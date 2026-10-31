@@ -40,7 +40,7 @@ family|stripLinkTracking|Strip link tracking|linkTracking,plainPinLinks
 family|hideAdvertisingId|Hide advertising ID|advertisingId,browserId
 family|removeAdTrackingPermissions|Remove ad tracking permissions|
 family|spoofSignature|Spoof signature for Google sign-in|
-family|gmsCoreSupport|GmsCore support|
+family|gmsCoreSupport|GmsCore support|signInFailure
 family|downloadPins|Download pins|pinDownloads,copyImage,shareImage
 family|downloadBoard|Download board|boardMenu,boardPins
 family|longPressDownload|Long-press download|longPressMenu,longPressChoices
@@ -101,4 +101,5 @@ mutation|saveToasts|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hi
 mutation|imageChooser|imageOrder|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->originalImages()Z
 mutation|closeupImage|closeupImage|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->imageSizes(Ljava/util/Set;)V|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->closeupImage(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 mutation|updateNag|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->disableUpdateNag()Z|update
+mutation|signInFailure|signInFailure|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->requestFailed(Ljava/lang/Exception;)V
 mutation|firebaseCertificate|firebaseCertificate|Lapp/hushpinterest/extension/pinterest/notifications/PushNotifications;->certificateHeader(Ljava/net/URLConnection;Ljava/lang/String;)Ljava/lang/String;

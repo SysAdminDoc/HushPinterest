@@ -643,3 +643,8 @@ Home keeps the pins you were looking at when you come back to Pinterest or to th
 Show posted date	Veröffentlichungsdatum anzeigen
 Shows the day a pin was posted under its title. It shows on the next pin you open.	Zeigt unter dem Titel eines Pins, an welchem Tag er gepostet wurde. Das Datum erscheint beim nächsten Pin, den du öffnest.
 Posted %1$s	Gepostet am %1$s
+Install microG-RE to use Google sign-in.	Installiere microG-RE für die Google-Anmeldung.
+Turn on microG-RE to use Google sign-in.	Aktiviere microG-RE für die Google-Anmeldung.
+microG-RE didn't answer. Open it, then try again.	microG-RE antwortet nicht. Öffne es und versuche es erneut.
+This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.	Diese Version leitet die Google-Anmeldung an microG-RE weiter. Füge dein Google-Konto zuerst in microG-RE hinzu. Wenn dein Telefon Hintergrund-Apps einschränkt, erlaube microG-RE, von selbst zu starten.
+Google sign-in failure message	Meldung bei fehlgeschlagener Google-Anmeldung

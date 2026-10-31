@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1148);
+        Map<String, String> table = new HashMap<>(1158);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -469,6 +469,8 @@ public final class L10nTranslations {
                 "Google-Anmeldung und Push-Benachrichtigungen laufen \u00fcber microG-RE");
         table.put("Google sign-in and push notifications go through microG-RE instead of Google Play services, so microG-RE has to stay installed. Set when patching. Patch again without it to go back.",
                 "Google-Anmeldung und Push-Benachrichtigungen laufen \u00fcber microG-RE statt \u00fcber die Google Play-Dienste, deshalb muss microG-RE installiert bleiben. Beim Patchen festgelegt. Patche erneut ohne diesen Patch, um zur\u00fcckzuwechseln.");
+        table.put("Google sign-in failure message",
+                "Meldung bei fehlgeschlagener Google-Anmeldung");
         table.put("Height: %s",
                 "H\u00f6he: %s");
         table.put("Helps Google sign-in with XSpoofSignatures, or with microG-RE when GmsCore support is patched in too. Stock Google Play services ignores it. Set when patching. Patch again without it to remove it.",
@@ -549,11 +551,11 @@ public final class L10nTranslations {
                 "Blendet Werbung, Vorschl\u00e4ge, Erinnerungen und Pop-ups aus.");
         table.put("Hides comments and comment previews under pins. It doesn't change who can comment. The change shows the next time the screen updates.",
                 "Blendet Kommentare und Kommentarvorschauen unter Pins aus. Wer kommentieren darf, \u00e4ndert sich nicht. Die \u00c4nderung zeigt sich, wenn sich der Bildschirm das n\u00e4chste Mal aktualisiert.");
-        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
-                "Blendet Pins aus, deren Titel oder Beschreibung ein Wort oder eine Wortgruppe enth\u00e4lt, die du hier hinzuf\u00fcgst. Noch keine.");
     }
 
     private static void fillDe4(Map<String, String> table) {
+        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
+                "Blendet Pins aus, deren Titel oder Beschreibung ein Wort oder eine Wortgruppe enth\u00e4lt, die du hier hinzuf\u00fcgst. Noch keine.");
         table.put("Hides product pins, shopping stories, featured boards and Shop the look under pins. Visit and Paid link stay.",
                 "Blendet Produkt-Pins, Shopping-Stories, hervorgehobene Pinnw\u00e4nde und Shop the look unter Pins aus. Der Besuchslink und die Kennzeichnung f\u00fcr bezahlte Links bleiben.");
         table.put("Hides the \"Ideas you might love\" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.",
@@ -626,6 +628,8 @@ public final class L10nTranslations {
                 "F\u00e4rbt im dunklen Modus die untere Leiste tiefschwarz, passend zur Seite. Auf OLED-Bildschirmen spart das auch etwas Akku. Der helle Modus bleibt, wie er ist. Die \u00c4nderung zeigt sich, wenn die Leiste das n\u00e4chste Mal neu gezeichnet wird.");
         table.put("In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.",
                 "F\u00e4rbt im dunklen Modus das Kommentarfenster und seine Antwortleiste tiefschwarz. Der helle Modus bleibt, wie er ist. Die \u00c4nderung zeigt sich, wenn du das n\u00e4chste Mal die Kommentare \u00f6ffnest.");
+        table.put("Install microG-RE to use Google sign-in.",
+                "Installiere microG-RE f\u00fcr die Google-Anmeldung.");
         table.put("Installed patches and switches",
                 "Installierte Patches und Schalter");
         table.put("Interface",
@@ -670,13 +674,13 @@ public final class L10nTranslations {
                 "Neue Downloads warten auf ein ungetaktetes Netzwerk, meist das WLAN zu Hause. Getaktetes WLAN und die meisten Hotspots z\u00e4hlen nicht. Eingereihte Downloads behalten ihre urspr\u00fcngliche Regel.");
         table.put("No HushPinterest downloads in this history.",
                 "Keine HushPinterest-Downloads in diesem Verlauf.");
+    }
+
+    private static void fillDe5(Map<String, String> table) {
         table.put("No HushPinterest release is out yet.",
                 "Es gibt noch keine Version von HushPinterest.");
         table.put("No app can open %1$s.",
                 "Keine App kann %1$s \u00f6ffnen.");
-    }
-
-    private static void fillDe5(Map<String, String> table) {
         table.put("No downloads while roaming",
                 "Keine Downloads beim Roaming");
         table.put("No matching settings",
@@ -793,13 +797,13 @@ public final class L10nTranslations {
                 "Pinterest streamt dieses Video nur. Es gibt keine Datei zum Herunterladen.");
         table.put("Pinterest password help",
                 "Pinterest-Hilfe zum Passwort");
+    }
+
+    private static void fillDe6(Map<String, String> table) {
         table.put("Pinterest's access to the ad ID and Android's ad services is removed",
                 "Pinterests Zugriff auf die Werbe-ID und die Werbedienste von Android ist entfernt");
         table.put("Pinterest's ad personalization and data choices for your account. Disable analytics doesn't change them.",
                 "Pinterests Einstellungen zu personalisierter Werbung und Daten f\u00fcr dein Konto. Analyse deaktivieren \u00e4ndert sie nicht.");
-    }
-
-    private static void fillDe6(Map<String, String> table) {
         table.put("Pinterest's choice of a light or dark look, or the one your phone uses.",
                 "Pinterests Wahl zwischen hellem oder dunklem Aussehen oder dem deines Telefons.");
         table.put("Pinterest's data export is separate from Export settings. Pinterest's help page explains how to request your personal data from the account you're already using.",
@@ -916,13 +920,13 @@ public final class L10nTranslations {
                 "Im Pinterest-Ordner speichern");
         table.put("Save list",
                 "Liste speichern");
+    }
+
+    private static void fillDe7(Map<String, String> table) {
         table.put("Save list as",
                 "Liste speichern als");
         table.put("Save media",
                 "Medien speichern");
-    }
-
-    private static void fillDe7(Map<String, String> table) {
         table.put("Save the full report in %1$s.",
                 "Speichere den vollst\u00e4ndigen Bericht unter %1$s.");
         table.put("Save your switches to a file. They cover all the accounts in this Pinterest app. Pause and Debug logging aren't included, and neither is the release check.",
@@ -1039,13 +1043,13 @@ public final class L10nTranslations {
                 "Entfernt Tracking aus Links und stoppt Nutzungsberichte und die Werbe-ID.");
         table.put("Support HushPinterest",
                 "HushPinterest unterst\u00fctzen");
+    }
+
+    private static void fillDe8(Map<String, String> table) {
         table.put("Supported links",
                 "Unterst\u00fctzte Links");
         table.put("System share sheet",
                 "Systemmen\u00fc zum Teilen");
-    }
-
-    private static void fillDe8(Map<String, String> table) {
         table.put("Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.",
                 "Nimmt Pinterests Merken-Schaltfl\u00e4che aus dem Men\u00fc beim Gedr\u00fcckthalten eines Pins im Raster. Merken direkt am Pin funktioniert weiterhin.");
         table.put("Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.",
@@ -1108,6 +1112,8 @@ public final class L10nTranslations {
                 "Dieser Build enth\u00e4lt die Teile nicht, die %1$s behandeln.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Dieser Build behandelt %1$s. Es fehlen die Teile f\u00fcr %2$s.");
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Diese Version leitet die Google-Anmeldung an microG-RE weiter. F\u00fcge dein Google-Konto zuerst in microG-RE hinzu. Wenn dein Telefon Hintergrund-Apps einschr\u00e4nkt, erlaube microG-RE, von selbst zu starten.");
         table.put("This download isn't a finished image anymore. Check %s.",
                 "Dieser Download ist kein fertiges Bild mehr. Sieh unter %s nach.");
         table.put("This download isn't a finished image anymore. Check Downloads.",
@@ -1134,6 +1140,8 @@ public final class L10nTranslations {
                 "Versuche es noch einmal oder kehre zu Pinterest zur\u00fcck.");
         table.put("Turn on a set of switches in one tap, or put every switch back the way it started. Press and hold to hide this row.",
                 "Schalte mehrere Schalter mit einem Tippen ein oder setze alle Schalter auf ihren Ausgangszustand zur\u00fcck. Halte diese Zeile gedr\u00fcckt, um sie auszublenden.");
+        table.put("Turn on microG-RE to use Google sign-in.",
+                "Aktiviere microG-RE f\u00fcr die Google-Anmeldung.");
         table.put("Turned off, Pinterest shows less AI content in your feed. Hide AI-labeled pins only takes out pins that carry Pinterest's AI label.",
                 "Ausgeschaltet zeigt Pinterest weniger KI-Inhalte in deinem Feed. KI-markierte Pins ausblenden entfernt nur Pins mit Pinterests KI-Kennzeichnung.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
@@ -1158,6 +1166,9 @@ public final class L10nTranslations {
                 "Nicht unterst\u00fctzt");
         table.put("Unsupported image",
                 "Nicht unterst\u00fctztes Bild");
+    }
+
+    private static void fillDe9(Map<String, String> table) {
         table.put("Unsupported video",
                 "Nicht unterst\u00fctztes Video");
         table.put("Unsupported: %d",
@@ -1166,9 +1177,6 @@ public final class L10nTranslations {
                 "Bis zum Fortsetzen verh\u00e4lt sich jeder Schalter au\u00dfer der Debug-Protokollierung, als w\u00e4re er aus. Was beim Patchen festgelegt wurde, bleibt aktiv.");
         table.put("Update instructions",
                 "Anleitung zum Aktualisieren");
-    }
-
-    private static void fillDe9(Map<String, String> table) {
         table.put("Updates",
                 "Updates");
         table.put("Use Download again",
@@ -1221,6 +1229,8 @@ public final class L10nTranslations {
                 "Ausblenden von Pinterests Schaltfl\u00e4chen beim Gedr\u00fcckthalten");
         table.put("loaded board pins",
                 "geladene Pinnwand-Pins");
+        table.put("microG-RE didn't answer. Open it, then try again.",
+                "microG-RE antwortet nicht. \u00d6ffne es und versuche es erneut.");
         table.put("none",
                 "keine");
         table.put("pin closeups",
@@ -1240,7 +1250,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1148);
+        Map<String, String> table = new HashMap<>(1158);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -1662,6 +1672,8 @@ public final class L10nTranslations {
                 "El inicio de sesi\u00f3n con Google y las notificaciones push pasan por microG-RE");
         table.put("Google sign-in and push notifications go through microG-RE instead of Google Play services, so microG-RE has to stay installed. Set when patching. Patch again without it to go back.",
                 "El inicio de sesi\u00f3n con Google y las notificaciones push pasan por microG-RE en lugar de los servicios de Google Play, as\u00ed que microG-RE tiene que seguir instalado. Se define al parchear. Vuelve a parchear sin \u00e9l para volver atr\u00e1s.");
+        table.put("Google sign-in failure message",
+                "Mensaje de error de inicio de sesi\u00f3n con Google");
         table.put("Height: %s",
                 "Alto: %s");
         table.put("Helps Google sign-in with XSpoofSignatures, or with microG-RE when GmsCore support is patched in too. Stock Google Play services ignores it. Set when patching. Patch again without it to remove it.",
@@ -1742,11 +1754,11 @@ public final class L10nTranslations {
                 "Oculta anuncios, sugerencias, avisos insistentes y ventanas emergentes.");
         table.put("Hides comments and comment previews under pins. It doesn't change who can comment. The change shows the next time the screen updates.",
                 "Oculta los comentarios y sus vistas previas bajo los pines. No cambia qui\u00e9n puede comentar. El cambio se ve la pr\u00f3xima vez que se actualice la pantalla.");
-        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
-                "Oculta los pines cuyo t\u00edtulo o descripci\u00f3n tenga una palabra o frase que a\u00f1adas aqu\u00ed. A\u00fan no hay ninguna.");
     }
 
     private static void fillEs4(Map<String, String> table) {
+        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
+                "Oculta los pines cuyo t\u00edtulo o descripci\u00f3n tenga una palabra o frase que a\u00f1adas aqu\u00ed. A\u00fan no hay ninguna.");
         table.put("Hides product pins, shopping stories, featured boards and Shop the look under pins. Visit and Paid link stay.",
                 "Oculta pines de productos, historias de compras, tableros destacados y Shop the look bajo los pines. El enlace de visita y la etiqueta de enlace pagado se quedan.");
         table.put("Hides the \"Ideas you might love\" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.",
@@ -1819,6 +1831,8 @@ public final class L10nTranslations {
                 "En modo oscuro, pinta la barra inferior de negro puro para que combine con la p\u00e1gina, lo que tambi\u00e9n ahorra un poco de bater\u00eda en pantallas OLED. El modo claro se queda como est\u00e1. El cambio se ve la pr\u00f3xima vez que se vuelva a dibujar la barra.");
         table.put("In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.",
                 "En modo oscuro, pinta de negro puro el panel de comentarios y su barra de respuesta. El modo claro se queda como est\u00e1. El cambio se ve la pr\u00f3xima vez que abras los comentarios.");
+        table.put("Install microG-RE to use Google sign-in.",
+                "Instala microG-RE para iniciar sesi\u00f3n con Google.");
         table.put("Installed patches and switches",
                 "Parches instalados e interruptores");
         table.put("Interface",
@@ -1863,13 +1877,13 @@ public final class L10nTranslations {
                 "Las descargas nuevas esperan una red de uso no medido, normalmente el Wi-Fi de casa. El Wi-Fi de uso medido y la mayor\u00eda de puntos de acceso no cuentan. Las descargas en cola mantienen su regla original.");
         table.put("No HushPinterest downloads in this history.",
                 "No hay descargas de HushPinterest en este historial.");
+    }
+
+    private static void fillEs5(Map<String, String> table) {
         table.put("No HushPinterest release is out yet.",
                 "Todav\u00eda no hay ninguna versi\u00f3n de HushPinterest.");
         table.put("No app can open %1$s.",
                 "Ninguna app puede abrir %1$s.");
-    }
-
-    private static void fillEs5(Map<String, String> table) {
         table.put("No downloads while roaming",
                 "Sin descargas en roaming");
         table.put("No matching settings",
@@ -1986,13 +2000,13 @@ public final class L10nTranslations {
                 "Pinterest solo transmite este video. No hay archivo para descargar.");
         table.put("Pinterest password help",
                 "Ayuda de Pinterest con la contrase\u00f1a");
+    }
+
+    private static void fillEs6(Map<String, String> table) {
         table.put("Pinterest's access to the ad ID and Android's ad services is removed",
                 "el acceso de Pinterest al ID de publicidad y a los servicios de publicidad de Android est\u00e1 eliminado");
         table.put("Pinterest's ad personalization and data choices for your account. Disable analytics doesn't change them.",
                 "Las opciones de Pinterest sobre anuncios personalizados y datos de tu cuenta. Desactivar estad\u00edsticas no las cambia.");
-    }
-
-    private static void fillEs6(Map<String, String> table) {
         table.put("Pinterest's choice of a light or dark look, or the one your phone uses.",
                 "La opci\u00f3n de Pinterest entre un aspecto claro u oscuro, o el que usa tu tel\u00e9fono.");
         table.put("Pinterest's data export is separate from Export settings. Pinterest's help page explains how to request your personal data from the account you're already using.",
@@ -2109,13 +2123,13 @@ public final class L10nTranslations {
                 "Guardar en la carpeta de Pinterest");
         table.put("Save list",
                 "Guardar lista");
+    }
+
+    private static void fillEs7(Map<String, String> table) {
         table.put("Save list as",
                 "Guardar lista como");
         table.put("Save media",
                 "Guardar contenido multimedia");
-    }
-
-    private static void fillEs7(Map<String, String> table) {
         table.put("Save the full report in %1$s.",
                 "Guarda el informe completo en %1$s.");
         table.put("Save your switches to a file. They cover all the accounts in this Pinterest app. Pause and Debug logging aren't included, and neither is the release check.",
@@ -2232,13 +2246,13 @@ public final class L10nTranslations {
                 "Quita el seguimiento de los enlaces y detiene los informes de uso y el ID de publicidad.");
         table.put("Support HushPinterest",
                 "Apoya HushPinterest");
+    }
+
+    private static void fillEs8(Map<String, String> table) {
         table.put("Supported links",
                 "Enlaces compatibles");
         table.put("System share sheet",
                 "Men\u00fa de compartir del sistema");
-    }
-
-    private static void fillEs8(Map<String, String> table) {
         table.put("Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.",
                 "Quita el bot\u00f3n Guardar de Pinterest del men\u00fa al mantener pulsado un pin en la cuadr\u00edcula. Guardar desde el propio pin sigue funcionando.");
         table.put("Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.",
@@ -2301,6 +2315,8 @@ public final class L10nTranslations {
                 "Esta versi\u00f3n no incluye las partes que se encargan de %1$s.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Esta versi\u00f3n se encarga de %1$s. Faltan las partes para %2$s.");
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Esta versi\u00f3n env\u00eda el inicio de sesi\u00f3n con Google a microG-RE. Primero agrega tu cuenta de Google en microG-RE. Si tu tel\u00e9fono limita las aplicaciones en segundo plano, permite que microG-RE se inicie por s\u00ed solo.");
         table.put("This download isn't a finished image anymore. Check %s.",
                 "Esta descarga ya no es una imagen terminada. Revisa %s.");
         table.put("This download isn't a finished image anymore. Check Downloads.",
@@ -2327,6 +2343,8 @@ public final class L10nTranslations {
                 "Int\u00e9ntalo de nuevo o vuelve a Pinterest.");
         table.put("Turn on a set of switches in one tap, or put every switch back the way it started. Press and hold to hide this row.",
                 "Activa varios interruptores con un toque o devuelve todos los interruptores a como estaban al principio. Mant\u00e9n pulsada esta fila para ocultarla.");
+        table.put("Turn on microG-RE to use Google sign-in.",
+                "Activa microG-RE para iniciar sesi\u00f3n con Google.");
         table.put("Turned off, Pinterest shows less AI content in your feed. Hide AI-labeled pins only takes out pins that carry Pinterest's AI label.",
                 "Si lo desactivas, Pinterest muestra menos contenido de IA en tu feed. Ocultar pines con etiqueta de IA solo quita los pines que llevan la etiqueta de IA de Pinterest.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
@@ -2351,6 +2369,9 @@ public final class L10nTranslations {
                 "No compatible");
         table.put("Unsupported image",
                 "Imagen no compatible");
+    }
+
+    private static void fillEs9(Map<String, String> table) {
         table.put("Unsupported video",
                 "Video no compatible");
         table.put("Unsupported: %d",
@@ -2359,9 +2380,6 @@ public final class L10nTranslations {
                 "Hasta que reanudes, todos los interruptores, salvo el Registro de depuraci\u00f3n, funcionan como si estuvieran desactivados. Lo que se aplic\u00f3 al parchear se mantiene.");
         table.put("Update instructions",
                 "Instrucciones de actualizaci\u00f3n");
-    }
-
-    private static void fillEs9(Map<String, String> table) {
         table.put("Updates",
                 "Actualizaciones");
         table.put("Use Download again",
@@ -2414,6 +2432,8 @@ public final class L10nTranslations {
                 "ocultar los botones de Pinterest al mantener pulsado");
         table.put("loaded board pins",
                 "pines cargados del tablero");
+        table.put("microG-RE didn't answer. Open it, then try again.",
+                "microG-RE no respondi\u00f3. \u00c1brelo e int\u00e9ntalo de nuevo.");
         table.put("none",
                 "ninguna");
         table.put("pin closeups",
@@ -2433,7 +2453,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1148);
+        Map<String, String> table = new HashMap<>(1158);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -2855,6 +2875,8 @@ public final class L10nTranslations {
                 "Masuk dengan Google dan notifikasi push melewati microG-RE");
         table.put("Google sign-in and push notifications go through microG-RE instead of Google Play services, so microG-RE has to stay installed. Set when patching. Patch again without it to go back.",
                 "Masuk dengan Google dan notifikasi push melewati microG-RE, bukan Google Play services, jadi microG-RE harus tetap terpasang. Diatur saat menambal. Tambal ulang tanpanya untuk kembali.");
+        table.put("Google sign-in failure message",
+                "Pesan gagal masuk dengan Google");
         table.put("Height: %s",
                 "Tinggi: %s");
         table.put("Helps Google sign-in with XSpoofSignatures, or with microG-RE when GmsCore support is patched in too. Stock Google Play services ignores it. Set when patching. Patch again without it to remove it.",
@@ -2935,11 +2957,11 @@ public final class L10nTranslations {
                 "Menyembunyikan iklan, saran, pengingat yang mengganggu, dan pop-up.");
         table.put("Hides comments and comment previews under pins. It doesn't change who can comment. The change shows the next time the screen updates.",
                 "Menyembunyikan komentar dan pratinjau komentar di bawah pin. Siapa yang boleh berkomentar tidak berubah. Perubahan terlihat saat layar diperbarui berikutnya.");
-        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
-                "Menyembunyikan pin yang judul atau deskripsinya berisi kata atau frasa yang Anda tambahkan di sini. Belum ada.");
     }
 
     private static void fillIn4(Map<String, String> table) {
+        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
+                "Menyembunyikan pin yang judul atau deskripsinya berisi kata atau frasa yang Anda tambahkan di sini. Belum ada.");
         table.put("Hides product pins, shopping stories, featured boards and Shop the look under pins. Visit and Paid link stay.",
                 "Menyembunyikan pin produk, cerita belanja, papan unggulan, dan Shop the look di bawah pin. Tautan kunjungan dan label tautan berbayar tetap ada.");
         table.put("Hides the \"Ideas you might love\" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.",
@@ -3012,6 +3034,8 @@ public final class L10nTranslations {
                 "Dalam mode gelap, mewarnai bilah bawah hitam pekat agar serasi dengan halaman, yang juga sedikit menghemat baterai di layar OLED. Mode terang tetap seperti biasa. Perubahan terlihat saat bilah digambar ulang berikutnya.");
         table.put("In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.",
                 "Dalam mode gelap, mewarnai panel komentar dan bilah balasannya hitam pekat. Mode terang tetap seperti biasa. Perubahan terlihat saat Anda membuka komentar berikutnya.");
+        table.put("Install microG-RE to use Google sign-in.",
+                "Instal microG-RE untuk masuk dengan Google.");
         table.put("Installed patches and switches",
                 "Patch yang terpasang dan sakelar");
         table.put("Interface",
@@ -3056,13 +3080,13 @@ public final class L10nTranslations {
                 "Unduhan baru menunggu jaringan tidak terukur, biasanya Wi-Fi rumah. Wi-Fi terukur dan kebanyakan hotspot tidak memenuhi syarat. Unduhan dalam antrean tetap memakai aturan awalnya.");
         table.put("No HushPinterest downloads in this history.",
                 "Tidak ada unduhan HushPinterest dalam riwayat ini.");
+    }
+
+    private static void fillIn5(Map<String, String> table) {
         table.put("No HushPinterest release is out yet.",
                 "Belum ada rilis HushPinterest.");
         table.put("No app can open %1$s.",
                 "Tidak ada aplikasi yang bisa membuka %1$s.");
-    }
-
-    private static void fillIn5(Map<String, String> table) {
         table.put("No downloads while roaming",
                 "Jangan mengunduh saat roaming");
         table.put("No matching settings",
@@ -3179,13 +3203,13 @@ public final class L10nTranslations {
                 "Pinterest hanya menayangkan video ini. Tidak ada file untuk diunduh.");
         table.put("Pinterest password help",
                 "Bantuan kata sandi Pinterest");
+    }
+
+    private static void fillIn6(Map<String, String> table) {
         table.put("Pinterest's access to the ad ID and Android's ad services is removed",
                 "akses Pinterest ke ID iklan dan layanan iklan Android dihapus");
         table.put("Pinterest's ad personalization and data choices for your account. Disable analytics doesn't change them.",
                 "Pilihan Pinterest tentang iklan yang dipersonalisasi dan data akun Anda. Nonaktifkan analitik tidak mengubahnya.");
-    }
-
-    private static void fillIn6(Map<String, String> table) {
         table.put("Pinterest's choice of a light or dark look, or the one your phone uses.",
                 "Pilihan Pinterest untuk tampilan terang atau gelap, atau tampilan yang dipakai ponsel Anda.");
         table.put("Pinterest's data export is separate from Export settings. Pinterest's help page explains how to request your personal data from the account you're already using.",
@@ -3302,13 +3326,13 @@ public final class L10nTranslations {
                 "Simpan di folder Pinterest");
         table.put("Save list",
                 "Simpan daftar");
+    }
+
+    private static void fillIn7(Map<String, String> table) {
         table.put("Save list as",
                 "Simpan daftar sebagai");
         table.put("Save media",
                 "Simpan media");
-    }
-
-    private static void fillIn7(Map<String, String> table) {
         table.put("Save the full report in %1$s.",
                 "Simpan laporan lengkap di %1$s.");
         table.put("Save your switches to a file. They cover all the accounts in this Pinterest app. Pause and Debug logging aren't included, and neither is the release check.",
@@ -3425,13 +3449,13 @@ public final class L10nTranslations {
                 "Menghapus pelacakan dari tautan serta menghentikan laporan penggunaan dan ID iklan.");
         table.put("Support HushPinterest",
                 "Dukung HushPinterest");
+    }
+
+    private static void fillIn8(Map<String, String> table) {
         table.put("Supported links",
                 "Tautan yang didukung");
         table.put("System share sheet",
                 "Menu berbagi sistem");
-    }
-
-    private static void fillIn8(Map<String, String> table) {
         table.put("Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.",
                 "Mengeluarkan tombol Simpan Pinterest dari menu tekan lama pin di kisi. Menyimpan dari pin itu sendiri tetap berfungsi.");
         table.put("Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.",
@@ -3494,6 +3518,8 @@ public final class L10nTranslations {
                 "Build ini tidak menyertakan bagian yang menangani %1$s.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Build ini menangani %1$s. Bagian untuk %2$s tidak ada.");
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Versi ini meneruskan proses masuk dengan Google ke microG-RE. Tambahkan dulu akun Google kamu di microG-RE. Jika ponselmu membatasi aplikasi latar belakang, izinkan microG-RE berjalan sendiri.");
         table.put("This download isn't a finished image anymore. Check %s.",
                 "Unduhan ini bukan lagi gambar yang selesai. Periksa %s.");
         table.put("This download isn't a finished image anymore. Check Downloads.",
@@ -3520,6 +3546,8 @@ public final class L10nTranslations {
                 "Coba lagi, atau kembali ke Pinterest.");
         table.put("Turn on a set of switches in one tap, or put every switch back the way it started. Press and hold to hide this row.",
                 "Nyalakan sekumpulan sakelar dengan sekali ketuk, atau kembalikan semua sakelar seperti semula. Tekan lama baris ini untuk menyembunyikannya.");
+        table.put("Turn on microG-RE to use Google sign-in.",
+                "Aktifkan microG-RE untuk masuk dengan Google.");
         table.put("Turned off, Pinterest shows less AI content in your feed. Hide AI-labeled pins only takes out pins that carry Pinterest's AI label.",
                 "Jika dimatikan, Pinterest menampilkan lebih sedikit konten AI di feed Anda. Sembunyikan pin berlabel AI hanya menghapus pin yang memiliki label AI dari Pinterest.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
@@ -3544,6 +3572,9 @@ public final class L10nTranslations {
                 "Tidak didukung");
         table.put("Unsupported image",
                 "Gambar tidak didukung");
+    }
+
+    private static void fillIn9(Map<String, String> table) {
         table.put("Unsupported video",
                 "Video tidak didukung");
         table.put("Unsupported: %d",
@@ -3552,9 +3583,6 @@ public final class L10nTranslations {
                 "Sampai Anda melanjutkan, semua sakelar kecuali Pencatatan debug dianggap nonaktif. Yang diatur saat Anda menambal tetap aktif.");
         table.put("Update instructions",
                 "Petunjuk pembaruan");
-    }
-
-    private static void fillIn9(Map<String, String> table) {
         table.put("Updates",
                 "Pembaruan");
         table.put("Use Download again",
@@ -3607,6 +3635,8 @@ public final class L10nTranslations {
                 "menyembunyikan tombol tekan lama Pinterest");
         table.put("loaded board pins",
                 "Pin papan yang dimuat");
+        table.put("microG-RE didn't answer. Open it, then try again.",
+                "microG-RE tidak merespons. Buka lalu coba lagi.");
         table.put("none",
                 "tidak ada");
         table.put("pin closeups",
@@ -3626,7 +3656,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1148);
+        Map<String, String> table = new HashMap<>(1158);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -4048,6 +4078,8 @@ public final class L10nTranslations {
                 "O login com Google e as notifica\u00e7\u00f5es push passam pelo microG-RE");
         table.put("Google sign-in and push notifications go through microG-RE instead of Google Play services, so microG-RE has to stay installed. Set when patching. Patch again without it to go back.",
                 "O login com Google e as notifica\u00e7\u00f5es push passam pelo microG-RE em vez do Google Play Services, ent\u00e3o o microG-RE precisa continuar instalado. Definido ao aplicar os patches. Aplique de novo sem ele para voltar.");
+        table.put("Google sign-in failure message",
+                "Mensagem de falha no login com o Google");
         table.put("Height: %s",
                 "Altura: %s");
         table.put("Helps Google sign-in with XSpoofSignatures, or with microG-RE when GmsCore support is patched in too. Stock Google Play services ignores it. Set when patching. Patch again without it to remove it.",
@@ -4128,11 +4160,11 @@ public final class L10nTranslations {
                 "Oculta an\u00fancios, sugest\u00f5es, lembretes insistentes e pop-ups.");
         table.put("Hides comments and comment previews under pins. It doesn't change who can comment. The change shows the next time the screen updates.",
                 "Oculta os coment\u00e1rios e as pr\u00e9vias de coment\u00e1rios sob os pins. N\u00e3o muda quem pode comentar. A mudan\u00e7a aparece na pr\u00f3xima vez que a tela for atualizada.");
-        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
-                "Oculta pins cujo t\u00edtulo ou descri\u00e7\u00e3o tenha uma palavra ou frase que voc\u00ea adicionar aqui. Nenhuma ainda.");
     }
 
     private static void fillPt_rBR4(Map<String, String> table) {
+        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
+                "Oculta pins cujo t\u00edtulo ou descri\u00e7\u00e3o tenha uma palavra ou frase que voc\u00ea adicionar aqui. Nenhuma ainda.");
         table.put("Hides product pins, shopping stories, featured boards and Shop the look under pins. Visit and Paid link stay.",
                 "Oculta pins de produtos, stories de compras, pastas em destaque e Shop the look abaixo dos pins. O link para visitar o site e a indica\u00e7\u00e3o de link pago ficam.");
         table.put("Hides the \"Ideas you might love\" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.",
@@ -4205,6 +4237,8 @@ public final class L10nTranslations {
                 "No modo escuro, pinta a barra inferior de preto puro para combinar com a p\u00e1gina, o que tamb\u00e9m economiza um pouco de bateria em telas OLED. O modo claro continua como est\u00e1. A mudan\u00e7a aparece na pr\u00f3xima vez que a barra for redesenhada.");
         table.put("In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.",
                 "No modo escuro, pinta de preto puro o painel de coment\u00e1rios e sua barra de resposta. O modo claro continua como est\u00e1. A mudan\u00e7a aparece na pr\u00f3xima vez que voc\u00ea abrir os coment\u00e1rios.");
+        table.put("Install microG-RE to use Google sign-in.",
+                "Instale o microG-RE para entrar com o Google.");
         table.put("Installed patches and switches",
                 "Patches instalados e op\u00e7\u00f5es");
         table.put("Interface",
@@ -4249,13 +4283,13 @@ public final class L10nTranslations {
                 "Downloads novos esperam uma rede ilimitada, geralmente o Wi-Fi de casa. Wi-Fi limitado e a maioria dos pontos de acesso n\u00e3o contam. Downloads na fila mant\u00eam a regra original.");
         table.put("No HushPinterest downloads in this history.",
                 "N\u00e3o h\u00e1 downloads do HushPinterest neste hist\u00f3rico.");
+    }
+
+    private static void fillPt_rBR5(Map<String, String> table) {
         table.put("No HushPinterest release is out yet.",
                 "Ainda n\u00e3o h\u00e1 nenhuma vers\u00e3o do HushPinterest.");
         table.put("No app can open %1$s.",
                 "Nenhum app consegue abrir %1$s.");
-    }
-
-    private static void fillPt_rBR5(Map<String, String> table) {
         table.put("No downloads while roaming",
                 "Sem downloads em roaming");
         table.put("No matching settings",
@@ -4372,13 +4406,13 @@ public final class L10nTranslations {
                 "O Pinterest s\u00f3 transmite este v\u00eddeo. N\u00e3o h\u00e1 arquivo para baixar.");
         table.put("Pinterest password help",
                 "Ajuda do Pinterest com a senha");
+    }
+
+    private static void fillPt_rBR6(Map<String, String> table) {
         table.put("Pinterest's access to the ad ID and Android's ad services is removed",
                 "o acesso do Pinterest ao ID de publicidade e aos servi\u00e7os de an\u00fancios do Android foi removido");
         table.put("Pinterest's ad personalization and data choices for your account. Disable analytics doesn't change them.",
                 "As escolhas do Pinterest sobre an\u00fancios personalizados e dados da sua conta. Desativar an\u00e1lises n\u00e3o muda nada nelas.");
-    }
-
-    private static void fillPt_rBR6(Map<String, String> table) {
         table.put("Pinterest's choice of a light or dark look, or the one your phone uses.",
                 "A escolha do Pinterest entre um visual claro ou escuro, ou o que o seu celular usa.");
         table.put("Pinterest's data export is separate from Export settings. Pinterest's help page explains how to request your personal data from the account you're already using.",
@@ -4495,13 +4529,13 @@ public final class L10nTranslations {
                 "Salvar na pasta do Pinterest");
         table.put("Save list",
                 "Salvar lista");
+    }
+
+    private static void fillPt_rBR7(Map<String, String> table) {
         table.put("Save list as",
                 "Salvar lista como");
         table.put("Save media",
                 "Salvar m\u00eddia");
-    }
-
-    private static void fillPt_rBR7(Map<String, String> table) {
         table.put("Save the full report in %1$s.",
                 "Salve o relat\u00f3rio completo em %1$s.");
         table.put("Save your switches to a file. They cover all the accounts in this Pinterest app. Pause and Debug logging aren't included, and neither is the release check.",
@@ -4618,13 +4652,13 @@ public final class L10nTranslations {
                 "Remove o rastreamento dos links e para os relat\u00f3rios de uso e o ID de publicidade.");
         table.put("Support HushPinterest",
                 "Apoie o HushPinterest");
+    }
+
+    private static void fillPt_rBR8(Map<String, String> table) {
         table.put("Supported links",
                 "Links compat\u00edveis");
         table.put("System share sheet",
                 "Menu de compartilhamento do sistema");
-    }
-
-    private static void fillPt_rBR8(Map<String, String> table) {
         table.put("Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.",
                 "Tira o bot\u00e3o Salvar do Pinterest do menu ao manter um pin da grade pressionado. Salvar pelo pr\u00f3prio pin continua funcionando.");
         table.put("Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.",
@@ -4687,6 +4721,8 @@ public final class L10nTranslations {
                 "Esta vers\u00e3o n\u00e3o inclui as partes que cuidam de %1$s.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Esta vers\u00e3o cuida de %1$s. Faltam as partes para %2$s.");
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Esta vers\u00e3o envia o login com o Google para o microG-RE. Adicione primeiro sua conta do Google no microG-RE. Se o seu celular limita apps em segundo plano, permita que o microG-RE inicie sozinho.");
         table.put("This download isn't a finished image anymore. Check %s.",
                 "Este download n\u00e3o \u00e9 mais uma imagem conclu\u00edda. Confira %s.");
         table.put("This download isn't a finished image anymore. Check Downloads.",
@@ -4713,6 +4749,8 @@ public final class L10nTranslations {
                 "Tente novamente ou volte para o Pinterest.");
         table.put("Turn on a set of switches in one tap, or put every switch back the way it started. Press and hold to hide this row.",
                 "Ative um conjunto de op\u00e7\u00f5es com um toque ou volte todas as op\u00e7\u00f5es ao estado inicial. Toque e segure esta linha para ocult\u00e1-la.");
+        table.put("Turn on microG-RE to use Google sign-in.",
+                "Ative o microG-RE para entrar com o Google.");
         table.put("Turned off, Pinterest shows less AI content in your feed. Hide AI-labeled pins only takes out pins that carry Pinterest's AI label.",
                 "Desativado, o Pinterest mostra menos conte\u00fado de IA no seu feed. Ocultar pins com selo de IA s\u00f3 tira os pins que t\u00eam o selo de IA do Pinterest.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
@@ -4737,6 +4775,9 @@ public final class L10nTranslations {
                 "N\u00e3o compat\u00edvel");
         table.put("Unsupported image",
                 "Imagem n\u00e3o compat\u00edvel");
+    }
+
+    private static void fillPt_rBR9(Map<String, String> table) {
         table.put("Unsupported video",
                 "V\u00eddeo n\u00e3o compat\u00edvel");
         table.put("Unsupported: %d",
@@ -4745,9 +4786,6 @@ public final class L10nTranslations {
                 "At\u00e9 voc\u00ea retomar, todas as op\u00e7\u00f5es, menos o Registro de depura\u00e7\u00e3o, funcionam como se estivessem desligadas. O que foi definido ao aplicar os patches continua ativo.");
         table.put("Update instructions",
                 "Instru\u00e7\u00f5es de atualiza\u00e7\u00e3o");
-    }
-
-    private static void fillPt_rBR9(Map<String, String> table) {
         table.put("Updates",
                 "Atualiza\u00e7\u00f5es");
         table.put("Use Download again",
@@ -4800,6 +4838,8 @@ public final class L10nTranslations {
                 "ocultar os bot\u00f5es de toque longo do Pinterest");
         table.put("loaded board pins",
                 "Pins carregados da pasta");
+        table.put("microG-RE didn't answer. Open it, then try again.",
+                "O microG-RE n\u00e3o respondeu. Abra-o e tente de novo.");
         table.put("none",
                 "nenhuma");
         table.put("pin closeups",
@@ -4819,7 +4859,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1148);
+        Map<String, String> table = new HashMap<>(1158);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -5241,6 +5281,8 @@ public final class L10nTranslations {
                 "Google ile giri\u015f ve anl\u0131k bildirimler microG-RE \u00fczerinden ge\u00e7er");
         table.put("Google sign-in and push notifications go through microG-RE instead of Google Play services, so microG-RE has to stay installed. Set when patching. Patch again without it to go back.",
                 "Google ile giri\u015f ve anl\u0131k bildirimler Google Play hizmetleri yerine microG-RE \u00fczerinden ge\u00e7er, bu y\u00fczden microG-RE y\u00fckl\u00fc kalmal\u0131. Yamalarken ayarlan\u0131r. Geri d\u00f6nmek i\u00e7in bu yama olmadan yeniden yamala.");
+        table.put("Google sign-in failure message",
+                "Google ile giri\u015f hatas\u0131 mesaj\u0131");
         table.put("Height: %s",
                 "Y\u00fckseklik: %s");
         table.put("Helps Google sign-in with XSpoofSignatures, or with microG-RE when GmsCore support is patched in too. Stock Google Play services ignores it. Set when patching. Patch again without it to remove it.",
@@ -5321,11 +5363,11 @@ public final class L10nTranslations {
                 "Reklamlar\u0131, \u00f6nerileri, \u0131srarc\u0131 hat\u0131rlatmalar\u0131 ve a\u00e7\u0131l\u0131r pencereleri gizler.");
         table.put("Hides comments and comment previews under pins. It doesn't change who can comment. The change shows the next time the screen updates.",
                 "Pinlerin alt\u0131ndaki yorumlar\u0131 ve yorum \u00f6nizlemelerini gizler. Kimin yorum yapabilece\u011fini de\u011fi\u015ftirmez. De\u011fi\u015fiklik ekran bir sonraki g\u00fcncelleni\u015finde g\u00f6r\u00fcn\u00fcr.");
-        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
-                "Ba\u015fl\u0131\u011f\u0131nda ya da a\u00e7\u0131klamas\u0131nda buraya ekledi\u011fin bir kelime veya ifade ge\u00e7en pinleri gizler. Hen\u00fcz yok.");
     }
 
     private static void fillTr4(Map<String, String> table) {
+        table.put("Hides pins whose title or description has a word or phrase you add here. None yet.",
+                "Ba\u015fl\u0131\u011f\u0131nda ya da a\u00e7\u0131klamas\u0131nda buraya ekledi\u011fin bir kelime veya ifade ge\u00e7en pinleri gizler. Hen\u00fcz yok.");
         table.put("Hides product pins, shopping stories, featured boards and Shop the look under pins. Visit and Paid link stay.",
                 "\u00dcr\u00fcn pinlerini, al\u0131\u015fveri\u015f hikayelerini, \u00f6ne \u00e7\u0131kan panolar\u0131 ve pinlerin alt\u0131ndaki Shop the look b\u00f6l\u00fcm\u00fcn\u00fc gizler. Ziyaret ba\u011flant\u0131s\u0131 ve \u00fccretli ba\u011flant\u0131 etiketi kal\u0131r.");
         table.put("Hides the \"Ideas you might love\" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.",
@@ -5398,6 +5440,8 @@ public final class L10nTranslations {
                 "Karanl\u0131k modda alt \u00e7ubu\u011fu sayfaya uymas\u0131 i\u00e7in tamamen siyaha boyar. Bu, OLED ekranlarda biraz pil de tasarruf ettirir. Ayd\u0131nl\u0131k mod oldu\u011fu gibi kal\u0131r. De\u011fi\u015fiklik \u00e7ubuk bir sonraki \u00e7izili\u015finde g\u00f6r\u00fcn\u00fcr.");
         table.put("In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.",
                 "Karanl\u0131k modda yorum panelini ve yan\u0131t \u00e7ubu\u011funu tamamen siyaha boyar. Ayd\u0131nl\u0131k mod oldu\u011fu gibi kal\u0131r. De\u011fi\u015fiklik yorumlar\u0131 bir sonraki a\u00e7\u0131\u015f\u0131nda g\u00f6r\u00fcn\u00fcr.");
+        table.put("Install microG-RE to use Google sign-in.",
+                "Google ile giri\u015f i\u00e7in microG-RE'yi y\u00fckle.");
         table.put("Installed patches and switches",
                 "Y\u00fckl\u00fc yamalar ve anahtarlar");
         table.put("Interface",
@@ -5442,13 +5486,13 @@ public final class L10nTranslations {
                 "Yeni indirmeler saya\u00e7s\u0131z bir a\u011f\u0131, genellikle ev Wi-Fi'\u0131n\u0131 bekler. Saya\u00e7l\u0131 Wi-Fi ve \u00e7o\u011fu hotspot say\u0131lmaz. S\u0131radaki indirmeler ilk kurallar\u0131n\u0131 korur.");
         table.put("No HushPinterest downloads in this history.",
                 "Bu ge\u00e7mi\u015fte HushPinterest indirmesi yok.");
+    }
+
+    private static void fillTr5(Map<String, String> table) {
         table.put("No HushPinterest release is out yet.",
                 "Hen\u00fcz bir HushPinterest s\u00fcr\u00fcm\u00fc yay\u0131nlanmad\u0131.");
         table.put("No app can open %1$s.",
                 "%1$s adresini a\u00e7abilen uygulama yok.");
-    }
-
-    private static void fillTr5(Map<String, String> table) {
         table.put("No downloads while roaming",
                 "Dola\u015f\u0131mdayken indirme yapma");
         table.put("No matching settings",
@@ -5565,13 +5609,13 @@ public final class L10nTranslations {
                 "Pinterest bu videoyu yaln\u0131zca ak\u0131\u015fla sunuyor. \u0130ndirilecek dosya yok.");
         table.put("Pinterest password help",
                 "Pinterest parola yard\u0131m\u0131");
+    }
+
+    private static void fillTr6(Map<String, String> table) {
         table.put("Pinterest's access to the ad ID and Android's ad services is removed",
                 "Pinterest'in reklam kimli\u011fine ve Android reklam hizmetlerine eri\u015fimi kald\u0131r\u0131ld\u0131");
         table.put("Pinterest's ad personalization and data choices for your account. Disable analytics doesn't change them.",
                 "Pinterest'in hesab\u0131n i\u00e7in ki\u015fiselle\u015ftirilmi\u015f reklam ve veri se\u00e7imleri. Analizleri devre d\u0131\u015f\u0131 b\u0131rak bunlar\u0131 de\u011fi\u015ftirmez.");
-    }
-
-    private static void fillTr6(Map<String, String> table) {
         table.put("Pinterest's choice of a light or dark look, or the one your phone uses.",
                 "Pinterest'in a\u00e7\u0131k ya da koyu g\u00f6r\u00fcn\u00fcm veya telefonunun kulland\u0131\u011f\u0131 g\u00f6r\u00fcn\u00fcm se\u00e7imi.");
         table.put("Pinterest's data export is separate from Export settings. Pinterest's help page explains how to request your personal data from the account you're already using.",
@@ -5688,13 +5732,13 @@ public final class L10nTranslations {
                 "Pinterest klas\u00f6r\u00fcne kaydet");
         table.put("Save list",
                 "Listeyi kaydet");
+    }
+
+    private static void fillTr7(Map<String, String> table) {
         table.put("Save list as",
                 "Listeyi farkl\u0131 kaydet");
         table.put("Save media",
                 "Medyay\u0131 kaydet");
-    }
-
-    private static void fillTr7(Map<String, String> table) {
         table.put("Save the full report in %1$s.",
                 "Tam raporu %1$s konumuna kaydet.");
         table.put("Save your switches to a file. They cover all the accounts in this Pinterest app. Pause and Debug logging aren't included, and neither is the release check.",
@@ -5811,13 +5855,13 @@ public final class L10nTranslations {
                 "Ba\u011flant\u0131lardaki takibi kald\u0131r\u0131r, kullan\u0131m raporlar\u0131n\u0131 ve reklam kimli\u011fini durdurur.");
         table.put("Support HushPinterest",
                 "HushPinterest'i destekle");
+    }
+
+    private static void fillTr8(Map<String, String> table) {
         table.put("Supported links",
                 "Desteklenen ba\u011flant\u0131lar");
         table.put("System share sheet",
                 "Sistem payla\u015f\u0131m men\u00fcs\u00fc");
-    }
-
-    private static void fillTr8(Map<String, String> table) {
         table.put("Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.",
                 "Pinterest'in Kaydet d\u00fc\u011fmesini \u0131zgaradaki bir pine bas\u0131l\u0131 tutunca a\u00e7\u0131lan men\u00fcden \u00e7\u0131kar\u0131r. Pinin kendisinden kaydetmek \u00e7al\u0131\u015fmaya devam eder.");
         table.put("Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.",
@@ -5880,6 +5924,8 @@ public final class L10nTranslations {
                 "Bu s\u00fcr\u00fcm %1$s ile ilgilenen par\u00e7alar\u0131 i\u00e7ermiyor.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Bu s\u00fcr\u00fcm %1$s ile ilgileniyor. %2$s i\u00e7in par\u00e7alar eksik.");
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Bu s\u00fcr\u00fcm Google ile giri\u015fi microG-RE'ye y\u00f6nlendirir. \u00d6nce Google hesab\u0131n\u0131 microG-RE'ye ekle. Telefonun arka plan uygulamalar\u0131n\u0131 k\u0131s\u0131tl\u0131yorsa microG-RE'nin kendi kendine ba\u015flamas\u0131na izin ver.");
         table.put("This download isn't a finished image anymore. Check %s.",
                 "Bu indirme art\u0131k tamamlanm\u0131\u015f bir g\u00f6rsel de\u011fil. %s klas\u00f6r\u00fcne bak.");
         table.put("This download isn't a finished image anymore. Check Downloads.",
@@ -5906,6 +5952,8 @@ public final class L10nTranslations {
                 "Tekrar dene veya Pinterest'a geri d\u00f6n.");
         table.put("Turn on a set of switches in one tap, or put every switch back the way it started. Press and hold to hide this row.",
                 "Bir grup anahtar\u0131 tek dokunu\u015fla a\u00e7 veya t\u00fcm anahtarlar\u0131 ba\u015flang\u0131\u00e7taki h\u00e2line d\u00f6nd\u00fcr. Gizlemek i\u00e7in bu sat\u0131ra bas\u0131l\u0131 tut.");
+        table.put("Turn on microG-RE to use Google sign-in.",
+                "Google ile giri\u015f i\u00e7in microG-RE'yi a\u00e7.");
         table.put("Turned off, Pinterest shows less AI content in your feed. Hide AI-labeled pins only takes out pins that carry Pinterest's AI label.",
                 "Kapal\u0131yken Pinterest ak\u0131\u015f\u0131nda daha az yapay zeka i\u00e7eri\u011fi g\u00f6sterir. Yapay zeka etiketli pinleri gizle yaln\u0131zca Pinterest'in yapay zeka etiketini ta\u015f\u0131yan pinleri kald\u0131r\u0131r.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
@@ -5930,6 +5978,9 @@ public final class L10nTranslations {
                 "Desteklenmiyor");
         table.put("Unsupported image",
                 "Desteklenmeyen g\u00f6rsel");
+    }
+
+    private static void fillTr9(Map<String, String> table) {
         table.put("Unsupported video",
                 "Desteklenmeyen video");
         table.put("Unsupported: %d",
@@ -5938,9 +5989,6 @@ public final class L10nTranslations {
                 "Devam ettirene kadar Hata ay\u0131klama g\u00fcnl\u00fc\u011f\u00fc d\u0131\u015f\u0131ndaki her anahtar kapal\u0131ym\u0131\u015f gibi davran\u0131r. Yamalad\u0131\u011f\u0131nda ayarlananlar devrede kal\u0131r.");
         table.put("Update instructions",
                 "G\u00fcncelleme talimatlar\u0131");
-    }
-
-    private static void fillTr9(Map<String, String> table) {
         table.put("Updates",
                 "G\u00fcncellemeler");
         table.put("Use Download again",
@@ -5993,6 +6041,8 @@ public final class L10nTranslations {
                 "Pinterest'in uzun basma d\u00fc\u011fmelerini gizleme");
         table.put("loaded board pins",
                 "y\u00fcklenen pano Pinleri");
+        table.put("microG-RE didn't answer. Open it, then try again.",
+                "microG-RE yan\u0131t vermedi. A\u00e7\u0131p tekrar dene.");
         table.put("none",
                 "yok");
         table.put("pin closeups",

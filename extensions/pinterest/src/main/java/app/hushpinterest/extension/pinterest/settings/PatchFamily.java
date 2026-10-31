@@ -196,6 +196,7 @@ public enum PatchFamily {
         CLOSEUP_IMAGE(ORIGINAL_IMAGES, "closeupImage", "pin closeups"),
         POSTED_DATE(SHOW_POSTED_DATE, "postedDate", "Show posted date"),
         UPDATE_NAG(DISABLE_UPDATE_NAG, "updateNag", "Disable update nag"),
+        SIGN_IN_FAILURE(GMS_CORE_SUPPORT, "signInFailure", "Google sign-in failure message"),
         FIREBASE_CERTIFICATE(FIX_PUSH_NOTIFICATIONS, "firebaseCertificate", "Fix push notifications");
 
         public final PatchFamily family;
@@ -422,6 +423,7 @@ public enum PatchFamily {
     public static void registerDiagnostics() {
         LogBufferManager.registerReportSection(REPORT);
         LogBufferManager.registerReportSection(PushReadiness.REPORT);
+        LogBufferManager.registerReportSection(GoogleSignInReadiness.REPORT);
         for (PatchFamily family : values()) {
             if (family.switches.isEmpty()) HookStatus.runsWhilePaused(family.patchName);
         }

@@ -643,3 +643,8 @@ Home keeps the pins you were looking at when you come back to Pinterest or to th
 Show posted date	Tampilkan tanggal posting
 Shows the day a pin was posted under its title. It shows on the next pin you open.	Menampilkan tanggal pin diposting di bawah judulnya. Tanggal muncul di pin berikutnya yang Anda buka.
 Posted %1$s	Diposting %1$s
+Install microG-RE to use Google sign-in.	Instal microG-RE untuk masuk dengan Google.
+Turn on microG-RE to use Google sign-in.	Aktifkan microG-RE untuk masuk dengan Google.
+microG-RE didn't answer. Open it, then try again.	microG-RE tidak merespons. Buka lalu coba lagi.
+This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.	Versi ini meneruskan proses masuk dengan Google ke microG-RE. Tambahkan dulu akun Google kamu di microG-RE. Jika ponselmu membatasi aplikasi latar belakang, izinkan microG-RE berjalan sendiri.
+Google sign-in failure message	Pesan gagal masuk dengan Google

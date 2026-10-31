@@ -57,6 +57,7 @@ public final class SettingsStatus {
     public static boolean removeAdTrackingPermissions() { return false; }
     public static boolean spoofSignature() { return false; }
     public static boolean gmsCoreSupport() { return false; }
+    public static boolean signInFailure() { return false; }
     public static boolean downloadPins() { return false; }
     public static boolean pinDownloads() { return false; }
     public static boolean copyImage() { return false; }

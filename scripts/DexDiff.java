@@ -276,7 +276,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 5),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1), Map.entry("postedDate", 1),
             Map.entry("longPressChoices", 1));
 
@@ -5740,6 +5740,30 @@ public class DexDiff {
         }
 
         /**
+         * androidx's failure listener for the Sign in with Google request: the extension gets the
+         * exception ahead of the listener's own first instruction. A build with no listener has nothing to claim.
+         */
+        void signInFailure(Contract c) {
+            String hook = c.strings.get(0);
+            List<Method> listeners = new ArrayList<>();
+            for (Method m : clean.holding("During get sign-in intent, failure response from one tap: "))
+                if (m.getDefiningClass().equals("Landroidx/credentials/playservices/HiddenActivity;") && m.getReturnType().equals("V")
+                        && AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getParameterTypes().size() == 2
+                        && m.getParameterTypes().get(0).toString().equals(m.getDefiningClass())
+                        && m.getParameterTypes().get(1).toString().equals("Ljava/lang/Exception;")) listeners.add(m);
+            if (listeners.isEmpty()) { capability(c.callee, false); return; }
+            Method m = actual(unique(listeners, "Google sign-in failure listener"));
+            List<Integer> sites = calls(m, hook, 1);
+            boolean found = false;
+            if (m != null && sites.size() == 1) {
+                found = sites.get(0) == 0 && arguments(instructions(m).get(0)).equals(List.of(parameter(m, 1)));
+                if (found) remove(m, 0, 1);
+                else fail(hook + " doesn't get the exception ahead of " + m);
+            }
+            capability(c.callee, found);
+        }
+
+        /**
          * Pinterest's browser ID in Block Store: the read answers no record when its hook says so and
          * the save returns what its hook hands back unless that's null, both ahead of the method's own
          * first instruction, and the extension's delete stub calls the wrapper's own delete.
@@ -6167,6 +6191,7 @@ public class DexDiff {
                     case "analytics": analytics(c); break;
                     case "answers": answers(c); break;
                     case "browserId": browserId(c); break;
+                    case "signInFailure": signInFailure(c); break;
                     case "firebaseCertificate": firebaseCertificate(c); break;
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;

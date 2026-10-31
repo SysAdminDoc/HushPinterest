@@ -284,7 +284,8 @@ public class PatchFamilyTest {
         assertEquals("gmsCoreSupport", family.statusMethod);
         assertEquals(permanent, family.staysWhilePaused);
         assertTrue("no switch can turn it off", family.switches.isEmpty());
-        assertTrue("it has no separately recorded targets", family.expectedCapabilities().isEmpty());
+        assertEquals("the failure message is its one recorded target",
+                Collections.singleton(PatchFamily.Capability.SIGN_IN_FAILURE), new java.util.HashSet<>(family.expectedCapabilities()));
         assertTrue("the Privacy page draws it", PatchFamily.PRIVACY_PAGE.contains(family));
 
         Set<PatchFamily> build = EnumSet.of(family);
