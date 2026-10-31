@@ -645,3 +645,10 @@ Turn on microG-RE to use Google sign-in.	Ative o microG-RE para entrar com o Goo
 microG-RE didn't answer. Open it, then try again.	O microG-RE não respondeu. Abra-o e tente de novo.
 This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.	Esta versão envia o login com o Google para o microG-RE. Adicione primeiro sua conta do Google no microG-RE. Se o seu celular limita apps em segundo plano, permita que o microG-RE inicie sozinho.
 Google sign-in failure message	Mensagem de falha no login com o Google
+# context: Download pins switches that tie a pin's download to its save
+Save pins you download	Salvar os pins que você baixar
+Downloading a pin from its menu also saves it to your profile, unless it's saved already. Grid and board downloads aren't saved. Needs Download pins on.	Baixar um pin pelo menu dele também o salva no seu perfil, a menos que já esteja salvo. Downloads de grades e pastas não são salvos. Baixar Pins precisa estar ativado.
+Download pins you save	Baixar os pins que você salvar
+Saving a pin also downloads it, from any screen. Needs Download pins on.	Salvar um pin também o baixa, em qualquer tela. Baixar Pins precisa estar ativado.
+Couldn't save this pin. Open it once, then try again.	Não foi possível salvar este pin. Abra-o uma vez e tente de novo.
+Save and download	Salvar e baixar

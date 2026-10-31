@@ -648,3 +648,10 @@ Turn on microG-RE to use Google sign-in.	Aktifkan microG-RE untuk masuk dengan G
 microG-RE didn't answer. Open it, then try again.	microG-RE tidak merespons. Buka lalu coba lagi.
 This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.	Versi ini meneruskan proses masuk dengan Google ke microG-RE. Tambahkan dulu akun Google kamu di microG-RE. Jika ponselmu membatasi aplikasi latar belakang, izinkan microG-RE berjalan sendiri.
 Google sign-in failure message	Pesan gagal masuk dengan Google
+# context: Download pins switches that tie a pin's download to its save
+Save pins you download	Simpan pin yang diunduh
+Downloading a pin from its menu also saves it to your profile, unless it's saved already. Grid and board downloads aren't saved. Needs Download pins on.	Mengunduh pin dari menunya juga menyimpannya ke profil Anda, kecuali sudah disimpan. Unduhan dari kisi dan papan tidak disimpan. Unduh Pin harus aktif.
+Download pins you save	Unduh pin yang disimpan
+Saving a pin also downloads it, from any screen. Needs Download pins on.	Menyimpan pin juga mengunduhnya, dari layar mana pun. Unduh Pin harus aktif.
+Couldn't save this pin. Open it once, then try again.	Tidak dapat menyimpan pin ini. Buka sekali, lalu coba lagi.
+Save and download	Simpan dan unduh

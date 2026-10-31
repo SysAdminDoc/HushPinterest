@@ -276,7 +276,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 5),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1), Map.entry("saveAndDownload", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1), Map.entry("postedDate", 1),
             Map.entry("longPressChoices", 1));
 
@@ -5764,6 +5764,97 @@ public class DexDiff {
         }
 
         /**
+         * Save pins you download and Download pins you save: the extension gets the pin ahead of the
+         * method every save goes through and each new quick-save helper in front of its constructor's
+         * return, and two stubs make the quick save and read the pin's saved state. The closeup
+         * presenter names those classes, so a build without it has nothing to claim.
+         */
+        void saveAndDownload(Contract c) {
+            ClassDef presenter = clean.classes.get(c.strings.get(2));
+            if (presenter == null) { capability(c.callee, false); return; }
+            String helperType = null, actionType = null, pin = null;
+            for (Field f : presenter.getFields()) {
+                if (f.getName().equals("repinUtils")) helperType = f.getType();
+                if (f.getName().equals("pinAction")) actionType = f.getType();
+            }
+            ClassDef menu = clean.classes.get(PIN_MENU);
+            if (menu != null) for (Field f : menu.getFields()) if (f.getName().equals("pin")) pin = f.getType();
+            ClassDef helper = helperType == null ? null : clean.classes.get(helperType);
+            ClassDef action = actionType == null ? null : clean.classes.get(actionType);
+            if (helper == null || action == null || pin == null) { fail("the save route's classes aren't in the clean APK"); return; }
+
+            List<Method> saves = new ArrayList<>();
+            for (Method m : presenter.getMethods()) if (m.getName().equals("repinToBoard"))
+                for (Instruction i : instructions(m)) if (reference(i) instanceof MethodReference called && called.getDefiningClass().equals(actionType)
+                        && !called.getParameterTypes().isEmpty() && called.getParameterTypes().get(0).toString().equals(pin))
+                    for (Method candidate : action.getMethods()) if (candidate.toString().equals(called.toString()) && !saves.contains(candidate)) saves.add(candidate);
+            Method save = actual(unique(saves, "method every save goes through"));
+            List<Integer> sites = calls(save, c.strings.get(0), 1);
+            boolean saving = false;
+            if (save != null && sites.size() == 1) {
+                saving = sites.get(0) == 0 && arguments(instructions(save).get(0)).equals(List.of(parameter(save, 0)));
+                if (saving) remove(save, 0, 1);
+                else fail(c.strings.get(0) + " doesn't get the pin ahead of " + save);
+            }
+
+            List<Method> constructors = new ArrayList<>();
+            for (Method m : helper.getMethods()) if (m.getName().equals("<init>") && m.getImplementation() != null) constructors.add(m);
+            Method built = unique(constructors, "quick save constructor");
+            Method init = actual(built);
+            boolean kept = false;
+            if (built != null && init != null) {
+                int returns = 0;
+                for (Instruction i : instructions(built)) if (i.getOpcode() == Opcode.RETURN_VOID) returns++;
+                List<Instruction> body = instructions(init);
+                List<Integer> hands = calls(init, c.strings.get(1), returns);
+                kept = returns > 0 && hands.size() == returns;
+                for (int at : hands) {
+                    if (at + 1 >= body.size() || body.get(at + 1).getOpcode() != Opcode.RETURN_VOID || !arguments(body.get(at)).equals(List.of(parameter(init, -1)))) {
+                        fail(c.strings.get(1) + " at " + at + " is not the helper itself in front of a return");
+                        kept = false;
+                    }
+                    remove(init, at, at + 1);
+                }
+            }
+
+            List<String> shape = List.of(pin, "Z", "Ljava/lang/String;", "Z", "Z", "Lkotlin/jvm/functions/Function1;", "Ljava/lang/String;");
+            List<Method> quickSaves = new ArrayList<>();
+            for (Method m : helper.getMethods()) if (m.getReturnType().equals("V") && m.getParameterTypes().size() == 8 && AccessFlags.PUBLIC.isSet(m.getAccessFlags())
+                    && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getParameterTypes().subList(0, 7).stream().map(Object::toString).toList().equals(shape)) quickSaves.add(m);
+            Method quickSave = unique(quickSaves, "quick save");
+            List<Method> writers = new ArrayList<>();
+            for (Method m : clean.holding("pinned_to_profile")) if (m.getReturnType().equals("V") && m.getParameterTypes().size() > 1
+                    && m.getParameterTypes().get(1).toString().equals(pin)) writers.add(m);
+            Method writer = unique(writers, "pin writer");
+            String board = pinAccessor(writer, "pinned_to_board", pin);
+            String profile = pinAccessor(writer, "pinned_to_profile", pin);
+            if (quickSave == null || board == null || profile == null) return;
+            String reason = quickSave.getParameterTypes().get(7).toString();
+            Method saved = stub(BASE + "actions/SaveAndDownload;->savePin(Ljava/lang/Object;Ljava/lang/Object;)V",
+                    List.of(Opcode.CHECK_CAST, Opcode.CHECK_CAST, Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT, Opcode.CONST_4, Opcode.CONST_4, Opcode.CONST_4,
+                            Opcode.CONST_4, Opcode.CONST_4, Opcode.CONST_4, Opcode.SGET_OBJECT, Opcode.INVOKE_VIRTUAL_RANGE, Opcode.RETURN_VOID),
+                    Arrays.asList(helperType, pin, null, null, null, null, null, null, null, null, reason + "->UNKNOWN:" + reason, quickSave.toString(), null));
+            Method read = stub(BASE + "actions/SaveAndDownload;->alreadySaved(Ljava/lang/Object;)Z",
+                    List.of(Opcode.CHECK_CAST, Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT_OBJECT, Opcode.IF_NEZ, Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT_OBJECT, Opcode.IF_EQZ,
+                            Opcode.INVOKE_VIRTUAL, Opcode.MOVE_RESULT, Opcode.RETURN, Opcode.CONST_4, Opcode.RETURN, Opcode.CONST_4, Opcode.RETURN),
+                    Arrays.asList(pin, board, null, null, profile, null, null, "Ljava/lang/Boolean;->booleanValue()Z", null, null, null, null, null, null));
+            capability(c.callee, saving && kept && saved != null && read != null);
+        }
+
+        /** The pin's own static accessor that a pin writer reads right after naming [label]. */
+        private String pinAccessor(Method writer, String label, String pin) {
+            if (writer == null) return null;
+            boolean named = false;
+            for (Instruction i : instructions(writer)) {
+                if (!named) { named = reference(i) instanceof StringReference text && text.getString().equals(label); continue; }
+                if (i.getOpcode() == Opcode.INVOKE_STATIC && reference(i) instanceof MethodReference accessor && accessor.getDefiningClass().equals(pin)
+                        && accessor.getParameterTypes().size() == 1 && accessor.getParameterTypes().get(0).toString().equals(pin)) return accessor.toString();
+            }
+            fail("the pin writer has no accessor for " + label);
+            return null;
+        }
+
+        /**
          * Pinterest's browser ID in Block Store: the read answers no record when its hook says so and
          * the save returns what its hook hands back unless that's null, both ahead of the method's own
          * first instruction, and the extension's delete stub calls the wrapper's own delete.
@@ -6192,6 +6283,7 @@ public class DexDiff {
                     case "answers": answers(c); break;
                     case "browserId": browserId(c); break;
                     case "signInFailure": signInFailure(c); break;
+                    case "saveAndDownload": saveAndDownload(c); break;
                     case "firebaseCertificate": firebaseCertificate(c); break;
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;

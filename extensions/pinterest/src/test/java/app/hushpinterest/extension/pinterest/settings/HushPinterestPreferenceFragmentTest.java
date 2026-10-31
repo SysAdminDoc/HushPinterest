@@ -483,6 +483,34 @@ public class HushPinterestPreferenceFragmentTest {
         }
     }
 
+    @Test
+    public void saveAndDownloadSwitchesFollowShareImageOnlyWhereTheirHooksWentIn() {
+        PatchFamily.inBuildForTests = EnumSet.allOf(PatchFamily.class);
+        Set<PatchFamily.Capability> withoutThem = EnumSet.allOf(PatchFamily.Capability.class);
+        withoutThem.remove(PatchFamily.Capability.SAVE_AND_DOWNLOAD);
+        PatchFamily.capabilitiesForTests = withoutThem;
+        try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+            HushPinterestPreferenceFragment page = pageOf(controller);
+            assertNull(page.findPreference(Settings.SAVE_DOWNLOADED_PINS.key));
+            assertNull(page.findPreference(Settings.DOWNLOAD_SAVED_PINS.key));
+            assertNotNull(page.findPreference(Settings.SHARE_IMAGE.key));
+        }
+        PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
+        try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+            HushPinterestPreferenceFragment page = pageOf(controller);
+            SwitchPreference save = (SwitchPreference) page.findPreference(Settings.SAVE_DOWNLOADED_PINS.key);
+            SwitchPreference download = (SwitchPreference) page.findPreference(Settings.DOWNLOAD_SAVED_PINS.key);
+            assertEquals("Save pins you download", String.valueOf(save.getTitle()));
+            assertEquals("Download pins you save", String.valueOf(download.getTitle()));
+            assertFalse("Save pins you download starts off", save.isChecked());
+            assertFalse("Download pins you save starts off", download.isChecked());
+            List<Preference> rows = new ArrayList<>();
+            collect(page.getPreferenceScreen(), rows);
+            assertEquals(indexOfKey(rows, Settings.SHARE_IMAGE.key) + 1, indexOfKey(rows, Settings.SAVE_DOWNLOADED_PINS.key));
+            assertEquals(indexOfKey(rows, Settings.SHARE_IMAGE.key) + 2, indexOfKey(rows, Settings.DOWNLOAD_SAVED_PINS.key));
+        }
+    }
+
     /** A method, not a field, so Settings loads after the rule has given it a context. */
     private static BooleanSetting[] longPressHides() {
         return new BooleanSetting[] {Settings.LONG_PRESS_HIDE_SAVE, Settings.LONG_PRESS_HIDE_SEND, Settings.LONG_PRESS_HIDE_SEARCH};

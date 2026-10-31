@@ -394,6 +394,15 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                                 + "through Android's share menu. Needs Download pins on. Videos don't get the row.")),
                             SettingsIcons.DOWNLOADS));
                 }
+                if (PatchFamily.Capability.SAVE_AND_DOWNLOAD.installed()) {
+                    actions.addPreference(mark(toggle(context, Settings.SAVE_DOWNLOADED_PINS, L10n.t("Save pins you download"),
+                            L10n.t("Downloading a pin from its menu also saves it to your profile, unless it's saved already. "
+                                + "Grid and board downloads aren't saved. Needs Download pins on.")),
+                            SettingsIcons.DOWNLOADS));
+                    actions.addPreference(mark(toggle(context, Settings.DOWNLOAD_SAVED_PINS, L10n.t("Download pins you save"),
+                            L10n.t("Saving a pin also downloads it, from any screen. Needs Download pins on.")),
+                            SettingsIcons.DOWNLOADS));
+                }
             }
             patchToggle(actions, context, build, PatchFamily.DOWNLOAD_BOARD, Settings.DOWNLOAD_BOARD,
                     L10n.t("Download board"), L10n.t("Downloads up to 500 loaded pins, skipping those in Download history. "

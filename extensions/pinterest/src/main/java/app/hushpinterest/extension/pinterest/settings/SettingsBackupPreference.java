@@ -453,6 +453,8 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_download_board": return L10n.t("Download board");
             case "hushpinterest_copy_image": return L10n.t("Copy image");
             case "hushpinterest_share_image": return L10n.t("Share image");
+            case "hushpinterest_save_downloaded_pins": return L10n.t("Save pins you download");
+            case "hushpinterest_download_saved_pins": return L10n.t("Download pins you save");
             case "hushpinterest_long_press_download": return L10n.t("Long-press download");
             case "hushpinterest_long_press_hide_save": return L10n.t("Hide Save in the long-press menu");
             case "hushpinterest_long_press_hide_send": return L10n.t("Hide Send in the long-press menu");

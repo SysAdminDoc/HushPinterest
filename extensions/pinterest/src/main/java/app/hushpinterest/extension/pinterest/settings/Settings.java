@@ -107,6 +107,12 @@ public class Settings extends BaseSettings {
     /** Download pins' Share image row in the pin menu. Starts off, and needs Download pins on. */
     public static final BooleanSetting SHARE_IMAGE =
             new BooleanSetting("hushpinterest_share_image", FALSE);
+    /** Download pins: downloading one pin from its menu also saves it. Starts off, and needs Download pins on. */
+    public static final BooleanSetting SAVE_DOWNLOADED_PINS =
+            new BooleanSetting("hushpinterest_save_downloaded_pins", FALSE);
+    /** Download pins: saving a pin also downloads it. Starts off, and needs Download pins on. */
+    public static final BooleanSetting DOWNLOAD_SAVED_PINS =
+            new BooleanSetting("hushpinterest_download_saved_pins", FALSE);
     public static final BooleanSetting DOWNLOAD_BOARD =
             new BooleanSetting("hushpinterest_download_board", FALSE);
     public static final BooleanSetting LONG_PRESS_DOWNLOAD =

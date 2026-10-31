@@ -71,6 +71,7 @@ import app.hushpinterest.extension.pinterest.actions.ExternalBrowser;
 import app.hushpinterest.extension.pinterest.actions.LongPressDownloadForTests;
 import app.hushpinterest.extension.pinterest.actions.LongPressDownloadTest;
 import app.hushpinterest.extension.pinterest.actions.PinDownloads;
+import app.hushpinterest.extension.pinterest.actions.SaveAndDownloadForTests;
 import app.hushpinterest.extension.pinterest.actions.SystemShare;
 import app.hushpinterest.extension.pinterest.ads.Ads;
 import app.hushpinterest.extension.pinterest.ads.FeedFilter;
@@ -319,6 +320,8 @@ public class PausedHooksTest {
                 () -> queuesWithDownloadPins(request -> !request.getAllowedOverRoaming())));
         probes.put(Settings.COPY_IMAGE, Collections.singletonList(() -> offersImageRow("CopyImage")));
         probes.put(Settings.SHARE_IMAGE, Collections.singletonList(() -> offersImageRow("ShareImage")));
+        probes.put(Settings.SAVE_DOWNLOADED_PINS, Collections.singletonList(() -> withDownloadPins(() -> SaveAndDownloadForTests.savesADownload(PIN))));
+        probes.put(Settings.DOWNLOAD_SAVED_PINS, Collections.singletonList(() -> withDownloadPins(() -> SaveAndDownloadForTests.downloadsASave(PIN))));
         probes.put(Settings.DOWNLOAD_BOARD, Collections.singletonList(() -> BoardDownloads.record(Collections.singletonList(BOARD_PIN))));
         probes.put(Settings.LONG_PRESS_DOWNLOAD, Collections.singletonList(PausedHooksTest::addsLongPressDownload));
         probes.put(Settings.LONG_PRESS_HIDE_SAVE, Collections.singletonList(() -> LongPressDownloadForTests.hidesButton(LongPressDownloadForTests.SAVE)));
@@ -460,6 +463,17 @@ public class PausedHooksTest {
                 ShadowDownloadManager.ShadowRequest request = queuedDownload(activity);
                 return request != null && limited.apply(request);
             });
+        } finally {
+            if (!pins) Settings.DOWNLOAD_PINS.save(false);
+        }
+    }
+
+    /** Save pins you download and Download pins you save ride on Download pins, so their probe turns it on. */
+    private static boolean withDownloadPins(Probe probe) {
+        boolean pins = Settings.DOWNLOAD_PINS.savedValue();
+        if (!pins) Settings.DOWNLOAD_PINS.save(true);
+        try {
+            return probe.changedPinterest();
         } finally {
             if (!pins) Settings.DOWNLOAD_PINS.save(false);
         }
