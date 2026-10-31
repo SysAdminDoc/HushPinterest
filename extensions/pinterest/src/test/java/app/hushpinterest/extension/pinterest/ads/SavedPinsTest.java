@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
+import app.hushpinterest.extension.pinterest.actions.SavedRecordForTests;
 import app.hushpinterest.extension.pinterest.settings.FamilyNames;
 import app.hushpinterest.extension.pinterest.settings.PatchFamily;
 import app.hushpinterest.extension.pinterest.settings.PatchFamilyForTests;
@@ -64,6 +65,7 @@ public class SavedPinsTest {
         @Json("is_repin") Boolean repin;
         @Json("is_owned_by_viewer") Boolean owned;
         @Json("pinned_to_board") Board board;
+        @Json("pinned_to_profile") Boolean profile;
 
         Pin(String id) {
             this.id = id;
@@ -122,8 +124,8 @@ public class SavedPinsTest {
 
     @Test
     public void theFieldGoesAmongThePinsOwnWhereverTheyAre() {
-        assertEquals("pin.{pinned_to_board,id,title},board.{id}", SavedPins.askingSaved("pin.{id,title},board.{id}"));
-        assertEquals("board.{id},pin.{pinned_to_board,id},user.{id}", SavedPins.askingSaved("board.{id},pin.{id},user.{id}"));
+        assertEquals("pin.{pinned_to_board,pinned_to_profile,id,title},board.{id}", SavedPins.askingSaved("pin.{id,title},board.{id}"));
+        assertEquals("board.{id},pin.{pinned_to_board,pinned_to_profile,id},user.{id}", SavedPins.askingSaved("board.{id},pin.{id},user.{id}"));
     }
 
     /** A set with no pin fields of its own isn't touched, nor is a word that only ends in "pin". */
@@ -136,20 +138,21 @@ public class SavedPinsTest {
 
     @Test
     public void aListThatAlreadyNamesItStaysAsItWas() {
-        String fields = "pin.{id,pinned_to_board,title},board.{id}";
+        String fields = "pin.{id,pinned_to_board,pinned_to_profile,title},board.{id}";
         assertSame(fields, SavedPins.askingSaved(fields));
+        assertEquals("pin.{pinned_to_profile,id,pinned_to_board},board.{id}", SavedPins.askingSaved("pin.{id,pinned_to_board},board.{id}"));
         String other = "pin.{pinned_to_board_id},board.{id}";
-        assertEquals("pin.{pinned_to_board,pinned_to_board_id},board.{id}", SavedPins.askingSaved(other));
+        assertEquals("pin.{pinned_to_board,pinned_to_profile,pinned_to_board_id},board.{id}", SavedPins.askingSaved(other));
     }
 
     @Test
     public void eitherSwitchAsksAndPauseStopsBoth() {
         String fields = "pin.{id}";
         Settings.HIDE_SAVED_PINS.save(true);
-        assertEquals("pin.{pinned_to_board,id}", SavedPins.homeFields(fields));
+        assertEquals("pin.{pinned_to_board,pinned_to_profile,id}", SavedPins.homeFields(fields));
         Settings.HIDE_SAVED_PINS.save(false);
         Settings.SAVE_DOWNLOADED_PINS.save(true);
-        assertEquals("pin.{pinned_to_board,id}", SavedPins.homeFields(fields));
+        assertEquals("pin.{pinned_to_board,pinned_to_profile,id}", SavedPins.homeFields(fields));
         PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
         assertSame(fields, SavedPins.homeFields(fields));
     }
@@ -186,6 +189,28 @@ public class SavedPinsTest {
         SavedPins.prune(page);
         assertEquals(Arrays.asList(fresh, repinned, intro), page);
         assertTrue(report(), report().contains(FamilyNames.FILTER_FEED) && report().contains("saved pin removed 2"));
+    }
+
+    /** Pinterest's default save goes to your profile with no board, so that field alone would miss it. */
+    @Test
+    public void aPinOnYourProfileLeavesAndOneThatSaysItIsntStays() {
+        Pin onProfile = new Pin("onProfile");
+        onProfile.profile = true;
+        Pin notOnProfile = new Pin("notOnProfile");
+        notOnProfile.profile = false;
+        List<Object> page = new ArrayList<>(Arrays.asList(onProfile, notOnProfile));
+        SavedPins.prune(page);
+        assertEquals(Arrays.asList(notOnProfile), page);
+    }
+
+    /** A pin saved here that Home sends back with nothing set, as a response that leaves the fields out would. */
+    @Test
+    public void aPinInTheLocalRecordLeaves() {
+        SavedRecordForTests.add("recorded");
+        Pin recorded = new Pin("recorded");
+        List<Object> page = new ArrayList<>(Arrays.asList(fresh, recorded));
+        SavedPins.prune(page);
+        assertEquals(Arrays.asList(fresh), page);
     }
 
     @Test
