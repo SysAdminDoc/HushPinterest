@@ -75,6 +75,7 @@ public enum PatchFamily {
     EXTERNAL_BROWSER(FamilyNames.EXTERNAL_BROWSER, "externalBrowser", null, Settings.EXTERNAL_BROWSER),
     SYSTEM_SHARE(FamilyNames.SYSTEM_SHARE, "systemShare", null, Settings.SYSTEM_SHARE),
     HIDE_SCREENSHOT_SHARE(FamilyNames.HIDE_SCREENSHOT_SHARE, "hideScreenshotShare", null, Settings.HIDE_SCREENSHOT_SHARE),
+    HIDE_ASSISTANT(FamilyNames.HIDE_ASSISTANT, "hideAssistant", null, Settings.HIDE_ASSISTANT),
     HIDE_SEARCH_HISTORY(FamilyNames.HIDE_SEARCH_HISTORY, "hideSearchHistory", null, Settings.HIDE_SEARCH_HISTORY),
     HIDE_NAVIGATION_BUTTONS(FamilyNames.HIDE_NAVIGATION_BUTTONS, "hideNavigationButtons", null,
             Settings.HIDE_NAV_CREATE, Settings.HIDE_NAV_NOTIFICATIONS, Settings.HIDE_NAV_SEARCH),
@@ -146,7 +147,7 @@ public enum PatchFamily {
     static final Set<PatchFamily> ACTIONS_PAGE = Collections.unmodifiableSet(EnumSet.of(DOWNLOAD_PINS, DOWNLOAD_BOARD,
             LONG_PRESS_DOWNLOAD, SYSTEM_SHARE));
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
-            HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
+            HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
             HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE));
 
@@ -177,6 +178,7 @@ public enum PatchFamily {
         VISIT_LINKS(EXTERNAL_BROWSER, "visitLinks", "Open links in your browser"),
         PIN_SHARE(SYSTEM_SHARE, "pinShare", "System share sheet"),
         SCREENSHOT_SHARE(HIDE_SCREENSHOT_SHARE, "screenshotShare", "No screenshot share menu"),
+        ASSISTANT_ENTRIES(HIDE_ASSISTANT, "assistantEntries", "Hide Assistant"),
         SEARCH_HISTORY(HIDE_SEARCH_HISTORY, "searchHistory", "Hide search history"),
         RECENT_SEARCH_ROWS(HIDE_SEARCH_HISTORY, "recentSearchRows", "Recent searches under the search bar"),
         RECENT_SEARCH_HEADING(HIDE_SEARCH_HISTORY, "recentSearchHeading", "Recent searches heading on the search page"),

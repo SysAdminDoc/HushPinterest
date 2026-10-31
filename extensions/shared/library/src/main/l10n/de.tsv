@@ -655,3 +655,6 @@ Download pins you save	Gemerkte Pins herunterladen
 Saving a pin also downloads it, from any screen. Needs Download pins on.	Merkst du einen Pin, wird er auch heruntergeladen, auf jedem Bildschirm. Pins herunterladen muss an sein.
 Couldn't save this pin. Open it once, then try again.	Pin konnte nicht gemerkt werden. Öffne ihn einmal und versuch es erneut.
 Save and download	Merken und herunterladen
+# context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
+Hide Assistant	Assistent ausblenden
+Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Entfernt den KI-Assistenten von Pinterest aus der Suche, von Pinnwänden und Pins. Die Suche funktioniert wie gewohnt. Die Änderung zeigt sich, sobald der Bildschirm das nächste Mal aktualisiert wird.

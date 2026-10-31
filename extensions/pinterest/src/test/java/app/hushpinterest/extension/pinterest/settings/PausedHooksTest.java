@@ -357,6 +357,7 @@ public class PausedHooksTest {
             return launched != null;
         })));
         probes.put(Settings.HIDE_SCREENSHOT_SHARE, Collections.singletonList(UiHooks::hideScreenshotShare));
+        probes.put(Settings.HIDE_ASSISTANT, Collections.singletonList(UiHooks::hideAssistant));
         probes.put(Settings.HIDE_SEARCH_HISTORY, Arrays.asList(
                 () -> UiHooks.searchHistoryVisibility(View.INVISIBLE) != View.INVISIBLE,
                 () -> UiHooks.searchHistoryMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC,

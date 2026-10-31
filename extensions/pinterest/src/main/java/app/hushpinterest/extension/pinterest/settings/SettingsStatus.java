@@ -74,6 +74,8 @@ public final class SettingsStatus {
     public static boolean systemShare() { return false; }
     public static boolean pinShare() { return false; }
     public static boolean hideScreenshotShare() { return false; }
+    public static boolean hideAssistant() { return false; }
+    public static boolean assistantEntries() { return false; }
     public static boolean screenshotShare() { return false; }
     public static boolean hideSearchHistory() { return false; }
     public static boolean searchHistory() { return false; }

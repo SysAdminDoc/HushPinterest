@@ -655,3 +655,6 @@ Download pins you save	Kaydettiğin pinleri indir
 Saving a pin also downloads it, from any screen. Needs Download pins on.	Bir pini kaydettiğinde, hangi ekranda olursan ol indirilir. Pinleri indir açık olmalı.
 Couldn't save this pin. Open it once, then try again.	Bu pin kaydedilemedi. Bir kez aç, sonra yeniden dene.
 Save and download	Kaydet ve indir
+# context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
+Hide Assistant	Asistanı gizle
+Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Pinterest'in yapay zeka Asistanı'nı aramadan, panolardan ve pinlerden kaldırır. Arama her zamanki gibi çalışır. Değişiklik, ekran bir sonraki güncellendiğinde görünür.

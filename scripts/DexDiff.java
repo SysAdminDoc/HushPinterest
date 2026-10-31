@@ -2884,6 +2884,9 @@ public class DexDiff {
                 for (Method m : clean.holding("sg_android_new_screenshot_api_14")) if (!AccessFlags.STATIC.isSet(m.getAccessFlags())
                         && m.getReturnType().equals("V") && m.getParameterTypes().size() == 2
                         && m.getParameterTypes().get(1).toString().equals("Landroidx/fragment/app/FragmentActivity;")) targets.add(m);
+            } else if (selector.equals("assistant")) {
+                for (Method m : clean.holding("ai_fwd_android_assistant_ask_mode")) if (!AccessFlags.STATIC.isSet(m.getAccessFlags())
+                        && m.getReturnType().equals("Z") && m.getParameterTypes().isEmpty()) targets.add(m);
             } else if (selector.equals("update")) {
                 targets.addAll(updateTargets());
                 if (targets.isEmpty()) {
@@ -2969,6 +2972,10 @@ public class DexDiff {
                     sendableStubs();
                     return original != null;
                 }
+                if (selector.equals("assistant")) {
+                    falseGuard(m, hook);
+                    return original != null;
+                }
                 if (selector.equals("update")) {
                     before = -1;
                     List<Instruction> body = instructions(m);
@@ -2978,6 +2985,27 @@ public class DexDiff {
                 guard(m, hook, before, args, prep, selector.equals("email"), selector.equals("update"));
             }
             return original != null && whole;
+        }
+
+        /** A guard on a host method that answers a question: when the hook says so it answers false, and nothing else runs. */
+        void falseGuard(Method m, String hook) {
+            List<Integer> sites = calls(m, hook, 1);
+            if (sites.size() != 1) return;
+            List<Instruction> body = instructions(m);
+            Layout layout = new Layout(m.getImplementation());
+            if (sites.get(0) != 0 || body.size() < 6 || !arguments(body.get(0)).isEmpty()) {
+                fail(hook + " has the wrong guarded placement or arguments in " + m);
+                return;
+            }
+            Instruction answer = body.get(1), branch = body.get(2), zero = body.get(3), done = body.get(4);
+            if (answer.getOpcode() != Opcode.MOVE_RESULT || branch.getOpcode() != Opcode.IF_EQZ || firstRegister(answer) != firstRegister(branch)
+                    || !(branch instanceof OffsetInstruction)
+                    || layout.addresses.get(2) + ((OffsetInstruction) branch).getCodeOffset() != layout.addresses.get(5))
+                fail(hook + " has no false branch to its original body in " + m);
+            if (zero.getOpcode() != Opcode.CONST_4 || done.getOpcode() != Opcode.RETURN || firstRegister(zero) != firstRegister(done)
+                    || ((NarrowLiteralInstruction) zero).getNarrowLiteral() != 0)
+                fail(hook + " does not answer false only in its enabled branch in " + m);
+            remove(m, 0, 5);
         }
 
         /** The static Home refresh calls in [m]: the fragment's owner, a pin map and a default-argument mask. */

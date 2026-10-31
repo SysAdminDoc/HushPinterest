@@ -1236,6 +1236,7 @@ public class SettingsNavigationTest {
 
     @Test public void interfaceRowsNameTheirOwnSurfaceAndRefreshBoundary() {
         summaryContains(Settings.HIDE_SCREENSHOT_SHARE.key, "share a screenshot", "Restart Pinterest", "Screenshots still work");
+        summaryContains(Settings.HIDE_ASSISTANT.key, "AI Assistant", "next time the screen updates", "Search works as usual");
         summaryContains(Settings.HIDE_SEARCH_HISTORY.key, "recent searches", "next time the screen updates", "doesn't delete your account's search history");
         summaryContains(Settings.HIDE_NAV_CREATE.key, "Create in the bottom bar", "next time the bar updates");
         summaryContains(Settings.HIDE_NAV_NOTIFICATIONS.key, "Notifications in the bottom bar", "next time the bar updates");

@@ -246,7 +246,7 @@ public class SettingsBackupTest {
                         Settings.DOWNLOAD_UNMETERED_ONLY, Settings.DOWNLOAD_NO_ROAMING, Settings.COPY_IMAGE, Settings.SHARE_IMAGE, Settings.SAVE_DOWNLOADED_PINS, Settings.DOWNLOAD_SAVED_PINS, Settings.DOWNLOAD_BOARD, Settings.LONG_PRESS_DOWNLOAD,
                         Settings.LONG_PRESS_HIDE_SAVE, Settings.LONG_PRESS_HIDE_SEND, Settings.LONG_PRESS_HIDE_SEARCH,
                         Settings.EXTERNAL_BROWSER, Settings.SYSTEM_SHARE,
-                        Settings.HIDE_SCREENSHOT_SHARE, Settings.HIDE_SEARCH_HISTORY,
+                        Settings.HIDE_SCREENSHOT_SHARE, Settings.HIDE_ASSISTANT, Settings.HIDE_SEARCH_HISTORY,
                         Settings.HIDE_NAV_CREATE, Settings.HIDE_NAV_NOTIFICATIONS, Settings.HIDE_NAV_SEARCH, Settings.HIDE_HEADER_BUTTONS,
                         Settings.BLACK_BOTTOM_BAR, Settings.BLACK_COMMENTS, Settings.BLACK_PIN_MENU,
                         Settings.HIDE_CLOSEUP_BACK, Settings.HIDE_CLOSEUP_LENS, Settings.HIDE_CLOSEUP_SEARCH_LABEL,

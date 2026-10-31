@@ -76,7 +76,7 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 33 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 34 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
@@ -92,6 +92,7 @@ There are 33 patches. Where a patch has a switch, its description names the sett
 | `Hide AI-labeled pins` | Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. A second switch also takes unlabeled pins whose title or description calls them AI art, or that come from an AI image site. Other AI images still show. Both start off. Turn them on in HushPinterest settings > Feed. |
 | `Hide ads` | Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads. Good for a cleaner feed. On by default. Turn it off in HushPinterest settings > Feed. |
 | `Hide advertising ID` | Pinterest sees an empty advertising ID with ad tracking limited, the same as if you deleted your advertising ID in Android. Pinterest also stops keeping its browser ID in Google's Block Store, so a reinstall doesn't bring the old one back. Good for keeping ads from following you. On by default. Turn it off in HushPinterest settings > Privacy. |
+| `Hide Assistant` | Removes Pinterest's AI Assistant from search, boards and pins, so you don't get its buttons or its suggestion row. Regular search keeps working. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Hide closeup buttons` | Lets you hide the back arrow and the visual search (lens) button that float over a pin you open, each with its own switch, so they stop covering the picture. A third switch keeps the lens but drops the Search image label Pinterest puts on it for your first pins each day. Your phone's back gesture still leaves the pin, and Search image in the pin menu still works. All three start off. Turn them on in HushPinterest settings > Interface. |
 | `Hide comments` | Collapses the comments and comment previews under pins. It doesn't change who can comment on your pins. Good for a quieter pin page. A separate switch hides the suggested replies next to the comment box. Both start off. Turn them on in HushPinterest settings > Interface. |
 | `Hide header buttons` | Hides the small icon buttons at the end of the top bar. Back buttons, text buttons and account controls stay. Good for a cleaner top bar. Starts off. Turn it on in HushPinterest settings > Interface. |

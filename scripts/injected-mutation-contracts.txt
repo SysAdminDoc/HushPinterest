@@ -47,6 +47,7 @@ family|longPressDownload|Long-press download|longPressMenu,longPressChoices
 family|externalBrowser|Open links in your browser|visitLinks
 family|systemShare|System share sheet|pinShare
 family|hideScreenshotShare|No screenshot share menu|screenshotShare
+family|hideAssistant|Hide Assistant|assistantEntries
 family|hideSearchHistory|Hide search history|searchHistory,recentSearchRows,recentSearchHeading
 family|hideNavigationButtons|Hide navigation buttons|navigationButtons
 family|hideHeaderButtons|Hide header buttons|headerButtons
@@ -80,6 +81,7 @@ mutation|longPressChoices|longPressChoices|Lapp/hushpinterest/extension/pinteres
 mutation|visitLinks|guard|Lapp/hushpinterest/extension/pinterest/actions/ExternalBrowser;->open(Ljava/lang/String;Ljava/lang/Object;)Z|visit|Lapp/hushpinterest/extension/pinterest/actions/ExternalBrowser;->openProfile(Ljava/lang/String;)Z|profileWebsite
 mutation|pinShare|guard|Lapp/hushpinterest/extension/pinterest/actions/SystemShare;->open(Ljava/lang/Object;Ljava/lang/Object;)Z|share|Lapp/hushpinterest/extension/pinterest/actions/SystemShare;->openSendable(Ljava/lang/Object;Ljava/lang/Object;)Z|shareCloseup
 mutation|screenshotShare|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideScreenshotShare()Z|screenshot
+mutation|assistantEntries|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideAssistant()Z|assistant
 mutation|searchHistory|views|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->searchHistoryVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->searchHistoryMeasureSpec(I)I|Lcom/pinterest/feature/search/landing/view/SlpRecentSearchCell;,Lcom/pinterest/feature/search/typeahead/view/SearchTypeaheadRecentSearchesCarouselView;,Lcom/pinterest/feature/search/typeahead/view/SearchTypeaheadRecentSearchPillView;
 mutation|navigationButtons|navigation|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->bindNavigation(Landroid/view/View;Ljava/lang/Object;)V|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->refreshNavigation(Landroid/view/View;)V
 mutation|headerButtons|refresh|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->headerButtons(Landroid/view/View;)V|Lcom/pinterest/gestalt/headerBar/GestaltHeaderBar;

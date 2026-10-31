@@ -434,6 +434,10 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("No screenshot share menu"),
                     L10n.t("Stops Pinterest from suggesting you share a screenshot. Screenshots still work. Restart "
                         + "Pinterest to see the change."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.HIDE_ASSISTANT, Settings.HIDE_ASSISTANT,
+                    L10n.t("Hide Assistant"),
+                    L10n.t("Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. "
+                        + "The change shows the next time the screen updates."), SettingsIcons.BLOCK);
             patchToggle(ui, context, build, PatchFamily.HIDE_SEARCH_HISTORY, Settings.HIDE_SEARCH_HISTORY,
                     L10n.t("Hide search history"),
                     L10n.t("Hides your recent searches. It doesn't delete your account's search history. The change "

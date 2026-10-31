@@ -104,6 +104,7 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.EXTERNAL_BROWSER, "Open links in your browser");
         ROW_TITLES.put(PatchFamily.SYSTEM_SHARE, "System share sheet");
         ROW_TITLES.put(PatchFamily.HIDE_SCREENSHOT_SHARE, "No screenshot share menu");
+        ROW_TITLES.put(PatchFamily.HIDE_ASSISTANT, "Hide Assistant");
         ROW_TITLES.put(PatchFamily.HIDE_SEARCH_HISTORY, "Hide search history");
         ROW_TITLES.put(PatchFamily.HIDE_NAVIGATION_BUTTONS, "Hide Create button");
         ROW_TITLES.put(PatchFamily.HIDE_HEADER_BUTTONS, "Hide header buttons");

@@ -655,3 +655,6 @@ Download pins you save	Unduh pin yang disimpan
 Saving a pin also downloads it, from any screen. Needs Download pins on.	Menyimpan pin juga mengunduhnya, dari layar mana pun. Unduh Pin harus aktif.
 Couldn't save this pin. Open it once, then try again.	Tidak dapat menyimpan pin ini. Buka sekali, lalu coba lagi.
 Save and download	Simpan dan unduh
+# context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
+Hide Assistant	Sembunyikan Asisten
+Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Menghapus Asisten AI Pinterest dari pencarian, papan, dan pin. Pencarian tetap berfungsi seperti biasa. Perubahan terlihat saat layar diperbarui berikutnya.

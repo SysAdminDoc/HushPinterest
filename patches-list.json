@@ -368,6 +368,42 @@
       "options": []
     },
     {
+      "name": "Hide Assistant",
+      "description": "Removes Pinterest's AI Assistant from search, boards and pins, so you don't get its buttons or its suggestion row. Regular search keeps working. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Interface",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.42.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.42.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14428010
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide ads",
       "description": "Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads. Good for a cleaner feed. On by default. Turn it off in HushPinterest settings > Feed.",
       "category": "Ads",

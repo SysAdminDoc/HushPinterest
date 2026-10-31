@@ -655,3 +655,6 @@ Download pins you save	Descargar los pines que guardas
 Saving a pin also downloads it, from any screen. Needs Download pins on.	Al guardar un pin, también se descarga, desde cualquier pantalla. Necesita Descargar pines activado.
 Couldn't save this pin. Open it once, then try again.	No se pudo guardar este pin. Ábrelo una vez y vuelve a intentarlo.
 Save and download	Guardar y descargar
+# context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
+Hide Assistant	Ocultar Asistente
+Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Quita el Asistente de IA de Pinterest de la búsqueda, los tableros y los pines. La búsqueda funciona como siempre. El cambio se ve la próxima vez que se actualice la pantalla.
