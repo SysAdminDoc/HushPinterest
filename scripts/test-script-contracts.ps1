@@ -2042,9 +2042,11 @@ try {
     # went in unchanged, the check passed as it should have, and this case failed with "No error
     # was raised" while the gate it covers was working perfectly. A version literal in a test
     # goes stale on the next bump, and does it silently until something reads the message.
-    $fixtureFloor = ([regex]::Match(
-        (Get-Content -LiteralPath (Join-Path $factsRoot 'gradle/libs.versions.toml') -Raw),
-        '(?m)^\s*manager-floor\s*=\s*"([^"]+)"')).Groups[1].Value
+    $fixtureCatalog = Get-Content -LiteralPath (Join-Path $factsRoot 'gradle/libs.versions.toml') -Raw
+    $catalogFloor = ([regex]::Match($fixtureCatalog, '(?m)^\s*manager-floor\s*=\s*"([^"]+)"')).Groups[1].Value
+    # Between releases the README names readme-manager-floor, when the catalog carries one.
+    $fixtureFloor = ([regex]::Match($fixtureCatalog, '(?m)^\s*readme-manager-floor\s*=\s*"([^"]+)"')).Groups[1].Value
+    if (-not $fixtureFloor) { $fixtureFloor = $catalogFloor }
     Assert-True ($fixtureFloor -match '^\d+\.\d+\.\d+$') `
         "The fixture catalog does not pin a Manager floor, so this case would prove nothing: $fixtureFloor"
     Set-FactsFile 'README.md' {
@@ -2053,6 +2055,13 @@ try {
     }
     Assert-Throws { Invoke-Facts } '*' 'A README naming a Manager older than the patcher needs was accepted.'
     Reset-FactsFile 'README.md'
+
+    # With a readme-manager-floor in the catalog, the README keeps the published release's floor
+    # between releases and a release run moves it to manager-floor.
+    if ($fixtureFloor -ne $catalogFloor) {
+        Assert-Throws { & $factsScript -Root $factsRoot -SkipDescriptionTestCount -SkipUrlCheck -VerifyPublishedAsset 6> $null } '*Manager*' `
+            'A release run accepted a README that still names the previous Manager floor.'
+    }
 
     # The same floor in the install step, where a link sits between the name and the version, so
     # the pattern above never reached it and a stale step passed while the badge was right. And in

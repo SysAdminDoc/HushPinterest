@@ -4,6 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* **Pinterest:** The patches are now built on Morphe patcher 2.1.0, so you'll need Morphe Manager 2.3.0 or newer to apply them.
 * **Tooling:** Release walks now bind the bundle, stock build and patch selection to the signed APK installed on the test device. Publish rejects missing or mismatched evidence, unsupported app versions, invalid times and reported problems. A survey of an installed app without matching build evidence stays diagnostic only.
 
 ## 0.0.13 (2026-10-23)
