@@ -4,6 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* **Pinterest:** The patches now target Pinterest 14.42.0, version code 14428010. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
 * **Pinterest:** The patches are now built on Morphe patcher 2.1.0, so you'll need Morphe Manager 2.3.0 or newer to apply them.
 * **Tooling:** Release walks now bind the bundle, stock build and patch selection to the signed APK installed on the test device. Publish rejects missing or mismatched evidence, unsupported app versions, invalid times and reported problems. A survey of an installed app without matching build evidence stays diagnostic only.
 
