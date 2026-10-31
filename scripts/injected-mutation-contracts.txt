@@ -105,6 +105,5 @@ mutation|closeupImage|closeupImage|Lapp/hushpinterest/extension/pinterest/ui/UiH
 mutation|updateNag|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->disableUpdateNag()Z|update
 mutation|signInFailure|signInFailure|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->requestFailed(Ljava/lang/Exception;)V
 mutation|saveAndDownload|saveAndDownload|Lapp/hushpinterest/extension/pinterest/actions/SaveAndDownload;->saving(Ljava/lang/Object;)V|Lapp/hushpinterest/extension/pinterest/actions/SaveAndDownload;->saver(Ljava/lang/Object;)V|Lcom/pinterest/feature/pin/closeup/presenter/OrganicPinCloseupPresenter;
-mutation|feedSavedPins,saveAndDownload|homeFields|Lapp/hushpinterest/extension/pinterest/ads/SavedPins;->homeFields(Ljava/lang/String;)Ljava/lang/String;|Lcom/pinterest/feature/home/model/|android_hf_api_request_get_to_post|compressed_fields|DYNAMIC_GRID_FEED_WITH_BOARD_FIELDS
 mutation|feedSavedPins|homePage|Lapp/hushpinterest/extension/pinterest/ads/SavedPins;->homePage(Ljava/lang/Object;)V|Lcom/pinterest/feature/home/model/|Lcom/pinterest/legacy/feeds/DynamicFeed;
 mutation|firebaseCertificate|firebaseCertificate|Lapp/hushpinterest/extension/pinterest/notifications/PushNotifications;->certificateHeader(Ljava/net/URLConnection;Ljava/lang/String;)Ljava/lang/String;
