@@ -658,3 +658,6 @@ Save and download	Simpan dan unduh
 # context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
 Hide Assistant	Sembunyikan Asisten
 Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Menghapus Asisten AI Pinterest dari pencarian, papan, dan pin. Pencarian tetap berfungsi seperti biasa. Perubahan terlihat saat layar diperbarui berikutnya.
+# context: a Feed switch from the Filter feed patch. It takes pins the person has already saved to a board out of their home feed only; boards and search still show them. The title is also the name of that part of the patch in the build report.
+Hide pins you've already saved	Sembunyikan pin yang sudah disimpan
+Takes pins you've saved out of your home feed. Your boards and search still show them.	Menghapus pin yang sudah Anda simpan dari beranda. Papan dan pencarian Anda tetap menampilkannya.

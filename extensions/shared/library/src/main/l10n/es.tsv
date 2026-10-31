@@ -658,3 +658,6 @@ Save and download	Guardar y descargar
 # context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
 Hide Assistant	Ocultar Asistente
 Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Quita el Asistente de IA de Pinterest de la búsqueda, los tableros y los pines. La búsqueda funciona como siempre. El cambio se ve la próxima vez que se actualice la pantalla.
+# context: a Feed switch from the Filter feed patch. It takes pins the person has already saved to a board out of their home feed only; boards and search still show them. The title is also the name of that part of the patch in the build report.
+Hide pins you've already saved	Ocultar los pines que ya guardaste
+Takes pins you've saved out of your home feed. Your boards and search still show them.	Quita de tu feed de inicio los pines que guardaste. Tus tableros y la búsqueda los siguen mostrando.

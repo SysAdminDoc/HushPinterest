@@ -10,6 +10,7 @@ Every HushPinterest release, newest first.
 * **Pinterest:** With GmsCore support, Continue with Google no longer does nothing when microG-RE can't be reached. You get a message saying to install it, turn it on or open it, and the setup guide says to add your Google account there first. Export report has a new Google sign-in section (no account names, no tokens) so a failure can be traced.
 * **Pinterest:** Two new switches under Pin actions, both off to start. Save pins you download also saves a pin you download from its menu, and Download pins you save downloads whatever you save, from any screen.
 * **Pinterest:** New `Hide Assistant` switch under Interface takes Pinterest's AI Assistant out of search, boards and pins on accounts that get it. Regular search keeps working. It starts off.
+* **Pinterest:** New `Hide pins you've already saved` switch under Feed takes pins you've saved or own out of your home feed. Your boards and search still show them. It starts off.
 * **Tooling:** Release walks now bind the bundle, stock build and patch selection to the signed APK installed on the test device. Publish rejects missing or mismatched evidence, unsupported app versions, invalid times and reported problems. A survey of an installed app without matching build evidence stays diagnostic only.
 
 ## 0.0.13 (2026-10-23)

@@ -188,7 +188,7 @@
     },
     {
       "name": "Filter feed",
-      "description": "Lets you take video pins (photos and GIFs stay) and pins that mention words you mute out of your home feed, search, related pins and boards. Starts off. Set it up in HushPinterest settings > Feed.",
+      "description": "Lets you take video pins (photos and GIFs stay) and pins that mention words you mute out of your home feed, search, related pins and boards, and pins you've already saved out of your home feed. Starts off. Set it up in HushPinterest settings > Feed.",
       "category": "Feed",
       "use": true,
       "dependencies": [

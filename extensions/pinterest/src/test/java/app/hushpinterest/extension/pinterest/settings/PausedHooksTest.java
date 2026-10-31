@@ -76,6 +76,7 @@ import app.hushpinterest.extension.pinterest.actions.SystemShare;
 import app.hushpinterest.extension.pinterest.ads.Ads;
 import app.hushpinterest.extension.pinterest.ads.FeedFilter;
 import app.hushpinterest.extension.pinterest.ads.HomeFeed;
+import app.hushpinterest.extension.pinterest.ads.SavedPins;
 import app.hushpinterest.extension.pinterest.privacy.Analytics;
 import app.hushpinterest.extension.pinterest.privacy.AdvertisingId;
 import app.hushpinterest.extension.pinterest.notifications.PushNotificationsTest;
@@ -280,6 +281,9 @@ public class PausedHooksTest {
             video.video = true;
             return filtersOut(video);
         }));
+        // Home's request asks whether each pin is saved, which is what its pages are judged by.
+        probes.put(Settings.HIDE_SAVED_PINS, Collections.singletonList(
+                () -> !"pin.{id}".equals(SavedPins.homeFields("pin.{id}"))));
         probes.put(Settings.KEEP_HOME_FEED, Arrays.asList(() -> HomeFeed.holdResumeRefresh(10 * 60 * 1000L),
                 () -> HomeFeed.holdHomeRefresh(null, 1)));
         probes.put(Settings.DISABLE_ANALYTICS, Arrays.asList(Analytics::blockUpload,

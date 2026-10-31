@@ -67,6 +67,12 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting HIDE_VIDEO_PINS =
             new BooleanSetting("hushpinterest_hide_video_pins", FALSE);
     /**
+     * Pins you've saved or own leave Home, on Filter feed's switch. Home's request only asks for the
+     * field that says so while this or Save pins you download is on. Off to start.
+     */
+    public static final BooleanSetting HIDE_SAVED_PINS =
+            new BooleanSetting("hushpinterest_hide_saved_pins", FALSE);
+    /**
      * Filter feed's second capability: pins whose title, grid title or description holds one of
      * these words or phrases leave the same lists. Empty to start, and empty while paused.
      */

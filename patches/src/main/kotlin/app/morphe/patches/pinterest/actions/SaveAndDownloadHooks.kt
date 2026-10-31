@@ -9,6 +9,9 @@ package app.morphe.patches.pinterest.actions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patches.pinterest.ads.HomeFields
+import app.morphe.patches.pinterest.ads.homeFieldsOrNull
+import app.morphe.patches.pinterest.ads.installHomeFields
 import app.morphe.patches.pinterest.misc.extension.EXTENSION_PACKAGE
 import app.morphe.patches.pinterest.misc.extension.requireStub
 import app.morphe.patches.pinterest.misc.extension.requireThisIntact
@@ -45,6 +48,7 @@ internal class SaveRoute(
     val reason: String,
     val board: MethodReference,
     val profile: MethodReference,
+    val homeFields: HomeFields?,
 )
 
 /** Null when the build has no closeup presenter. Throws when it has one this can't read. */
@@ -106,7 +110,7 @@ internal fun BytecodePatchContext.saveRoute(pin: String): SaveRoute? {
             fail("has no extension hook $hook")
         }
     }
-    return SaveRoute(pin, save, init, returns, quickSave, reason, board, profile)
+    return SaveRoute(pin, save, init, returns, quickSave, reason, board, profile, homeFieldsOrNull())
 }
 
 /** Fills the two stubs, then hooks the save and hands each new quick-save helper to the extension. */
@@ -147,6 +151,8 @@ internal fun BytecodePatchContext.installSaveRoute(route: SaveRoute) = with(rout
         const/4 v0, 0x0
         return v0
     """)
+    // Home's pins never say they're saved unless the request asks, and a saved one would be saved again.
+    homeFields?.let { installHomeFields(it) }
     mutable(save).addInstructions(0, "invoke-static/range { p1 .. p1 }, $SAVE_AND_DOWNLOAD->saving(Ljava/lang/Object;)V")
     val built = mutable(builder)
     returns.sortedDescending().forEach { at ->

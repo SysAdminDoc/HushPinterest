@@ -276,7 +276,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 5),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1), Map.entry("saveAndDownload", 3),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1), Map.entry("saveAndDownload", 3), Map.entry("homeFields", 5), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1), Map.entry("postedDate", 1),
             Map.entry("longPressChoices", 1));
 
@@ -5869,6 +5869,79 @@ public class DexDiff {
             capability(c.callee, saving && kept && saved != null && read != null);
         }
 
+        /**
+         * Home's request hands the field list it has just read to the extension and keeps what comes
+         * back. Hide pins you've already saved and Save pins you download share that one call. A build
+         * without the request has nothing to claim, and Save pins you download goes on without it.
+         */
+        void homeFields(Contract c) {
+            List<Method> requests = new ArrayList<>();
+            for (Method m : clean.holding(c.strings.get(2))) if (m.getDefiningClass().startsWith(c.strings.get(1))
+                    && clean.texts.get(m.toString()).contains(c.strings.get(3))) requests.add(m);
+            if (requests.isEmpty()) { capability("feedSavedPins", false); return; }
+            Method request = unique(requests, "Home's request");
+            Method after = actual(request);
+            String set = null;
+            if (request != null) for (Instruction i : instructions(request))
+                if (reference(i) instanceof FieldReference named && named.getName().equals(c.strings.get(4))) set = named.getType();
+            List<Integer> sites = calls(after, c.strings.get(0), 1);
+            boolean hooked = false;
+            if (after != null && set != null && sites.size() == 1) {
+                List<Instruction> body = instructions(after);
+                int at = sites.get(0);
+                int kept = at > 1 && body.get(at - 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT ? firstRegister(body.get(at - 1)) : -1;
+                hooked = kept >= 0 && at + 1 < body.size()
+                        && reference(body.get(at - 2)) instanceof MethodReference list && list.getReturnType().equals("Ljava/lang/String;")
+                        && list.getParameterTypes().size() == 1 && list.getParameterTypes().get(0).toString().equals(set)
+                        && arguments(body.get(at)).equals(List.of(kept))
+                        && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT && firstRegister(body.get(at + 1)) == kept;
+                if (hooked) remove(after, at, at + 2);
+                else fail(c.strings.get(0) + " doesn't get Home's field list as it's read");
+            }
+            capability(c.callee, hooked);
+        }
+
+        /**
+         * Each page of Home goes through the extension as soon as the callback holds it as the feed's own
+         * type, and a stub reads the page's items. A build without the callback has nothing to claim.
+         */
+        void homePage(Contract c) {
+            String feed = c.strings.get(2);
+            List<Method> callbacks = new ArrayList<>();
+            for (ClassDef owner : clean.classes.values()) if (owner.getType().startsWith(c.strings.get(1)))
+                for (Method m : owner.getMethods()) if (m.getName().equals("invoke") && m.getImplementation() != null && handsBack(m, feed)) callbacks.add(m);
+            if (callbacks.isEmpty()) { capability(c.callee, false); return; }
+            Method after = actual(unique(callbacks, "Home's page callback"));
+            List<Integer> sites = calls(after, c.strings.get(0), 1);
+            boolean hooked = false;
+            if (after != null && sites.size() == 1) {
+                List<Instruction> body = instructions(after);
+                int at = sites.get(0);
+                hooked = at > 0 && body.get(at - 1).getOpcode() == Opcode.CHECK_CAST && feed.equals(String.valueOf(reference(body.get(at - 1))))
+                        && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at - 1))));
+                if (hooked) remove(after, at, at + 1);
+                else fail(c.strings.get(0) + " doesn't get Home's page right after its cast");
+            }
+            ClassDef page = clean.classes.get(feed);
+            List<Method> lists = new ArrayList<>();
+            if (page != null) for (Method m : page.getMethods()) if (m.getReturnType().equals("Ljava/util/List;") && m.getParameterTypes().isEmpty()
+                    && AccessFlags.PUBLIC.isSet(m.getAccessFlags()) && !AccessFlags.STATIC.isSet(m.getAccessFlags())) lists.add(m);
+            Method items = unique(lists, "Home's page items");
+            if (items == null) return;
+            Method read = stub(BASE + "ads/SavedPins;->pageItems(Ljava/lang/Object;)Ljava/util/List;",
+                    List.of(Opcode.CHECK_CAST, Opcode.INVOKE_VIRTUAL, Opcode.MOVE_RESULT_OBJECT, Opcode.RETURN_OBJECT),
+                    Arrays.asList(feed, items.toString(), null, null));
+            capability(c.callee, hooked && read != null);
+        }
+
+        /** Whether [m] casts something to [type] and returns that register, unlike a callback that only logs it. */
+        private boolean handsBack(Method m, String type) {
+            Set<Integer> returned = new HashSet<>();
+            for (Instruction i : instructions(m)) if (i.getOpcode() == Opcode.RETURN_OBJECT) returned.add(firstRegister(i));
+            for (Instruction i : instructions(m)) if (i.getOpcode() == Opcode.CHECK_CAST && type.equals(String.valueOf(reference(i))) && returned.contains(firstRegister(i))) return true;
+            return false;
+        }
+
         /** The pin's own static accessor that a pin writer reads right after naming [label]. */
         private String pinAccessor(Method writer, String label, String pin) {
             if (writer == null) return null;
@@ -6312,6 +6385,8 @@ public class DexDiff {
                     case "browserId": browserId(c); break;
                     case "signInFailure": signInFailure(c); break;
                     case "saveAndDownload": saveAndDownload(c); break;
+                    case "homeFields": homeFields(c); break;
+                    case "homePage": homePage(c); break;
                     case "firebaseCertificate": firebaseCertificate(c); break;
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;

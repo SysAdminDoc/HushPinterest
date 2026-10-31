@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1174);
+        Map<String, String> table = new HashMap<>(1178);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -527,6 +527,8 @@ public final class L10nTranslations {
                 "Navigationsschaltfl\u00e4chen ausblenden");
         table.put("Hide pins that say they're AI",
                 "Pins ausblenden, die sich KI nennen");
+        table.put("Hide pins you've already saved",
+                "Bereits gemerkte Pins ausblenden");
         table.put("Hide save toasts",
                 "Merken-Hinweise ausblenden");
         table.put("Hide search history",
@@ -549,11 +551,11 @@ public final class L10nTranslations {
                 "Blendet Benachrichtigungen in der unteren Leiste aus. Die \u00c4nderung zeigt sich, wenn sich die Leiste das n\u00e4chste Mal aktualisiert.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Blendet Play-Store-Hinweise aus, die dich zum Update von Pinterest auffordern. Ein bereits offener Hinweis bleibt.");
-        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
-                "Blendet Pin bewerben in Pin-Men\u00fcs aus, die du ab jetzt \u00f6ffnest. Ein bereits offenes Men\u00fc \u00e4ndert sich nicht.");
     }
 
     private static void fillDe4(Map<String, String> table) {
+        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
+                "Blendet Pin bewerben in Pin-Men\u00fcs aus, die du ab jetzt \u00f6ffnest. Ein bereits offenes Men\u00fc \u00e4ndert sich nicht.");
         table.put("Hides Search image in pin menus you open from now on. A menu that's already open won't change.",
                 "Blendet Bild suchen in Pin-Men\u00fcs aus, die du ab jetzt \u00f6ffnest. Ein bereits offenes Men\u00fc \u00e4ndert sich nicht.");
         table.put("Hides Search in the bottom bar. The change shows the next time the bar updates.",
@@ -672,11 +674,11 @@ public final class L10nTranslations {
                 "Medienlink kopiert.");
         table.put("Missing",
                 "Nicht vorhanden");
-        table.put("More settings",
-                "Weitere Einstellungen");
     }
 
     private static void fillDe5(Map<String, String> table) {
+        table.put("More settings",
+                "Weitere Einstellungen");
         table.put("Muted words",
                 "Stummgeschaltete W\u00f6rter");
         table.put("New downloads avoid roaming data. They wait for Wi-Fi or your home mobile network. Queued downloads keep their original rule.",
@@ -795,11 +797,11 @@ public final class L10nTranslations {
                 "Pinterest-Hilfe zum Datenexport");
         table.put("Pinterest didn't offer a downloadable video file for this pin.",
                 "Pinterest hat f\u00fcr diesen Pin keine herunterladbare Videodatei angeboten.");
-        table.put("Pinterest didn't send a usable image.",
-                "Pinterest hat kein brauchbares Bild geschickt.");
     }
 
     private static void fillDe6(Map<String, String> table) {
+        table.put("Pinterest didn't send a usable image.",
+                "Pinterest hat kein brauchbares Bild geschickt.");
         table.put("Pinterest didn't supply supported media for this pin.",
                 "Pinterest hat f\u00fcr diesen Pin keine unterst\u00fctzten Medien bereitgestellt.");
         table.put("Pinterest hasn't supplied an image to download.",
@@ -918,11 +920,11 @@ public final class L10nTranslations {
                 "Download erneut starten");
         table.put("Reverse image search",
                 "Umgekehrte Bildersuche");
-        table.put("Same as Pinterest",
-                "Wie in Pinterest");
     }
 
     private static void fillDe7(Map<String, String> table) {
+        table.put("Same as Pinterest",
+                "Wie in Pinterest");
         table.put("Save",
                 "Speichern");
         table.put("Save and download",
@@ -1041,11 +1043,11 @@ public final class L10nTranslations {
                 "Bleibt w\u00e4hrend der Pause aktiv");
         table.put("Still copying the last image.",
                 "Das letzte Bild wird noch kopiert.");
-        table.put("Still getting the last image ready.",
-                "Das letzte Bild wird noch vorbereitet.");
     }
 
     private static void fillDe8(Map<String, String> table) {
+        table.put("Still getting the last image ready.",
+                "Das letzte Bild wird noch vorbereitet.");
         table.put("Stop selection",
                 "Auswahl stoppen");
         table.put("Stopping keeps downloads already started. Unstarted selections end when Pinterest closes.",
@@ -1072,6 +1074,8 @@ public final class L10nTranslations {
                 "Nimmt Pinterests Schaltfl\u00e4che \u201eBild suchen\u201c aus dem Men\u00fc beim Gedr\u00fcckthalten eines Pins im Raster. Die Lens auf einem ge\u00f6ffneten Pin sucht weiterhin.");
         table.put("Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.",
                 "Nimmt Pinterests Senden-Schaltfl\u00e4che aus dem Men\u00fc beim Gedr\u00fcckthalten eines Pins im Raster. Teilen direkt am Pin funktioniert weiterhin.");
+        table.put("Takes pins you've saved out of your home feed. Your boards and search still show them.",
+                "Entfernt Pins, die du gemerkt hast, aus deinem Startfeed. Deine Pinnw\u00e4nde und die Suche zeigen sie weiter.");
         table.put("Tap to turn it back on.",
                 "Zum Wiedereinschalten tippen.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
@@ -1162,13 +1166,13 @@ public final class L10nTranslations {
                 "Ausgeschaltet zeigt Pinterest weniger KI-Inhalte in deinem Feed. KI-markierte Pins ausblenden entfernt nur Pins mit Pinterests KI-Kennzeichnung.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
                 "Ausgeschaltet starten Videos \u00fcber mobile Daten nicht von selbst. Pinterest l\u00e4dt eventuell trotzdem schon einen Teil eines Videos vorab.");
+    }
+
+    private static void fillDe9(Map<String, String> table) {
         table.put("Turns down Pinterest's \"Got a minute?\" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.",
                 "Lehnt Pinterests Umfrage-Einladung \u201eHast du eine Minute?\u201c ab, bevor sie erscheint, so wie \u201eVielleicht sp\u00e4ter\u201c, damit diese Umfrage nicht wiederkommt. Gesponserte Umfragen von Werbetreibenden erscheinen auch nicht. Eine Einladung, die schon offen ist, bleibt.");
         table.put("Turns off every HushPinterest switch except Debug logging the next time Pinterest starts. What you chose when you patched stays, and your choices are saved.",
                 "Schaltet beim n\u00e4chsten Start von Pinterest jeden HushPinterest-Schalter au\u00dfer der Debug-Protokollierung aus. Was du beim Patchen gew\u00e4hlt hast, bleibt, und deine Auswahl bleibt gespeichert.");
-    }
-
-    private static void fillDe9(Map<String, String> table) {
         table.put("Unavailable",
                 "Nicht verf\u00fcgbar");
         table.put("Undo",
@@ -1266,7 +1270,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1174);
+        Map<String, String> table = new HashMap<>(1178);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -1746,6 +1750,8 @@ public final class L10nTranslations {
                 "Ocultar botones de navegaci\u00f3n");
         table.put("Hide pins that say they're AI",
                 "Ocultar pines que dicen ser IA");
+        table.put("Hide pins you've already saved",
+                "Ocultar los pines que ya guardaste");
         table.put("Hide save toasts",
                 "Ocultar avisos al guardar");
         table.put("Hide search history",
@@ -1768,11 +1774,11 @@ public final class L10nTranslations {
                 "Oculta Notificaciones en la barra inferior. El cambio se ve la pr\u00f3xima vez que se actualice la barra.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Oculta los avisos de Play Store que te piden actualizar Pinterest. Un aviso que ya est\u00e1 abierto se queda.");
-        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
-                "Oculta Promocionar pin en los men\u00fas de pin que abras a partir de ahora. Un men\u00fa que ya est\u00e1 abierto no cambia.");
     }
 
     private static void fillEs4(Map<String, String> table) {
+        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
+                "Oculta Promocionar pin en los men\u00fas de pin que abras a partir de ahora. Un men\u00fa que ya est\u00e1 abierto no cambia.");
         table.put("Hides Search image in pin menus you open from now on. A menu that's already open won't change.",
                 "Oculta Buscar imagen en los men\u00fas de pin que abras a partir de ahora. Un men\u00fa que ya est\u00e1 abierto no cambia.");
         table.put("Hides Search in the bottom bar. The change shows the next time the bar updates.",
@@ -1891,11 +1897,11 @@ public final class L10nTranslations {
                 "Enlace del archivo copiado.");
         table.put("Missing",
                 "No encontrado");
-        table.put("More settings",
-                "M\u00e1s ajustes");
     }
 
     private static void fillEs5(Map<String, String> table) {
+        table.put("More settings",
+                "M\u00e1s ajustes");
         table.put("Muted words",
                 "Palabras silenciadas");
         table.put("New downloads avoid roaming data. They wait for Wi-Fi or your home mobile network. Queued downloads keep their original rule.",
@@ -2014,11 +2020,11 @@ public final class L10nTranslations {
                 "Ayuda de Pinterest para exportar datos");
         table.put("Pinterest didn't offer a downloadable video file for this pin.",
                 "Pinterest no ofreci\u00f3 un archivo de video descargable para este pin.");
-        table.put("Pinterest didn't send a usable image.",
-                "Pinterest no envi\u00f3 una imagen utilizable.");
     }
 
     private static void fillEs6(Map<String, String> table) {
+        table.put("Pinterest didn't send a usable image.",
+                "Pinterest no envi\u00f3 una imagen utilizable.");
         table.put("Pinterest didn't supply supported media for this pin.",
                 "Pinterest no proporcion\u00f3 contenido compatible para este pin.");
         table.put("Pinterest hasn't supplied an image to download.",
@@ -2137,11 +2143,11 @@ public final class L10nTranslations {
                 "Reintentar descarga");
         table.put("Reverse image search",
                 "B\u00fasqueda inversa de im\u00e1genes");
-        table.put("Same as Pinterest",
-                "El mismo que en Pinterest");
     }
 
     private static void fillEs7(Map<String, String> table) {
+        table.put("Same as Pinterest",
+                "El mismo que en Pinterest");
         table.put("Save",
                 "Guardar");
         table.put("Save and download",
@@ -2260,11 +2266,11 @@ public final class L10nTranslations {
                 "Se mantiene durante la pausa");
         table.put("Still copying the last image.",
                 "A\u00fan se est\u00e1 copiando la \u00faltima imagen.");
-        table.put("Still getting the last image ready.",
-                "A\u00fan se est\u00e1 preparando la \u00faltima imagen.");
     }
 
     private static void fillEs8(Map<String, String> table) {
+        table.put("Still getting the last image ready.",
+                "A\u00fan se est\u00e1 preparando la \u00faltima imagen.");
         table.put("Stop selection",
                 "Detener selecci\u00f3n");
         table.put("Stopping keeps downloads already started. Unstarted selections end when Pinterest closes.",
@@ -2291,6 +2297,8 @@ public final class L10nTranslations {
                 "Quita el bot\u00f3n Buscar imagen de Pinterest del men\u00fa al mantener pulsado un pin en la cuadr\u00edcula. La lente de un pin que abres sigue buscando.");
         table.put("Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.",
                 "Quita el bot\u00f3n Enviar de Pinterest del men\u00fa al mantener pulsado un pin en la cuadr\u00edcula. Compartir desde el propio pin sigue funcionando.");
+        table.put("Takes pins you've saved out of your home feed. Your boards and search still show them.",
+                "Quita de tu feed de inicio los pines que guardaste. Tus tableros y la b\u00fasqueda los siguen mostrando.");
         table.put("Tap to turn it back on.",
                 "Toca para volver a activarlo.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
@@ -2381,13 +2389,13 @@ public final class L10nTranslations {
                 "Si lo desactivas, Pinterest muestra menos contenido de IA en tu feed. Ocultar pines con etiqueta de IA solo quita los pines que llevan la etiqueta de IA de Pinterest.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
                 "Si lo desactivas, los videos no empiezan solos con datos m\u00f3viles. Pinterest puede seguir cargando parte de un video por adelantado.");
+    }
+
+    private static void fillEs9(Map<String, String> table) {
         table.put("Turns down Pinterest's \"Got a minute?\" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.",
                 "Rechaza la invitaci\u00f3n a la encuesta \u00ab\u00bfTienes un minuto?\u00bb de Pinterest antes de que aparezca, como lo hace \u00abQuiz\u00e1s m\u00e1s tarde\u00bb, para que esa encuesta no vuelva. Las encuestas patrocinadas por anunciantes tampoco aparecen. Una invitaci\u00f3n que ya est\u00e1 abierta se queda.");
         table.put("Turns off every HushPinterest switch except Debug logging the next time Pinterest starts. What you chose when you patched stays, and your choices are saved.",
                 "Desactiva todos los interruptores de HushPinterest, salvo el Registro de depuraci\u00f3n, la pr\u00f3xima vez que se abra Pinterest. Lo que elegiste al parchear se mantiene y tus preferencias quedan guardadas.");
-    }
-
-    private static void fillEs9(Map<String, String> table) {
         table.put("Unavailable",
                 "No disponible");
         table.put("Undo",
@@ -2485,7 +2493,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1174);
+        Map<String, String> table = new HashMap<>(1178);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -2965,6 +2973,8 @@ public final class L10nTranslations {
                 "Sembunyikan tombol navigasi");
         table.put("Hide pins that say they're AI",
                 "Sembunyikan pin yang menyebut dirinya AI");
+        table.put("Hide pins you've already saved",
+                "Sembunyikan pin yang sudah disimpan");
         table.put("Hide save toasts",
                 "Sembunyikan notifikasi simpan");
         table.put("Hide search history",
@@ -2987,11 +2997,11 @@ public final class L10nTranslations {
                 "Menyembunyikan Notifikasi di bilah bawah. Perubahan terlihat saat bilah diperbarui berikutnya.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Menyembunyikan pop-up Play Store yang meminta Anda memperbarui Pinterest. Pop-up yang sudah terbuka tetap ada.");
-        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
-                "Menyembunyikan Promosikan pin di menu pin yang Anda buka mulai sekarang. Menu yang sudah terbuka tidak berubah.");
     }
 
     private static void fillIn4(Map<String, String> table) {
+        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
+                "Menyembunyikan Promosikan pin di menu pin yang Anda buka mulai sekarang. Menu yang sudah terbuka tidak berubah.");
         table.put("Hides Search image in pin menus you open from now on. A menu that's already open won't change.",
                 "Menyembunyikan Cari gambar di menu pin yang Anda buka mulai sekarang. Menu yang sudah terbuka tidak berubah.");
         table.put("Hides Search in the bottom bar. The change shows the next time the bar updates.",
@@ -3110,11 +3120,11 @@ public final class L10nTranslations {
                 "Tautan media disalin.");
         table.put("Missing",
                 "Tidak ditemukan");
-        table.put("More settings",
-                "Pengaturan lainnya");
     }
 
     private static void fillIn5(Map<String, String> table) {
+        table.put("More settings",
+                "Pengaturan lainnya");
         table.put("Muted words",
                 "Kata yang dibisukan");
         table.put("New downloads avoid roaming data. They wait for Wi-Fi or your home mobile network. Queued downloads keep their original rule.",
@@ -3233,11 +3243,11 @@ public final class L10nTranslations {
                 "Bantuan ekspor data Pinterest");
         table.put("Pinterest didn't offer a downloadable video file for this pin.",
                 "Pinterest tidak menawarkan file video yang bisa diunduh untuk pin ini.");
-        table.put("Pinterest didn't send a usable image.",
-                "Pinterest tidak mengirim gambar yang bisa dipakai.");
     }
 
     private static void fillIn6(Map<String, String> table) {
+        table.put("Pinterest didn't send a usable image.",
+                "Pinterest tidak mengirim gambar yang bisa dipakai.");
         table.put("Pinterest didn't supply supported media for this pin.",
                 "Pinterest tidak menyediakan media yang didukung untuk Pin ini.");
         table.put("Pinterest hasn't supplied an image to download.",
@@ -3356,11 +3366,11 @@ public final class L10nTranslations {
                 "Coba unduh lagi");
         table.put("Reverse image search",
                 "Pencarian gambar terbalik");
-        table.put("Same as Pinterest",
-                "Sama dengan Pinterest");
     }
 
     private static void fillIn7(Map<String, String> table) {
+        table.put("Same as Pinterest",
+                "Sama dengan Pinterest");
         table.put("Save",
                 "Simpan");
         table.put("Save and download",
@@ -3479,11 +3489,11 @@ public final class L10nTranslations {
                 "Tetap aktif saat dijeda");
         table.put("Still copying the last image.",
                 "Gambar terakhir masih disalin.");
-        table.put("Still getting the last image ready.",
-                "Gambar terakhir masih disiapkan.");
     }
 
     private static void fillIn8(Map<String, String> table) {
+        table.put("Still getting the last image ready.",
+                "Gambar terakhir masih disiapkan.");
         table.put("Stop selection",
                 "Hentikan pilihan");
         table.put("Stopping keeps downloads already started. Unstarted selections end when Pinterest closes.",
@@ -3510,6 +3520,8 @@ public final class L10nTranslations {
                 "Mengeluarkan tombol Cari gambar Pinterest dari menu tekan lama pin di kisi. Lens di pin yang Anda buka tetap mencari.");
         table.put("Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.",
                 "Mengeluarkan tombol Kirim Pinterest dari menu tekan lama pin di kisi. Berbagi dari pin itu sendiri tetap berfungsi.");
+        table.put("Takes pins you've saved out of your home feed. Your boards and search still show them.",
+                "Menghapus pin yang sudah Anda simpan dari beranda. Papan dan pencarian Anda tetap menampilkannya.");
         table.put("Tap to turn it back on.",
                 "Ketuk untuk mengaktifkan HushPinterest lagi.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
@@ -3600,13 +3612,13 @@ public final class L10nTranslations {
                 "Jika dimatikan, Pinterest menampilkan lebih sedikit konten AI di feed Anda. Sembunyikan pin berlabel AI hanya menghapus pin yang memiliki label AI dari Pinterest.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
                 "Jika dimatikan, video tidak diputar sendiri saat memakai data seluler. Pinterest mungkin tetap memuat sebagian video lebih dulu.");
+    }
+
+    private static void fillIn9(Map<String, String> table) {
         table.put("Turns down Pinterest's \"Got a minute?\" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.",
                 "Menolak undangan survei \"Punya waktu sebentar?\" dari Pinterest sebelum muncul, seperti tombol \"Mungkin nanti\", agar survei itu tidak muncul lagi. Polling bersponsor dari pengiklan juga tidak muncul. Undangan yang sudah terbuka tetap ada.");
         table.put("Turns off every HushPinterest switch except Debug logging the next time Pinterest starts. What you chose when you patched stays, and your choices are saved.",
                 "Mematikan semua sakelar HushPinterest kecuali Pencatatan debug saat Pinterest dibuka berikutnya. Yang Anda pilih saat menambal tetap berlaku, dan pilihan Anda tersimpan.");
-    }
-
-    private static void fillIn9(Map<String, String> table) {
         table.put("Unavailable",
                 "Tidak tersedia");
         table.put("Undo",
@@ -3704,7 +3716,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1174);
+        Map<String, String> table = new HashMap<>(1178);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -4184,6 +4196,8 @@ public final class L10nTranslations {
                 "Ocultar bot\u00f5es de navega\u00e7\u00e3o");
         table.put("Hide pins that say they're AI",
                 "Ocultar pins que dizem ser IA");
+        table.put("Hide pins you've already saved",
+                "Ocultar pins que voc\u00ea j\u00e1 salvou");
         table.put("Hide save toasts",
                 "Ocultar avisos ao salvar");
         table.put("Hide search history",
@@ -4206,11 +4220,11 @@ public final class L10nTranslations {
                 "Oculta Notifica\u00e7\u00f5es na barra inferior. A mudan\u00e7a aparece na pr\u00f3xima vez que a barra for atualizada.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Oculta os avisos da Play Store que pedem para voc\u00ea atualizar o Pinterest. Um aviso j\u00e1 aberto continua.");
-        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
-                "Oculta Promover pin nos menus de pin que voc\u00ea abrir a partir de agora. Um menu j\u00e1 aberto n\u00e3o muda.");
     }
 
     private static void fillPt_rBR4(Map<String, String> table) {
+        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
+                "Oculta Promover pin nos menus de pin que voc\u00ea abrir a partir de agora. Um menu j\u00e1 aberto n\u00e3o muda.");
         table.put("Hides Search image in pin menus you open from now on. A menu that's already open won't change.",
                 "Oculta Pesquisar imagem nos menus de pin que voc\u00ea abrir a partir de agora. Um menu j\u00e1 aberto n\u00e3o muda.");
         table.put("Hides Search in the bottom bar. The change shows the next time the bar updates.",
@@ -4329,11 +4343,11 @@ public final class L10nTranslations {
                 "Link da m\u00eddia copiado.");
         table.put("Missing",
                 "N\u00e3o encontrado");
-        table.put("More settings",
-                "Mais configura\u00e7\u00f5es");
     }
 
     private static void fillPt_rBR5(Map<String, String> table) {
+        table.put("More settings",
+                "Mais configura\u00e7\u00f5es");
         table.put("Muted words",
                 "Palavras silenciadas");
         table.put("New downloads avoid roaming data. They wait for Wi-Fi or your home mobile network. Queued downloads keep their original rule.",
@@ -4452,11 +4466,11 @@ public final class L10nTranslations {
                 "Ajuda do Pinterest para exportar dados");
         table.put("Pinterest didn't offer a downloadable video file for this pin.",
                 "O Pinterest n\u00e3o ofereceu um v\u00eddeo para baixar neste pin.");
-        table.put("Pinterest didn't send a usable image.",
-                "O Pinterest n\u00e3o enviou uma imagem utiliz\u00e1vel.");
     }
 
     private static void fillPt_rBR6(Map<String, String> table) {
+        table.put("Pinterest didn't send a usable image.",
+                "O Pinterest n\u00e3o enviou uma imagem utiliz\u00e1vel.");
         table.put("Pinterest didn't supply supported media for this pin.",
                 "O Pinterest n\u00e3o forneceu m\u00eddia compat\u00edvel para este Pin.");
         table.put("Pinterest hasn't supplied an image to download.",
@@ -4575,11 +4589,11 @@ public final class L10nTranslations {
                 "Tentar baixar novamente");
         table.put("Reverse image search",
                 "Pesquisa reversa de imagens");
-        table.put("Same as Pinterest",
-                "O mesmo do Pinterest");
     }
 
     private static void fillPt_rBR7(Map<String, String> table) {
+        table.put("Same as Pinterest",
+                "O mesmo do Pinterest");
         table.put("Save",
                 "Salvar");
         table.put("Save and download",
@@ -4698,11 +4712,11 @@ public final class L10nTranslations {
                 "O que continua ativo na pausa");
         table.put("Still copying the last image.",
                 "A \u00faltima imagem ainda est\u00e1 sendo copiada.");
-        table.put("Still getting the last image ready.",
-                "A \u00faltima imagem ainda est\u00e1 sendo preparada.");
     }
 
     private static void fillPt_rBR8(Map<String, String> table) {
+        table.put("Still getting the last image ready.",
+                "A \u00faltima imagem ainda est\u00e1 sendo preparada.");
         table.put("Stop selection",
                 "Parar sele\u00e7\u00e3o");
         table.put("Stopping keeps downloads already started. Unstarted selections end when Pinterest closes.",
@@ -4729,6 +4743,8 @@ public final class L10nTranslations {
                 "Tira o bot\u00e3o Pesquisar imagem do Pinterest do menu ao manter um pin da grade pressionado. A lente de um pin que voc\u00ea abre continua pesquisando.");
         table.put("Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.",
                 "Tira o bot\u00e3o Enviar do Pinterest do menu ao manter um pin da grade pressionado. Compartilhar pelo pr\u00f3prio pin continua funcionando.");
+        table.put("Takes pins you've saved out of your home feed. Your boards and search still show them.",
+                "Remove do seu feed inicial os pins que voc\u00ea salvou. Suas pastas e a busca continuam mostrando.");
         table.put("Tap to turn it back on.",
                 "Toque para reativar.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
@@ -4819,13 +4835,13 @@ public final class L10nTranslations {
                 "Desativado, o Pinterest mostra menos conte\u00fado de IA no seu feed. Ocultar pins com selo de IA s\u00f3 tira os pins que t\u00eam o selo de IA do Pinterest.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
                 "Desativado, os v\u00eddeos n\u00e3o come\u00e7am sozinhos com dados m\u00f3veis. O Pinterest ainda pode carregar parte de um v\u00eddeo antes.");
+    }
+
+    private static void fillPt_rBR9(Map<String, String> table) {
         table.put("Turns down Pinterest's \"Got a minute?\" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.",
                 "Recusa o convite de pesquisa \"Tem um minuto?\" do Pinterest antes que ele apare\u00e7a, como faz o \"Talvez mais tarde\", para que essa pesquisa n\u00e3o volte. Enquetes patrocinadas por anunciantes tamb\u00e9m n\u00e3o aparecem. Um convite que j\u00e1 est\u00e1 aberto continua.");
         table.put("Turns off every HushPinterest switch except Debug logging the next time Pinterest starts. What you chose when you patched stays, and your choices are saved.",
                 "Desliga todas as op\u00e7\u00f5es do HushPinterest, menos o Registro de depura\u00e7\u00e3o, na pr\u00f3xima vez que o Pinterest abrir. O que voc\u00ea escolheu ao aplicar os patches continua, e suas escolhas ficam salvas.");
-    }
-
-    private static void fillPt_rBR9(Map<String, String> table) {
         table.put("Unavailable",
                 "Indispon\u00edvel");
         table.put("Undo",
@@ -4923,7 +4939,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1174);
+        Map<String, String> table = new HashMap<>(1178);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -5403,6 +5419,8 @@ public final class L10nTranslations {
                 "Gezinme d\u00fc\u011fmelerini gizle");
         table.put("Hide pins that say they're AI",
                 "Yapay zeka oldu\u011funu s\u00f6yleyen pinleri gizle");
+        table.put("Hide pins you've already saved",
+                "Kaydetti\u011fin pinleri gizle");
         table.put("Hide save toasts",
                 "Kaydetme bildirimlerini gizle");
         table.put("Hide search history",
@@ -5425,11 +5443,11 @@ public final class L10nTranslations {
                 "Alt \u00e7ubuktaki Bildirimler'i gizler. De\u011fi\u015fiklik \u00e7ubuk bir sonraki g\u00fcncelleni\u015finde g\u00f6r\u00fcn\u00fcr.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Play Store'un Pinterest'i g\u00fcncellemeni isteyen a\u00e7\u0131l\u0131r uyar\u0131lar\u0131n\u0131 gizler. Zaten a\u00e7\u0131k olan uyar\u0131 kal\u0131r.");
-        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
-                "Bundan sonra a\u00e7t\u0131\u011f\u0131n pin men\u00fclerinde Pini tan\u0131t \u00f6\u011fesini gizler. Zaten a\u00e7\u0131k olan men\u00fc de\u011fi\u015fmez.");
     }
 
     private static void fillTr4(Map<String, String> table) {
+        table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
+                "Bundan sonra a\u00e7t\u0131\u011f\u0131n pin men\u00fclerinde Pini tan\u0131t \u00f6\u011fesini gizler. Zaten a\u00e7\u0131k olan men\u00fc de\u011fi\u015fmez.");
         table.put("Hides Search image in pin menus you open from now on. A menu that's already open won't change.",
                 "Bundan sonra a\u00e7t\u0131\u011f\u0131n pin men\u00fclerinde G\u00f6r\u00fcnt\u00fc ara \u00f6\u011fesini gizler. Zaten a\u00e7\u0131k olan men\u00fc de\u011fi\u015fmez.");
         table.put("Hides Search in the bottom bar. The change shows the next time the bar updates.",
@@ -5548,11 +5566,11 @@ public final class L10nTranslations {
                 "Medya ba\u011flant\u0131s\u0131 kopyaland\u0131.");
         table.put("Missing",
                 "Bulunamad\u0131");
-        table.put("More settings",
-                "Di\u011fer ayarlar");
     }
 
     private static void fillTr5(Map<String, String> table) {
+        table.put("More settings",
+                "Di\u011fer ayarlar");
         table.put("Muted words",
                 "Sessize al\u0131nan kelimeler");
         table.put("New downloads avoid roaming data. They wait for Wi-Fi or your home mobile network. Queued downloads keep their original rule.",
@@ -5671,11 +5689,11 @@ public final class L10nTranslations {
                 "Pinterest veri d\u0131\u015fa aktar\u0131m yard\u0131m\u0131");
         table.put("Pinterest didn't offer a downloadable video file for this pin.",
                 "Pinterest bu pin i\u00e7in indirilebilir bir video dosyas\u0131 sunmad\u0131.");
-        table.put("Pinterest didn't send a usable image.",
-                "Pinterest kullan\u0131labilir bir g\u00f6rsel g\u00f6ndermedi.");
     }
 
     private static void fillTr6(Map<String, String> table) {
+        table.put("Pinterest didn't send a usable image.",
+                "Pinterest kullan\u0131labilir bir g\u00f6rsel g\u00f6ndermedi.");
         table.put("Pinterest didn't supply supported media for this pin.",
                 "Pinterest bu Pin i\u00e7in desteklenen bir medya sa\u011flamad\u0131.");
         table.put("Pinterest hasn't supplied an image to download.",
@@ -5794,11 +5812,11 @@ public final class L10nTranslations {
                 "\u0130ndirmeyi yeniden dene");
         table.put("Reverse image search",
                 "Tersine g\u00f6rsel arama");
-        table.put("Same as Pinterest",
-                "Pinterest ile ayn\u0131");
     }
 
     private static void fillTr7(Map<String, String> table) {
+        table.put("Same as Pinterest",
+                "Pinterest ile ayn\u0131");
         table.put("Save",
                 "Kaydet");
         table.put("Save and download",
@@ -5917,11 +5935,11 @@ public final class L10nTranslations {
                 "Duraklat\u0131lsa da devrede kal\u0131r");
         table.put("Still copying the last image.",
                 "Son g\u00f6rsel h\u00e2l\u00e2 kopyalan\u0131yor.");
-        table.put("Still getting the last image ready.",
-                "Son g\u00f6rsel h\u00e2l\u00e2 haz\u0131rlan\u0131yor.");
     }
 
     private static void fillTr8(Map<String, String> table) {
+        table.put("Still getting the last image ready.",
+                "Son g\u00f6rsel h\u00e2l\u00e2 haz\u0131rlan\u0131yor.");
         table.put("Stop selection",
                 "Se\u00e7imi durdur");
         table.put("Stopping keeps downloads already started. Unstarted selections end when Pinterest closes.",
@@ -5948,6 +5966,8 @@ public final class L10nTranslations {
                 "Pinterest'in G\u00f6r\u00fcnt\u00fc ara d\u00fc\u011fmesini \u0131zgaradaki bir pine bas\u0131l\u0131 tutunca a\u00e7\u0131lan men\u00fcden \u00e7\u0131kar\u0131r. A\u00e7t\u0131\u011f\u0131n bir pindeki mercek aramaya devam eder.");
         table.put("Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.",
                 "Pinterest'in G\u00f6nder d\u00fc\u011fmesini \u0131zgaradaki bir pine bas\u0131l\u0131 tutunca a\u00e7\u0131lan men\u00fcden \u00e7\u0131kar\u0131r. Pinin kendisinden payla\u015fmak \u00e7al\u0131\u015fmaya devam eder.");
+        table.put("Takes pins you've saved out of your home feed. Your boards and search still show them.",
+                "Kaydetti\u011fin pinleri ana ak\u0131\u015f\u0131ndan kald\u0131r\u0131r. Panolar\u0131n ve arama onlar\u0131 g\u00f6stermeye devam eder.");
         table.put("Tap to turn it back on.",
                 "Yeniden a\u00e7mak i\u00e7in dokun.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
@@ -6038,13 +6058,13 @@ public final class L10nTranslations {
                 "Kapal\u0131yken Pinterest ak\u0131\u015f\u0131nda daha az yapay zeka i\u00e7eri\u011fi g\u00f6sterir. Yapay zeka etiketli pinleri gizle yaln\u0131zca Pinterest'in yapay zeka etiketini ta\u015f\u0131yan pinleri kald\u0131r\u0131r.");
         table.put("Turned off, videos don't start on their own on cellular data. Pinterest may still load some of a video ahead of time.",
                 "Kapal\u0131yken videolar mobil veride kendili\u011finden ba\u015flamaz. Pinterest yine de bir videonun bir k\u0131sm\u0131n\u0131 \u00f6nceden y\u00fckleyebilir.");
+    }
+
+    private static void fillTr9(Map<String, String> table) {
         table.put("Turns down Pinterest's \"Got a minute?\" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.",
                 "Pinterest'in \"Bir dakikan var m\u0131?\" anket davetini, \"Belki daha sonra\" gibi, g\u00f6r\u00fcnmeden \u00f6nce reddeder, b\u00f6ylece o anket geri gelmez. Reklamverenlerin sponsorlu anketleri de a\u00e7\u0131lmaz. Zaten a\u00e7\u0131k olan bir davet kal\u0131r.");
         table.put("Turns off every HushPinterest switch except Debug logging the next time Pinterest starts. What you chose when you patched stays, and your choices are saved.",
                 "Pinterest bir sonraki a\u00e7\u0131l\u0131\u015f\u0131nda Hata ay\u0131klama g\u00fcnl\u00fc\u011f\u00fc d\u0131\u015f\u0131ndaki t\u00fcm HushPinterest anahtarlar\u0131n\u0131 kapat\u0131r. Yamalarken se\u00e7tiklerin kal\u0131r ve tercihlerin kay\u0131tl\u0131 kal\u0131r.");
-    }
-
-    private static void fillTr9(Map<String, String> table) {
         table.put("Unavailable",
                 "Kullan\u0131lam\u0131yor");
         table.put("Undo",

@@ -658,3 +658,6 @@ Save and download	Kaydet ve indir
 # context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
 Hide Assistant	Asistanı gizle
 Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Pinterest'in yapay zeka Asistanı'nı aramadan, panolardan ve pinlerden kaldırır. Arama her zamanki gibi çalışır. Değişiklik, ekran bir sonraki güncellendiğinde görünür.
+# context: a Feed switch from the Filter feed patch. It takes pins the person has already saved to a board out of their home feed only; boards and search still show them. The title is also the name of that part of the patch in the build report.
+Hide pins you've already saved	Kaydettiğin pinleri gizle
+Takes pins you've saved out of your home feed. Your boards and search still show them.	Kaydettiğin pinleri ana akışından kaldırır. Panoların ve arama onları göstermeye devam eder.
