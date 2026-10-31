@@ -289,6 +289,8 @@ public class HushPinterestPreferenceFragmentTest {
                     }
                     continue;
                 }
+                // GmsCore support has no switch, so there's no row to say what it's missing.
+                if (missing.family.switches.isEmpty()) continue;
                 String summary = String.valueOf(page.findPreference(missing.family.switches.get(0).key).getSummary());
                 if (missing.family.expectedCapabilities().size() == 1) {
                     assertEquals("This build doesn't include the parts that handle " + missing.label + ".", summary);
