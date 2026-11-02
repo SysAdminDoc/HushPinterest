@@ -124,8 +124,16 @@ public class SavedPinsTest {
 
     @Test
     public void theFieldGoesAmongThePinsOwnWhereverTheyAre() {
-        assertEquals("pin.{pinned_to_board,pinned_to_profile,id,title},board.{id}", SavedPins.askingSaved("pin.{id,title},board.{id}"));
-        assertEquals("board.{id},pin.{pinned_to_board,pinned_to_profile,id},user.{id}", SavedPins.askingSaved("board.{id},pin.{id},user.{id}"));
+        assertEquals("pin.{pinned_to_board,id,title},board.{id}", SavedPins.askingSaved("pin.{id,title},board.{id}"));
+        assertEquals("board.{id},pin.{pinned_to_board,id},user.{id}", SavedPins.askingSaved("board.{id},pin.{id},user.{id}"));
+    }
+
+    /** Home comes up empty with "Oops, something went wrong!" when its request names this one. */
+    @Test
+    public void homeIsNeverAskedForTheProfileField() {
+        assertFalse(SavedPins.askingSaved("pin.{id,title},board.{id}").contains(SavedPins.PINNED_TO_PROFILE));
+        Settings.HIDE_SAVED_PINS.save(true);
+        assertFalse(SavedPins.homeFields("pin.{id}").contains(SavedPins.PINNED_TO_PROFILE));
     }
 
     /** A set with no pin fields of its own isn't touched, nor is a word that only ends in "pin". */
@@ -138,21 +146,20 @@ public class SavedPinsTest {
 
     @Test
     public void aListThatAlreadyNamesItStaysAsItWas() {
-        String fields = "pin.{id,pinned_to_board,pinned_to_profile,title},board.{id}";
+        String fields = "pin.{id,pinned_to_board,title},board.{id}";
         assertSame(fields, SavedPins.askingSaved(fields));
-        assertEquals("pin.{pinned_to_profile,id,pinned_to_board},board.{id}", SavedPins.askingSaved("pin.{id,pinned_to_board},board.{id}"));
         String other = "pin.{pinned_to_board_id},board.{id}";
-        assertEquals("pin.{pinned_to_board,pinned_to_profile,pinned_to_board_id},board.{id}", SavedPins.askingSaved(other));
+        assertEquals("pin.{pinned_to_board,pinned_to_board_id},board.{id}", SavedPins.askingSaved(other));
     }
 
     @Test
     public void eitherSwitchAsksAndPauseStopsBoth() {
         String fields = "pin.{id}";
         Settings.HIDE_SAVED_PINS.save(true);
-        assertEquals("pin.{pinned_to_board,pinned_to_profile,id}", SavedPins.homeFields(fields));
+        assertEquals("pin.{pinned_to_board,id}", SavedPins.homeFields(fields));
         Settings.HIDE_SAVED_PINS.save(false);
         Settings.SAVE_DOWNLOADED_PINS.save(true);
-        assertEquals("pin.{pinned_to_board,pinned_to_profile,id}", SavedPins.homeFields(fields));
+        assertEquals("pin.{pinned_to_board,id}", SavedPins.homeFields(fields));
         PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
         assertSame(fields, SavedPins.homeFields(fields));
     }

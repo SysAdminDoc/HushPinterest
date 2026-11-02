@@ -8,7 +8,6 @@ package app.hushpinterest.extension.pinterest.ads;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +23,15 @@ import app.hushpinterest.extension.shared.diagnostics.HookStatus;
  * Hide pins you've already saved, on Home only: a board's pins are all saved, and search or related
  * pins showing one you have isn't what the switch is about.
  *
- * <p>Home never says a pin is saved on its own. Its request doesn't ask for {@code pinned_to_board} or
- * {@code pinned_to_profile}, and {@code is_repin} only says someone saved it from somewhere. So
- * {@link #homeFields} adds those two fields to the list the request is about to send, while something
- * here needs them, and {@link #homePage} takes out what comes back saved, along with pins you own and
- * pins in {@link SavedRecord}. Save pins you download reads the same fields to tell a pin that's already
- * saved from a new one.
+ * <p>Home never says a pin is saved on its own. Its request doesn't ask for {@code pinned_to_board},
+ * and {@code is_repin} only says someone saved it from somewhere. So {@link #homeFields} adds that
+ * field to the list the request is about to send, while something here needs it, and {@link #homePage}
+ * takes out what comes back saved, along with pins you own and pins in {@link SavedRecord}. Save pins
+ * you download reads the same field to tell a pin that's already saved from a new one.
+ *
+ * <p>Never add {@code pinned_to_profile} to that list, even though the pin model has it: Home comes up
+ * empty with "Oops, something went wrong!" when its request names it. A quick save only sets that field,
+ * so {@link SavedRecord} is what knows about those pins.
  */
 public final class SavedPins {
     private SavedPins() {}
@@ -39,7 +41,6 @@ public final class SavedPins {
     static final String PINNED_TO_BOARD = "pinned_to_board";
     static final String PINNED_TO_PROFILE = "pinned_to_profile";
     static final String OWNED = "is_owned_by_viewer";
-    private static final List<String> ASKED = Arrays.asList(PINNED_TO_BOARD, PINNED_TO_PROFILE);
 
     /** How a request's field list opens the pin's own fields: {@code pin.{id,title},board.{id}}. */
     private static final String PIN_FIELDS = "pin.{";
@@ -59,8 +60,8 @@ public final class SavedPins {
 
     /**
      * Called with the field list Home's request is about to send. Hands back the same list with the
-     * two saved fields added while Hide pins you've already saved or Save pins you download is on, and
-     * the same list untouched otherwise. Never throws.
+     * saved field added while Hide pins you've already saved or Save pins you download is on, and the
+     * same list untouched otherwise. Never throws.
      */
     public static String homeFields(String fields) {
         try {
@@ -77,19 +78,17 @@ public final class SavedPins {
                 || PatchFamily.Capability.SAVE_AND_DOWNLOAD.installed() && Settings.SAVE_DOWNLOADED_PINS.get();
     }
 
-    /** [fields] naming the saved fields among the pin's own, or as it was when it has none or names them already. */
+    /** [fields] naming the saved field among the pin's own, or as it was when it has none or names it already. */
     static String askingSaved(String fields) {
         int at = fields.startsWith(PIN_FIELDS) ? 0 : fields.indexOf("," + PIN_FIELDS);
         if (at < 0) return fields;
         int open = fields.indexOf('{', at) + 1;
         int close = fields.indexOf('}', open);
         if (close < 0) return fields;
-        List<String> named = Arrays.asList(fields.substring(open, close).split(","));
-        StringBuilder asking = new StringBuilder();
-        for (String field : ASKED) {
-            if (!named.contains(field)) asking.append(field).append(',');
+        for (String field : fields.substring(open, close).split(",")) {
+            if (field.equals(PINNED_TO_BOARD)) return fields;
         }
-        return asking.length() == 0 ? fields : fields.substring(0, open) + asking + fields.substring(open);
+        return fields.substring(0, open) + PINNED_TO_BOARD + "," + fields.substring(open);
     }
 
     /** Called with each page of Home as it arrives, before anything reads it. Never throws. */
