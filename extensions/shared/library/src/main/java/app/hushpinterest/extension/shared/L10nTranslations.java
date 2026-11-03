@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1232);
+        Map<String, String> table = new HashMap<>(1230);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -1022,8 +1022,6 @@ public final class L10nTranslations {
                 "Festlegen als");
         table.put("Set as wallpaper",
                 "Als Hintergrund festlegen");
-        table.put("Set when you patched",
-                "Beim Patchen festgelegt");
         table.put("Settings",
                 "Einstellungen");
         table.put("Settings couldn't open",
@@ -1044,11 +1042,11 @@ public final class L10nTranslations {
                 "Einstellungen importiert. %1$d Schalter wurden ge\u00e4ndert.");
         table.put("Setup and backup guide",
                 "Hilfe zur Einrichtung und Sicherung");
+        table.put("Share file",
+                "Datei teilen");
     }
 
     private static void fillDe8(Map<String, String> table) {
-        table.put("Share file",
-                "Datei teilen");
         table.put("Share image",
                 "Bild teilen");
         table.put("Share pin",
@@ -1167,11 +1165,11 @@ public final class L10nTranslations {
                 "Die neueste Version von HushPinterest ist %1$s.");
         table.put("The saved list reads back wrong. Save it again as a new file.",
                 "Die gespeicherte Liste ist fehlerhaft. Speichere sie als neue Datei.");
+        table.put("The setting couldn't finish updating. Its saved value is shown.",
+                "Aktualisierung unvollst\u00e4ndig. Der gespeicherte Wert wird angezeigt.");
     }
 
     private static void fillDe9(Map<String, String> table) {
-        table.put("The setting couldn't finish updating. Its saved value is shown.",
-                "Aktualisierung unvollst\u00e4ndig. Der gespeicherte Wert wird angezeigt.");
         table.put("There's no diagnostic data to clear.",
                 "Es gibt keine Diagnosedaten zum L\u00f6schen.");
         table.put("There's no diagnostic data to put back.",
@@ -1290,11 +1288,11 @@ public final class L10nTranslations {
                 "Deine Schalter sind aktiv.");
         table.put("ad buttons on pin closeups",
                 "Werbeschaltfl\u00e4chen in Pin-Detailansichten");
+        table.put("ad-only views",
+                "reine Werbeansichten");
     }
 
     private static void fillDe10(Map<String, String> table) {
-        table.put("ad-only views",
-                "reine Werbeansichten");
         table.put("board menus",
                 "Pinnwand-Men\u00fcs");
         table.put("cake, wedding dress",
@@ -1328,7 +1326,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1232);
+        Map<String, String> table = new HashMap<>(1230);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -2303,8 +2301,6 @@ public final class L10nTranslations {
                 "Usar como");
         table.put("Set as wallpaper",
                 "Usar como fondo de pantalla");
-        table.put("Set when you patched",
-                "Aplicado al parchear");
         table.put("Settings",
                 "Configuraci\u00f3n");
         table.put("Settings couldn't open",
@@ -2325,11 +2321,11 @@ public final class L10nTranslations {
                 "Configuraci\u00f3n importada. Cambiaron %1$d interruptores.");
         table.put("Setup and backup guide",
                 "Gu\u00eda de configuraci\u00f3n y copias de seguridad");
+        table.put("Share file",
+                "Compartir archivo");
     }
 
     private static void fillEs8(Map<String, String> table) {
-        table.put("Share file",
-                "Compartir archivo");
         table.put("Share image",
                 "Compartir imagen");
         table.put("Share pin",
@@ -2448,11 +2444,11 @@ public final class L10nTranslations {
                 "La versi\u00f3n m\u00e1s reciente de HushPinterest es la %1$s.");
         table.put("The saved list reads back wrong. Save it again as a new file.",
                 "La lista guardada no se lee bien. Gu\u00e1rdala como un archivo nuevo.");
+        table.put("The setting couldn't finish updating. Its saved value is shown.",
+                "No se pudo terminar de actualizar el ajuste. Se muestra su valor guardado.");
     }
 
     private static void fillEs9(Map<String, String> table) {
-        table.put("The setting couldn't finish updating. Its saved value is shown.",
-                "No se pudo terminar de actualizar el ajuste. Se muestra su valor guardado.");
         table.put("There's no diagnostic data to clear.",
                 "No hay datos de diagn\u00f3stico que borrar.");
         table.put("There's no diagnostic data to put back.",
@@ -2571,11 +2567,11 @@ public final class L10nTranslations {
                 "Tus interruptores est\u00e1n funcionando.");
         table.put("ad buttons on pin closeups",
                 "botones de anuncio en las vistas ampliadas de pines");
+        table.put("ad-only views",
+                "vistas solo de anuncios");
     }
 
     private static void fillEs10(Map<String, String> table) {
-        table.put("ad-only views",
-                "vistas solo de anuncios");
         table.put("board menus",
                 "men\u00fas de tableros");
         table.put("cake, wedding dress",
@@ -2609,7 +2605,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1232);
+        Map<String, String> table = new HashMap<>(1230);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -3584,8 +3580,6 @@ public final class L10nTranslations {
                 "Setel sebagai");
         table.put("Set as wallpaper",
                 "Jadikan wallpaper");
-        table.put("Set when you patched",
-                "Diatur saat Anda menambal");
         table.put("Settings",
                 "Pengaturan");
         table.put("Settings couldn't open",
@@ -3606,11 +3600,11 @@ public final class L10nTranslations {
                 "Pengaturan diimpor. %1$d sakelar berubah.");
         table.put("Setup and backup guide",
                 "Panduan penyiapan dan pencadangan");
+        table.put("Share file",
+                "Bagikan file");
     }
 
     private static void fillIn8(Map<String, String> table) {
-        table.put("Share file",
-                "Bagikan file");
         table.put("Share image",
                 "Bagikan gambar");
         table.put("Share pin",
@@ -3729,11 +3723,11 @@ public final class L10nTranslations {
                 "Rilis HushPinterest terbaru adalah %1$s.");
         table.put("The saved list reads back wrong. Save it again as a new file.",
                 "Daftar yang disimpan tidak cocok. Simpan lagi sebagai file baru.");
+        table.put("The setting couldn't finish updating. Its saved value is shown.",
+                "Pengaturan ini tidak dapat selesai diperbarui. Nilai yang tersimpan ditampilkan.");
     }
 
     private static void fillIn9(Map<String, String> table) {
-        table.put("The setting couldn't finish updating. Its saved value is shown.",
-                "Pengaturan ini tidak dapat selesai diperbarui. Nilai yang tersimpan ditampilkan.");
         table.put("There's no diagnostic data to clear.",
                 "Tidak ada data diagnostik yang dapat dihapus.");
         table.put("There's no diagnostic data to put back.",
@@ -3852,11 +3846,11 @@ public final class L10nTranslations {
                 "Sakelar Anda aktif.");
         table.put("ad buttons on pin closeups",
                 "tombol iklan di tampilan dekat pin");
+        table.put("ad-only views",
+                "tampilan khusus iklan");
     }
 
     private static void fillIn10(Map<String, String> table) {
-        table.put("ad-only views",
-                "tampilan khusus iklan");
         table.put("board menus",
                 "menu papan");
         table.put("cake, wedding dress",
@@ -3890,7 +3884,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1232);
+        Map<String, String> table = new HashMap<>(1230);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -4865,8 +4859,6 @@ public final class L10nTranslations {
                 "Definir como");
         table.put("Set as wallpaper",
                 "Definir como plano de fundo");
-        table.put("Set when you patched",
-                "Definido ao aplicar os patches");
         table.put("Settings",
                 "Configura\u00e7\u00f5es");
         table.put("Settings couldn't open",
@@ -4887,11 +4879,11 @@ public final class L10nTranslations {
                 "Configura\u00e7\u00f5es importadas. %1$d op\u00e7\u00f5es foram alteradas.");
         table.put("Setup and backup guide",
                 "Guia de configura\u00e7\u00e3o e backup");
+        table.put("Share file",
+                "Compartilhar arquivo");
     }
 
     private static void fillPt_rBR8(Map<String, String> table) {
-        table.put("Share file",
-                "Compartilhar arquivo");
         table.put("Share image",
                 "Compartilhar imagem");
         table.put("Share pin",
@@ -5010,11 +5002,11 @@ public final class L10nTranslations {
                 "A vers\u00e3o mais nova do HushPinterest \u00e9 %1$s.");
         table.put("The saved list reads back wrong. Save it again as a new file.",
                 "A lista salva n\u00e3o confere. Salve de novo como um arquivo novo.");
+        table.put("The setting couldn't finish updating. Its saved value is shown.",
+                "A configura\u00e7\u00e3o n\u00e3o terminou de atualizar. O valor salvo aparece.");
     }
 
     private static void fillPt_rBR9(Map<String, String> table) {
-        table.put("The setting couldn't finish updating. Its saved value is shown.",
-                "A configura\u00e7\u00e3o n\u00e3o terminou de atualizar. O valor salvo aparece.");
         table.put("There's no diagnostic data to clear.",
                 "N\u00e3o h\u00e1 dados de diagn\u00f3stico para limpar.");
         table.put("There's no diagnostic data to put back.",
@@ -5133,11 +5125,11 @@ public final class L10nTranslations {
                 "Suas op\u00e7\u00f5es est\u00e3o funcionando.");
         table.put("ad buttons on pin closeups",
                 "bot\u00f5es de an\u00fancio nas visualiza\u00e7\u00f5es ampliadas de Pins");
+        table.put("ad-only views",
+                "telas s\u00f3 de an\u00fancios");
     }
 
     private static void fillPt_rBR10(Map<String, String> table) {
-        table.put("ad-only views",
-                "telas s\u00f3 de an\u00fancios");
         table.put("board menus",
                 "menus de pastas");
         table.put("cake, wedding dress",
@@ -5171,7 +5163,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1232);
+        Map<String, String> table = new HashMap<>(1230);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -6146,8 +6138,6 @@ public final class L10nTranslations {
                 "Farkl\u0131 ayarla");
         table.put("Set as wallpaper",
                 "Duvar ka\u011f\u0131d\u0131 yap");
-        table.put("Set when you patched",
-                "Yamalad\u0131\u011f\u0131nda ayarlananlar");
         table.put("Settings",
                 "Ayarlar");
         table.put("Settings couldn't open",
@@ -6168,11 +6158,11 @@ public final class L10nTranslations {
                 "Ayarlar i\u00e7e aktar\u0131ld\u0131. %1$d anahtar de\u011fi\u015fti.");
         table.put("Setup and backup guide",
                 "Kurulum ve yedekleme rehberi");
+        table.put("Share file",
+                "Dosyay\u0131 payla\u015f");
     }
 
     private static void fillTr8(Map<String, String> table) {
-        table.put("Share file",
-                "Dosyay\u0131 payla\u015f");
         table.put("Share image",
                 "G\u00f6rseli payla\u015f");
         table.put("Share pin",
@@ -6291,11 +6281,11 @@ public final class L10nTranslations {
                 "En yeni HushPinterest s\u00fcr\u00fcm\u00fc %1$s.");
         table.put("The saved list reads back wrong. Save it again as a new file.",
                 "Kaydedilen liste yanl\u0131\u015f okunuyor. Yeni bir dosya olarak tekrar kaydet.");
+        table.put("The setting couldn't finish updating. Its saved value is shown.",
+                "Ayar\u0131n g\u00fcncellenmesi tamamlanamad\u0131. Kay\u0131tl\u0131 de\u011feri g\u00f6steriliyor.");
     }
 
     private static void fillTr9(Map<String, String> table) {
-        table.put("The setting couldn't finish updating. Its saved value is shown.",
-                "Ayar\u0131n g\u00fcncellenmesi tamamlanamad\u0131. Kay\u0131tl\u0131 de\u011feri g\u00f6steriliyor.");
         table.put("There's no diagnostic data to clear.",
                 "Temizlenecek tan\u0131lama verisi yok.");
         table.put("There's no diagnostic data to put back.",
@@ -6414,11 +6404,11 @@ public final class L10nTranslations {
                 "Anahtarlar\u0131n \u00e7al\u0131\u015f\u0131yor.");
         table.put("ad buttons on pin closeups",
                 "Pin yak\u0131n g\u00f6r\u00fcn\u00fcmlerindeki reklam d\u00fc\u011fmeleri");
+        table.put("ad-only views",
+                "yaln\u0131zca reklam g\u00f6r\u00fcn\u00fcmleri");
     }
 
     private static void fillTr10(Map<String, String> table) {
-        table.put("ad-only views",
-                "yaln\u0131zca reklam g\u00f6r\u00fcn\u00fcmleri");
         table.put("board menus",
                 "pano men\u00fcleri");
         table.put("cake, wedding dress",
