@@ -330,9 +330,9 @@ public class DexDiff {
                 String[] columns = line.split("\\|", -1);
                 boolean family = columns[0].equals("family");
                 int mutationValues = columns.length - 3;
-                boolean validMutation = family || (!columns[2].equals("guard")
-                        ? MUTATION_COLUMNS.getOrDefault(columns[2], -1) == mutationValues
-                        : mutationValues >= 2 && mutationValues % 2 == 0);
+                boolean validMutation = family || (columns[2].equals("guard") ? mutationValues >= 2 && mutationValues % 2 == 0
+                        : columns[2].equals("builtView") ? mutationValues >= 3 && mutationValues % 3 == 0
+                        : MUTATION_COLUMNS.getOrDefault(columns[2], -1) == mutationValues);
                 // A family's capability column may be empty: a manifest-only patch changes no bytecode.
                 if ((family && columns.length != 4) || (!family && columns.length < 4)
                         || Arrays.stream(columns).limit(family ? 3 : columns.length).anyMatch(String::isBlank)
@@ -2746,36 +2746,51 @@ public class DexDiff {
          * The method answers a view through a single return-object, and the hook sits right in front
          * of that return with the answered register, as the only way into it.
          */
+        /**
+         * Each hook, builder name ("*" for any) and anchor triple is one view handed over by the method
+         * that builds it. The triples of one rule are one surface: the patch finds every builder before
+         * it changes any, so a missing one leaves the whole surface, and its capability, off.
+         */
         void builtView(Contract c) {
-            String hook = c.strings.get(0), name = c.strings.get(1), anchor = c.strings.get(2);
-            List<Method> builders = new ArrayList<>();
-            for (Method m : clean.methods.values()) {
-                if (m.getDefiningClass().startsWith(OWN) || m.getImplementation() == null || !m.getName().equals(name)) continue;
-                if (anchor.startsWith("L") ? m.getDefiningClass().equals(anchor)
-                        : instructions(m).stream().anyMatch(i -> readsId(i, anchor))) builders.add(m);
+            List<List<Method>> found = new ArrayList<>();
+            for (int t = 0; t < c.strings.size(); t += 3) {
+                String name = c.strings.get(t + 1), anchor = c.strings.get(t + 2);
+                List<Method> builders = new ArrayList<>();
+                for (Method m : clean.methods.values()) {
+                    if (m.getDefiningClass().startsWith(OWN) || m.getImplementation() == null
+                            || !(name.equals("*") || m.getName().equals(name))) continue;
+                    if (anchor.startsWith("L") ? m.getDefiningClass().equals(anchor)
+                            : instructions(m).stream().anyMatch(i -> readsId(i, anchor))) builders.add(m);
+                }
+                // No builder at all is a surface this build doesn't have: the patch warns, keeps its
+                // others and leaves the capability off. Two builders are a build to look at.
+                if (builders.isEmpty()) { capability(c.callee, false); return; }
+                found.add(builders);
             }
-            // No builder at all is a surface this build doesn't have: the patch warns, keeps its
-            // others and leaves the capability off. Two builders are a build to look at.
-            if (builders.isEmpty()) { capability(c.callee, false); return; }
-            Method builder = unique(builders, "builder of the view for " + hook);
-            boolean shaped = false;
-            if (builder != null) {
-                String type = builder.getReturnType();
-                shaped = instructions(builder).stream().filter(i -> i.getOpcode() == Opcode.RETURN_OBJECT).count() == 1
-                        && (type.equals("Landroid/view/View;") || frameworkView(type));
-                if (!shaped) fail(builder + " doesn't answer a view through a single return");
-            }
-            Method m = shaped ? actual(builder) : null;
-            List<Integer> sites = calls(m, hook, 1);
-            boolean handed = false;
-            if (m != null && sites.size() == 1) {
-                List<Instruction> body = instructions(m);
-                int at = sites.get(0);
-                handed = at + 1 < body.size() && body.get(at + 1).getOpcode() == Opcode.RETURN_OBJECT
-                        && body.stream().filter(i -> i.getOpcode() == Opcode.RETURN_OBJECT).count() == 1
-                        && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at + 1)))) && onlyFrom(m, at + 1, at);
-                if (!handed) fail(hook + " doesn't take the view " + m + " answers, right in front of its only return");
-                else remove(m, at, at + 1);
+            boolean handed = true;
+            for (int t = 0; t < found.size(); t++) {
+                String hook = c.strings.get(t * 3);
+                Method builder = unique(found.get(t), "builder of the view for " + hook);
+                boolean shaped = false;
+                if (builder != null) {
+                    String type = builder.getReturnType();
+                    shaped = instructions(builder).stream().filter(i -> i.getOpcode() == Opcode.RETURN_OBJECT).count() == 1
+                            && (type.startsWith("Landroid/view/") || type.startsWith("Landroid/widget/") || frameworkView(type));
+                    if (!shaped) fail(builder + " doesn't answer a view through a single return");
+                }
+                Method m = shaped ? actual(builder) : null;
+                List<Integer> sites = calls(m, hook, 1);
+                boolean one = false;
+                if (m != null && sites.size() == 1) {
+                    List<Instruction> body = instructions(m);
+                    int at = sites.get(0);
+                    one = at + 1 < body.size() && body.get(at + 1).getOpcode() == Opcode.RETURN_OBJECT
+                            && body.stream().filter(i -> i.getOpcode() == Opcode.RETURN_OBJECT).count() == 1
+                            && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at + 1)))) && onlyFrom(m, at + 1, at);
+                    if (!one) fail(hook + " doesn't take the view " + m + " answers, right in front of its only return");
+                    else remove(m, at, at + 1);
+                }
+                handed &= one;
             }
             capability(c.callee, handed);
         }

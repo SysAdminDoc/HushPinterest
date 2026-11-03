@@ -25,7 +25,8 @@ no-call Landroid/content/pm/ShortcutManager;->removeAllDynamicShortcuts()V outsi
 
 # family|installed flag|selected patch name|capability flags
 # mutation|capability flags|clean-target selector|selector-specific hook descriptors and anchors
-# Guard mutations list one or more hook/selector pairs.
+# Guard mutations list one or more hook/selector pairs. Built-view mutations list one or more
+# hook/builder name/anchor triples, "*" for a builder of any name, and all of a rule's triples are one surface.
 # The clean APK supplies the callers. Final flags do not excuse missing, duplicated or misplaced calls.
 # Feed ownership is shared. Ad views and the Play Core update prompt can be absent in a supported target.
 # An empty capability column is a family that changes no bytecode (a manifest-only patch): only its
@@ -87,7 +88,7 @@ mutation|navigationButtons|navigation|Lapp/hushpinterest/extension/pinterest/ui/
 mutation|headerButtons|refresh|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->headerButtons(Landroid/view/View;)V|Lcom/pinterest/gestalt/headerBar/GestaltHeaderBar;
 mutation|blackBottomBar|drawWash|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->bottomBar(Landroid/view/View;)V|Lcom/pinterest/navigation/view/FloatingBottomNavBar;|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->blurFill(Landroid/view/View;I)I|Lcom/pinterest/gestalt/design/blur/GestaltBlurView;
 mutation|blackComments|builtView|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->comments(Landroid/view/View;)V|onCreateView|comment_bottom_bar
-mutation|blackPinMenu|builtView|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->pinMenu(Landroid/view/View;)V|createModalView|Lcom/pinterest/feature/gridactions/modal/view/PinOverflowMenuModalImpl;
+mutation|blackPinMenu|builtView|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->pinMenu(Landroid/view/View;)V|createModalView|Lcom/pinterest/feature/gridactions/modal/view/PinOverflowMenuModalImpl;|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->pinMenuCard(Landroid/view/View;)V|*|bento_card_background
 mutation|closeupButtons|closeupButtons|Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->backArrow(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->lens(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->visibility(Landroid/view/View;I)I
 mutation|closeupSearchLabel|closeupSearchLabel|Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->searchLabel(Z)Z
 mutation|closeupRemix|closeupRemix|Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->remix(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->visibility(Landroid/view/View;I)I

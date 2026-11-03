@@ -50,8 +50,9 @@ internal data class GlassWash(val draw: Method, val index: Int, val view: Int, v
  * The bar's gray is Pinterest's elevation color, which menus, popovers and floating buttons share,
  * so the theme is left alone and only the bar's own drawables are recolored as it draws. The
  * comments sheet and a pin's menu carry the same color, and each is handed to the extension by the
- * method that builds it, as is each See more and See less card in that menu. The four are found
- * apart, so a build that lacks one keeps the others.
+ * method that builds it, as is each See more and See less card in that menu. The bar, the
+ * comments sheet and the menu are found apart, so a build that lacks one keeps the others. The
+ * menu's sheet and its cards go together, under one switch.
  */
 @Suppress("unused")
 val amoledBlackPatch = bytecodePatch(
@@ -68,7 +69,7 @@ val amoledBlackPatch = bytecodePatch(
         requireStatusMethod("blackBottomBar")
         requireStatusMethod("blackComments")
         requireStatusMethod("blackPinMenu")
-        handleTargets(PATCH, "surfaces", listOf("bottom bar", "comments screen", "pin menu", "pin menu cards")) { surface ->
+        handleTargets(PATCH, "surfaces", listOf("bottom bar", "comments screen", "pin menu")) { surface ->
             try {
                 when (surface) {
                     "bottom bar" -> {
@@ -79,12 +80,14 @@ val amoledBlackPatch = bytecodePatch(
                         handOver(commentsScreen(), surface, COMMENTS_HOOK)
                         enableCapability("blackComments")
                     }
-                    "pin menu" -> {
-                        handOver(pinMenuSheet(), surface, PIN_MENU_HOOK)
+                    else -> {
+                        // The sheet and its cards are one surface: both are found before either changes.
+                        val sheet = pinMenuSheet()
+                        val card = pinMenuCard()
+                        handOver(sheet, surface, PIN_MENU_HOOK)
+                        handOver(card, "pin menu card", PIN_MENU_CARD_HOOK)
                         enableCapability("blackPinMenu")
                     }
-                    // The cards follow the pin menu's switch, so they bring no switch of their own.
-                    else -> handOver(pinMenuCard(), surface, PIN_MENU_CARD_HOOK)
                 }
                 null
             } catch (missing: PatchException) {
