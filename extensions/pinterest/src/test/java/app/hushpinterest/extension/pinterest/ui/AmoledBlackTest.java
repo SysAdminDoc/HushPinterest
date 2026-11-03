@@ -23,6 +23,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -55,6 +56,8 @@ public class AmoledBlackTest {
     private static final int ELEVATION = 0xFF33332E;
     /** A pin page's own dark gray, which the strip behind the gesture handle takes there. */
     private static final int PAGE = 0xFF18181B;
+    /** Pinterest's sema_color_background_secondary at night, the See more and See less cards' gray. */
+    private static final int SECONDARY = 0xFF494943;
     /** navigation_bar_background's id in 14.39.0. A sheet's fills use 1 to 3. */
     private static final int STRIP = 0x7f0a0dae;
 
@@ -306,6 +309,36 @@ public class AmoledBlackTest {
         menu.layout(0, 0, 320, 480);
         assertEquals("a layout pass with the switch off gives the gray back", ELEVATION, cardColor(header.getBackground()));
         assertEquals(ELEVATION, ((ColorDrawable) list.getBackground()).getColor());
+    }
+
+    /**
+     * Seen on Pinterest 14.42.0 (#21): a pin's menu shows See more and See less on rounded cards its
+     * builder makes apart from the sheet, so the sheet's own fills never reached them.
+     */
+    @Test public void aPinMenusSeeMoreCardTurnsBlackAndOffOrLightModeKeepsItsGray() {
+        Settings.BLACK_PIN_MENU.save(true);
+        LinearLayout card = seeMoreCard(true);
+        Drawable.ConstantState loaded = card.getBackground().getConstantState();
+        AmoledBlack.pinMenuCard(card);
+        assertEquals(Color.BLACK, rippleColor(card.getBackground()));
+        assertEquals("a card built from the same resource keeps its own gray", SECONDARY, rippleColor(loaded.newDrawable()));
+        Settings.BLACK_PIN_MENU.save(false);
+        card.layout(0, 0, 160, 96);
+        assertEquals("a layout pass with the switch off gives the gray back", SECONDARY, rippleColor(card.getBackground()));
+        Settings.BLACK_PIN_MENU.save(true);
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        LinearLayout paused = seeMoreCard(true);
+        AmoledBlack.pinMenuCard(paused);
+        assertEquals("Pause keeps the gray", SECONDARY, rippleColor(paused.getBackground()));
+        PauseForTests.resume();
+        LinearLayout light = seeMoreCard(false);
+        AmoledBlack.pinMenuCard(light);
+        assertEquals("light mode is left alone", SECONDARY, rippleColor(light.getBackground()));
+        Settings.BLACK_COMMENTS.save(true);
+        Settings.BLACK_PIN_MENU.save(false);
+        LinearLayout other = seeMoreCard(true);
+        AmoledBlack.pinMenuCard(other);
+        assertEquals("the comments switch leaves the cards alone", SECONDARY, rippleColor(other.getBackground()));
     }
 
     @Test public void theCommentsScreenTurnsBlackAndAFillPinterestSwapsInLaterFollowsOnTheNextLayout() {
@@ -594,6 +627,20 @@ public class AmoledBlackTest {
 
     private static int cardColor(Drawable card) {
         return ((GradientDrawable) ((LayerDrawable) card).getDrawable(1)).getColor().getDefaultColor();
+    }
+
+    /** A See more card the way 14.42.0's bento_card_background builds it: a rounded shape in the secondary gray under a ripple. */
+    private static LinearLayout seeMoreCard(boolean night) {
+        LinearLayout card = new LinearLayout(sheet(night).getContext());
+        GradientDrawable shape = new GradientDrawable();
+        shape.setCornerRadius(16f);
+        shape.setColor(SECONDARY);
+        card.setBackground(new RippleDrawable(ColorStateList.valueOf(0x33FFFFFF), shape, null));
+        return card;
+    }
+
+    private static int rippleColor(Drawable ripple) {
+        return ((GradientDrawable) ((LayerDrawable) ripple).getDrawable(0)).getColor().getDefaultColor();
     }
 
     /** A bar like Pinterest's, holding a plain tab row with the gray rounded shape. */

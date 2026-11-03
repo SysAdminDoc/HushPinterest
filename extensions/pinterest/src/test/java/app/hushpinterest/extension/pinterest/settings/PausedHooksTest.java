@@ -22,10 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.view.View;
@@ -388,7 +390,7 @@ public class PausedHooksTest {
         }));
         probes.put(Settings.BLACK_BOTTOM_BAR, Collections.singletonList(PausedHooksTest::paintsBottomBarBlack));
         probes.put(Settings.BLACK_COMMENTS, Collections.singletonList(() -> paintsSheetBlack(true)));
-        probes.put(Settings.BLACK_PIN_MENU, Collections.singletonList(() -> paintsSheetBlack(false)));
+        probes.put(Settings.BLACK_PIN_MENU, Arrays.asList(() -> paintsSheetBlack(false), PausedHooksTest::paintsMenuCardBlack));
         probes.put(Settings.HIDE_CLOSEUP_BACK, Arrays.asList(() -> hidesCloseupButton(true), () -> keepsCloseupButtonHidden(true)));
         probes.put(Settings.HIDE_CLOSEUP_LENS, Arrays.asList(() -> hidesCloseupButton(false), () -> keepsCloseupButtonHidden(false)));
         probes.put(Settings.HIDE_CLOSEUP_SEARCH_LABEL, Collections.singletonList(() -> !CloseupButtons.searchLabel(true)));
@@ -620,6 +622,19 @@ public class PausedHooksTest {
         if (comments) AmoledBlack.comments(sheet);
         else AmoledBlack.pinMenu(sheet);
         return fill.getColor().getDefaultColor() == Color.BLACK;
+    }
+
+    /** A dark-mode See more card from a pin's menu, its gray shape under a ripple: true when it turned black. */
+    private static boolean paintsMenuCardBlack() {
+        Context context = RuntimeEnvironment.getApplication();
+        Configuration night = new Configuration(context.getResources().getConfiguration());
+        night.uiMode = Configuration.UI_MODE_NIGHT_YES | (night.uiMode & ~Configuration.UI_MODE_NIGHT_MASK);
+        LinearLayout card = new LinearLayout(context.createConfigurationContext(night));
+        GradientDrawable fill = new GradientDrawable();
+        fill.setColor(0xFF494943);
+        card.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.WHITE), fill, null));
+        AmoledBlack.pinMenuCard(card);
+        return ((GradientDrawable) ((RippleDrawable) card.getBackground()).getDrawable(0)).getColor().getDefaultColor() == Color.BLACK;
     }
 
     private static View namedView(String name) {
