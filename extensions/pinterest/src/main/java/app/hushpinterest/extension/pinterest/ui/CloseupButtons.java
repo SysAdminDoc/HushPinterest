@@ -68,9 +68,10 @@ public final class CloseupButtons {
 
     /**
      * The lens's Search image label, read where the lens decides to wear it and where it plays the
-     * animation that shows it. Pinterest raises the flag on the first two eligible pins of a day and
-     * drops it after, so with the switch on every pin's lens looks the way the third one does:
-     * unlabeled, still there and still searching.
+     * animation that shows it, and the lens's glow, read where it's built. Pinterest raises the label
+     * flag on the first two eligible pins of a day and drops it after, so with the switch on every
+     * pin's lens looks the way the third one does: unlabeled, still there and still searching. The
+     * glow has a flag of its own, answered the same way.
      */
     public static boolean searchLabel(boolean shown) {
         if (!shown) return false;

@@ -5237,19 +5237,23 @@ public class DexDiff {
             capability(c.callee, handed && held);
         }
 
-        static final String SEARCH_LABEL_FLAG = ", isVisualActionAnimated=", SEARCH_IMAGE_TEXT = "search_image";
+        static final String SEARCH_LABEL_FLAG = ", isVisualActionAnimated=", SEARCH_GLOW_FLAG = "isGlowAnimationEnabled=",
+                SEARCH_IMAGE_TEXT = "search_image";
 
         /**
-         * The lens's Search image label. In the one clean class that reads the lens id, search_image and
-         * the closeup state's label flag (see searchLabelFlag), every read of the flag gains the hook on
-         * the read's register, answered back into it, reached only from the read and followed by the
-         * original next instruction. A build without that state or builder has no label switch, and its
-         * flag stays off.
+         * The lens's Search image label and glow. In the one clean class that reads the lens id,
+         * search_image and the closeup state's label flag (see stateFlag), every read of the label or
+         * glow flag gains the hook on the read's register, answered back into it, reached only from the
+         * read and followed by the original next instruction. A build without that state, its glow flag,
+         * a glow read in the builder or a single builder has no label switch, and its flag stays off.
          */
         void closeupSearchLabel(Contract c) {
-            String hook = c.strings.get(0), flag = searchLabelFlag();
+            String hook = c.strings.get(0);
+            Method state = closeupState();
+            String flag = state == null ? null : stateFlag(state, SEARCH_LABEL_FLAG, false, ""),
+                    glow = flag == null ? null : stateFlag(state, SEARCH_GLOW_FLAG, true, flag);
             List<ClassDef> builders = new ArrayList<>();
-            if (flag != null) for (ClassDef cd : clean.classes.values()) {
+            if (glow != null) for (ClassDef cd : clean.classes.values()) {
                 if (cd.getType().startsWith(OWN)) continue;
                 boolean lens = false, text = false, flagged = false;
                 for (Method m : cd.getMethods()) for (Instruction i : instructions(m)) {
@@ -5260,10 +5264,15 @@ public class DexDiff {
                 if (lens && text && flagged) builders.add(cd);
             }
             boolean labeled = builders.size() == 1;
+            if (labeled) {
+                boolean glows = false;
+                for (Method m : builders.get(0).getMethods()) for (Instruction i : instructions(m)) glows |= readsFlag(i, glow);
+                labeled = glows;
+            }
             if (labeled) for (Method old : builders.get(0).getMethods()) {
                 List<Instruction> was = instructions(old);
                 List<Integer> reads = new ArrayList<>();
-                for (int k = 0; k < was.size(); k++) if (readsFlag(was.get(k), flag)) reads.add(k);
+                for (int k = 0; k < was.size(); k++) if (readsFlag(was.get(k), flag) || readsFlag(was.get(k), glow)) reads.add(k);
                 if (reads.isEmpty()) continue;
                 Method m = actual(old);
                 calls(m, hook, reads.size());
@@ -5271,8 +5280,8 @@ public class DexDiff {
                 List<Instruction> body = instructions(m);
                 // The n-th read in the built method, wherever another switch's hooks moved it.
                 List<Integer> built = new ArrayList<>();
-                for (int k = 0; k < body.size(); k++) if (readsFlag(body.get(k), flag)) built.add(k);
-                if (built.size() != reads.size()) { fail(m + " reads the label flag " + built.size() + " times, not " + reads.size()); labeled = false; continue; }
+                for (int k = 0; k < body.size(); k++) if (readsFlag(body.get(k), flag) || readsFlag(body.get(k), glow)) built.add(k);
+                if (built.size() != reads.size()) { fail(m + " reads the label and glow flags " + built.size() + " times, not " + reads.size()); labeled = false; continue; }
                 for (int n = 0; n < reads.size(); n++) {
                     int read = reads.get(n), at = built.get(n), register = ((TwoRegisterInstruction) was.get(read)).getRegisterA();
                     boolean placed = at + 3 < body.size() && read + 1 < was.size()
@@ -5281,28 +5290,34 @@ public class DexDiff {
                             && isMoveResult(body.get(at + 2).getOpcode()) && firstRegister(body.get(at + 2)) == register
                             && body.get(at + 3).getOpcode() == was.get(read + 1).getOpcode()
                             && onlyFrom(m, at + 1, at) && onlyFrom(m, at + 2, at + 1);
-                    if (!placed) { fail(hook + " doesn't answer the label flag read at instruction " + read + " of " + m); labeled = false; }
+                    if (!placed) { fail(hook + " doesn't answer the label or glow flag read at instruction " + read + " of " + m); labeled = false; }
                     else remove(m, at + 1, at + 3);
                 }
             }
             capability(c.callee, labeled);
         }
 
-        /**
-         * The boolean the closeup state's toString reads first after naming isVisualActionAnimated, as
-         * a field descriptor, or null when no single state names it or the read isn't the state's own.
-         */
-        String searchLabelFlag() {
+        /** The closeup state's toString, the single one naming isVisualActionAnimated, or null. */
+        Method closeupState() {
             List<Method> described = new ArrayList<>();
             for (Method m : clean.holding(SEARCH_LABEL_FLAG)) if (m.getName().equals("toString") && m.getParameterTypes().isEmpty()) described.add(m);
-            if (described.size() != 1) return null;
-            Method state = described.get(0);
+            return described.size() == 1 ? described.get(0) : null;
+        }
+
+        /**
+         * The first boolean other than [not] that [state] reads after the first string equal to [name]
+         * (ending in it, with [suffix]), as a field descriptor, or null when there's no such string or
+         * the read isn't the state's own.
+         */
+        String stateFlag(Method state, String name, boolean suffix, String not) {
             List<Instruction> body = instructions(state);
             int named = -1;
             for (int k = 0; k < body.size() && named < 0; k++)
-                if (reference(body.get(k)) instanceof StringReference s && s.getString().equals(SEARCH_LABEL_FLAG)) named = k;
+                if (reference(body.get(k)) instanceof StringReference s && (suffix ? s.getString().endsWith(name) : s.getString().equals(name))) named = k;
+            if (named < 0) return null;
             for (int k = named + 1; k < body.size(); k++) if (body.get(k).getOpcode() == Opcode.IGET_BOOLEAN) {
                 FieldReference f = (FieldReference) reference(body.get(k));
+                if (f.toString().equals(not)) continue;
                 return f.getDefiningClass().equals(state.getDefiningClass()) && f.getType().equals("Z") ? f.toString() : null;
             }
             return null;

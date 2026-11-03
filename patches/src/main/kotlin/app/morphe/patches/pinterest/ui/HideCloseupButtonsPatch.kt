@@ -55,6 +55,9 @@ internal const val CLOSEUP_CAROUSEL_LENS_ID = "carousel_flashlight_button"
 /** The closeup state's toString names the lens label's flag right before reading it. */
 internal const val SEARCH_LABEL_FLAG = ", isVisualActionAnimated="
 
+/** The end of the string the same toString names the lens's glow flag with. */
+internal const val SEARCH_GLOW_FLAG = "isGlowAnimationEnabled="
+
 /** The R string the lens wears as its label. */
 internal const val SEARCH_IMAGE_TEXT = "search_image"
 
@@ -183,40 +186,53 @@ private fun foundAt(method: Method, body: List<Instruction>, at: Int, id: String
     return ButtonSite(method, at + 3, button, ((cast as ReferenceInstruction).reference as TypeReference).type, true)
 }
 
-/** A read of the lens label's flag into [register], with the hook going in right after [index]. */
+/** A read of the lens label's or glow's flag into [register], with the hook going in right after [index]. */
 internal class LabelRead(val method: Method, val index: Int, val register: Int)
 
 /**
- * Where the lens decides to wear its Search image label and play the animation that shows it:
- * every read of the closeup state's label flag in the one class that builds the lens and picks
- * the search_image string. The flag is the first boolean the state's toString reads after naming
- * it. Pinterest sets it on the first two eligible closeups of a day and clears it after, so the
- * hook only ever makes a closeup look like the third. Throws when any part is missing or there's
- * more than one candidate.
+ * Where the lens decides to wear its Search image label, play the animation that shows it, and
+ * glow: every read of the closeup state's label and glow flags in the one class that builds the
+ * lens, picks the search_image string and reads the label flag. Each flag is the first of the
+ * state's own booleans its toString reads after naming it, the glow's being the first that isn't
+ * the label's. Pinterest sets the label flag on the first two eligible closeups of a day and clears it
+ * after, so the hook only ever makes a closeup look like the third, and the glow is a separate
+ * effect the same hook switches off. Throws when any part is missing or there's more than one
+ * candidate.
  */
 internal fun BytecodePatchContext.labelReads(): List<LabelRead> {
     val described = methodsWithString(SEARCH_LABEL_FLAG).filter { it.name == "toString" && it.parameterTypes.isEmpty() }
     val toString = described.singleOrNull()
         ?: throw PatchException("${described.size} closeup states describe their lens label flag")
     val body = toString.instructions()
-    val named = body.indexOfFirst { (it as? ReferenceInstruction)?.reference.let { text -> text is StringReference && text.string == SEARCH_LABEL_FLAG } }
-    val flag = body.drop(named + 1).firstOrNull { it.opcode == Opcode.IGET_BOOLEAN }
-        ?.let { (it as ReferenceInstruction).reference as FieldReference }
-        ?.takeIf { it.definingClass == toString.definingClass && it.type == "Z" }
+    fun ownFlagAfter(names: (String) -> Boolean, not: String = ""): FieldReference? {
+        val named = body.indexOfFirst { (it as? ReferenceInstruction)?.reference.let { text -> text is StringReference && names(text.string) } }
+        if (named < 0) return null
+        return body.drop(named + 1).filter { it.opcode == Opcode.IGET_BOOLEAN }
+            .map { (it as ReferenceInstruction).reference as FieldReference }
+            .firstOrNull { "$it" != not }
+            ?.takeIf { it.definingClass == toString.definingClass && it.type == "Z" }
+    }
+    val flag = ownFlagAfter({ it == SEARCH_LABEL_FLAG })
         ?: throw PatchException("the closeup state ${toString.definingClass} names its lens label flag without reading its own boolean")
-    fun Instruction.readsFlag() = opcode == Opcode.IGET_BOOLEAN && "${(this as ReferenceInstruction).reference}" == "$flag"
+    val glow = ownFlagAfter({ it.endsWith(SEARCH_GLOW_FLAG) }, "$flag")
+        ?: throw PatchException("the closeup state ${toString.definingClass} doesn't name and read its lens glow flag")
+    fun Instruction.reads(field: FieldReference) = opcode == Opcode.IGET_BOOLEAN && "${(this as ReferenceInstruction).reference}" == "$field"
     val builders = mutableListOf<ClassDef>()
     classDefForEach { owner ->
         if (owner.type.startsWith(EXTENSION_ROOT)) return@classDefForEach
         val code = owner.methods.map { it.instructions() }
         if (code.any { body -> body.any { it.readsId(CLOSEUP_LENS_ID) } } && code.any { body -> body.any { it.readsId(SEARCH_IMAGE_TEXT) } } &&
-            code.any { body -> body.any { it.readsFlag() } }) builders += owner
+            code.any { body -> body.any { it.reads(flag) } }) builders += owner
     }
     val builder = builders.singleOrNull() ?: throw PatchException("${builders.size} lens builders read its label flag")
-    return builder.methods.flatMap { method ->
-        method.instructions().withIndex().filter { (_, read) -> read.readsFlag() }
+    val reads = builder.methods.flatMap { method ->
+        method.instructions().withIndex().filter { (_, read) -> read.reads(flag) || read.reads(glow) }
             .map { (at, read) -> LabelRead(method, at, (read as TwoRegisterInstruction).registerA) }
     }
+    if (reads.none { it.method.instructions()[it.index].reads(glow) }) {
+        throw PatchException("the lens builder ${builder.type} never reads the lens glow flag $glow")
+    }
+    return reads
 }
 
 /** True when the class's first ancestor outside the APK is one of Android's view classes. */
@@ -227,8 +243,8 @@ private fun BytecodePatchContext.isFrameworkView(type: String) =
 val hideCloseupButtonsPatch = bytecodePatch(
     name = PATCH,
     description = "Lets you hide the back arrow and the visual search (lens) button that float over a pin you open, " +
-        "each with its own switch, so they stop covering the picture. A third switch keeps the lens but drops the " +
-        "Search image label Pinterest puts on it for your first pins each day. Your phone's back gesture still " +
+        "each with its own switch, so they stop covering the picture. A third switch keeps the lens but drops its " +
+        "glow and the Search image label Pinterest puts on it for your first pins each day. Your phone's back gesture still " +
         "leaves the pin, and Search image in the pin menu still works. All three start off. Turn them on in " +
         "HushPinterest settings > Interface.",
 ) {

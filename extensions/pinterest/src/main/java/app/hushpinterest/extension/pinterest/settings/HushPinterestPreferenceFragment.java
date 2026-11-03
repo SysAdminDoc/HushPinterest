@@ -491,9 +491,9 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             // buttons above still work.
             if (build.contains(PatchFamily.HIDE_CLOSEUP_BUTTONS) && PatchFamily.Capability.CLOSEUP_SEARCH_LABEL.installed()) {
                 ui.addPreference(mark(toggle(context, Settings.HIDE_CLOSEUP_SEARCH_LABEL, L10n.t("Hide Search image label on pins"),
-                        L10n.t("Keeps the lens button on a pin you open but leaves off the Search image label Pinterest "
-                            + "adds to it on your first pins each day. Tapping the lens still searches. The change "
-                            + "shows on the next pin you open.")), SettingsIcons.BLOCK));
+                        L10n.t("Keeps the lens button on a pin you open but leaves off its glow and the Search image "
+                            + "label Pinterest adds to it on your first pins each day. Tapping the lens still searches. "
+                            + "The change shows on the next pin you open.")), SettingsIcons.BLOCK));
             }
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),

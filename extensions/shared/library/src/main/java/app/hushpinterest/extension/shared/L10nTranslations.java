@@ -654,8 +654,8 @@ public final class L10nTranslations {
                 "Startfeed behalten");
         table.put("Keeps every detail, for other tools.",
                 "Enth\u00e4lt alle Angaben, f\u00fcr andere Tools.");
-        table.put("Keeps the lens button on a pin you open but leaves off the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
-                "Beh\u00e4lt die Lens-Schaltfl\u00e4che auf einem ge\u00f6ffneten Pin, l\u00e4sst aber das Label \u201eBild suchen\u201c weg, das Pinterest bei deinen ersten Pins am Tag daran zeigt. Ein Tippen auf die Lens sucht weiterhin. Die \u00c4nderung zeigt sich beim n\u00e4chsten Pin, den du \u00f6ffnest.");
+        table.put("Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
+                "Beh\u00e4lt die Lens-Schaltfl\u00e4che auf einem ge\u00f6ffneten Pin, l\u00e4sst aber ihr Leuchten und das Label \u201eBild suchen\u201c weg, das Pinterest bei deinen ersten Pins am Tag daran zeigt. Ein Tippen auf die Lens sucht weiterhin. Die \u00c4nderung zeigt sich beim n\u00e4chsten Pin, den du \u00f6ffnest.");
         table.put("Lets a patched Pinterest sign up for push notifications, which it can't do on its own. A change applies the next time Pinterest starts.",
                 "L\u00e4sst ein gepatchtes Pinterest sich f\u00fcr Push-Benachrichtigungen anmelden. Allein kann es das nicht. Eine \u00c4nderung gilt beim n\u00e4chsten Start von Pinterest.");
         table.put("Licenses",
@@ -1877,8 +1877,8 @@ public final class L10nTranslations {
                 "Mantener el feed de inicio");
         table.put("Keeps every detail, for other tools.",
                 "Conserva todos los detalles, para otras herramientas.");
-        table.put("Keeps the lens button on a pin you open but leaves off the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
-                "Mantiene el bot\u00f3n Lens en un pin que abres, pero quita la etiqueta Buscar imagen que Pinterest le pone en tus primeros pines del d\u00eda. Tocar el Lens sigue buscando. El cambio se ve en el siguiente pin que abras.");
+        table.put("Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
+                "Mantiene el bot\u00f3n Lens en un pin que abres, pero quita su brillo y la etiqueta Buscar imagen que Pinterest le pone en tus primeros pines del d\u00eda. Tocar el Lens sigue buscando. El cambio se ve en el siguiente pin que abras.");
         table.put("Lets a patched Pinterest sign up for push notifications, which it can't do on its own. A change applies the next time Pinterest starts.",
                 "Permite que un Pinterest parcheado se registre para recibir notificaciones push, algo que no puede hacer por s\u00ed solo. Un cambio se aplica la pr\u00f3xima vez que Pinterest se inicie.");
         table.put("Licenses",
@@ -3100,8 +3100,8 @@ public final class L10nTranslations {
                 "Pertahankan beranda");
         table.put("Keeps every detail, for other tools.",
                 "Menyimpan semua detail, untuk alat lain.");
-        table.put("Keeps the lens button on a pin you open but leaves off the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
-                "Tetap menampilkan tombol Lens di pin yang Anda buka, tetapi tanpa label Cari gambar yang Pinterest tambahkan pada pin pertama Anda setiap hari. Mengetuk Lens tetap mencari. Perubahan terlihat pada pin berikutnya yang Anda buka.");
+        table.put("Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
+                "Tetap menampilkan tombol Lens di pin yang Anda buka, tetapi tanpa cahayanya dan tanpa label Cari gambar yang Pinterest tambahkan pada pin pertama Anda setiap hari. Mengetuk Lens tetap mencari. Perubahan terlihat pada pin berikutnya yang Anda buka.");
         table.put("Lets a patched Pinterest sign up for push notifications, which it can't do on its own. A change applies the next time Pinterest starts.",
                 "Memungkinkan Pinterest yang ditambal mendaftar untuk notifikasi push, yang tidak bisa dilakukannya sendiri. Perubahan berlaku saat Pinterest dimulai berikutnya.");
         table.put("Licenses",
@@ -4323,8 +4323,8 @@ public final class L10nTranslations {
                 "Manter o feed inicial");
         table.put("Keeps every detail, for other tools.",
                 "Guarda todos os detalhes, para outras ferramentas.");
-        table.put("Keeps the lens button on a pin you open but leaves off the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
-                "Mant\u00e9m o bot\u00e3o Lens em um pin que voc\u00ea abre, mas tira o r\u00f3tulo Pesquisar imagem que o Pinterest coloca nele nos seus primeiros pins do dia. Tocar no Lens continua pesquisando. A mudan\u00e7a aparece no pr\u00f3ximo pin que voc\u00ea abrir.");
+        table.put("Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
+                "Mant\u00e9m o bot\u00e3o Lens em um pin que voc\u00ea abre, mas tira o brilho dele e o r\u00f3tulo Pesquisar imagem que o Pinterest coloca nele nos seus primeiros pins do dia. Tocar no Lens continua pesquisando. A mudan\u00e7a aparece no pr\u00f3ximo pin que voc\u00ea abrir.");
         table.put("Lets a patched Pinterest sign up for push notifications, which it can't do on its own. A change applies the next time Pinterest starts.",
                 "Permite que um Pinterest com patches se cadastre para receber notifica\u00e7\u00f5es push, o que ele n\u00e3o consegue fazer sozinho. Uma mudan\u00e7a vale na pr\u00f3xima vez que o Pinterest abrir.");
         table.put("Licenses",
@@ -5546,8 +5546,8 @@ public final class L10nTranslations {
                 "Ana ak\u0131\u015f\u0131 koru");
         table.put("Keeps every detail, for other tools.",
                 "T\u00fcm ayr\u0131nt\u0131lar\u0131 saklar, ba\u015fka ara\u00e7lar i\u00e7in.");
-        table.put("Keeps the lens button on a pin you open but leaves off the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
-                "A\u00e7t\u0131\u011f\u0131n bir pinde Lens d\u00fc\u011fmesini tutar ama Pinterest'in her g\u00fcn ilk pinlerinde ona ekledi\u011fi G\u00f6r\u00fcnt\u00fc ara etiketini g\u00f6stermez. Lens'e dokunmak yine arama yapar. De\u011fi\u015fiklik a\u00e7t\u0131\u011f\u0131n bir sonraki pinde g\u00f6r\u00fcn\u00fcr.");
+        table.put("Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.",
+                "A\u00e7t\u0131\u011f\u0131n bir pinde Lens d\u00fc\u011fmesini tutar ama par\u0131lt\u0131s\u0131n\u0131 ve Pinterest'in her g\u00fcn ilk pinlerinde ona ekledi\u011fi G\u00f6r\u00fcnt\u00fc ara etiketini g\u00f6stermez. Lens'e dokunmak yine arama yapar. De\u011fi\u015fiklik a\u00e7t\u0131\u011f\u0131n bir sonraki pinde g\u00f6r\u00fcn\u00fcr.");
         table.put("Lets a patched Pinterest sign up for push notifications, which it can't do on its own. A change applies the next time Pinterest starts.",
                 "Yamal\u0131 Pinterest'in anl\u0131k bildirimlere kaydolmas\u0131n\u0131 sa\u011flar. Bunu kendi ba\u015f\u0131na yapamaz. De\u011fi\u015fiklik, Pinterest bir sonraki a\u00e7\u0131l\u0131\u015f\u0131nda ge\u00e7erli olur.");
         table.put("Licenses",

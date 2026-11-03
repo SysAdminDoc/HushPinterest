@@ -38,6 +38,7 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
 import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction10x
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction21s
 import com.android.tools.smali.dexlib2.writer.io.MemoryDataStore
 import com.android.tools.smali.dexlib2.writer.pool.DexPool
 import java.io.File
@@ -211,23 +212,28 @@ class CloseupButtonsFixtureTest {
     }
 
     @Test
-    fun `each declared original APK answers every read of the lens's label flag through its own switch`() {
+    fun `each declared original APK answers every read of the lens's label and glow flags through its own switch`() {
         for (build in Fixtures.declaredBuilds().map(::read)) {
             val context = PatchContexts.of(ExtensionDex.classes() + build.classes)
             hideCloseupButtonsPatch.execute(context)
             assertEquals("${build.name}: closeupSearchLabel", 1, flag(context, "closeupSearchLabel"))
             val labelFlag = labelFlag(build.states.single())
+            val glowFlag = glowFlag(build.states.single(), labelFlag)
             var sites = 0
+            var glows = 0
             for (method in build.readers.single { it.type == LENS_BUILDER }.methods) {
                 val original = method.implementation?.instructions?.toList() ?: continue
-                val reads = original.indices.filter { original[it].readsFlag(labelFlag) }
+                val reads = original.indices.filter { original[it].readsFlag(labelFlag) || original[it].readsFlag(glowFlag) }
+                glows += reads.count { original[it].readsFlag(glowFlag) }
                 val body = patched(context, method)
                 val hooks = body.indices.filter { (body[it] as? ReferenceInstruction)?.reference?.toString() == CLOSEUP_SEARCH_LABEL_HOOK }
-                assertEquals("${build.name}: $method's label flag reads", reads.size, hooks.size)
+                assertEquals("${build.name}: $method's label and glow flag reads", reads.size, hooks.size)
                 if (reads.isEmpty()) continue
                 for ((read, at) in reads.zip(hooks)) {
                     val register = (original[read] as TwoRegisterInstruction).registerA
-                    assertTrue("${build.name}: $method asks right after the read", body[at - 1].readsFlag(labelFlag))
+                    assertEquals("${build.name}: $method asks right after the read", original[read].opcode, body[at - 1].opcode)
+                    assertEquals("${build.name}: $method asks right after the read",
+                        (original[read] as ReferenceInstruction).reference.toString(), (body[at - 1] as ReferenceInstruction).reference.toString())
                     assertEquals("${build.name}: $method passes the flag it read", listOf(register), registers(body[at]))
                     assertEquals(Opcode.MOVE_RESULT, body[at + 1].opcode)
                     assertEquals("${build.name}: the answer replaces the flag", register, (body[at + 1] as OneRegisterInstruction).registerA)
@@ -240,7 +246,8 @@ class CloseupButtonsFixtureTest {
                     body.filterIndexed { at, _ -> at !in added }.map { it.opcode })
                 sites += hooks.size
             }
-            assertEquals("${build.name}: where the lens wears its label and where it plays the label's animation", 2, sites)
+            assertEquals("${build.name}: where the lens wears its label, plays the label's animation and glows", 3, sites)
+            assertEquals("${build.name}: where the lens glows", 1, glows)
         }
     }
 
@@ -252,9 +259,15 @@ class CloseupButtonsFixtureTest {
         val unlabeled = replace(builder, { method -> method.implementation?.instructions?.any { it.reads(SEARCH_IMAGE_TEXT) } == true }) { instructions ->
             instructions.flatMap { if (it.reads(SEARCH_IMAGE_TEXT)) List(it.codeUnits) { ImmutableInstruction10x(Opcode.NOP) } else listOf(it) }
         }
+        // The glow read becomes a constant false of the same size.
+        val glowFlag = glowFlag(build.states.single(), labelFlag)
+        val unglowing = replace(builder, { method -> method.implementation?.instructions?.any { it.readsFlag(glowFlag) } == true }) { instructions ->
+            instructions.map { if (it.readsFlag(glowFlag)) ImmutableInstruction21s(Opcode.CONST_16, (it as TwoRegisterInstruction).registerA, 0) else it }
+        }
         val cases = linkedMapOf(
             "no closeup state" to (build.classes - build.states.toSet() to "0 closeup states describe their lens label flag"),
             "no search_image text" to (build.classes.map { if (it.type == LENS_BUILDER) unlabeled else it } to "0 lens builders read its label flag"),
+            "no glow read" to (build.classes.map { if (it.type == LENS_BUILDER) unglowing else it } to "never reads the lens glow flag"),
         )
         for ((reason, case) in cases) {
             val (input, message) = case
@@ -278,6 +291,15 @@ class CloseupButtonsFixtureTest {
         val named = description.indexOfFirst { ((it as? ReferenceInstruction)?.reference as? StringReference)?.string == SEARCH_LABEL_FLAG }
         assertTrue("${state.type} names the label flag", named >= 0)
         val read = description.drop(named + 1).first { it.opcode == Opcode.IGET_BOOLEAN }
+        return ((read as ReferenceInstruction).reference as FieldReference).also { assertEquals(state.type, it.definingClass) }.toString()
+    }
+
+    /** The boolean other than [label] that [state]'s toString reads first after naming the glow flag. */
+    private fun glowFlag(state: ClassDef, label: String): String {
+        val description = state.methods.single { it.name == "toString" }.implementation!!.instructions.toList()
+        val named = description.indexOfFirst { ((it as? ReferenceInstruction)?.reference as? StringReference)?.string?.endsWith(SEARCH_GLOW_FLAG) == true }
+        assertTrue("${state.type} names the glow flag", named >= 0)
+        val read = description.drop(named + 1).first { it.opcode == Opcode.IGET_BOOLEAN && !it.readsFlag(label) }
         return ((read as ReferenceInstruction).reference as FieldReference).also { assertEquals(state.type, it.definingClass) }.toString()
     }
 

@@ -12,6 +12,7 @@ Every HushPinterest release, newest first.
 * **Pinterest:** New `Hide Assistant` switch under Interface takes Pinterest's AI Assistant out of search, boards and pins on accounts that get it. Regular search keeps working. It starts off.
 * **Pinterest:** New `Hide pins you've already saved` switch under Feed takes pins you've saved or own out of your home feed. Your boards and search still show them. It starts off.
 * **Pinterest:** `Hide lens button on pins` now also hides the lens on pins with several pictures, which have a second lens of their own in the picture carousel. (#20)
+* **Pinterest:** `Hide Search image label on pins` now also turns off the glow Pinterest puts around the lens. (#19)
 * **Tooling:** Release walks now bind the bundle, stock build and patch selection to the signed APK installed on the test device. Publish rejects missing or mismatched evidence, unsupported app versions, invalid times and reported problems. A survey of an installed app without matching build evidence stays diagnostic only.
 
 ## 0.0.13 (2026-10-23)
