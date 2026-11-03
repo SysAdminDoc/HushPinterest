@@ -38,6 +38,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -277,7 +278,8 @@ public class DexDiff {
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 5),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
-            Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1), Map.entry("postedDate", 1),
+            Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
+            Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("postedDate", 1),
             Map.entry("longPressChoices", 1));
 
     /**
@@ -5215,26 +5217,217 @@ public class DexDiff {
                     else remove(m, at, at + 1);
                 }
             }
-            boolean held = !sites.isEmpty();
             Set<String> views = new TreeSet<>();
             for (ButtonSite site : sites) views.add(site.view());
-            for (String type : views) {
-                ClassDef cd = clean.classes.get(type);
-                if (cd == null || !frameworkView(type) || !canOverride(type, "setVisibility", "(I)V")) {
-                    fail("the button class " + type + " isn't a view whose setVisibility can be overridden"); held = false; continue;
-                }
-                Method m = actual(type + "->setVisibility(I)V");
-                List<Integer> calls = calls(m, visibilityHook, 1);
-                if (m == null || calls.size() != 1) { held = false; continue; }
-                List<Instruction> body = instructions(m);
-                boolean prefix = calls.get(0) == 0 && body.size() > 2
-                        && arguments(body.get(0)).equals(List.of(parameter(m, -1), parameter(m, 0)))
-                        && isMoveResult(body.get(1).getOpcode()) && firstRegister(body.get(1)) == parameter(m, 0);
-                if (!prefix) { fail(visibilityHook + " does not pass the button and its request, in place, first in " + m); held = false; continue; }
-                remove(m, 0, 2);
-                inherited(cd, m, "setVisibility", "(I)V");
-            }
+            boolean held = !sites.isEmpty() && holdsVisibility(views, visibilityHook);
             capability(c.callee, handed && held);
+        }
+
+        /** Each closeup button class already checked, and whether it held, so a class several switches share is checked once. */
+        final Map<String, Boolean> heldViews = new HashMap<>();
+
+        /**
+         * Each of [types] gains, or starts its own, setVisibility with the visibility hook taking the
+         * view and the request and answering into the request.
+         */
+        boolean holdsVisibility(Collection<String> types, String hook) {
+            boolean held = true;
+            for (String type : types) {
+                if (!heldViews.containsKey(type)) heldViews.put(type, holdsVisibility(type, hook));
+                held &= heldViews.get(type);
+            }
+            return held;
+        }
+
+        boolean holdsVisibility(String type, String hook) {
+            ClassDef cd = clean.classes.get(type);
+            if (cd == null || !frameworkView(type) || !canOverride(type, "setVisibility", "(I)V")) {
+                fail("the button class " + type + " isn't a view whose setVisibility can be overridden"); return false;
+            }
+            Method m = actual(type + "->setVisibility(I)V");
+            List<Integer> calls = calls(m, hook, 1);
+            if (m == null || calls.size() != 1) return false;
+            List<Instruction> body = instructions(m);
+            boolean prefix = calls.get(0) == 0 && body.size() > 2
+                    && arguments(body.get(0)).equals(List.of(parameter(m, -1), parameter(m, 0)))
+                    && isMoveResult(body.get(1).getOpcode()) && firstRegister(body.get(1)) == parameter(m, 0);
+            if (!prefix) { fail(hook + " does not pass the button and its request, in place, first in " + m); return false; }
+            remove(m, 0, 2);
+            inherited(cd, m, "setVisibility", "(I)V");
+            return true;
+        }
+
+        static final String CLOSEUP_REMIX_ID = "collages_remix_closeup_button", CLOSEUP_COMMENTS_ID = "action_module_comments_icon",
+                CLOSEUP_VISIT_SITE_ID = "clickthrough_button", BUTTON_GROUP = "/GestaltButtonGroup;";
+
+        /**
+         * The Remix button, made by a call (see madeButtons). Right after the call's move-result-object
+         * comes the hook with that register, reached only from it, then the clean next instruction.
+         * Its class holds its visibility like the other buttons. A build that makes no Remix button, or
+         * branches into the spot after it, has no Remix switch.
+         */
+        void closeupRemix(Contract c) {
+            String hook = c.strings.get(0), visibilityHook = c.strings.get(1);
+            List<ButtonSite> sites = madeButtons(CLOSEUP_REMIX_ID, hook);
+            sites.removeIf(site -> !onlyFrom(site.method(), site.at(), site.at() - 1));
+            Map<Method, List<ButtonSite>> byMethod = new LinkedHashMap<>();
+            for (ButtonSite site : sites) byMethod.computeIfAbsent(site.method(), k -> new ArrayList<>()).add(site);
+            boolean placed = !sites.isEmpty();
+            for (Map.Entry<Method, List<ButtonSite>> entry : byMethod.entrySet()) {
+                Method old = entry.getKey(), m = actual(old);
+                calls(m, hook, entry.getValue().size());
+                if (m == null) { placed = false; continue; }
+                List<Instruction> was = instructions(old), body = instructions(m);
+                for (ButtonSite site : entry.getValue()) {
+                    // The same call in the built method, wherever other switches' hooks moved it.
+                    int at = sameCall(was, site.at() - 2, body);
+                    boolean ok = at >= 0 && at + 3 < body.size() && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT
+                            && firstRegister(body.get(at + 1)) == site.register()
+                            && hook.equals(String.valueOf(reference(body.get(at + 2)))) && arguments(body.get(at + 2)).equals(List.of(site.register()))
+                            && body.get(at + 3).getOpcode() == was.get(site.at()).getOpcode()
+                            && onlyFrom(m, at + 2, at + 1) && onlyFrom(m, at + 3, at + 2);
+                    if (!ok) { fail(hook + " doesn't hand over the button made at instruction " + (site.at() - 2) + " of " + m); placed = false; }
+                    else remove(m, at + 2, at + 3);
+                }
+            }
+            Set<String> views = new TreeSet<>();
+            for (ButtonSite site : sites) views.add(site.view());
+            capability(c.callee, placed && holdsVisibility(views, visibilityHook));
+        }
+
+        /**
+         * Every place [id]'s button is made by a call: a clean method other than a constructor, passed
+         * the id while its register still holds it, answering one of the APK's own framework views into
+         * the move-result-object right after. The hook goes in after that.
+         */
+        List<ButtonSite> madeButtons(String id, String hook) {
+            List<ButtonSite> sites = new ArrayList<>();
+            for (Method m : clean.methods.values()) {
+                if (m.getDefiningClass().startsWith(OWN) || m.getImplementation() == null) continue;
+                List<Instruction> body = instructions(m);
+                for (int k = 0; k < body.size(); k++) {
+                    if (!readsId(body.get(k), id)) continue;
+                    int register = firstRegister(body.get(k));
+                    for (int j = k + 1; j < body.size() - 1; j++) {
+                        Instruction call = body.get(j);
+                        if ((call instanceof FiveRegisterInstruction || call instanceof RegisterRangeInstruction)
+                                && reference(call) instanceof MethodReference target && !target.getName().equals("<init>")
+                                && callRegisters(call).contains(register)) {
+                            String type = target.getReturnType();
+                            if (body.get(j + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT && clean.classes.containsKey(type) && frameworkView(type)) {
+                                sites.add(new ButtonSite(m, j + 2, firstRegister(body.get(j + 1)), type, true, hook));
+                                break;
+                            }
+                        }
+                        if (writes(call, register)) break;
+                    }
+                }
+            }
+            return sites;
+        }
+
+        /** Where [body] has the call clean [was] has at [at]: the same call with the same registers, counted in order. */
+        static int sameCall(List<Instruction> was, int at, List<Instruction> body) {
+            String key = callKey(was.get(at));
+            if (key == null) return -1;
+            int ordinal = 0;
+            for (int k = 0; k < at; k++) if (key.equals(callKey(was.get(k)))) ordinal++;
+            for (int k = 0; k < body.size(); k++)
+                if (key.equals(callKey(body.get(k))) && ordinal-- == 0) return k;
+            return -1;
+        }
+
+        /** An invoke's opcode, target and registers, null for anything else. */
+        static String callKey(Instruction i) {
+            if (!(i instanceof FiveRegisterInstruction || i instanceof RegisterRangeInstruction) || !(reference(i) instanceof MethodReference)) return null;
+            return i.getOpcode() + " " + reference(i) + " " + callRegisters(i);
+        }
+
+        /**
+         * Rows handed over whole from their constructors. The row under a pin's picture is an APK
+         * framework view whose constructor builds the comment button, an APK view whose own
+         * constructor reads the comment id and calls setId. For [visit], every APK framework view whose
+         * constructor builds a GestaltButtonGroup and a class reading the Visit site id. A row whose
+         * constructors have no parentCall is left alone. Right after each row constructor's parent
+         * call comes the hook with this, once, reached only from that call. The views the action row's
+         * constructors build, or each Visit site row itself, hold their visibility like the buttons,
+         * and a row group with a view that can't is left alone.
+         */
+        void closeupRows(Contract c, boolean visit) {
+            String hook = c.strings.get(0), visibilityHook = c.strings.get(1);
+            Set<String> marks = new HashSet<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN)) continue;
+                for (Method m : cd.getMethods()) {
+                    List<Instruction> body = instructions(m);
+                    boolean mark = visit ? body.stream().anyMatch(i -> readsId(i, CLOSEUP_VISIT_SITE_ID))
+                            : m.getName().equals("<init>") && body.stream().anyMatch(i -> readsId(i, CLOSEUP_COMMENTS_ID))
+                                    && body.stream().anyMatch(i -> reference(i) instanceof MethodReference r && r.getName().equals("setId")
+                                            && r.getParameterTypes().size() == 1 && r.getParameterTypes().get(0).toString().equals("I"));
+                    if (mark) marks.add(cd.getType());
+                }
+            }
+            if (!visit) marks.removeIf(type -> !frameworkView(type));
+            Map<String, List<Method>> rows = new TreeMap<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN) || !frameworkView(cd.getType())) continue;
+                for (Method m : cd.getMethods()) {
+                    if (!m.getName().equals("<init>")) continue;
+                    List<String> built = newTypes(m);
+                    if (built.stream().anyMatch(marks::contains) && (!visit || built.stream().anyMatch(t -> t.endsWith(BUTTON_GROUP))))
+                        rows.computeIfAbsent(cd.getType(), k -> new ArrayList<>()).add(m);
+                }
+            }
+            rows.values().removeIf(constructors -> !constructors.stream().allMatch(m -> parentCall(m) >= 0));
+            Set<String> views = new TreeSet<>();
+            if (visit) views.addAll(rows.keySet());
+            else for (List<Method> constructors : rows.values()) for (Method m : constructors)
+                for (String type : newTypes(m)) if (clean.classes.containsKey(type) && frameworkView(type)) views.add(type);
+            if (!views.stream().allMatch(type -> heldViews.containsKey(type) || canOverride(type, "setVisibility", "(I)V"))) {
+                rows.clear();
+                views.clear();
+            }
+            boolean placed = !rows.isEmpty();
+            for (List<Method> constructors : rows.values()) for (Method old : constructors) {
+                Method m = actual(old);
+                List<Integer> sites = calls(m, hook, 1);
+                if (m == null) { placed = false; continue; }
+                Instruction parent = instructions(old).get(parentCall(old));
+                int at = sites.size() == 1 ? sites.get(0) : -1;
+                boolean ok = at > 0 && parentCall(m) == at - 1
+                        && String.valueOf(reference(instructions(m).get(at - 1))).equals(String.valueOf(reference(parent)))
+                        && arguments(instructions(m).get(at)).equals(List.of(parameter(m, -1))) && onlyFrom(m, at, at - 1);
+                if (!ok) { fail(hook + " doesn't hand over the row right after its parent's constructor in " + m); placed = false; }
+                else remove(m, at, at + 1);
+            }
+            capability(c.callee, placed && holdsVisibility(views, visibilityHook));
+        }
+
+        static List<String> newTypes(Method m) {
+            List<String> types = new ArrayList<>();
+            for (Instruction i : instructions(m)) if (i.getOpcode() == Opcode.NEW_INSTANCE) types.add(String.valueOf(reference(i)));
+            return types;
+        }
+
+        /**
+         * Where the constructor calls its parent's constructor (or another of its own) on its this
+         * register, or -1 when it doesn't or something else goes in that register first. D8 may reuse
+         * the register once this is dead, so a row is handed over right after that call.
+         */
+        int parentCall(Method m) {
+            if (m.getImplementation() == null) return -1;
+            int self = parameter(m, -1);
+            ClassDef owner = clean.classes.get(m.getDefiningClass());
+            String parent = owner == null ? null : owner.getSuperclass();
+            List<Instruction> body = instructions(m);
+            for (int at = 0; at < body.size(); at++) {
+                Instruction i = body.get(at);
+                if ((i.getOpcode() == Opcode.INVOKE_DIRECT || i.getOpcode() == Opcode.INVOKE_DIRECT_RANGE) && reference(i) instanceof MethodReference r
+                        && r.getName().equals("<init>") && (r.getDefiningClass().equals(parent) || r.getDefiningClass().equals(m.getDefiningClass()))
+                        && !callRegisters(i).isEmpty() && callRegisters(i).get(0) == self) return at;
+                if (writes(i, self)) return -1;
+            }
+            return -1;
         }
 
         static final String SEARCH_LABEL_FLAG = ", isVisualActionAnimated=", SEARCH_GLOW_FLAG = "isGlowAnimationEnabled=",
@@ -6423,6 +6616,9 @@ public class DexDiff {
                     case "recentSearchHeading": recentSearchHeading(c); break;
                     case "closeupButtons": closeupButtons(c); break;
                     case "closeupSearchLabel": closeupSearchLabel(c); break;
+                    case "closeupRemix": closeupRemix(c); break;
+                    case "closeupActionBar": closeupRows(c, false); break;
+                    case "closeupVisitSite": closeupRows(c, true); break;
                     case "postedDate": postedDate(c); break;
                     case "boardMenu": boardMenu(c); break;
                     case "surveyPrompts": surveyPrompts(c); break;

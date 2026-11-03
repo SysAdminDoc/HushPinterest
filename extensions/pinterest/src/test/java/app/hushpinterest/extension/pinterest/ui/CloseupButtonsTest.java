@@ -11,8 +11,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,16 +34,75 @@ import app.hushpinterest.extension.shared.settings.PauseForTests;
 public class CloseupButtonsTest {
     @Rule public final SettingsContextRule context = new SettingsContextRule();
 
+    @Before public void ids() {
+        // Pinterest's ids don't exist here, so the row's buttons wear made-up ones.
+        CloseupButtons.likeId = View.generateViewId();
+        CloseupButtons.commentsId = View.generateViewId();
+        CloseupButtons.shareId = View.generateViewId();
+        CloseupButtons.moreId = View.generateViewId();
+        CloseupButtons.visitSiteId = View.generateViewId();
+    }
+
     @After public void restore() {
         PauseForTests.resume();
         Settings.HIDE_CLOSEUP_BACK.resetToDefault();
         Settings.HIDE_CLOSEUP_LENS.resetToDefault();
         Settings.HIDE_CLOSEUP_SEARCH_LABEL.resetToDefault();
+        Settings.HIDE_CLOSEUP_LIKE.resetToDefault();
+        Settings.HIDE_CLOSEUP_COMMENTS.resetToDefault();
+        Settings.HIDE_CLOSEUP_SHARE.resetToDefault();
+        Settings.HIDE_CLOSEUP_MORE.resetToDefault();
+        Settings.HIDE_CLOSEUP_REMIX.resetToDefault();
+        Settings.HIDE_CLOSEUP_VISIT_SITE.resetToDefault();
+        CloseupButtons.likeId = -1;
+        CloseupButtons.commentsId = -1;
+        CloseupButtons.shareId = -1;
+        CloseupButtons.moreId = -1;
+        CloseupButtons.visitSiteId = -1;
         HookStatus.clear();
     }
 
     private static View button() {
         return new View(RuntimeEnvironment.getApplication());
+    }
+
+    /** The row under a pin's picture as 14.42.0 lays it out: like and more sit in holders, comment and share wear their ids. */
+    private static final class ActionBar {
+        final FrameLayout bar = new FrameLayout(RuntimeEnvironment.getApplication());
+        final LinearLayout row = new LinearLayout(RuntimeEnvironment.getApplication());
+        final FrameLayout likeHolder = new FrameLayout(RuntimeEnvironment.getApplication());
+        final View like = button();
+        final View comments = button();
+        final View share = button();
+        final FrameLayout moreHolder = new FrameLayout(RuntimeEnvironment.getApplication());
+        final View more = button();
+
+        ActionBar(boolean moreNamed) {
+            like.setId(CloseupButtons.likeId);
+            comments.setId(CloseupButtons.commentsId);
+            share.setId(CloseupButtons.shareId);
+            if (moreNamed) more.setId(CloseupButtons.moreId);
+            likeHolder.addView(like);
+            moreHolder.addView(more);
+            row.addView(likeHolder);
+            row.addView(comments);
+            row.addView(share);
+            row.addView(moreHolder);
+            bar.addView(row);
+        }
+    }
+
+    /** A row that holds the Visit site button once Pinterest fills it in. */
+    private static FrameLayout visitRow(boolean filled) {
+        FrameLayout bar = new FrameLayout(RuntimeEnvironment.getApplication());
+        LinearLayout group = new LinearLayout(RuntimeEnvironment.getApplication());
+        bar.addView(group);
+        if (filled) {
+            View visit = button();
+            visit.setId(CloseupButtons.visitSiteId);
+            group.addView(visit);
+        }
+        return bar;
     }
 
     @Test public void offByDefaultBothButtonsShowAsPinterestAsks() {
@@ -133,5 +195,118 @@ public class CloseupButtonsTest {
 
         PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
         assertTrue("paused, Pinterest's label shows again", CloseupButtons.searchLabel(true));
+    }
+
+    @Test public void eachSwitchUnderThePictureHidesOnlyItsOwnButtonAndHoldsIt() {
+        ActionBar shown = new ActionBar(true);
+        CloseupButtons.actionBar(shown.bar);
+        for (View child : new View[] {shown.likeHolder, shown.comments, shown.share, shown.moreHolder}) {
+            assertEquals("off by default", View.VISIBLE, child.getVisibility());
+        }
+
+        Settings.HIDE_CLOSEUP_LIKE.save(true);
+        Settings.HIDE_CLOSEUP_MORE.save(true);
+        ActionBar bar = new ActionBar(true);
+        CloseupButtons.actionBar(bar.bar);
+        assertEquals("the like's holder goes, so it takes no room", View.GONE, bar.likeHolder.getVisibility());
+        assertEquals(View.VISIBLE, bar.comments.getVisibility());
+        assertEquals(View.VISIBLE, bar.share.getVisibility());
+        assertEquals(View.GONE, bar.moreHolder.getVisibility());
+        assertEquals("the row itself stays", View.VISIBLE, bar.row.getVisibility());
+        assertEquals(View.VISIBLE, bar.bar.getVisibility());
+        assertEquals("Pinterest shows the like again", View.GONE, CloseupButtons.visibility(bar.likeHolder, View.VISIBLE));
+        assertEquals(View.VISIBLE, CloseupButtons.visibility(bar.comments, View.VISIBLE));
+        assertEquals("the switch read again, so turning it on holds the row handed over earlier",
+                View.VISIBLE, CloseupButtons.visibility(shown.comments, View.VISIBLE));
+
+        Settings.HIDE_CLOSEUP_COMMENTS.save(true);
+        Settings.HIDE_CLOSEUP_SHARE.save(true);
+        assertEquals(View.GONE, CloseupButtons.visibility(shown.comments, View.VISIBLE));
+        ActionBar next = new ActionBar(true);
+        CloseupButtons.actionBar(next.bar);
+        assertEquals(View.GONE, next.comments.getVisibility());
+        assertEquals(View.GONE, next.share.getVisibility());
+        String report = String.join("\n", HookStatus.report());
+        for (String hidden : new String[] {"like hidden", "comments hidden", "share hidden", "more hidden"}) {
+            assertTrue(report, report.contains(hidden));
+        }
+    }
+
+    @Test public void aRowHandedOverBeforeItsButtonsFindsThemAsItsLaidOut() {
+        Settings.HIDE_CLOSEUP_LIKE.save(true);
+        Settings.HIDE_CLOSEUP_MORE.save(true);
+        ActionBar bar = new ActionBar(false);
+        // Pinterest hands the row over right after its parent's constructor, before it has buttons.
+        bar.bar.removeView(bar.row);
+        CloseupButtons.actionBar(bar.bar);
+        bar.bar.addView(bar.row);
+        bar.bar.layout(0, 0, 100, 40);
+        assertEquals(View.GONE, bar.likeHolder.getVisibility());
+        assertEquals("more isn't named yet", View.VISIBLE, bar.moreHolder.getVisibility());
+        bar.more.setId(CloseupButtons.moreId);
+        bar.bar.layout(0, 0, 200, 40);
+        assertEquals(View.GONE, bar.moreHolder.getVisibility());
+        assertEquals("the comment's switch is off", View.VISIBLE, bar.comments.getVisibility());
+    }
+
+    @Test public void aBuildWithoutTheRowsIdsLeavesItAlone() {
+        Settings.HIDE_CLOSEUP_LIKE.save(true);
+        Settings.HIDE_CLOSEUP_COMMENTS.save(true);
+        ActionBar bar = new ActionBar(true);
+        CloseupButtons.likeId = -1;
+        CloseupButtons.commentsId = -1;
+        CloseupButtons.shareId = -1;
+        CloseupButtons.moreId = -1;
+        CloseupButtons.actionBar(bar.bar);
+        assertEquals(View.VISIBLE, bar.likeHolder.getVisibility());
+        assertEquals(View.VISIBLE, bar.comments.getVisibility());
+        assertEquals("looked up once, then known to be missing", 0, CloseupButtons.commentsId);
+        CloseupButtons.actionBar(null);
+        CloseupButtons.visitSite(null);
+        CloseupButtons.remix(null);
+    }
+
+    @Test public void theVisitSiteRowGoesWholeOnlyOnceTheButtonIsInIt() {
+        Settings.HIDE_CLOSEUP_VISIT_SITE.save(true);
+        FrameLayout empty = visitRow(false);
+        CloseupButtons.visitSite(empty);
+        assertEquals("a row without the button is some other row", View.VISIBLE, empty.getVisibility());
+        assertEquals(View.VISIBLE, CloseupButtons.visibility(empty, View.VISIBLE));
+
+        FrameLayout filled = visitRow(true);
+        CloseupButtons.visitSite(filled);
+        assertEquals(View.GONE, filled.getVisibility());
+        assertEquals(View.GONE, CloseupButtons.visibility(filled, View.VISIBLE));
+        assertTrue(String.join("\n", HookStatus.report()).contains("visit site hidden"));
+
+        FrameLayout late = visitRow(false);
+        CloseupButtons.visitSite(late);
+        late.layout(0, 0, 100, 40);
+        assertEquals("not filled in yet", View.VISIBLE, late.getVisibility());
+        View visit = button();
+        visit.setId(CloseupButtons.visitSiteId);
+        ((LinearLayout) late.getChildAt(0)).addView(visit);
+        late.layout(0, 0, 200, 40);
+        assertEquals("filled in, then laid out", View.GONE, late.getVisibility());
+
+        Settings.HIDE_CLOSEUP_VISIT_SITE.save(false);
+        assertEquals(View.VISIBLE, CloseupButtons.visibility(filled, View.VISIBLE));
+    }
+
+    @Test public void theRemixButtonHidesWithItsSwitchAndPausedItShows() {
+        View off = button();
+        CloseupButtons.remix(off);
+        assertEquals(View.VISIBLE, off.getVisibility());
+
+        Settings.HIDE_CLOSEUP_REMIX.save(true);
+        View remix = button();
+        CloseupButtons.remix(remix);
+        assertEquals(View.GONE, remix.getVisibility());
+        assertEquals(View.GONE, CloseupButtons.visibility(remix, View.VISIBLE));
+        assertTrue(String.join("\n", HookStatus.report()).contains("remix hidden"));
+        assertFalse("the lens switch stays off", Settings.HIDE_CLOSEUP_LENS.savedValue());
+
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertEquals(View.VISIBLE, CloseupButtons.visibility(remix, View.VISIBLE));
     }
 }

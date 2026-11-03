@@ -220,6 +220,18 @@ public class PausedHooksTest {
         return CloseupButtons.visibility(button, View.VISIBLE) != View.VISIBLE;
     }
 
+    /** One button of the row under a pin's picture: hidden when handed over, and kept GONE after. */
+    private static List<Probe> actionButton(int which) {
+        return Arrays.asList(() -> UiHooksForTests.hidesActionButton(which, false), () -> UiHooksForTests.hidesActionButton(which, true));
+    }
+
+    /** The Remix button Pinterest builds: true when the hook hid it. */
+    private static boolean hidesRemix() {
+        View remix = new View(RuntimeEnvironment.getApplication());
+        CloseupButtons.remix(remix);
+        return remix.getVisibility() == View.GONE;
+    }
+
     /** A topic suggestion row Pinterest binds and then measures: true when the measure folded. */
     private static boolean foldsTopicRow() {
         View row = new View(RuntimeEnvironment.getApplication());
@@ -380,6 +392,17 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_CLOSEUP_BACK, Arrays.asList(() -> hidesCloseupButton(true), () -> keepsCloseupButtonHidden(true)));
         probes.put(Settings.HIDE_CLOSEUP_LENS, Arrays.asList(() -> hidesCloseupButton(false), () -> keepsCloseupButtonHidden(false)));
         probes.put(Settings.HIDE_CLOSEUP_SEARCH_LABEL, Collections.singletonList(() -> !CloseupButtons.searchLabel(true)));
+        probes.put(Settings.HIDE_CLOSEUP_LIKE, actionButton(UiHooksForTests.LIKE));
+        probes.put(Settings.HIDE_CLOSEUP_COMMENTS, actionButton(UiHooksForTests.COMMENTS));
+        probes.put(Settings.HIDE_CLOSEUP_SHARE, actionButton(UiHooksForTests.SHARE));
+        probes.put(Settings.HIDE_CLOSEUP_MORE, actionButton(UiHooksForTests.MORE));
+        probes.put(Settings.HIDE_CLOSEUP_REMIX, Arrays.asList(PausedHooksTest::hidesRemix, () -> {
+            View remix = new View(RuntimeEnvironment.getApplication());
+            CloseupButtons.remix(remix);
+            return CloseupButtons.visibility(remix, View.VISIBLE) != View.VISIBLE;
+        }));
+        probes.put(Settings.HIDE_CLOSEUP_VISIT_SITE, Arrays.asList(
+                () -> UiHooksForTests.hidesVisitSite(false), () -> UiHooksForTests.hidesVisitSite(true)));
         probes.put(Settings.HIDE_PIN_MENU_COLLAGE, Collections.singletonList(() -> hidesMenuItem("overflow_menu_add_to_collage")));
         probes.put(Settings.HIDE_PIN_MENU_VISUAL_SEARCH, Collections.singletonList(() -> hidesMenuItem("contextmenu_visual_search_image")));
         probes.put(Settings.HIDE_PIN_MENU_PIN_BOOST, Collections.singletonList(() -> hidesMenuItem("overflow_menu_pin_boost")));

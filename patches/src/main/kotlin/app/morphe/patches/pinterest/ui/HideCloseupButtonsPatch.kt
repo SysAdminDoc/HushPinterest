@@ -44,6 +44,9 @@ internal const val CLOSEUP_BACK_HOOK = "$CLOSEUP_BUTTONS->backArrow(Landroid/vie
 internal const val CLOSEUP_LENS_HOOK = "$CLOSEUP_BUTTONS->lens(Landroid/view/View;)V"
 internal const val CLOSEUP_VISIBILITY_HOOK = "$CLOSEUP_BUTTONS->visibility(Landroid/view/View;I)I"
 internal const val CLOSEUP_SEARCH_LABEL_HOOK = "$CLOSEUP_BUTTONS->searchLabel(Z)Z"
+internal const val CLOSEUP_REMIX_HOOK = "$CLOSEUP_BUTTONS->remix(Landroid/view/View;)V"
+internal const val CLOSEUP_ACTION_BAR_HOOK = "$CLOSEUP_BUTTONS->actionBar(Landroid/view/View;)V"
+internal const val CLOSEUP_VISIT_SITE_HOOK = "$CLOSEUP_BUTTONS->visitSite(Landroid/view/View;)V"
 
 /** The R fields naming each button's id. This build reads ids from R rather than inlining them. */
 internal const val CLOSEUP_BACK_ID = "closeup_back_button"
@@ -51,6 +54,17 @@ internal const val CLOSEUP_LENS_ID = "flashlight_search_button"
 
 /** A pin with several pictures shows them in a carousel, which has a lens of its own under this id. */
 internal const val CLOSEUP_CAROUSEL_LENS_ID = "carousel_flashlight_button"
+
+/** The Remix button's id, passed to the call that makes it. */
+internal const val CLOSEUP_REMIX_ID = "collages_remix_closeup_button"
+
+/** The id the comment button in the row under a pin's picture gives itself. */
+internal const val CLOSEUP_COMMENTS_ID = "action_module_comments_icon"
+
+/** The Visit site button's id, given by a lambda its row builds. */
+internal const val CLOSEUP_VISIT_SITE_ID = "clickthrough_button"
+
+private const val BUTTON_GROUP = "/GestaltButtonGroup;"
 
 /** The closeup state's toString names the lens label's flag right before reading it. */
 internal const val SEARCH_LABEL_FLAG = ", isVisualActionAnimated="
@@ -186,6 +200,129 @@ private fun foundAt(method: Method, body: List<Instruction>, at: Int, id: String
     return ButtonSite(method, at + 3, button, ((cast as ReferenceInstruction).reference as TypeReference).type, true)
 }
 
+/**
+ * Every place [id]'s button is made by a call: a method other than a constructor, passed the id
+ * while its register still holds it, answering one of the APK's own views into the
+ * `move-result-object` right after. 14.42.0 makes the Remix button that way. The hook goes right
+ * after, the only place the new button is sure to be in that register, so these sites are checked
+ * like a found button's.
+ */
+internal fun BytecodePatchContext.madeSites(id: String): List<ButtonSite> {
+    val sites = mutableListOf<ButtonSite>()
+    classDefForEach { owner ->
+        if (owner.type.startsWith(EXTENSION_ROOT)) return@classDefForEach
+        owner.methods.forEach { method ->
+            val body = method.instructions()
+            body.indices.filter { body[it].readsId(id) }.mapNotNullTo(sites) { madeAt(method, body, it) }
+        }
+    }
+    return sites
+}
+
+private fun BytecodePatchContext.madeAt(method: Method, body: List<Instruction>, read: Int): ButtonSite? {
+    val id = (body[read] as OneRegisterInstruction).registerA
+    for (index in read + 1 until body.size - 1) {
+        val call = body[index]
+        val target = (call as? ReferenceInstruction)?.reference as? MethodReference
+        if (target != null && target.name != "<init>" && (call is FiveRegisterInstruction || call is RegisterRangeInstruction) &&
+            id in call.namedRegisters()) {
+            val kept = body[index + 1]
+            val type = target.returnType
+            if (kept.opcode == Opcode.MOVE_RESULT_OBJECT && classDefByOrNull(type) != null && isFrameworkView(type)) {
+                return ButtonSite(method, index + 2, (kept as OneRegisterInstruction).registerA, type, true)
+            }
+        }
+        if (call.writes(id)) return null
+    }
+    return null
+}
+
+/** True when the instruction puts a new value in [register]. */
+private fun Instruction.writes(register: Int): Boolean {
+    if (!opcode.setsRegister()) return false
+    val written = (this as? OneRegisterInstruction)?.registerA ?: return false
+    return written == register || opcode.setsWideRegister() && written + 1 == register
+}
+
+/**
+ * A row of buttons, an APK view handed over right after its [constructors] call their parent's,
+ * with the APK views those constructors [built].
+ */
+internal class ButtonRow(val type: String, val constructors: List<Method>, val built: List<String>)
+
+/**
+ * The row of buttons under a pin's picture: an APK view whose constructor builds the comment
+ * button, an APK view whose own constructor gives itself [CLOSEUP_COMMENTS_ID]. Like, share and
+ * more are among the other APK views that constructor builds, and the extension tells them apart by
+ * the ids they hold.
+ */
+internal fun BytecodePatchContext.actionRows(): List<ButtonRow> {
+    val comments = classesWhere { owner ->
+        owner.methods.any { method ->
+            method.name == "<init>" && method.instructions().let { body -> body.any { it.readsId(CLOSEUP_COMMENTS_ID) } && body.any { it.setsId() } }
+        }
+    }.filter { isFrameworkView(it) }.toSet()
+    return rows { built -> built.any { it in comments } }
+}
+
+/**
+ * The rows that can hold the Visit site button: APK views whose constructor builds a
+ * GestaltButtonGroup and a lambda that gives its button [CLOSEUP_VISIT_SITE_ID].
+ */
+internal fun BytecodePatchContext.visitRows(): List<ButtonRow> {
+    val namers = classesWhere { owner -> owner.methods.any { method -> method.instructions().any { it.readsId(CLOSEUP_VISIT_SITE_ID) } } }.toSet()
+    return rows { built -> built.any { it.endsWith(BUTTON_GROUP) } && built.any { it in namers } }
+}
+
+private fun Instruction.setsId(): Boolean {
+    val method = (this as? ReferenceInstruction)?.reference as? MethodReference ?: return false
+    return method.name == "setId" && method.parameterTypes.map { it.toString() } == listOf("I")
+}
+
+private fun BytecodePatchContext.classesWhere(test: (ClassDef) -> Boolean): List<String> {
+    val types = mutableListOf<String>()
+    classDefForEach { owner -> if (!owner.type.startsWith(EXTENSION_ROOT) && test(owner)) types += owner.type }
+    return types
+}
+
+/** The APK views with constructors whose built types pass [builds]. */
+private fun BytecodePatchContext.rows(builds: (List<String>) -> Boolean): List<ButtonRow> {
+    val found = linkedMapOf<String, List<Method>>()
+    classDefForEach { owner ->
+        if (owner.type.startsWith(EXTENSION_ROOT)) return@classDefForEach
+        val constructors = owner.methods.filter { it.name == "<init>" && builds(it.built()) }
+        if (constructors.isNotEmpty()) found[owner.type] = constructors
+    }
+    return found.filterKeys { isFrameworkView(it) }.map { (type, constructors) ->
+        ButtonRow(type, constructors, constructors.flatMap { it.built() }.distinct().filter { classDefByOrNull(it) != null && isFrameworkView(it) })
+    }
+}
+
+private fun Method.built() = instructions().filter { it.opcode == Opcode.NEW_INSTANCE }
+    .map { ((it as ReferenceInstruction).reference as TypeReference).type }
+
+/**
+ * Where the constructor calls [parent]'s constructor (or another of its own) on its `this`
+ * register, or null when it doesn't or something else goes in that register first. The row is
+ * handed over from that register right after the call, because D8 may reuse it once `this` is no
+ * longer read.
+ */
+internal fun Method.parentCall(parent: String?): Int? {
+    val self = implementation!!.registerCount - 1 - parameterTypes.map { if (it.toString() in setOf("J", "D")) 2 else 1 }.sum()
+    val body = instructions()
+    val call = body.indexOfFirst { instruction ->
+        val target = (instruction as? ReferenceInstruction)?.reference as? MethodReference
+        val receiver = when (instruction) {
+            is FiveRegisterInstruction -> instruction.registerC
+            is RegisterRangeInstruction -> instruction.startRegister
+            else -> -1
+        }
+        (instruction.opcode == Opcode.INVOKE_DIRECT || instruction.opcode == Opcode.INVOKE_DIRECT_RANGE) && target?.name == "<init>" &&
+            target.definingClass in setOf(parent, definingClass) && receiver == self
+    }
+    return call.takeIf { it >= 0 && body.take(it).none { instruction -> instruction.writes(self) } }
+}
+
 /** A read of the lens label's or glow's flag into [register], with the hook going in right after [index]. */
 internal class LabelRead(val method: Method, val index: Int, val register: Int)
 
@@ -242,11 +379,11 @@ private fun BytecodePatchContext.isFrameworkView(type: String) =
 @Suppress("unused")
 val hideCloseupButtonsPatch = bytecodePatch(
     name = PATCH,
-    description = "Lets you hide the back arrow and the visual search (lens) button that float over a pin you open, " +
-        "each with its own switch, so they stop covering the picture. A third switch keeps the lens but drops its " +
-        "glow and the Search image label Pinterest puts on it for your first pins each day. Your phone's back gesture still " +
-        "leaves the pin, and Search image in the pin menu still works. All three start off. Turn them on in " +
-        "HushPinterest settings > Interface.",
+    description = "Lets you hide the buttons on a pin you open, each with its own switch. That covers the back arrow and " +
+        "the visual search (lens) button that float over the picture, the like, comment, share and more buttons under it, " +
+        "the Remix button and the Visit site button. Another switch keeps the lens but drops its glow and the Search " +
+        "image label Pinterest puts on it for your first pins each day. Your phone's back gesture still leaves the pin, " +
+        "and Search image in the pin menu still works. They all start off. Turn them on in HushPinterest settings > Interface.",
 ) {
     category("Interface")
     dependsOn(settingsPatch, pinterestExtensionPatch)
@@ -256,6 +393,9 @@ val hideCloseupButtonsPatch = bytecodePatch(
         requireStatusMethod("hideCloseupButtons")
         requireStatusMethod("closeupButtons")
         requireStatusMethod("closeupSearchLabel")
+        requireStatusMethod("closeupActionBar")
+        requireStatusMethod("closeupRemix")
+        requireStatusMethod("closeupVisitSite")
         val backs = buttonSites(CLOSEUP_BACK_ID)
         val single = buttonSites(CLOSEUP_LENS_ID)
         if (backs.isEmpty()) throw PatchException("$PATCH: nothing finds the closeup's back arrow")
@@ -278,7 +418,7 @@ val hideCloseupButtonsPatch = bytecodePatch(
         val views = (backs + lenses).map { it.view }.distinct().map { type ->
             if (!isFrameworkView(type)) throw PatchException("$PATCH: the button class $type is not an Android view")
             mutableClassDefBy(type).also { requireOverride(it, "setVisibility", listOf("I")) }
-        }
+        }.toMutableList()
         val hooked = backs.map { it to CLOSEUP_BACK_HOOK } + lenses.map { it to CLOSEUP_LENS_HOOK }
         val edits = hooked.map { (site, hook) -> Triple(mutable(site.method), site, hook) }
         for ((method, site, _) in edits) {
@@ -290,12 +430,61 @@ val hideCloseupButtonsPatch = bytecodePatch(
             }
         }
 
+        // Remix, the row under the picture and Visit site each have their own switches, so a build
+        // where one of them can't be pinned down still gets the rest. Each group's views must all take
+        // the visibility hook, or none of its switches is offered.
+        fun takesHook(group: String, types: List<String>): Boolean {
+            val adding = types.filter { type -> views.none { it.type == type } }.map { mutableClassDefBy(it) }
+            try {
+                adding.forEach { requireOverride(it, "setVisibility", listOf("I")) }
+            } catch (refused: PatchException) {
+                patchLog.warning("$PATCH: ${refused.message}. $group isn't in this build.")
+                return false
+            }
+            views += adding
+            return true
+        }
+        val remixes = madeSites(CLOSEUP_REMIX_ID).filter { site ->
+            val at = mutable(site.method).implementation!!.instructions[site.index] as BuilderInstruction
+            if (at.location.labels.isEmpty()) return@filter true
+            patchLog.warning("$PATCH: ${site.method.definingClass}->${site.method.name} branches into the Remix button")
+            false
+        }
+        if (remixes.isEmpty()) patchLog.warning("$PATCH: nothing makes the Remix button. Hide Remix button isn't in this build.")
+        val remix = remixes.isNotEmpty() && takesHook("Hide Remix button", remixes.map { it.view }.distinct())
+        // A row is handed over from its constructor's this register right after its parent's
+        // constructor, before D8 can reuse that register.
+        fun handedOver(group: String, rows: List<ButtonRow>): List<ButtonRow> {
+            val kept = rows.filter { row ->
+                val parent = classDefBy(row.type).superclass
+                row.constructors.all { it.parentCall(parent) != null }.also { calls ->
+                    if (!calls) patchLog.warning("$PATCH: ${row.type}'s constructor doesn't call its parent's on its this register first")
+                }
+            }
+            if (kept.isEmpty()) patchLog.warning("$PATCH: no row to hand over for $group. It isn't in this build.")
+            return kept
+        }
+        val actions = handedOver("Hide pin action buttons", actionRows()).let { rows ->
+            if (rows.isNotEmpty() && takesHook("Hide pin action buttons", rows.flatMap { it.built }.distinct())) rows else emptyList()
+        }
+        val visits = handedOver("Hide Visit site button", visitRows()).let { rows ->
+            if (rows.isNotEmpty() && takesHook("Hide Visit site button", rows.map { it.type })) rows else emptyList()
+        }
+
         // Within one method the later site goes in first, so the earlier index still holds. A button
         // goes in at the label of the instruction it precedes; a label read's answer goes in after the
         // read, off any label there, so only the path from the read is filtered.
         val inserts = mutableListOf<Pair<Int, () -> Unit>>()
-        for ((method, site, hook) in edits) inserts += site.index to {
+        val sites = edits + if (remix) remixes.map { Triple(mutable(it.method), it, CLOSEUP_REMIX_HOOK) } else emptyList()
+        for ((method, site, hook) in sites) inserts += site.index to {
             method.addInstructionsAtControlFlowLabel(site.index, "invoke-static/range { v${site.register} .. v${site.register} }, $hook")
+        }
+        for ((rows, hook) in listOf(actions to CLOSEUP_ACTION_BAR_HOOK, visits to CLOSEUP_VISIT_SITE_HOOK)) {
+            for (row in rows) for (constructor in row.constructors) {
+                val method = mutable(constructor)
+                val after = constructor.parentCall(classDefBy(row.type).superclass)!! + 1
+                inserts += after to { method.addInstructions(after, "invoke-static { p0 }, $hook") }
+            }
         }
         for (read in labels) {
             val method = mutable(read.method)
@@ -317,6 +506,9 @@ val hideCloseupButtonsPatch = bytecodePatch(
         }
         enableCapability("closeupButtons")
         if (labels.isNotEmpty()) enableCapability("closeupSearchLabel")
+        if (remix) enableCapability("closeupRemix")
+        if (actions.isNotEmpty()) enableCapability("closeupActionBar")
+        if (visits.isNotEmpty()) enableCapability("closeupVisitSite")
         enableStatus("hideCloseupButtons")
     }
 }

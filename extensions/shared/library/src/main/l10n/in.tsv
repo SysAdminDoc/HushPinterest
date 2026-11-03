@@ -517,6 +517,21 @@ Hides the back arrow that floats over a pin you open. Your phone's back gesture 
 Hide lens button on pins	Sembunyikan tombol Lens di pin
 Hide closeup buttons	Sembunyikan tombol di pin
 Hides the visual search button in the corner of a pin you open. Search image in the pin menu still works. The change shows on the next pin you open.	Menyembunyikan tombol pencarian visual di sudut pin yang Anda buka. Cari gambar di menu pin tetap berfungsi. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hide like button on pins	Sembunyikan tombol suka di pin
+Hides the heart under a pin you open, along with its count. The change shows on the next pin you open.	Menyembunyikan ikon hati di bawah pin yang Anda buka, beserta jumlahnya. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hide comment button on pins	Sembunyikan tombol komentar di pin
+Hides the comment button under a pin you open. The change shows on the next pin you open.	Menyembunyikan tombol komentar di bawah pin yang Anda buka. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hide share button on pins	Sembunyikan tombol bagikan di pin
+Hides the share button under a pin you open. The change shows on the next pin you open.	Menyembunyikan tombol bagikan di bawah pin yang Anda buka. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hide more button on pins	Sembunyikan tombol lainnya di pin
+Hides the three dots under a pin you open. Their menu, Download pin included, can't be opened from that page while this is on. The change shows on the next pin you open.	Menyembunyikan tiga titik di bawah pin yang Anda buka. Menunya, termasuk Unduh Pin, tidak bisa dibuka dari halaman itu selama ini aktif. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hide Remix button on pins	Sembunyikan tombol Remix di pin
+Hides the Remix button on a pin you open. The change shows on the next pin you open.	Menyembunyikan tombol Remix di pin yang Anda buka. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hide Visit site button on pins	Sembunyikan tombol Kunjungi situs di pin
+Hides the Visit site button under a pin that links to a website. The change shows on the next pin you open.	Menyembunyikan tombol Kunjungi situs di bawah pin yang menautkan ke situs web. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hide pin action buttons	Sembunyikan tombol aksi pin
+Hide Remix button	Sembunyikan tombol Remix
+Hide Visit site button	Sembunyikan tombol Kunjungi situs
 # context: a third Hide closeup buttons switch on the Interface page, right under Hide lens button. Pinterest puts a Search image label on the lens button for the first two pins someone opens each day. With this on the lens stays but never wears the label or glows. The last line names this part of the patch in a build report.
 Hide Search image label on pins	Sembunyikan label Cari gambar di pin
 Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.	Tetap menampilkan tombol Lens di pin yang Anda buka, tetapi tanpa cahayanya dan tanpa label Cari gambar yang Pinterest tambahkan pada pin pertama Anda setiap hari. Mengetuk Lens tetap mencari. Perubahan terlihat pada pin berikutnya yang Anda buka.

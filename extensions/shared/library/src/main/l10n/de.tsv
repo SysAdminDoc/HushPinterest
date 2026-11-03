@@ -517,6 +517,21 @@ Hides the back arrow that floats over a pin you open. Your phone's back gesture 
 Hide lens button on pins	Lens-Schaltfläche auf Pins ausblenden
 Hide closeup buttons	Schaltflächen auf Pins ausblenden
 Hides the visual search button in the corner of a pin you open. Search image in the pin menu still works. The change shows on the next pin you open.	Blendet die Schaltfläche für die visuelle Suche in der Ecke eines geöffneten Pins aus. Bild suchen im Pin-Menü funktioniert weiterhin. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
+Hide like button on pins	Like-Schaltfläche auf Pins ausblenden
+Hides the heart under a pin you open, along with its count. The change shows on the next pin you open.	Blendet das Herz unter einem geöffneten Pin samt Zähler aus. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
+Hide comment button on pins	Kommentar-Schaltfläche auf Pins ausblenden
+Hides the comment button under a pin you open. The change shows on the next pin you open.	Blendet die Kommentar-Schaltfläche unter einem geöffneten Pin aus. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
+Hide share button on pins	Teilen-Schaltfläche auf Pins ausblenden
+Hides the share button under a pin you open. The change shows on the next pin you open.	Blendet die Teilen-Schaltfläche unter einem geöffneten Pin aus. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
+Hide more button on pins	Mehr-Schaltfläche auf Pins ausblenden
+Hides the three dots under a pin you open. Their menu, Download pin included, can't be opened from that page while this is on. The change shows on the next pin you open.	Blendet die drei Punkte unter einem geöffneten Pin aus. Ihr Menü, Pin herunterladen eingeschlossen, lässt sich auf dieser Seite dann nicht öffnen. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
+Hide Remix button on pins	Remix-Schaltfläche auf Pins ausblenden
+Hides the Remix button on a pin you open. The change shows on the next pin you open.	Blendet die Remix-Schaltfläche auf einem geöffneten Pin aus. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
+Hide Visit site button on pins	Schaltfläche Website besuchen auf Pins ausblenden
+Hides the Visit site button under a pin that links to a website. The change shows on the next pin you open.	Blendet die Schaltfläche Website besuchen unter einem Pin aus, der auf eine Website verweist. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
+Hide pin action buttons	Aktionsschaltflächen auf Pins ausblenden
+Hide Remix button	Remix-Schaltfläche ausblenden
+Hide Visit site button	Schaltfläche Website besuchen ausblenden
 # context: a third Hide closeup buttons switch on the Interface page, right under Hide lens button. Pinterest puts a Search image label on the lens button for the first two pins someone opens each day. With this on the lens stays but never wears the label or glows. The last line names this part of the patch in a build report.
 Hide Search image label on pins	Label „Bild suchen“ auf Pins ausblenden
 Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.	Behält die Lens-Schaltfläche auf einem geöffneten Pin, lässt aber ihr Leuchten und das Label „Bild suchen“ weg, das Pinterest bei deinen ersten Pins am Tag daran zeigt. Ein Tippen auf die Lens sucht weiterhin. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.

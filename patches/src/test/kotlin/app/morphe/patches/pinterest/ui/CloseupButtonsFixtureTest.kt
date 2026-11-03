@@ -78,9 +78,9 @@ class CloseupButtonsFixtureTest {
             for (method in build.readers.flatMap { it.methods }.filter { it.readsAnId() }) {
                 val original = method.implementation!!.instructions.toList()
                 val body = patched(context, method)
-                val hooks = body.indices.filter { (body[it] as? ReferenceInstruction)?.reference?.toString() in hooked.keys }
+                val hooks = body.indices.filter { body[it].calls(hooked.keys) }
                 assertEquals("${build.name}: $method keeps every original instruction", original.map { it.opcode },
-                    body.filterIndexed { at, _ -> at !in hooks }.map { it.opcode })
+                    body.filterIndexed { at, call -> at !in hooks && !call.calls(OTHER_HOOKS) }.map { it.opcode })
                 for (at in hooks) {
                     val hook = (body[at] as ReferenceInstruction).reference.toString()
                     hooked.getValue(hook) += method.definingClass
@@ -242,8 +242,8 @@ class CloseupButtonsFixtureTest {
                         branchesTo(original, read + 1).size, branchesTo(body, at + 2).size)
                 }
                 val added = hooks.flatMap { listOf(it, it + 1) }.toSet()
-                assertEquals("${build.name}: $method keeps every original instruction", original.map { it.opcode },
-                    body.filterIndexed { at, _ -> at !in added }.map { it.opcode })
+                assertEquals("${build.name}: $method keeps every original instruction", original.opcodes(),
+                    body.filterIndexed { at, call -> at !in added && !call.calls(OTHER_HOOKS) }.opcodes())
                 sites += hooks.size
             }
             assertEquals("${build.name}: where the lens wears its label, plays the label's animation and glows", 3, sites)
@@ -285,6 +285,83 @@ class CloseupButtonsFixtureTest {
         }
     }
 
+    @Test
+    fun `each declared original APK hands over the Remix button, the row under the picture and the Visit site rows`() {
+        for (build in Fixtures.declaredBuilds().map(::read)) {
+            val context = PatchContexts.of(ExtensionDex.classes() + build.classes)
+            val warnings = PatchLogCapture.warnings { hideCloseupButtonsPatch.execute(context) }
+            assertEquals("${build.name}: $warnings", emptyList<String>(), warnings)
+            for (flag in listOf("closeupRemix", "closeupActionBar", "closeupVisitSite")) assertEquals("${build.name}: $flag", 1, flag(context, flag))
+
+            val remixes = hookSites(context, build.classes, CLOSEUP_REMIX_HOOK)
+            assertEquals("${build.name}: what makes the Remix button", listOf(LENS_BUILDER), remixes.map { it.first.definingClass })
+            val (maker, at) = remixes.single()
+            val body = patched(context, maker)
+            assertEquals(Opcode.MOVE_RESULT_OBJECT, body[at - 1].opcode)
+            assertEquals("${build.name}: hands over the button the call just made", listOf((body[at - 1] as OneRegisterInstruction).registerA),
+                body[at].namedRegisters())
+            assertEquals(REMIX_VIEW, ((body[at - 2] as ReferenceInstruction).reference as MethodReference).returnType)
+            assertEquals("${build.name}: nothing jumps into the hook", emptyList<Int>(), branchesTo(body, at))
+
+            for ((hook, rows) in listOf(CLOSEUP_ACTION_BAR_HOOK to setOf(ACTION_ROW), CLOSEUP_VISIT_SITE_HOOK to VISIT_ROWS)) {
+                val sites = hookSites(context, build.classes, hook)
+                assertEquals("${build.name}: the rows handed to $hook", rows, sites.map { it.first.definingClass }.toSet())
+                for (constructor in sites.map { it.first }.distinct()) {
+                    assertEquals("<init>", constructor.name)
+                    val original = constructor.implementation!!.instructions.toList()
+                    val patchedBody = patched(context, constructor)
+                    val self = constructor.thisRegister()
+                    val call = sites.filter { it.first == constructor }.map { it.second }.single()
+                    val parent = (patchedBody[call - 1] as ReferenceInstruction).reference as MethodReference
+                    assertEquals("${build.name}: $constructor hands the row over right after its parent's constructor",
+                        "<init>" to build.classes.single { it.type == constructor.definingClass }.superclass, parent.name to parent.definingClass)
+                    assertEquals("${build.name}: $constructor builds its parent on itself", self, patchedBody[call - 1].namedRegisters().first())
+                    assertEquals("${build.name}: $constructor hands over itself", listOf(self), patchedBody[call].namedRegisters())
+                    assertEquals("${build.name}: nothing jumps into the hook", emptyList<Int>(), branchesTo(patchedBody, call))
+                    assertEquals("${build.name}: $constructor keeps every original instruction", original.opcodes(),
+                        patchedBody.filterIndexed { k, _ -> k != call }.opcodes())
+                }
+            }
+
+            for (type in listOf(REMIX_VIEW, COMMENT_VIEW) + VISIT_ROWS) {
+                val code = context.mutableClassDefBy(type).methods.single { it.name == "setVisibility" && it.parameters() == listOf("I") }
+                    .implementation!!.instructions.toList()
+                assertEquals("${build.name}: $type holds its visibility", CLOSEUP_VISIBILITY_HOOK, (code[0] as ReferenceInstruction).reference.toString())
+            }
+        }
+    }
+
+    @Test
+    fun `without the Remix button, a this register to hand the row over from or the Visit site id, the other switches stay`() {
+        val build = read(Fixtures.declaredBuilds().last())
+        fun nopped(owner: ClassDef, id: String) = replace(owner, { it.reads(id) }) { instructions ->
+            instructions.flatMap { if (it.reads(id)) List(it.codeUnits) { ImmutableInstruction10x(Opcode.NOP) } else listOf(it) }
+        }
+        val unmade = nopped(build.readers.single { it.type == LENS_BUILDER }, CLOSEUP_REMIX_ID)
+        val row = build.others.single { it.type == ACTION_ROW }
+        val rowBuilder = row.methods.single { it.name == "<init>" && COMMENT_VIEW in it.newTypes() }
+        val self = rowBuilder.thisRegister()
+        // The constructor puts a zero in its this register right before it calls its parent's.
+        val reused = replace(row, { it == rowBuilder }) { instructions ->
+            val parent = instructions.indexOfFirst { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.definingClass == row.superclass }
+            instructions.subList(0, parent) + ImmutableInstruction21s(Opcode.CONST_16, self, 0) + instructions.subList(parent, instructions.size)
+        }
+        val unnamed = build.classes.filter { owner -> owner.methods.any { it.reads(CLOSEUP_VISIT_SITE_ID) } }.map { nopped(it, CLOSEUP_VISIT_SITE_ID) }
+        val swaps = listOf(unmade, reused) + unnamed
+        val context = PatchContexts.of(ExtensionDex.classes() + build.classes.map { owner -> swaps.firstOrNull { it.type == owner.type } ?: owner })
+        val warnings = PatchLogCapture.warnings { hideCloseupButtonsPatch.execute(context) }
+        assertEquals(listOf(
+            "Hide closeup buttons: nothing makes the Remix button. Hide Remix button isn't in this build.",
+            "Hide closeup buttons: $ACTION_ROW's constructor doesn't call its parent's on its this register first",
+            "Hide closeup buttons: no row to hand over for Hide pin action buttons. It isn't in this build.",
+            "Hide closeup buttons: no row to hand over for Hide Visit site button. It isn't in this build.",
+        ), warnings)
+        for ((flag, value) in listOf("closeupButtons" to 1, "closeupSearchLabel" to 1, "closeupRemix" to 0, "closeupActionBar" to 0, "closeupVisitSite" to 0)) {
+            assertEquals(flag, value, flag(context, flag))
+        }
+        for (hook in OTHER_HOOKS) assertEquals("$hook is left out", emptyList<Pair<Method, Int>>(), hookSites(context, build.classes, hook))
+    }
+
     /** The boolean [state]'s toString reads right after naming the label flag. */
     private fun labelFlag(state: ClassDef): String {
         val description = state.methods.single { it.name == "toString" }.implementation!!.instructions.toList()
@@ -310,6 +387,24 @@ class CloseupButtonsFixtureTest {
 
     private fun Method.reads(id: String) = implementation?.instructions?.any { it.reads(id) } == true
     private fun Method.readsAnId() = ids.any { reads(it) }
+
+    private fun Method.newTypes() = implementation?.instructions?.filter { it.opcode == Opcode.NEW_INSTANCE }
+        ?.map { ((it as ReferenceInstruction).reference as TypeReference).type }.orEmpty()
+
+    /** Each method of [classes] calling [hook], with the index of each call in its patched body. */
+    private fun hookSites(context: BytecodePatchContext, classes: List<ClassDef>, hook: String) =
+        classes.flatMap { it.methods }.filter { it.implementation != null }.flatMap { method ->
+            val body = patched(context, method)
+            body.indices.filter { (body[it] as? ReferenceInstruction)?.reference?.toString() == hook }.map { method to it }
+        }
+
+    private fun Method.thisRegister() =
+        implementation!!.registerCount - 1 - parameterTypes.map { if (it.toString() in setOf("J", "D")) 2 else 1 }.sum()
+
+    private fun Instruction.calls(hooks: Collection<String>) = (this as? ReferenceInstruction)?.reference?.toString() in hooks
+
+    /** The opcodes of [this], without the nops the dex writer adds to align a switch's payload. */
+    private fun List<Instruction>.opcodes() = map { it.opcode }.filter { it != Opcode.NOP }
 
     private fun flag(context: BytecodePatchContext, name: String) =
         (context.mutableClassDefBy(SETTINGS_STATUS).methods.single { it.name == name }.implementation!!.instructions.first()
@@ -363,12 +458,21 @@ class CloseupButtonsFixtureTest {
         val readers = linkedMapOf<String, ClassDef>()
         val states = linkedMapOf<String, ClassDef>()
         val wanted = mutableSetOf<String>()
+        // Every class reading the comment or Visit site id, so the rows built from them can be told apart.
+        val marks = mutableSetOf<String>()
         FixtureDex.forEach(build) { dex ->
             for (classDef in dex.classes) {
                 parents.putIfAbsent(classDef.type, classDef.superclass)
                 if (classDef.methods.any { method -> method.name == "toString" && method.implementation?.instructions?.any {
                         ((it as? ReferenceInstruction)?.reference as? StringReference)?.string == SEARCH_LABEL_FLAG } == true })
                     states.putIfAbsent(classDef.type, ImmutableClassDef.of(classDef))
+                for (method in classDef.methods) {
+                    if (method.reads(CLOSEUP_REMIX_ID)) {
+                        wanted += classDef.type
+                        method.implementation!!.instructions.mapNotNullTo(wanted) { ((it as? ReferenceInstruction)?.reference as? MethodReference)?.returnType }
+                    }
+                    if (method.reads(CLOSEUP_COMMENTS_ID) || method.reads(CLOSEUP_VISIT_SITE_ID)) marks += classDef.type
+                }
                 val reading = classDef.methods.filter { it.readsAnId() }
                 if (reading.isEmpty() || classDef.type in readers) continue
                 readers[classDef.type] = ImmutableClassDef.of(classDef)
@@ -379,6 +483,16 @@ class CloseupButtonsFixtureTest {
                 }
             }
         }
+        // Every class whose constructor builds one of those or a button group, and what it builds.
+        FixtureDex.forEach(build) { dex ->
+            for (classDef in dex.classes) {
+                val built = classDef.methods.filter { it.name == "<init>" }.flatMap { it.newTypes() }
+                if (built.none { it in marks || it.endsWith("/GestaltButtonGroup;") }) continue
+                wanted += classDef.type
+                wanted += built
+            }
+        }
+        wanted += marks
         val types = wanted.filter { it in parents }.flatMap { type -> generateSequence(type) { parents[it] }.filter { it in parents }.toList() }
             .toSet() - readers.keys - states.keys
         val others = FixtureDex.classes(build, types)
@@ -391,5 +505,10 @@ class CloseupButtonsFixtureTest {
         const val ICON_BUTTON = "Lcom/pinterest/gestalt/iconbutton/GestaltIconButton;"
         const val LENS_BUILDER = "Lyt/d;"
         const val SET_ID_CALL = "Landroid/view/View;->setId(I)V"
+        const val REMIX_VIEW = "Lfk1/m;"
+        const val ACTION_ROW = "Ljc1/r0;"
+        const val COMMENT_VIEW = "Lac1/k;"
+        val VISIT_ROWS = setOf("Ljc1/x0;", "Lzz/b;")
+        val OTHER_HOOKS = setOf(CLOSEUP_REMIX_HOOK, CLOSEUP_ACTION_BAR_HOOK, CLOSEUP_VISIT_SITE_HOOK)
     }
 }

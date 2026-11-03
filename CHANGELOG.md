@@ -13,6 +13,9 @@ Every HushPinterest release, newest first.
 * **Pinterest:** New `Hide pins you've already saved` switch under Feed takes pins you've saved or own out of your home feed. Your boards and search still show them. It starts off.
 * **Pinterest:** `Hide lens button on pins` now also hides the lens on pins with several pictures, which have a second lens of their own in the picture carousel. (#20)
 * **Pinterest:** `Hide Search image label on pins` now also turns off the glow Pinterest puts around the lens. (#19)
+* **Pinterest:** Hide closeup buttons has four new switches for the row under a pin's picture: like, comment, share and more, each on its own. Hiding more also hides the way into that pin's menu from there, Download pin included, and the row says so. They all start off and sit on the Interface page. (#22)
+* **Pinterest:** New `Hide Remix button on pins` switch takes the Remix button off pins that show it. The Cutout button next to it stays. It starts off. (#25)
+* **Pinterest:** New `Hide Visit site button on pins` switch takes away the Visit site button under pins that link to a website. It starts off. (#26)
 * **Tooling:** Release walks now bind the bundle, stock build and patch selection to the signed APK installed on the test device. Publish rejects missing or mismatched evidence, unsupported app versions, invalid times and reported problems. A survey of an installed app without matching build evidence stays diagnostic only.
 
 ## 0.0.13 (2026-10-23)

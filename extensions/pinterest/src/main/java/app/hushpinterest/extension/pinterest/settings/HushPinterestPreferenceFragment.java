@@ -495,6 +495,31 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                             + "label Pinterest adds to it on your first pins each day. Tapping the lens still searches. "
                             + "The change shows on the next pin you open.")), SettingsIcons.BLOCK));
             }
+            if (build.contains(PatchFamily.HIDE_CLOSEUP_BUTTONS) && PatchFamily.Capability.CLOSEUP_ACTION_BAR.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_CLOSEUP_LIKE, L10n.t("Hide like button on pins"),
+                        L10n.t("Hides the heart under a pin you open, along with its count. The change shows on the "
+                            + "next pin you open.")), SettingsIcons.BLOCK));
+                ui.addPreference(mark(toggle(context, Settings.HIDE_CLOSEUP_COMMENTS, L10n.t("Hide comment button on pins"),
+                        L10n.t("Hides the comment button under a pin you open. The change shows on the next pin you "
+                            + "open.")), SettingsIcons.BLOCK));
+                ui.addPreference(mark(toggle(context, Settings.HIDE_CLOSEUP_SHARE, L10n.t("Hide share button on pins"),
+                        L10n.t("Hides the share button under a pin you open. The change shows on the next pin you "
+                            + "open.")), SettingsIcons.BLOCK));
+                ui.addPreference(mark(toggle(context, Settings.HIDE_CLOSEUP_MORE, L10n.t("Hide more button on pins"),
+                        L10n.t("Hides the three dots under a pin you open. Their menu, Download pin included, can't be "
+                            + "opened from that page while this is on. The change shows on the next pin you open.")),
+                        SettingsIcons.BLOCK));
+            }
+            if (build.contains(PatchFamily.HIDE_CLOSEUP_BUTTONS) && PatchFamily.Capability.CLOSEUP_REMIX.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_CLOSEUP_REMIX, L10n.t("Hide Remix button on pins"),
+                        L10n.t("Hides the Remix button on a pin you open. The change shows on the next pin you open.")),
+                        SettingsIcons.BLOCK));
+            }
+            if (build.contains(PatchFamily.HIDE_CLOSEUP_BUTTONS) && PatchFamily.Capability.CLOSEUP_VISIT_SITE.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_CLOSEUP_VISIT_SITE, L10n.t("Hide Visit site button on pins"),
+                        L10n.t("Hides the Visit site button under a pin that links to a website. The change shows on "
+                            + "the next pin you open.")), SettingsIcons.BLOCK));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),
                     L10n.t("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's "

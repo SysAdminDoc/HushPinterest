@@ -517,6 +517,21 @@ Hides the back arrow that floats over a pin you open. Your phone's back gesture 
 Hide lens button on pins	Pinlerde Lens düğmesini gizle
 Hide closeup buttons	Pinlerdeki düğmeleri gizle
 Hides the visual search button in the corner of a pin you open. Search image in the pin menu still works. The change shows on the next pin you open.	Açtığın bir pinin köşesindeki görsel arama düğmesini gizler. Pin menüsündeki Görüntü ara çalışmaya devam eder. Değişiklik açtığın bir sonraki pinde görünür.
+Hide like button on pins	Pinlerde beğen düğmesini gizle
+Hides the heart under a pin you open, along with its count. The change shows on the next pin you open.	Açtığın bir pinin altındaki kalbi sayısıyla birlikte gizler. Değişiklik açtığın bir sonraki pinde görünür.
+Hide comment button on pins	Pinlerde yorum düğmesini gizle
+Hides the comment button under a pin you open. The change shows on the next pin you open.	Açtığın bir pinin altındaki yorum düğmesini gizler. Değişiklik açtığın bir sonraki pinde görünür.
+Hide share button on pins	Pinlerde paylaş düğmesini gizle
+Hides the share button under a pin you open. The change shows on the next pin you open.	Açtığın bir pinin altındaki paylaş düğmesini gizler. Değişiklik açtığın bir sonraki pinde görünür.
+Hide more button on pins	Pinlerde diğer düğmesini gizle
+Hides the three dots under a pin you open. Their menu, Download pin included, can't be opened from that page while this is on. The change shows on the next pin you open.	Açtığın bir pinin altındaki üç noktayı gizler. Bu açıkken menüsü, Pini indir de dahil, o sayfadan açılamaz. Değişiklik açtığın bir sonraki pinde görünür.
+Hide Remix button on pins	Pinlerde Remix düğmesini gizle
+Hides the Remix button on a pin you open. The change shows on the next pin you open.	Açtığın bir pindeki Remix düğmesini gizler. Değişiklik açtığın bir sonraki pinde görünür.
+Hide Visit site button on pins	Pinlerde Siteyi ziyaret et düğmesini gizle
+Hides the Visit site button under a pin that links to a website. The change shows on the next pin you open.	Bir web sitesine bağlanan pinin altındaki Siteyi ziyaret et düğmesini gizler. Değişiklik açtığın bir sonraki pinde görünür.
+Hide pin action buttons	Pin işlem düğmelerini gizle
+Hide Remix button	Remix düğmesini gizle
+Hide Visit site button	Siteyi ziyaret et düğmesini gizle
 # context: a third Hide closeup buttons switch on the Interface page, right under Hide lens button. Pinterest puts a Search image label on the lens button for the first two pins someone opens each day. With this on the lens stays but never wears the label or glows. The last line names this part of the patch in a build report.
 Hide Search image label on pins	Pinlerde Görüntü ara etiketini gizle
 Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.	Açtığın bir pinde Lens düğmesini tutar ama parıltısını ve Pinterest'in her gün ilk pinlerinde ona eklediği Görüntü ara etiketini göstermez. Lens'e dokunmak yine arama yapar. Değişiklik açtığın bir sonraki pinde görünür.

@@ -514,6 +514,21 @@ Hides the back arrow that floats over a pin you open. Your phone's back gesture 
 Hide lens button on pins	Ocultar botão Lens nos pins
 Hide closeup buttons	Ocultar botões nos pins
 Hides the visual search button in the corner of a pin you open. Search image in the pin menu still works. The change shows on the next pin you open.	Oculta o botão de pesquisa visual no canto de um pin que você abre. Pesquisar imagem no menu do pin continua funcionando. A mudança aparece no próximo pin que você abrir.
+Hide like button on pins	Ocultar botão de curtir nos pins
+Hides the heart under a pin you open, along with its count. The change shows on the next pin you open.	Oculta o coração embaixo de um pin que você abre, junto com a contagem. A mudança aparece no próximo pin que você abrir.
+Hide comment button on pins	Ocultar botão de comentários nos pins
+Hides the comment button under a pin you open. The change shows on the next pin you open.	Oculta o botão de comentários embaixo de um pin que você abre. A mudança aparece no próximo pin que você abrir.
+Hide share button on pins	Ocultar botão de compartilhar nos pins
+Hides the share button under a pin you open. The change shows on the next pin you open.	Oculta o botão de compartilhar embaixo de um pin que você abre. A mudança aparece no próximo pin que você abrir.
+Hide more button on pins	Ocultar botão de mais opções nos pins
+Hides the three dots under a pin you open. Their menu, Download pin included, can't be opened from that page while this is on. The change shows on the next pin you open.	Oculta os três pontos embaixo de um pin que você abre. O menu deles, incluindo Baixar Pin, não abre nessa página enquanto isto estiver ligado. A mudança aparece no próximo pin que você abrir.
+Hide Remix button on pins	Ocultar botão Remix nos pins
+Hides the Remix button on a pin you open. The change shows on the next pin you open.	Oculta o botão Remix em um pin que você abre. A mudança aparece no próximo pin que você abrir.
+Hide Visit site button on pins	Ocultar botão Visitar site nos pins
+Hides the Visit site button under a pin that links to a website. The change shows on the next pin you open.	Oculta o botão Visitar site embaixo de um pin que leva a um site. A mudança aparece no próximo pin que você abrir.
+Hide pin action buttons	Ocultar botões de ação dos pins
+Hide Remix button	Ocultar botão Remix
+Hide Visit site button	Ocultar botão Visitar site
 # context: a third Hide closeup buttons switch on the Interface page, right under Hide lens button. Pinterest puts a Search image label on the lens button for the first two pins someone opens each day. With this on the lens stays but never wears the label or glows. The last line names this part of the patch in a build report.
 Hide Search image label on pins	Ocultar o rótulo Pesquisar imagem nos pins
 Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.	Mantém o botão Lens em um pin que você abre, mas tira o brilho dele e o rótulo Pesquisar imagem que o Pinterest coloca nele nos seus primeiros pins do dia. Tocar no Lens continua pesquisando. A mudança aparece no próximo pin que você abrir.
