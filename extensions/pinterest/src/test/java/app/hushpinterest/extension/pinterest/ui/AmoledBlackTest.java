@@ -60,6 +60,8 @@ public class AmoledBlackTest {
     private static final int SECONDARY = 0xFF494943;
     /** The same color at night in 14.42.0's deniminkhc theme, a 40% gray the sheet shows through. */
     private static final int SEE_THROUGH_SECONDARY = 0x66A1A1AF;
+    /** The reactions header's gray on a video pin's comments in 14.42.0. */
+    private static final int REACTIONS = 0xFF222226;
     /** navigation_bar_background's id in 14.39.0. A sheet's fills use 1 to 3. */
     private static final int STRIP = 0x7f0a0dae;
 
@@ -384,6 +386,27 @@ public class AmoledBlackTest {
         assertEquals("Pause gives the gray back on the next layout", ELEVATION, fullHeight.getColor().getDefaultColor());
         assertEquals(ELEVATION, replyBar.getColor().getDefaultColor());
         assertEquals(ELEVATION, ((ColorDrawable) floating.getBackground()).getColor());
+    }
+
+    /**
+     * Seen on Pinterest 14.42.0 on a phone (#12): opening a video pin's comments showed a gray band
+     * across the top of the black list for about half a second. Pinterest shows the reactions header
+     * there in its own gray while the comments load, then hides it.
+     */
+    @Test public void theReactionsHeaderShownWhileTheCommentsLoadTurnsBlackAndOffGivesItsGrayBack() {
+        Settings.BLACK_COMMENTS.save(true);
+        FrameLayout screen = sheet(true, "comments_feed", "comment_bottom_bar", "floating_comment_view", "comment_reaction_header");
+        View reactions = fill(screen, 4, new ColorDrawable(REACTIONS));
+        AmoledBlack.comments(screen);
+        assertEquals(Color.BLACK, ((ColorDrawable) reactions.getBackground()).getColor());
+        Settings.BLACK_COMMENTS.save(false);
+        screen.layout(0, 0, 320, 480);
+        assertEquals(REACTIONS, ((ColorDrawable) reactions.getBackground()).getColor());
+        Settings.BLACK_PIN_MENU.save(true);
+        FrameLayout menu = sheet(true, "modal_header", "modal_container", "unused", "comment_reaction_header");
+        View inMenu = fill(menu, 4, new ColorDrawable(REACTIONS));
+        AmoledBlack.pinMenu(menu);
+        assertEquals("a pin's menu doesn't paint the header", REACTIONS, ((ColorDrawable) inMenu.getBackground()).getColor());
     }
 
     @Test public void eachSheetFollowsItsOwnSwitchAndLightModeIsLeftAlone() {
