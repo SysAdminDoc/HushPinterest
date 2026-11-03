@@ -58,6 +58,8 @@ public class AmoledBlackTest {
     private static final int PAGE = 0xFF18181B;
     /** Pinterest's sema_color_background_secondary at night, the See more and See less cards' gray. */
     private static final int SECONDARY = 0xFF494943;
+    /** The same color at night in 14.42.0's deniminkhc theme, a 40% gray the sheet shows through. */
+    private static final int SEE_THROUGH_SECONDARY = 0x66A1A1AF;
     /** navigation_bar_background's id in 14.39.0. A sheet's fills use 1 to 3. */
     private static final int STRIP = 0x7f0a0dae;
 
@@ -339,6 +341,24 @@ public class AmoledBlackTest {
         LinearLayout other = seeMoreCard(true);
         AmoledBlack.pinMenuCard(other);
         assertEquals("the comments switch leaves the cards alone", SECONDARY, rippleColor(other.getBackground()));
+    }
+
+    /**
+     * Seen on Pinterest 14.42.0 on a phone (#21): the cards came out #3a3a41 over the black sheet,
+     * since the theme there gives them a see-through gray that only an opaque fill check passed over.
+     */
+    @Test public void aSeeMoreCardsSeeThroughGrayTurnsBlackAndOffGivesItBack() {
+        Settings.BLACK_PIN_MENU.save(true);
+        LinearLayout card = seeMoreCard(true, SEE_THROUGH_SECONDARY);
+        AmoledBlack.pinMenuCard(card);
+        assertEquals(Color.BLACK, rippleColor(card.getBackground()));
+        Settings.BLACK_PIN_MENU.save(false);
+        card.layout(0, 0, 160, 96);
+        assertEquals(SEE_THROUGH_SECONDARY, rippleColor(card.getBackground()));
+        Settings.BLACK_PIN_MENU.save(true);
+        LinearLayout clear = seeMoreCard(true, Color.TRANSPARENT);
+        AmoledBlack.pinMenuCard(clear);
+        assertEquals("a card with no fill at all stays clear", Color.TRANSPARENT, rippleColor(clear.getBackground()));
     }
 
     @Test public void theCommentsScreenTurnsBlackAndAFillPinterestSwapsInLaterFollowsOnTheNextLayout() {
@@ -631,10 +651,14 @@ public class AmoledBlackTest {
 
     /** A See more card the way 14.42.0's bento_card_background builds it: a rounded shape in the secondary gray under a ripple. */
     private static LinearLayout seeMoreCard(boolean night) {
+        return seeMoreCard(night, SECONDARY);
+    }
+
+    private static LinearLayout seeMoreCard(boolean night, int fill) {
         LinearLayout card = new LinearLayout(sheet(night).getContext());
         GradientDrawable shape = new GradientDrawable();
         shape.setCornerRadius(16f);
-        shape.setColor(SECONDARY);
+        shape.setColor(fill);
         card.setBackground(new RippleDrawable(ColorStateList.valueOf(0x33FFFFFF), shape, null));
         return card;
     }
