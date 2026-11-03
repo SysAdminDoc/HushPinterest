@@ -520,6 +520,13 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                         L10n.t("Hides the Visit site button under a pin that links to a website. The change shows on "
                             + "the next pin you open.")), SettingsIcons.BLOCK));
             }
+            if (build.contains(PatchFamily.HIDE_CLOSEUP_BUTTONS) && PatchFamily.Capability.CLOSEUP_SAVE_BUTTON.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.SMALLER_SAVE_BUTTON, L10n.t("Smaller Save button on pins"),
+                        L10n.t("Shrinks the red Save button on a pin you open to four fifths of its size, keeping its "
+                            + "spot at the end of the row. The change shows on the next pin you open.")),
+                        SettingsIcons.TOOLS));
+                ui.addPreference(mark(new SaveButtonColorPreference(context), SettingsIcons.DARK_MODE));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),
                     L10n.t("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's "

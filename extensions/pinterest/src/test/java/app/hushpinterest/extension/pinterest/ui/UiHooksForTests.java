@@ -84,6 +84,19 @@ public final class UiHooksForTests {
         }
     }
 
+    /** A Save button wearing its id, handed over after Pinterest styles it: true when it was made smaller. */
+    public static boolean shrinksSaveButton() {
+        View save = new View(RuntimeEnvironment.getApplication());
+        save.setId(View.generateViewId());
+        CloseupButtons.saveId = save.getId();
+        try {
+            CloseupButtons.saveButton(save);
+            return save.getScaleX() != 1f;
+        } finally {
+            CloseupButtons.saveId = -1;
+        }
+    }
+
     private static boolean hidden(View view, boolean held) {
         return held ? CloseupButtons.visibility(view, View.VISIBLE) != View.VISIBLE : view.getVisibility() == View.GONE;
     }

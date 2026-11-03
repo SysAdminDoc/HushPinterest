@@ -279,7 +279,7 @@ public class DexDiff {
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
-            Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("postedDate", 1),
+            Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("longPressChoices", 1));
 
     /**
@@ -5403,6 +5403,58 @@ public class DexDiff {
             capability(c.callee, placed && holdsVisibility(views, visibilityHook));
         }
 
+        static final String GESTALT_BUTTON = "Lcom/pinterest/gestalt/button/view/GestaltButton;",
+                COMPOUND_PADDING = "Landroid/widget/TextView;->setCompoundDrawablePadding(I)V";
+
+        /**
+         * The Save button's size and color. GestaltButton's one instance method taking two of the same
+         * style object and returning nothing calls setCompoundDrawablePadding on its this register
+         * exactly once, with nothing writing that register before it, no backward branch and no try
+         * block. Right after the padding comes the hook with that register, and the instruction that
+         * followed the padding is reached only from the hook, so the branch that skips the padding
+         * lands on the hook too.
+         */
+        void closeupSaveButton(Contract c) {
+            String hook = c.strings.get(0);
+            ClassDef button = clean.classes.get(GESTALT_BUTTON);
+            List<Method> styles = new ArrayList<>();
+            Map<Method, Integer> padAt = new HashMap<>();
+            if (button != null) for (Method m : button.getMethods()) {
+                List<? extends CharSequence> params = m.getParameterTypes();
+                if (AccessFlags.STATIC.isSet(m.getAccessFlags()) || m.getImplementation() == null || !m.getReturnType().equals("V")
+                        || params.size() != 2 || !params.get(0).toString().equals(params.get(1).toString()) || params.get(0).length() == 1) continue;
+                int self = parameter(m, -1);
+                List<Instruction> body = instructions(m);
+                List<Integer> pads = new ArrayList<>();
+                for (int k = 0; k < body.size(); k++) if (COMPOUND_PADDING.equals(String.valueOf(reference(body.get(k))))
+                        && callRegisters(body.get(k)).get(0) == self) pads.add(k);
+                if (pads.size() != 1) continue;
+                boolean kept = m.getImplementation().getTryBlocks().isEmpty();
+                for (int k = 0; kept && k < pads.get(0); k++) kept = !writes(body.get(k), self);
+                for (Instruction i : body) kept &= !branchesBack(i);
+                if (kept) { styles.add(m); padAt.put(m, pads.get(0)); }
+            }
+            Method style = unique(styles, "the GestaltButton style method that pads its icon on itself");
+            Method m = actual(style);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (style != null && m != null && sites.size() == 1) {
+                List<Instruction> body = instructions(m), was = instructions(style);
+                int at = sites.get(0), self = parameter(style, -1);
+                placed = at == padAt.get(style) + 1 && at + 1 < body.size() && COMPOUND_PADDING.equals(String.valueOf(reference(body.get(at - 1))))
+                        && callRegisters(body.get(at - 1)).get(0) == self && arguments(body.get(at)).equals(List.of(self))
+                        && body.get(at + 1).getOpcode() == was.get(at).getOpcode() && onlyFrom(m, at + 1, at);
+                if (!placed) fail(hook + " doesn't hand over the button right after " + style + " pads its icon");
+                else remove(m, at, at + 1);
+            }
+            capability(c.callee, placed);
+        }
+
+        static boolean branchesBack(Instruction i) {
+            if (i instanceof SwitchPayload payload) return payload.getSwitchElements().stream().anyMatch(e -> e.getOffset() < 0);
+            return i instanceof OffsetInstruction branch && branch.getCodeOffset() < 0;
+        }
+
         static List<String> newTypes(Method m) {
             List<String> types = new ArrayList<>();
             for (Instruction i : instructions(m)) if (i.getOpcode() == Opcode.NEW_INSTANCE) types.add(String.valueOf(reference(i)));
@@ -6619,6 +6671,7 @@ public class DexDiff {
                     case "closeupRemix": closeupRemix(c); break;
                     case "closeupActionBar": closeupRows(c, false); break;
                     case "closeupVisitSite": closeupRows(c, true); break;
+                    case "closeupSaveButton": closeupSaveButton(c); break;
                     case "postedDate": postedDate(c); break;
                     case "boardMenu": boardMenu(c); break;
                     case "surveyPrompts": surveyPrompts(c); break;

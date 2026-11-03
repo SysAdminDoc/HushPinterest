@@ -252,6 +252,7 @@ public class SettingsBackupTest {
                         Settings.HIDE_CLOSEUP_BACK, Settings.HIDE_CLOSEUP_LENS, Settings.HIDE_CLOSEUP_SEARCH_LABEL,
                         Settings.HIDE_CLOSEUP_LIKE, Settings.HIDE_CLOSEUP_COMMENTS, Settings.HIDE_CLOSEUP_SHARE,
                         Settings.HIDE_CLOSEUP_MORE, Settings.HIDE_CLOSEUP_REMIX, Settings.HIDE_CLOSEUP_VISIT_SITE,
+                        Settings.SMALLER_SAVE_BUTTON,
                         Settings.HIDE_PIN_MENU_COLLAGE, Settings.HIDE_PIN_MENU_VISUAL_SEARCH,
                         Settings.HIDE_PIN_MENU_PIN_BOOST, Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_TOPIC_SUGGESTIONS,
                         Settings.QUIET_EMAIL_REMINDER, Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES,

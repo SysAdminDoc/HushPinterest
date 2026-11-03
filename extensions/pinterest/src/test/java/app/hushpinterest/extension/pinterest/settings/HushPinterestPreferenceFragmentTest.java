@@ -444,6 +444,7 @@ public class HushPinterestPreferenceFragmentTest {
                 Settings.HIDE_CLOSEUP_COMMENTS, Settings.HIDE_CLOSEUP_SHARE, Settings.HIDE_CLOSEUP_MORE));
         rowsOf.put(PatchFamily.Capability.CLOSEUP_REMIX, Collections.singletonList(Settings.HIDE_CLOSEUP_REMIX));
         rowsOf.put(PatchFamily.Capability.CLOSEUP_VISIT_SITE, Collections.singletonList(Settings.HIDE_CLOSEUP_VISIT_SITE));
+        rowsOf.put(PatchFamily.Capability.CLOSEUP_SAVE_BUTTON, Collections.singletonList(Settings.SMALLER_SAVE_BUTTON));
         for (Map.Entry<PatchFamily.Capability, List<BooleanSetting>> missing : rowsOf.entrySet()) {
             Set<PatchFamily.Capability> withoutIt = EnumSet.allOf(PatchFamily.Capability.class);
             withoutIt.remove(missing.getKey());
@@ -457,6 +458,8 @@ public class HushPinterestPreferenceFragmentTest {
                     }
                 }
                 assertNotNull(page.findPreference(Settings.HIDE_CLOSEUP_LENS.key));
+                boolean colorRow = missing.getKey() != PatchFamily.Capability.CLOSEUP_SAVE_BUTTON;
+                assertEquals(colorRow, page.findPreference("action_save_button_color") != null);
             }
         }
         PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
@@ -466,9 +469,11 @@ public class HushPinterestPreferenceFragmentTest {
             collect(page.getPreferenceScreen(), rows);
             int at = indexOfKey(rows, Settings.HIDE_CLOSEUP_SEARCH_LABEL.key);
             String[] titles = {"Hide like button on pins", "Hide comment button on pins", "Hide share button on pins",
-                    "Hide more button on pins", "Hide Remix button on pins", "Hide Visit site button on pins"};
+                    "Hide more button on pins", "Hide Remix button on pins", "Hide Visit site button on pins",
+                    "Smaller Save button on pins"};
             BooleanSetting[] settings = {Settings.HIDE_CLOSEUP_LIKE, Settings.HIDE_CLOSEUP_COMMENTS, Settings.HIDE_CLOSEUP_SHARE,
-                    Settings.HIDE_CLOSEUP_MORE, Settings.HIDE_CLOSEUP_REMIX, Settings.HIDE_CLOSEUP_VISIT_SITE};
+                    Settings.HIDE_CLOSEUP_MORE, Settings.HIDE_CLOSEUP_REMIX, Settings.HIDE_CLOSEUP_VISIT_SITE,
+                    Settings.SMALLER_SAVE_BUTTON};
             for (int i = 0; i < settings.length; i++) {
                 SwitchPreference row = (SwitchPreference) page.findPreference(settings[i].key);
                 assertNotNull(settings[i].key, row);
@@ -476,6 +481,8 @@ public class HushPinterestPreferenceFragmentTest {
                 assertFalse(titles[i] + " starts off", row.isChecked());
                 assertEquals(titles[i], at + 1 + i, indexOfKey(rows, settings[i].key));
             }
+            assertEquals(at + 1 + settings.length, indexOfKey(rows, "action_save_button_color"));
+            assertEquals("Save button color", String.valueOf(page.findPreference("action_save_button_color").getTitle()));
         }
     }
 

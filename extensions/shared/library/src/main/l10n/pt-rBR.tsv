@@ -529,6 +529,19 @@ Hides the Visit site button under a pin that links to a website. The change show
 Hide pin action buttons	Ocultar botões de ação dos pins
 Hide Remix button	Ocultar botão Remix
 Hide Visit site button	Ocultar botão Visitar site
+# context: two more Hide closeup buttons rows on the Interface page for Pinterest's red Save button on a pin someone opens: a switch that draws it at 80 percent of its size, and a row that opens a box for a hex color to paint it. %1$s is a color code like #3366FF. The first line names this part of the patch in a build report.
+Save button size and color	Tamanho e cor do botão Salvar
+Smaller Save button on pins	Botão Salvar menor nos pins
+Shrinks the red Save button on a pin you open to four fifths of its size, keeping its spot at the end of the row. The change shows on the next pin you open.	Reduz o botão vermelho Salvar em um pin que você abre para quatro quintos do tamanho, no mesmo lugar no fim da linha. A mudança aparece no próximo pin que você abrir.
+Save button color	Cor do botão Salvar
+Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.	Pinta o botão vermelho Salvar em um pin que você abre com a cor que você escolher. Por enquanto é o vermelho do Pinterest.
+Painting the Save button %1$s. Tap to change it. The change shows on the next pin you open.	O botão Salvar fica %1$s. Toque para mudar. A mudança aparece no próximo pin que você abrir.
+Type a hex color, like #3366FF, or three digits, like #36F. A light color gets dark text so the button stays readable.	Digite uma cor hex, como #3366FF, ou três dígitos, como #36F. Uma cor clara ganha texto escuro para o botão continuar legível.
+Couldn't open the Save button color. Try again.	Não foi possível abrir a cor do botão Salvar. Tente de novo.
+That isn't a hex color, so nothing changed. Try one like #3366FF.	Isso não é uma cor hex, então nada mudou. Tente uma como #3366FF.
+Couldn't save the Save button color. Try again.	Não foi possível salvar a cor do botão Salvar. Tente de novo.
+The Save button is back to Pinterest's red on the next pin you open.	O botão Salvar volta ao vermelho do Pinterest no próximo pin que você abrir.
+The Save button turns %1$s on the next pin you open.	O botão Salvar fica %1$s no próximo pin que você abrir.
 # context: a third Hide closeup buttons switch on the Interface page, right under Hide lens button. Pinterest puts a Search image label on the lens button for the first two pins someone opens each day. With this on the lens stays but never wears the label or glows. The last line names this part of the patch in a build report.
 Hide Search image label on pins	Ocultar o rótulo Pesquisar imagem nos pins
 Keeps the lens button on a pin you open but leaves off its glow and the Search image label Pinterest adds to it on your first pins each day. Tapping the lens still searches. The change shows on the next pin you open.	Mantém o botão Lens em um pin que você abre, mas tira o brilho dele e o rótulo Pesquisar imagem que o Pinterest coloca nele nos seus primeiros pins do dia. Tocar no Lens continua pesquisando. A mudança aparece no próximo pin que você abrir.

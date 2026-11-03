@@ -22,15 +22,18 @@ import app.morphe.patches.shared.compat.AppCompatibilities
 import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.namedRegisters
 import app.morphe.util.superclassChain
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderInstruction
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -47,6 +50,13 @@ internal const val CLOSEUP_SEARCH_LABEL_HOOK = "$CLOSEUP_BUTTONS->searchLabel(Z)
 internal const val CLOSEUP_REMIX_HOOK = "$CLOSEUP_BUTTONS->remix(Landroid/view/View;)V"
 internal const val CLOSEUP_ACTION_BAR_HOOK = "$CLOSEUP_BUTTONS->actionBar(Landroid/view/View;)V"
 internal const val CLOSEUP_VISIT_SITE_HOOK = "$CLOSEUP_BUTTONS->visitSite(Landroid/view/View;)V"
+internal const val CLOSEUP_SAVE_BUTTON_HOOK = "$CLOSEUP_BUTTONS->saveButton(Landroid/view/View;)V"
+
+/** Pinterest's own button class. The Save button on a pin is one, and the extension knows it by its id. */
+internal const val GESTALT_BUTTON = "Lcom/pinterest/gestalt/button/view/GestaltButton;"
+
+/** The last thing a GestaltButton's style method does to it before moving on to its size. */
+internal const val COMPOUND_PADDING = "Landroid/widget/TextView;->setCompoundDrawablePadding(I)V"
 
 /** The R fields naming each button's id. This build reads ids from R rather than inlining them. */
 internal const val CLOSEUP_BACK_ID = "closeup_back_button"
@@ -372,6 +382,43 @@ internal fun BytecodePatchContext.labelReads(): List<LabelRead> {
     return reads
 }
 
+/** Where a GestaltButton has its look applied: the hook goes in at [index], passing the button in [register]. */
+internal class StyleSite(val method: Method, val index: Int, val register: Int)
+
+/**
+ * Where every GestaltButton, the Save button on a pin among them, has just been styled: its method
+ * taking the old and new style, right after its one `setCompoundDrawablePadding` on itself. Its
+ * colors, text and icons are all set by then, and the path that skips the padding for an unchanged
+ * icon branches to the same spot, so the hook goes in at that spot's label. The method's this
+ * register must still hold the button there: nothing writes it before, nothing branches backward
+ * and nothing is caught. Throws when there isn't exactly one such method.
+ */
+internal fun BytecodePatchContext.styleSite(): StyleSite {
+    val button = classDefByOrNull(GESTALT_BUTTON) ?: throw PatchException("there's no $GESTALT_BUTTON")
+    val sites = button.methods.mapNotNull { method ->
+        val parameters = method.parameterTypes.map { it.toString() }
+        if (AccessFlags.STATIC.isSet(method.accessFlags) || method.returnType != "V" || parameters.size != 2 ||
+            parameters[0] != parameters[1] || parameters[0].length == 1) return@mapNotNull null
+        val code = method.implementation ?: return@mapNotNull null
+        val self = code.registerCount - 1 - parameters.size
+        val body = method.instructions()
+        val pads = body.indices.filter { at ->
+            val call = body[at]
+            call is FiveRegisterInstruction && call.registerC == self && (call as ReferenceInstruction).reference.toString() == COMPOUND_PADDING
+        }
+        val pad = pads.singleOrNull() ?: return@mapNotNull null
+        if (code.tryBlocks.isNotEmpty() || body.take(pad).any { it.writes(self) } || body.any { it.branchesBack() }) return@mapNotNull null
+        StyleSite(method, pad + 1, self)
+    }
+    return sites.singleOrNull() ?: throw PatchException("${sites.size} $GESTALT_BUTTON methods style it and pad its icon on itself")
+}
+
+private fun Instruction.branchesBack(): Boolean = when (this) {
+    is SwitchPayload -> switchElements.any { it.offset < 0 }
+    is OffsetInstruction -> codeOffset < 0
+    else -> false
+}
+
 /** True when the class's first ancestor outside the APK is one of Android's view classes. */
 private fun BytecodePatchContext.isFrameworkView(type: String) =
     superclassChain(type).drop(1).lastOrNull()?.let { outside -> ANDROID_VIEWS.any { outside.startsWith(it) } } == true
@@ -382,8 +429,9 @@ val hideCloseupButtonsPatch = bytecodePatch(
     description = "Lets you hide the buttons on a pin you open, each with its own switch. That covers the back arrow and " +
         "the visual search (lens) button that float over the picture, the like, comment, share and more buttons under it, " +
         "the Remix button and the Visit site button. Another switch keeps the lens but drops its glow and the Search " +
-        "image label Pinterest puts on it for your first pins each day. Your phone's back gesture still leaves the pin, " +
-        "and Search image in the pin menu still works. They all start off. Turn them on in HushPinterest settings > Interface.",
+        "image label Pinterest puts on it for your first pins each day. Two more rows draw the red Save button smaller " +
+        "or paint it a color you pick. Your phone's back gesture still leaves the pin, and Search image in the pin menu " +
+        "still works. They all start off. Turn them on in HushPinterest settings > Interface.",
 ) {
     category("Interface")
     dependsOn(settingsPatch, pinterestExtensionPatch)
@@ -396,6 +444,7 @@ val hideCloseupButtonsPatch = bytecodePatch(
         requireStatusMethod("closeupActionBar")
         requireStatusMethod("closeupRemix")
         requireStatusMethod("closeupVisitSite")
+        requireStatusMethod("closeupSaveButton")
         val backs = buttonSites(CLOSEUP_BACK_ID)
         val single = buttonSites(CLOSEUP_LENS_ID)
         if (backs.isEmpty()) throw PatchException("$PATCH: nothing finds the closeup's back arrow")
@@ -470,6 +519,14 @@ val hideCloseupButtonsPatch = bytecodePatch(
         val visits = handedOver("Hide Visit site button", visitRows()).let { rows ->
             if (rows.isNotEmpty() && takesHook("Hide Visit site button", rows.map { it.type })) rows else emptyList()
         }
+        // The Save button's size and color ride on Pinterest's button styling, so a build where that
+        // can't be pinned down still hides every button.
+        val style = try {
+            styleSite()
+        } catch (missing: PatchException) {
+            patchLog.warning("$PATCH: ${missing.message}. The Save button's size and color aren't in this build.")
+            null
+        }
 
         // Within one method the later site goes in first, so the earlier index still holds. A button
         // goes in at the label of the instruction it precedes; a label read's answer goes in after the
@@ -484,6 +541,12 @@ val hideCloseupButtonsPatch = bytecodePatch(
                 val method = mutable(constructor)
                 val after = constructor.parentCall(classDefBy(row.type).superclass)!! + 1
                 inserts += after to { method.addInstructions(after, "invoke-static { p0 }, $hook") }
+            }
+        }
+        if (style != null) {
+            val method = mutable(style.method)
+            inserts += style.index to {
+                method.addInstructionsAtControlFlowLabel(style.index, "invoke-static/range { v${style.register} .. v${style.register} }, $CLOSEUP_SAVE_BUTTON_HOOK")
             }
         }
         for (read in labels) {
@@ -509,6 +572,7 @@ val hideCloseupButtonsPatch = bytecodePatch(
         if (remix) enableCapability("closeupRemix")
         if (actions.isNotEmpty()) enableCapability("closeupActionBar")
         if (visits.isNotEmpty()) enableCapability("closeupVisitSite")
+        if (style != null) enableCapability("closeupSaveButton")
         enableStatus("hideCloseupButtons")
     }
 }

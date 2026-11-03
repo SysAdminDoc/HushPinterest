@@ -51,7 +51,8 @@ import org.junit.experimental.categories.Category
 
 /**
  * Every class reading the closeup back arrow's or lens's id, the classes those buttons are, and their
- * ancestors, in each declared APK, with the closeup state that describes the lens's label flag.
+ * ancestors, in each declared APK, with the closeup state that describes the lens's label flag and
+ * the GestaltButton the Save button is.
  */
 @Category(FixtureTests::class)
 class CloseupButtonsFixtureTest {
@@ -291,7 +292,7 @@ class CloseupButtonsFixtureTest {
             val context = PatchContexts.of(ExtensionDex.classes() + build.classes)
             val warnings = PatchLogCapture.warnings { hideCloseupButtonsPatch.execute(context) }
             assertEquals("${build.name}: $warnings", emptyList<String>(), warnings)
-            for (flag in listOf("closeupRemix", "closeupActionBar", "closeupVisitSite")) assertEquals("${build.name}: $flag", 1, flag(context, flag))
+            for (flag in listOf("closeupRemix", "closeupActionBar", "closeupVisitSite", "closeupSaveButton")) assertEquals("${build.name}: $flag", 1, flag(context, flag))
 
             val remixes = hookSites(context, build.classes, CLOSEUP_REMIX_HOOK)
             assertEquals("${build.name}: what makes the Remix button", listOf(LENS_BUILDER), remixes.map { it.first.definingClass })
@@ -356,10 +357,63 @@ class CloseupButtonsFixtureTest {
             "Hide closeup buttons: no row to hand over for Hide pin action buttons. It isn't in this build.",
             "Hide closeup buttons: no row to hand over for Hide Visit site button. It isn't in this build.",
         ), warnings)
-        for ((flag, value) in listOf("closeupButtons" to 1, "closeupSearchLabel" to 1, "closeupRemix" to 0, "closeupActionBar" to 0, "closeupVisitSite" to 0)) {
+        for ((flag, value) in listOf("closeupButtons" to 1, "closeupSearchLabel" to 1, "closeupRemix" to 0, "closeupActionBar" to 0,
+                "closeupVisitSite" to 0, "closeupSaveButton" to 1)) {
             assertEquals(flag, value, flag(context, flag))
         }
         for (hook in OTHER_HOOKS) assertEquals("$hook is left out", emptyList<Pair<Method, Int>>(), hookSites(context, build.classes, hook))
+    }
+
+    @Test
+    fun `each declared original APK hands every styled GestaltButton over right after it pads its icon`() {
+        for (build in Fixtures.declaredBuilds().map(::read)) {
+            val context = PatchContexts.of(ExtensionDex.classes() + build.classes)
+            hideCloseupButtonsPatch.execute(context)
+            assertEquals("${build.name}: closeupSaveButton", 1, flag(context, "closeupSaveButton"))
+            val sites = hookSites(context, build.classes, CLOSEUP_SAVE_BUTTON_HOOK)
+            assertEquals("${build.name}: where a GestaltButton is styled", listOf(GESTALT_BUTTON), sites.map { it.first.definingClass })
+            val (style, at) = sites.single()
+            val original = style.implementation!!.instructions.toList()
+            val body = patched(context, style)
+            val self = style.thisRegister()
+            assertEquals("${build.name}: hands over the button itself", listOf(self), body[at].namedRegisters())
+            assertEquals("${build.name}: right after it pads its icon", COMPOUND_PADDING, (body[at - 1] as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: pads the button's own icon", self, body[at - 1].namedRegisters().first())
+            // The path that skips the padding for an unchanged icon lands on the hook too.
+            val kept = body.indices.filter { it != at }
+            val jumps = branchesTo(original, at).map { kept[it] }
+            assertTrue("${build.name}: a branch skips the padding", jumps.isNotEmpty())
+            assertEquals("${build.name}: the branches past the padding", jumps, branchesTo(body, at))
+            assertEquals("${build.name}: nothing jumps past the hook", emptyList<Int>(), branchesTo(body, at + 1))
+            assertEquals("${build.name}: $style keeps every original instruction", original.opcodes(),
+                body.filterIndexed { k, _ -> k != at }.opcodes())
+        }
+    }
+
+    @Test
+    fun `without a GestaltButton style method that keeps the button in its this register, the other switches stay`() {
+        val build = read(Fixtures.declaredBuilds().last())
+        val button = build.classes.single { it.type == GESTALT_BUTTON }
+        fun Instruction.pads() = (this as? ReferenceInstruction)?.reference?.toString() == COMPOUND_PADDING
+        val style = button.methods.single { method ->
+            method.parameterTypes.map { it.toString() }.let { it.size == 2 && it[0] == it[1] } &&
+                method.implementation?.instructions?.any { it.pads() } == true
+        }
+        val unpadded = replace(button, { it == style }) { instructions ->
+            instructions.flatMap { if (it.pads()) List(it.codeUnits) { ImmutableInstruction10x(Opcode.NOP) } else listOf(it) }
+        }
+        // Something else goes in the this register before the padding.
+        val reused = replace(button, { it == style }) { instructions -> listOf(ImmutableInstruction21s(Opcode.CONST_16, style.thisRegister(), 0)) + instructions }
+        for ((reason, swap) in linkedMapOf("no padding" to unpadded, "this register reused" to reused)) {
+            val context = PatchContexts.of(ExtensionDex.classes() + build.classes.map { if (it.type == GESTALT_BUTTON) swap else it })
+            val warnings = PatchLogCapture.warnings { hideCloseupButtonsPatch.execute(context) }
+            assertEquals(reason, listOf("Hide closeup buttons: 0 $GESTALT_BUTTON methods style it and pad its icon on itself. " +
+                "The Save button's size and color aren't in this build."), warnings)
+            for ((flag, value) in listOf("closeupButtons" to 1, "closeupVisitSite" to 1, "closeupSaveButton" to 0)) {
+                assertEquals("$reason: $flag", value, flag(context, flag))
+            }
+            assertEquals("$reason: the hook is left out", emptyList<Pair<Method, Int>>(), hookSites(context, build.classes, CLOSEUP_SAVE_BUTTON_HOOK))
+        }
     }
 
     /** The boolean [state]'s toString reads right after naming the label flag. */
@@ -493,6 +547,7 @@ class CloseupButtonsFixtureTest {
             }
         }
         wanted += marks
+        wanted += GESTALT_BUTTON
         val types = wanted.filter { it in parents }.flatMap { type -> generateSequence(type) { parents[it] }.filter { it in parents }.toList() }
             .toSet() - readers.keys - states.keys
         val others = FixtureDex.classes(build, types)

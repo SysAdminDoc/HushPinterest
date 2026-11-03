@@ -481,6 +481,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_closeup_more": return L10n.t("Hide more button on pins");
             case "hushpinterest_hide_closeup_remix": return L10n.t("Hide Remix button on pins");
             case "hushpinterest_hide_closeup_visit_site": return L10n.t("Hide Visit site button on pins");
+            case "hushpinterest_smaller_save_button": return L10n.t("Smaller Save button on pins");
             case "hushpinterest_hide_pin_menu_collage": return L10n.t("Hide collage menu items");
             case "hushpinterest_hide_pin_menu_visual_search": return L10n.t("Hide Search image menu item");
             case "hushpinterest_hide_pin_menu_pin_boost": return L10n.t("Hide Promote pin menu item");

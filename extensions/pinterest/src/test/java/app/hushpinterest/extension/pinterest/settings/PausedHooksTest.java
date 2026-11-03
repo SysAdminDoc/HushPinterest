@@ -403,6 +403,7 @@ public class PausedHooksTest {
         }));
         probes.put(Settings.HIDE_CLOSEUP_VISIT_SITE, Arrays.asList(
                 () -> UiHooksForTests.hidesVisitSite(false), () -> UiHooksForTests.hidesVisitSite(true)));
+        probes.put(Settings.SMALLER_SAVE_BUTTON, Collections.singletonList(UiHooksForTests::shrinksSaveButton));
         probes.put(Settings.HIDE_PIN_MENU_COLLAGE, Collections.singletonList(() -> hidesMenuItem("overflow_menu_add_to_collage")));
         probes.put(Settings.HIDE_PIN_MENU_VISUAL_SEARCH, Collections.singletonList(() -> hidesMenuItem("contextmenu_visual_search_image")));
         probes.put(Settings.HIDE_PIN_MENU_PIN_BOOST, Collections.singletonList(() -> hidesMenuItem("overflow_menu_pin_boost")));

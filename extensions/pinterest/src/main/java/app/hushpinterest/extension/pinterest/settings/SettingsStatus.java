@@ -96,6 +96,7 @@ public final class SettingsStatus {
     public static boolean closeupActionBar() { return false; }
     public static boolean closeupRemix() { return false; }
     public static boolean closeupVisitSite() { return false; }
+    public static boolean closeupSaveButton() { return false; }
     public static boolean hidePinMenuItems() { return false; }
     public static boolean pinMenuItems() { return false; }
     public static boolean hideComments() { return false; }

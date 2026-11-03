@@ -6,14 +6,23 @@
  */
 package app.hushpinterest.extension.pinterest.ui;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import app.hushpinterest.extension.pinterest.settings.FamilyNames;
+import app.hushpinterest.extension.pinterest.settings.SaveButtonColorSetting;
 import app.hushpinterest.extension.pinterest.settings.Settings;
 import app.hushpinterest.extension.shared.ResourceType;
 import app.hushpinterest.extension.shared.ResourceUtils;
@@ -29,7 +38,8 @@ import app.hushpinterest.extension.shared.settings.BooleanSetting;
  * view classes through {@link #visibility}. A handed-over button whose switch is on stays GONE, so it
  * takes no room and TalkBack skips it. Off or paused, Pinterest's own visibility goes through, and
  * the next closeup's button shows as usual. The lens's label has a switch of its own, see
- * {@link #searchLabel}.
+ * {@link #searchLabel}, and the red Save button can be made smaller and painted, see
+ * {@link #saveButton}.
  */
 public final class CloseupButtons {
     private CloseupButtons() {}
@@ -37,12 +47,27 @@ public final class CloseupButtons {
     /** Each button handed over, and the switch that hides it. */
     private static final Map<View, BooleanSetting> MARKED = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /** Pinterest's ids for the row's buttons and the Visit site button: -1 until looked up, 0 when the build has none. */
+    /** Pinterest's ids for the row's buttons, the Visit site button and the Save button: -1 until looked up, 0 when the build has none. */
     static int likeId = -1;
     static int commentsId = -1;
     static int shareId = -1;
     static int moreId = -1;
     static int visitSiteId = -1;
+    static int saveId = -1;
+
+    /** How big the Save button is with its switch on. */
+    static final float SMALLER = 0.8f;
+    /** Dark text for a Save button painted a light color, Pinterest's own near-black. */
+    static final int DARK_TEXT = 0xFF111111;
+
+    /** Save buttons made smaller, so the switch going off puts them back. */
+    private static final Set<View> SHRUNK = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
+    /** Save buttons painted, with what Pinterest had on them. */
+    private static final Map<View, Painted> PAINTED = Collections.synchronizedMap(new WeakHashMap<>());
+
+    /** Keeps a smaller Save button anchored at the end of its row as its size changes. */
+    private static final View.OnLayoutChangeListener PIVOT =
+            (view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> pivot(view);
 
     /** The closeup's back arrow, right after Pinterest finds it in the closeup's layout. */
     public static void backArrow(View button) {
@@ -197,6 +222,108 @@ public final class CloseupButtons {
             HookStatus.threw(FamilyNames.HIDE_CLOSEUP_BUTTONS, "search image label", failure);
             return true;
         }
+    }
+
+    /**
+     * Every Gestalt button, right after Pinterest applies a new look to it: its colors, text and
+     * icon. Only the closeup's Save button is changed. With its switch on it's drawn at
+     * {@link #SMALLER} of its size, anchored at the end of its row, and a color saved for it
+     * replaces Pinterest's red while the button is red, so Saved keeps Pinterest's own look. A
+     * light color gets {@link #DARK_TEXT}. Each call first takes back what an earlier one did, so
+     * the switch going off, the color cleared or a pause shows Pinterest's button again.
+     */
+    public static void saveButton(View button) {
+        if (button == null || saveId == 0) return;
+        try {
+            if (saveId < 0) saveId = id(button, "save_pinit_bt");
+            if (saveId == 0 || button.getId() != saveId) return;
+            shrink(button, UiHooks.enabled(FamilyNames.HIDE_CLOSEUP_BUTTONS, Settings.SMALLER_SAVE_BUTTON));
+            if (button instanceof TextView) paint((TextView) button, Utils.settingsReady()
+                    ? SaveButtonColorSetting.color(SaveButtonColorSetting.SAVE_BUTTON_COLOR.get()) : null);
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.HIDE_CLOSEUP_BUTTONS, "save button", failure);
+        }
+    }
+
+    private static void shrink(View button, boolean smaller) {
+        if (smaller) {
+            if (SHRUNK.add(button)) button.addOnLayoutChangeListener(PIVOT);
+            pivot(button);
+            button.setScaleX(SMALLER);
+            button.setScaleY(SMALLER);
+            HookStatus.counted(FamilyNames.HIDE_CLOSEUP_BUTTONS, "save button smaller");
+        } else if (SHRUNK.remove(button)) {
+            button.removeOnLayoutChangeListener(PIVOT);
+            button.setScaleX(1f);
+            button.setScaleY(1f);
+        }
+    }
+
+    private static void pivot(View button) {
+        if (!SHRUNK.contains(button)) return;
+        boolean rtl = button.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        button.setPivotX(rtl ? 0f : button.getWidth());
+        button.setPivotY(button.getHeight() / 2f);
+    }
+
+    /** What Pinterest had on a Save button this class painted, and what it put there instead. */
+    private static final class Painted {
+        final ColorStateList red;
+        final ColorStateList paint;
+        @Nullable final ColorStateList text;
+        @Nullable final ColorStateList dark;
+
+        Painted(ColorStateList red, ColorStateList paint, @Nullable ColorStateList text, @Nullable ColorStateList dark) {
+            this.red = red;
+            this.paint = paint;
+            this.text = text;
+            this.dark = dark;
+        }
+    }
+
+    private static void paint(TextView button, @Nullable Integer color) {
+        Painted was = PAINTED.remove(button);
+        ColorStateList now = button.getBackgroundTintList();
+        // Pinterest puts its colors on only when they change, so what's still ours goes back first.
+        if (was != null && now == was.paint) {
+            tint(button, was.red);
+            now = was.red;
+        }
+        if (was != null && was.dark != null && button.getTextColors() == was.dark) button.setTextColor(was.text);
+        if (color == null || !red(now)) return;
+        ColorStateList paint = ColorStateList.valueOf(color);
+        ColorStateList text = null, dark = null;
+        // White text under 3:1 against the color is hard to read, so it goes dark.
+        if (1.05 / (Color.luminance(color) + 0.05) < 3) {
+            text = button.getTextColors();
+            dark = ColorStateList.valueOf(DARK_TEXT);
+            button.setTextColor(dark);
+        }
+        tint(button, paint);
+        PAINTED.put(button, new Painted(now, paint, text, dark));
+        HookStatus.counted(FamilyNames.HIDE_CLOSEUP_BUTTONS, "save button painted");
+    }
+
+    /** Pinterest's red, in light or dark mode, and not the gray or black of Saved. */
+    private static boolean red(@Nullable ColorStateList colors) {
+        if (colors == null) return false;
+        float[] hsv = new float[3];
+        Color.colorToHSV(colors.getDefaultColor(), hsv);
+        return (hsv[0] >= 340f || hsv[0] <= 10f) && hsv[1] >= 0.75f && hsv[2] >= 0.6f;
+    }
+
+    /** The way Pinterest colors a Gestalt button: the background's tint and its shape's under a ripple. */
+    private static void tint(View button, ColorStateList colors) {
+        button.setBackgroundTintList(colors);
+        Drawable background = button.getBackground();
+        if (background instanceof RippleDrawable && ((RippleDrawable) background).getNumberOfLayers() > 0) {
+            Drawable shape = ((RippleDrawable) background).getDrawable(0);
+            if (shape != null) shape.mutate().setTintList(colors);
+        } else if (background != null) {
+            background.mutate().setTintList(colors);
+        }
+        button.refreshDrawableState();
+        button.invalidate();
     }
 
     /** The switch read again for a visibility change, which isn't counted as another call. */

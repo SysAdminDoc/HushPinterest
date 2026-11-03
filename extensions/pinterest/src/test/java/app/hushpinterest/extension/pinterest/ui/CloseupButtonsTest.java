@@ -10,7 +10,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.content.res.ColorStateList;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -23,6 +27,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import app.hushpinterest.extension.pinterest.settings.SaveButtonColorSetting;
 import app.hushpinterest.extension.pinterest.settings.Settings;
 import app.hushpinterest.extension.shared.SettingsContextRule;
 import app.hushpinterest.extension.shared.diagnostics.HookStatus;
@@ -41,6 +46,7 @@ public class CloseupButtonsTest {
         CloseupButtons.shareId = View.generateViewId();
         CloseupButtons.moreId = View.generateViewId();
         CloseupButtons.visitSiteId = View.generateViewId();
+        CloseupButtons.saveId = View.generateViewId();
     }
 
     @After public void restore() {
@@ -54,11 +60,14 @@ public class CloseupButtonsTest {
         Settings.HIDE_CLOSEUP_MORE.resetToDefault();
         Settings.HIDE_CLOSEUP_REMIX.resetToDefault();
         Settings.HIDE_CLOSEUP_VISIT_SITE.resetToDefault();
+        Settings.SMALLER_SAVE_BUTTON.resetToDefault();
+        SaveButtonColorSetting.SAVE_BUTTON_COLOR.resetToDefault();
         CloseupButtons.likeId = -1;
         CloseupButtons.commentsId = -1;
         CloseupButtons.shareId = -1;
         CloseupButtons.moreId = -1;
         CloseupButtons.visitSiteId = -1;
+        CloseupButtons.saveId = -1;
         HookStatus.clear();
     }
 
@@ -308,5 +317,122 @@ public class CloseupButtonsTest {
 
         PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
         assertEquals(View.VISIBLE, CloseupButtons.visibility(remix, View.VISIBLE));
+    }
+
+    private static final int RED = 0xFFE60023, GRAY = 0xFFEFEFEF, WHITE = 0xFFFFFFFF, BLACK = 0xFF111111;
+
+    /** A Gestalt button the way Pinterest builds one: a shape under a ripple, colored by its tint. */
+    private static Button gestaltButton(int id) {
+        Button button = new Button(RuntimeEnvironment.getApplication());
+        button.setId(id);
+        button.setBackground(new RippleDrawable(ColorStateList.valueOf(GRAY), new GradientDrawable(), null));
+        return button;
+    }
+
+    /** What Pinterest does when a button's colors change, then the hook right after. */
+    private static void style(Button button, int background, int text) {
+        ColorStateList colors = ColorStateList.valueOf(background);
+        button.setBackgroundTintList(colors);
+        ((RippleDrawable) button.getBackground()).getDrawable(0).mutate().setTintList(colors);
+        button.setTextColor(text);
+        CloseupButtons.saveButton(button);
+    }
+
+    private static int tint(Button button) {
+        return button.getBackgroundTintList().getDefaultColor();
+    }
+
+    @Test public void untouchedTheSaveButtonIsPinterestsOwn() {
+        Button save = gestaltButton(CloseupButtons.saveId);
+        style(save, RED, WHITE);
+        assertEquals(RED, tint(save));
+        assertEquals(1f, save.getScaleX(), 0f);
+        assertEquals(WHITE, save.getCurrentTextColor());
+    }
+
+    @Test public void aColorPaintsOnlyTheRedSaveButtonAndSavedKeepsPinterestsLook() {
+        SaveButtonColorSetting.SAVE_BUTTON_COLOR.save("#3366ff");
+        Button save = gestaltButton(CloseupButtons.saveId);
+        style(save, RED, WHITE);
+        assertEquals(0xFF3366FF, tint(save));
+        assertEquals("a dark color keeps Pinterest's white text", WHITE, save.getCurrentTextColor());
+        assertTrue(String.join("\n", HookStatus.report()).contains("save button painted"));
+
+        Button other = gestaltButton(View.generateViewId());
+        style(other, RED, WHITE);
+        assertEquals("another red Gestalt button", RED, tint(other));
+
+        style(save, GRAY, BLACK);
+        assertEquals("Saved", GRAY, tint(save));
+        style(save, RED, WHITE);
+        assertEquals("Save again", 0xFF3366FF, tint(save));
+        // A new look that leaves the colors alone, the way Pinterest skips them when they didn't change.
+        CloseupButtons.saveButton(save);
+        assertEquals(0xFF3366FF, tint(save));
+    }
+
+    @Test public void aLightColorGetsDarkTextAndClearingItPutsPinterestsBack() {
+        Button save = gestaltButton(CloseupButtons.saveId);
+        style(save, RED, WHITE);
+        ColorStateList red = save.getBackgroundTintList();
+        ColorStateList white = save.getTextColors();
+
+        SaveButtonColorSetting.SAVE_BUTTON_COLOR.save("#FC0");
+        CloseupButtons.saveButton(save);
+        assertEquals(0xFFFFCC00, tint(save));
+        assertEquals(CloseupButtons.DARK_TEXT, save.getCurrentTextColor());
+
+        SaveButtonColorSetting.SAVE_BUTTON_COLOR.save("");
+        CloseupButtons.saveButton(save);
+        assertTrue("Pinterest's red, the same colors it put on", save.getBackgroundTintList() == red);
+        assertTrue("Pinterest's text colors", save.getTextColors() == white);
+    }
+
+    @Test public void theSwitchDrawsTheSaveButtonSmallerAtTheEndOfItsRow() {
+        Settings.SMALLER_SAVE_BUTTON.save(true);
+        Button save = gestaltButton(CloseupButtons.saveId);
+        style(save, RED, WHITE);
+        assertEquals(CloseupButtons.SMALLER, save.getScaleX(), 0f);
+        assertEquals(CloseupButtons.SMALLER, save.getScaleY(), 0f);
+        assertEquals("still Pinterest's red", RED, tint(save));
+        save.layout(0, 0, 200, 80);
+        assertEquals(200f, save.getPivotX(), 0f);
+        assertEquals(40f, save.getPivotY(), 0f);
+        assertTrue(String.join("\n", HookStatus.report()).contains("save button smaller"));
+
+        Button other = gestaltButton(View.generateViewId());
+        style(other, RED, WHITE);
+        assertEquals("another Gestalt button", 1f, other.getScaleX(), 0f);
+
+        Settings.SMALLER_SAVE_BUTTON.save(false);
+        CloseupButtons.saveButton(save);
+        assertEquals(1f, save.getScaleX(), 0f);
+        assertEquals(1f, save.getScaleY(), 0f);
+    }
+
+    @Test public void pausedTheSaveButtonIsPinterestsAgain() {
+        Settings.SMALLER_SAVE_BUTTON.save(true);
+        SaveButtonColorSetting.SAVE_BUTTON_COLOR.save("#FFFFFF");
+        Button save = gestaltButton(CloseupButtons.saveId);
+        style(save, RED, WHITE);
+        assertEquals(WHITE, tint(save));
+        assertEquals(CloseupButtons.DARK_TEXT, save.getCurrentTextColor());
+
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        CloseupButtons.saveButton(save);
+        assertEquals(1f, save.getScaleX(), 0f);
+        assertEquals(RED, tint(save));
+        assertEquals(WHITE, save.getCurrentTextColor());
+        assertTrue("the saved color stays", "#FFFFFF".equals(SaveButtonColorSetting.SAVE_BUTTON_COLOR.savedValue()));
+    }
+
+    @Test public void aBuildWithoutTheSaveButtonsIdLeavesEveryButtonAlone() {
+        Settings.SMALLER_SAVE_BUTTON.save(true);
+        SaveButtonColorSetting.SAVE_BUTTON_COLOR.save("#3366FF");
+        Button save = gestaltButton(View.NO_ID);
+        CloseupButtons.saveId = 0;
+        style(save, RED, WHITE);
+        assertEquals(RED, tint(save));
+        assertEquals(1f, save.getScaleX(), 0f);
     }
 }
