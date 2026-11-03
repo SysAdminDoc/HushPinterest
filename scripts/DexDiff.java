@@ -5164,9 +5164,11 @@ public class DexDiff {
             capability(c.callee, folded);
         }
 
-        static final String CLOSEUP_BACK_ID = "closeup_back_button", CLOSEUP_LENS_ID = "flashlight_search_button";
+        static final String CLOSEUP_BACK_ID = "closeup_back_button", CLOSEUP_LENS_ID = "flashlight_search_button",
+                CLOSEUP_CAROUSEL_LENS_ID = "carousel_flashlight_button";
         static final String FIND_VIEW = "Landroid/view/View;->findViewById(I)Landroid/view/View;";
         static final String GET_CLASS = "Ljava/lang/Object;->getClass()Ljava/lang/Class;";
+        static final Set<Opcode> MOVE_OBJECTS = Set.of(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16);
 
         /** Where a closeup button is handed over: in front of clean instruction [at] of [method], with [register]. */
         record ButtonSite(Method method, int at, int register, String view, boolean found, String hook) {}
@@ -5175,8 +5177,9 @@ public class DexDiff {
          * The closeup's back arrow and visual search (lens) buttons. Every clean method reading the R
          * field named for a button's id hands the button over where the patch finds it. Found: the id,
          * findViewById with it and move-result-object, then the hook with that register, reached only
-         * from the move-result, and the check-cast after it, past a getClass null check, names the
-         * button's class. Built: a method answering one of the APK's own framework views through a
+         * from the move-result, and the check-cast after it, past a getClass null check, on the button
+         * or a move-object copy of it, names the button's class. The picture carousel's lens is found
+         * the same way when the build has one. Built: a method answering one of the APK's own framework views through a
          * single return-object, with the hook on the answered register as the only way into the
          * return. Constructed: see constructedButtons. Each button class then gains, or starts its own, setVisibility with the visibility
          * hook taking the view and the request and answering into the request.
@@ -5187,6 +5190,7 @@ public class DexDiff {
             boolean back = buttonSites(CLOSEUP_BACK_ID, backHook, sites), lens = buttonSites(CLOSEUP_LENS_ID, lensHook, sites);
             if (!back) fail("nothing finds the closeup's back arrow");
             if (!lens) fail("nothing builds the closeup's visual search button");
+            buttonSites(CLOSEUP_CAROUSEL_LENS_ID, lensHook, sites);
             Map<Method, List<ButtonSite>> byMethod = new LinkedHashMap<>();
             for (ButtonSite site : sites) byMethod.computeIfAbsent(site.method(), k -> new ArrayList<>()).add(site);
             boolean handed = back && lens;
@@ -5446,7 +5450,10 @@ public class DexDiff {
             int button = firstRegister(body.get(read + 2)), next = read + 3;
             if (next < body.size() && body.get(next) instanceof FiveRegisterInstruction check && check.getOpcode() == Opcode.INVOKE_VIRTUAL
                     && check.getRegisterCount() == 1 && check.getRegisterC() == button && GET_CLASS.equals(String.valueOf(reference(check)))) next++;
-            if (next >= body.size() || body.get(next).getOpcode() != Opcode.CHECK_CAST || firstRegister(body.get(next)) != button) {
+            int copy = button;
+            if (next < body.size() && MOVE_OBJECTS.contains(body.get(next).getOpcode())
+                    && ((TwoRegisterInstruction) body.get(next)).getRegisterB() == button) copy = firstRegister(body.get(next++));
+            if (next >= body.size() || body.get(next).getOpcode() != Opcode.CHECK_CAST || firstRegister(body.get(next)) != copy) {
                 fail(m + " finds the button without casting it to its class");
                 return null;
             }

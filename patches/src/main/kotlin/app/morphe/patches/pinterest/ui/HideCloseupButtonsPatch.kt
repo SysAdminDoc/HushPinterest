@@ -49,6 +49,9 @@ internal const val CLOSEUP_SEARCH_LABEL_HOOK = "$CLOSEUP_BUTTONS->searchLabel(Z)
 internal const val CLOSEUP_BACK_ID = "closeup_back_button"
 internal const val CLOSEUP_LENS_ID = "flashlight_search_button"
 
+/** A pin with several pictures shows them in a carousel, which has a lens of its own under this id. */
+internal const val CLOSEUP_CAROUSEL_LENS_ID = "carousel_flashlight_button"
+
 /** The closeup state's toString names the lens label's flag right before reading it. */
 internal const val SEARCH_LABEL_FLAG = ", isVisualActionAnimated="
 
@@ -57,6 +60,7 @@ internal const val SEARCH_IMAGE_TEXT = "search_image"
 
 private const val FIND_VIEW = "Landroid/view/View;->findViewById(I)Landroid/view/View;"
 private const val GET_CLASS = "Ljava/lang/Object;->getClass()Ljava/lang/Class;"
+private val MOVE_OBJECTS = setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16)
 private val ANDROID_VIEWS = listOf("Landroid/view/", "Landroid/widget/")
 
 /** Where a button is handed to the extension: the hook goes in at [index], passing [register], a [view]. */
@@ -72,7 +76,8 @@ internal fun Instruction.readsId(id: String): Boolean {
  * Every place [id]'s button is found or built, from the methods that read the R field of that name.
  * Found: the id read, `findViewById` with it, and `move-result-object`. The hook goes right after,
  * and the button's class is the check-cast that follows, after Kotlin's getClass null check if
- * there is one. Built: a method answering one of the APK's own views through a single
+ * there is one, made on the button or on the copy a `move-object` makes of it (the picture
+ * carousel's lens). Built: a method answering one of the APK's own views through a single
  * `return-object`, where that view takes the id (see [tiedToId]). The hook goes right before it,
  * and the class is the method's return type. Constructed: see [constructedAt]. Anything else
  * reading the id, such as a table pairing ids with names, isn't a button.
@@ -166,8 +171,13 @@ private fun foundAt(method: Method, body: List<Instruction>, at: Int, id: String
     val check = body.getOrNull(next)
     if (check is FiveRegisterInstruction && check.opcode == Opcode.INVOKE_VIRTUAL && check.registerCount == 1 &&
         check.registerC == button && (check as ReferenceInstruction).reference.toString() == GET_CLASS) next++
-    val cast = body.getOrNull(next)
-    if (cast?.opcode != Opcode.CHECK_CAST || (cast as OneRegisterInstruction).registerA != button) {
+    var cast = body.getOrNull(next)
+    var copy = button
+    if (cast?.opcode in MOVE_OBJECTS && (cast as TwoRegisterInstruction).registerB == button) {
+        copy = cast.registerA
+        cast = body.getOrNull(next + 1)
+    }
+    if (cast?.opcode != Opcode.CHECK_CAST || (cast as OneRegisterInstruction).registerA != copy) {
         throw PatchException("$PATCH: ${method.definingClass}->${method.name} finds the $id button without casting it to its class")
     }
     return ButtonSite(method, at + 3, button, ((cast as ReferenceInstruction).reference as TypeReference).type, true)
@@ -231,9 +241,14 @@ val hideCloseupButtonsPatch = bytecodePatch(
         requireStatusMethod("closeupButtons")
         requireStatusMethod("closeupSearchLabel")
         val backs = buttonSites(CLOSEUP_BACK_ID)
-        val lenses = buttonSites(CLOSEUP_LENS_ID)
+        val single = buttonSites(CLOSEUP_LENS_ID)
         if (backs.isEmpty()) throw PatchException("$PATCH: nothing finds the closeup's back arrow")
-        if (lenses.isEmpty()) throw PatchException("$PATCH: nothing builds the closeup's visual search button")
+        if (single.isEmpty()) throw PatchException("$PATCH: nothing builds the closeup's visual search button")
+        // Only pins with several pictures have the carousel's lens, so a build without it still
+        // hides the lens on every other pin.
+        val carousel = buttonSites(CLOSEUP_CAROUSEL_LENS_ID)
+        if (carousel.isEmpty()) patchLog.warning("$PATCH: nothing finds the picture carousel's visual search button")
+        val lenses = single + carousel
         // The label has its own switch, so a build where its flag can't be pinned down still gets
         // both buttons, just without that third switch.
         val labels = try {

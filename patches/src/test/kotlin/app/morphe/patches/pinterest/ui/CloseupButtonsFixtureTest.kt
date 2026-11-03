@@ -58,7 +58,7 @@ class CloseupButtonsFixtureTest {
         val classes get() = readers + others + states
     }
 
-    private val ids = setOf(CLOSEUP_BACK_ID, CLOSEUP_LENS_ID)
+    private val ids = setOf(CLOSEUP_BACK_ID, CLOSEUP_LENS_ID, CLOSEUP_CAROUSEL_LENS_ID)
     private val fragments = listOf(
         "Lcom/pinterest/feature/pin/closeup/view/OrganicPinCloseupFragment;",
         "Lcom/pinterest/feature/pin/closeup/view/PromotedPinCloseupFragment;",
@@ -88,8 +88,10 @@ class CloseupButtonsFixtureTest {
                     if (before.opcode == Opcode.MOVE_RESULT_OBJECT) {
                         assertEquals("${build.name}: $method hands over the view findViewById found", (before as OneRegisterInstruction).registerA, register)
                         assertEquals(FIND_VIEW_CALL, (body[at - 2] as ReferenceInstruction).reference.toString())
+                        // The carousel copies the found view into another register and casts the copy.
+                        val copy = (body[at + 1] as? TwoRegisterInstruction)?.takeIf { it.opcode == Opcode.MOVE_OBJECT && it.registerB == register }
                         val cast = body.drop(at + 1).first { it.opcode == Opcode.CHECK_CAST }
-                        assertEquals(register, (cast as OneRegisterInstruction).registerA)
+                        assertEquals(copy?.registerA ?: register, (cast as OneRegisterInstruction).registerA)
                         views += ((cast as ReferenceInstruction).reference as TypeReference).type
                     } else if (((before as? ReferenceInstruction)?.reference as? MethodReference)?.name == "<init>") {
                         // Built in place (14.40.0's second closeup): handed over right after its constructor.
@@ -112,7 +114,9 @@ class CloseupButtonsFixtureTest {
             val backs = hooked.getValue(CLOSEUP_BACK_HOOK)
             assertEquals("${build.name}: the back arrow's finds, $backs", 4, backs.size)
             assertTrue("${build.name}: both closeup fragments hand the arrow over, $backs", backs.containsAll(fragments))
-            assertEquals("${build.name}: the lens's builders, ${hooked[CLOSEUP_LENS_HOOK]}", 2, hooked.getValue(CLOSEUP_LENS_HOOK).size)
+            val lenses = hooked.getValue(CLOSEUP_LENS_HOOK)
+            assertEquals("${build.name}: the lens's builders and the carousel's find, $lenses", 3, lenses.size)
+            assertTrue("${build.name}: a pin with several pictures hands its lens over, $lenses", CAROUSEL in lenses)
             assertTrue("${build.name}: a builder whose return is a branch target", relabeled > 0)
 
             assertEquals("${build.name}: the button classes", 2, views.size)
@@ -194,6 +198,16 @@ class CloseupButtonsFixtureTest {
                 patched(context, method).map { it.opcode })
         }
         assertEquals("the other builder still hands its lens over", 1, flag(context, "closeupButtons"))
+    }
+
+    @Test
+    fun `a build without the carousel's lens still hides the lens on every other pin`() {
+        val build = read(Fixtures.declaredBuilds().last())
+        val context = PatchContexts.of(ExtensionDex.classes() + build.classes.filterNot { it.type == CAROUSEL })
+        val warnings = PatchLogCapture.warnings { hideCloseupButtonsPatch.execute(context) }
+        assertEquals(listOf("Hide closeup buttons: nothing finds the picture carousel's visual search button"), warnings)
+        assertEquals(1, flag(context, "closeupButtons"))
+        assertEquals(1, flag(context, "closeupSearchLabel"))
     }
 
     @Test
@@ -351,6 +365,7 @@ class CloseupButtonsFixtureTest {
 
     private companion object {
         const val FIND_VIEW_CALL = "Landroid/view/View;->findViewById(I)Landroid/view/View;"
+        const val CAROUSEL = "Lcom/pinterest/ads/onetap/view/CloseupCarouselView;"
         const val ICON_BUTTON = "Lcom/pinterest/gestalt/iconbutton/GestaltIconButton;"
         const val LENS_BUILDER = "Lyt/d;"
         const val SET_ID_CALL = "Landroid/view/View;->setId(I)V"
