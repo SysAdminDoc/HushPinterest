@@ -20,8 +20,8 @@ import app.hushpinterest.extension.shared.settings.StringSetting;
  * Pinterest's own red. Whatever reaches it is cleaned first ({@link #clean}), so what's saved is
  * always a color or nothing.
  *
- * <p>It isn't a switch or a list, and a settings file carries only those, so it lives here rather
- * than in {@link Settings} and stays out of settings files.
+ * <p>It isn't a switch or a list, so it lives here rather than in {@link Settings}. A settings
+ * file carries it beside the muted words ({@link SettingsBackup#TEXTS}).
  */
 public final class SaveButtonColorSetting extends StringSetting {
     public static final SaveButtonColorSetting SAVE_BUTTON_COLOR =

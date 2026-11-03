@@ -643,6 +643,12 @@ none	keine
 %1$d word	%1$d Wort
 # context: the same for any other number
 %1$d words	%1$d Wörter
+# context: heading of the settings import preview when the file changes no switch but changes the Save button color (the hex color painted on the Save button of a pin someone opens)
+Your Save button color will change.	Die Farbe deiner Merken-Schaltfläche wird geändert.
+# context: the same heading when the file changes both the muted words list and the Save button color
+Your muted words and Save button color will change.	Deine stummgeschalteten Wörter und die Farbe der Merken-Schaltfläche werden geändert.
+# context: in the import preview line that reads like Save button color (Pinterest's red to #3366FF): no color is picked, so the button keeps Pinterest's own red
+Pinterest's red	Pinterest-Rot
 Pinterest's own AI setting	Pinterests eigene KI-Einstellung
 Pinterest can show you fewer AI pins among the ones it picks for you. It works alongside the switches above, and neither one catches every AI pin. Tap to open it.	Pinterest kann dir unter den Pins, die es für dich auswählt, weniger KI-Pins zeigen. Das wirkt zusammen mit den Schaltern oben, und keins von beiden erwischt jeden KI-Pin. Zum Öffnen tippen.
 Pinterest couldn't open that page.	Pinterest konnte diese Seite nicht öffnen.

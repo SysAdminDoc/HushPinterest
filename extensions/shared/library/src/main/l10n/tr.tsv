@@ -643,6 +643,12 @@ none	yok
 %1$d word	%1$d kelime
 # context: the same for any other number
 %1$d words	%1$d kelime
+# context: heading of the settings import preview when the file changes no switch but changes the Save button color (the hex color painted on the Save button of a pin someone opens)
+Your Save button color will change.	Kaydet düğmesinin rengi değişecek.
+# context: the same heading when the file changes both the muted words list and the Save button color
+Your muted words and Save button color will change.	Sessize aldığın kelimeler ve Kaydet düğmesinin rengi değişecek.
+# context: in the import preview line that reads like Save button color (Pinterest's red to #3366FF): no color is picked, so the button keeps Pinterest's own red
+Pinterest's red	Pinterest'in kırmızısı
 Pinterest's own AI setting	Pinterest'in kendi yapay zeka ayarı
 Pinterest can show you fewer AI pins among the ones it picks for you. It works alongside the switches above, and neither one catches every AI pin. Tap to open it.	Pinterest, senin için seçtiği pinler arasında daha az yapay zeka pini gösterebilir. Yukarıdaki anahtarlarla birlikte çalışır ve ikisi de her yapay zeka pinini yakalamaz. Açmak için dokun.
 Pinterest couldn't open that page.	Pinterest bu sayfayı açamadı.
