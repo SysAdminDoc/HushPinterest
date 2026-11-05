@@ -370,8 +370,14 @@ public final class AmoledBlack {
     /**
      * A view that holds a sheet's gray, whether as its own fill or as a layer of one. A ripple is a
      * layer list too. [washes] also takes a layer's see-through gray, as [paint] does for a shape.
+     * A tint draws over every layer's own color (14.43.0's Gestalt buttons, #21), so it's the tint
+     * that changes then.
      */
     private static void paintFill(View fill, boolean black, boolean washes) {
+        if (fill.getBackgroundTintList() != null || tints.containsKey(fill)) {
+            tint(fill, black, washes);
+            return;
+        }
         Drawable background = fill.getBackground();
         if (background instanceof LayerDrawable) paint((LayerDrawable) background, black, washes);
         else paint(fill, black);
@@ -555,13 +561,20 @@ public final class AmoledBlack {
     }
 
     private static void tint(View view, boolean black) {
+        tint(view, black, false);
+    }
+
+    /** [washes] also takes a tint that is partly see-through, never one that is fully clear. */
+    private static void tint(View view, boolean black, boolean washes) {
         if (!black) {
             ColorStateList original = tints.remove(view);
             if (original != null) view.setBackgroundTintList(original);
             return;
         }
         ColorStateList tint = view.getBackgroundTintList();
-        if (tint == null || !opaque(tint.getDefaultColor()) || isBlack(tint)) return;
+        if (tint == null || isBlack(tint)) return;
+        int alpha = Color.alpha(tint.getDefaultColor());
+        if (washes ? alpha == 0 : alpha != 0xFF) return;
         tints.put(view, tint);
         view.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK));
     }
