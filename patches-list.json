@@ -585,7 +585,7 @@
     },
     {
       "name": "Hide navigation buttons",
-      "description": "Lets you hide the Create, Notifications and Search buttons in the bottom bar, each with its own switch. Home and Profile stay. Starts off. Turn them on in HushPinterest settings > Interface.",
+      "description": "Lets you hide the Create, Notifications and Search buttons in the bottom bar, each with its own switch. The Create and Notifications switches also cover those buttons at the top of Home. Home and Profile stay. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Navigation",
       "use": true,
       "dependencies": [

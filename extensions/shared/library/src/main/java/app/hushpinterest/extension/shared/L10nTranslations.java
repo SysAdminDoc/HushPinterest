@@ -571,10 +571,10 @@ public final class L10nTranslations {
                 "Video-Pins ausblenden");
         table.put("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's already open won't change.",
                 "Blendet Zu Collage hinzuf\u00fcgen und Collage remixen in Pin-Men\u00fcs aus, die du ab jetzt \u00f6ffnest. Ein bereits offenes Men\u00fc \u00e4ndert sich nicht.");
-        table.put("Hides Create in the bottom bar. The change shows the next time the bar updates.",
-                "Blendet Erstellen in der unteren Leiste aus. Die \u00c4nderung zeigt sich, wenn sich die Leiste das n\u00e4chste Mal aktualisiert.");
-        table.put("Hides Notifications in the bottom bar. The change shows the next time the bar updates.",
-                "Blendet Benachrichtigungen in der unteren Leiste aus. Die \u00c4nderung zeigt sich, wenn sich die Leiste das n\u00e4chste Mal aktualisiert.");
+        table.put("Hides Create in the bottom bar and at the top of Home. The change shows the next time they update.",
+                "Blendet Erstellen in der unteren Leiste und oben auf der Startseite aus. Die \u00c4nderung zeigt sich, wenn sie sich das n\u00e4chste Mal aktualisieren.");
+        table.put("Hides Notifications in the bottom bar, and Notifications or Inbox at the top of Home. The change shows the next time they update.",
+                "Blendet Benachrichtigungen in der unteren Leiste und Benachrichtigungen oder Posteingang oben auf der Startseite aus. Die \u00c4nderung zeigt sich, wenn sie sich das n\u00e4chste Mal aktualisieren.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Blendet Play-Store-Hinweise aus, die dich zum Update von Pinterest auffordern. Ein bereits offener Hinweis bleibt.");
         table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
@@ -1858,10 +1858,10 @@ public final class L10nTranslations {
                 "Ocultar pines de video");
         table.put("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's already open won't change.",
                 "Oculta A\u00f1adir al collage y Remezclar collage en los men\u00fas de pin que abras a partir de ahora. Un men\u00fa que ya est\u00e1 abierto no cambia.");
-        table.put("Hides Create in the bottom bar. The change shows the next time the bar updates.",
-                "Oculta Crear en la barra inferior. El cambio se ve la pr\u00f3xima vez que se actualice la barra.");
-        table.put("Hides Notifications in the bottom bar. The change shows the next time the bar updates.",
-                "Oculta Notificaciones en la barra inferior. El cambio se ve la pr\u00f3xima vez que se actualice la barra.");
+        table.put("Hides Create in the bottom bar and at the top of Home. The change shows the next time they update.",
+                "Oculta Crear en la barra inferior y en la parte superior de Inicio. El cambio se ve la pr\u00f3xima vez que se actualicen.");
+        table.put("Hides Notifications in the bottom bar, and Notifications or Inbox at the top of Home. The change shows the next time they update.",
+                "Oculta Notificaciones en la barra inferior, y Notificaciones o Bandeja de entrada en la parte superior de Inicio. El cambio se ve la pr\u00f3xima vez que se actualicen.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Oculta los avisos de Play Store que te piden actualizar Pinterest. Un aviso que ya est\u00e1 abierto se queda.");
         table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
@@ -3145,10 +3145,10 @@ public final class L10nTranslations {
                 "Sembunyikan pin video");
         table.put("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's already open won't change.",
                 "Menyembunyikan Tambahkan ke kolase dan Remix kolase di menu pin yang Anda buka mulai sekarang. Menu yang sudah terbuka tidak berubah.");
-        table.put("Hides Create in the bottom bar. The change shows the next time the bar updates.",
-                "Menyembunyikan Buat di bilah bawah. Perubahan terlihat saat bilah diperbarui berikutnya.");
-        table.put("Hides Notifications in the bottom bar. The change shows the next time the bar updates.",
-                "Menyembunyikan Notifikasi di bilah bawah. Perubahan terlihat saat bilah diperbarui berikutnya.");
+        table.put("Hides Create in the bottom bar and at the top of Home. The change shows the next time they update.",
+                "Menyembunyikan Buat di bilah bawah dan di bagian atas Beranda. Perubahan terlihat saat keduanya diperbarui berikutnya.");
+        table.put("Hides Notifications in the bottom bar, and Notifications or Inbox at the top of Home. The change shows the next time they update.",
+                "Menyembunyikan Notifikasi di bilah bawah, serta Notifikasi atau Kotak masuk di bagian atas Beranda. Perubahan terlihat saat keduanya diperbarui berikutnya.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Menyembunyikan pop-up Play Store yang meminta Anda memperbarui Pinterest. Pop-up yang sudah terbuka tetap ada.");
         table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
@@ -4432,10 +4432,10 @@ public final class L10nTranslations {
                 "Ocultar pins de v\u00eddeo");
         table.put("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's already open won't change.",
                 "Oculta Adicionar \u00e0 colagem e Remixar colagem nos menus de pin que voc\u00ea abrir a partir de agora. Um menu j\u00e1 aberto n\u00e3o muda.");
-        table.put("Hides Create in the bottom bar. The change shows the next time the bar updates.",
-                "Oculta Criar na barra inferior. A mudan\u00e7a aparece na pr\u00f3xima vez que a barra for atualizada.");
-        table.put("Hides Notifications in the bottom bar. The change shows the next time the bar updates.",
-                "Oculta Notifica\u00e7\u00f5es na barra inferior. A mudan\u00e7a aparece na pr\u00f3xima vez que a barra for atualizada.");
+        table.put("Hides Create in the bottom bar and at the top of Home. The change shows the next time they update.",
+                "Oculta Criar na barra inferior e no topo do In\u00edcio. A mudan\u00e7a aparece na pr\u00f3xima vez que eles forem atualizados.");
+        table.put("Hides Notifications in the bottom bar, and Notifications or Inbox at the top of Home. The change shows the next time they update.",
+                "Oculta Notifica\u00e7\u00f5es na barra inferior, e Notifica\u00e7\u00f5es ou Caixa de entrada no topo do In\u00edcio. A mudan\u00e7a aparece na pr\u00f3xima vez que eles forem atualizados.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Oculta os avisos da Play Store que pedem para voc\u00ea atualizar o Pinterest. Um aviso j\u00e1 aberto continua.");
         table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",
@@ -5719,10 +5719,10 @@ public final class L10nTranslations {
                 "Video pinlerini gizle");
         table.put("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's already open won't change.",
                 "Bundan sonra a\u00e7t\u0131\u011f\u0131n pin men\u00fclerinde Kolaja ekle ve Kolaj\u0131 yeniden d\u00fczenle \u00f6\u011felerini gizler. Zaten a\u00e7\u0131k olan men\u00fc de\u011fi\u015fmez.");
-        table.put("Hides Create in the bottom bar. The change shows the next time the bar updates.",
-                "Alt \u00e7ubuktaki Olu\u015ftur'u gizler. De\u011fi\u015fiklik \u00e7ubuk bir sonraki g\u00fcncelleni\u015finde g\u00f6r\u00fcn\u00fcr.");
-        table.put("Hides Notifications in the bottom bar. The change shows the next time the bar updates.",
-                "Alt \u00e7ubuktaki Bildirimler'i gizler. De\u011fi\u015fiklik \u00e7ubuk bir sonraki g\u00fcncelleni\u015finde g\u00f6r\u00fcn\u00fcr.");
+        table.put("Hides Create in the bottom bar and at the top of Home. The change shows the next time they update.",
+                "Alt \u00e7ubuktaki ve Ana sayfan\u0131n \u00fcst\u00fcndeki Olu\u015ftur'u gizler. De\u011fi\u015fiklik bunlar bir sonraki g\u00fcncelleni\u015finde g\u00f6r\u00fcn\u00fcr.");
+        table.put("Hides Notifications in the bottom bar, and Notifications or Inbox at the top of Home. The change shows the next time they update.",
+                "Alt \u00e7ubuktaki Bildirimler'i ve Ana sayfan\u0131n \u00fcst\u00fcndeki Bildirimler'i ya da Gelen kutusu'nu gizler. De\u011fi\u015fiklik bunlar bir sonraki g\u00fcncelleni\u015finde g\u00f6r\u00fcn\u00fcr.");
         table.put("Hides Play Store pop-ups asking you to update Pinterest. A pop-up that's already open stays.",
                 "Play Store'un Pinterest'i g\u00fcncellemeni isteyen a\u00e7\u0131l\u0131r uyar\u0131lar\u0131n\u0131 gizler. Zaten a\u00e7\u0131k olan uyar\u0131 kal\u0131r.");
         table.put("Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.",

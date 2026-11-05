@@ -3531,7 +3531,68 @@ public class DexDiff {
                 remove(r, at - 2, at + 1);
             }
             view(navigation.getType(), null, null, c.strings.get(1));
+            String controls = c.strings.get(0).substring(0, c.strings.get(0).indexOf("->"));
+            greetingRow(controls + "->greetingHeader(Landroid/view/View;)V");
             capability(c.callee, m != null && r != null && identities.size() == 1);
+        }
+
+        static final String GREETING_ROW_ID = "home_feed_greeting_header_icon_container";
+        static final String GREETING_BELL_ID = "home_feed_greeting_header_newshub_icon";
+
+        /**
+         * Hide navigation buttons hands Home's greeting header row, where 14.43.0 keeps Create and the
+         * bell on accounts whose bottom bar has neither, to [hook] right after the row's last addView
+         * (the bell frame's). The builder is the one void method reading both ids, found in the clean
+         * target. Nothing may branch to the hook: the branch for a missing row lands on the
+         * instruction after it. A target without the builder has nothing to check here.
+         */
+        void greetingRow(String hook) {
+            List<Method> builders = new ArrayList<>();
+            for (Method m : clean.methods.values()) {
+                if (m.getDefiningClass().startsWith(OWN) || m.getImplementation() == null || !"V".equals(m.getReturnType())) continue;
+                boolean row = false, bell = false;
+                for (Instruction i : instructions(m)) { row |= readsId(i, GREETING_ROW_ID); bell |= readsId(i, GREETING_BELL_ID); }
+                if (row && bell) builders.add(m);
+            }
+            if (builders.isEmpty()) return;
+            Method was = unique(builders, "greeting header builder");
+            Method m = actual(was);
+            List<Integer> at = calls(m, hook, 1);
+            if (m == null || at.size() != 1) return;
+            int k = at.get(0);
+            List<Instruction> body = instructions(m), before = instructions(was);
+            int row = greetingRowRegister(body), cleanLast = lastRowAdd(before, greetingRowRegister(before));
+            if (row < 0 || row != greetingRowRegister(before) || cleanLast < 0 || k != lastRowAdd(body, row) + 1
+                    || k + 1 >= body.size() || cleanLast + 1 >= before.size() || !arguments(body.get(k)).equals(List.of(row))
+                    || !onlyFrom(m, k, k - 1) || body.get(k + 1).getOpcode() != before.get(cleanLast + 1).getOpcode()) {
+                fail(hook + " doesn't hand over the greeting header row right after its last button in " + m);
+                return;
+            }
+            remove(m, k, k + 1);
+        }
+
+        /** The register the row lookup is cast into: the row's id, findViewById, move-result-object, check-cast. */
+        static int greetingRowRegister(List<Instruction> body) {
+            int found = -1;
+            for (int k = 0; k + 3 < body.size(); k++) {
+                if (!readsId(body.get(k), GREETING_ROW_ID) || !methodNamed(body.get(k + 1), "findViewById", "(I)Landroid/view/View;")
+                        || body.get(k + 2).getOpcode() != Opcode.MOVE_RESULT_OBJECT || body.get(k + 3).getOpcode() != Opcode.CHECK_CAST
+                        || firstRegister(body.get(k + 2)) != firstRegister(body.get(k + 3))) continue;
+                if (found >= 0) return -1;
+                found = firstRegister(body.get(k + 3));
+            }
+            return found;
+        }
+
+        /** The last ViewGroup.addView(View) call on [row], or -1. */
+        static int lastRowAdd(List<Instruction> body, int row) {
+            int last = -1;
+            for (int k = 0; k < body.size(); k++) {
+                if (methodNamed(body.get(k), "addView", "(Landroid/view/View;)V")
+                        && "Landroid/view/ViewGroup;".equals(((MethodReference) reference(body.get(k))).getDefiningClass())
+                        && !arguments(body.get(k)).isEmpty() && arguments(body.get(k)).get(0) == row) last = k;
+            }
+            return last;
         }
 
         static boolean methodNamed(Instruction i, String name, String shape) {

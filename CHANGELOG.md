@@ -16,6 +16,7 @@ Every HushPinterest release, newest first.
 * `Hide Search image label on pins` now also turns off the glow Pinterest puts around the lens. (#19)
 * Hide closeup buttons has four new switches for the row under a pin's picture: like, comment, share and more, each on its own. Hiding more also hides the way into that pin's menu from there, Download pin included, and the row says so. They all start off and sit on the Interface page. (#22)
 * `Hide topic suggestions` works on Pinterest 14.43.0 again. It had latched onto a search suggestion cell instead of the "Ideas you might love" row, so the row kept showing under pins with the switch on. Now the row goes away with no gap, and it comes back when you turn the switch off or pause HushPinterest.
+* `Hide Create button` and `Hide Notifications button` now work on Pinterest 14.43.0 accounts that keep those buttons at the top of Home instead of in the bottom bar. The switches did nothing visible there before. The bell or Inbox button goes along with Notifications, and both come back when you turn their switch off or pause HushPinterest.
 * New `Hide Remix button on pins` switch takes the Remix button off pins that show it. The Cutout button next to it stays. It starts off. (#25)
 * New `Hide Visit site button on pins` switch takes away the Visit site button under pins that link to a website. It starts off. (#26)
 * New `Smaller Save button on pins` switch draws the red Save button on a pin you open at four fifths of its size, still at the end of its row. It starts off. (#24)

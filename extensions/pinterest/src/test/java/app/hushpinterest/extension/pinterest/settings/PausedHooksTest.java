@@ -404,8 +404,10 @@ public class PausedHooksTest {
                 () -> UiHooks.searchHistoryVisibility(View.INVISIBLE) != View.INVISIBLE,
                 () -> UiHooks.searchHistoryMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC,
                 PausedHooksTest::hidesRecentSearchRow, PausedHooksTest::foldsRecentSearchRow));
-        probes.put(Settings.HIDE_NAV_CREATE, Collections.singletonList(() -> hidesNavigation(Tab.CREATE)));
-        probes.put(Settings.HIDE_NAV_NOTIFICATIONS, Collections.singletonList(() -> hidesNavigation(Tab.NOTIFICATIONS)));
+        probes.put(Settings.HIDE_NAV_CREATE, Arrays.asList(() -> hidesNavigation(Tab.CREATE),
+                () -> hidesGreetingButton("home_feed_greeting_header_create_icon")));
+        probes.put(Settings.HIDE_NAV_NOTIFICATIONS, Arrays.asList(() -> hidesNavigation(Tab.NOTIFICATIONS),
+                () -> hidesGreetingButton("home_feed_greeting_header_newshub_icon")));
         probes.put(Settings.HIDE_NAV_SEARCH, Collections.singletonList(() -> hidesNavigation(Tab.SEARCH)));
         probes.put(Settings.HIDE_HEADER_BUTTONS, Collections.singletonList(() -> {
             View header = namedView("end_container_icon_bt");
@@ -598,6 +600,15 @@ public class PausedHooksTest {
         view.setVisibility(View.INVISIBLE);
         InterfaceControls.bindNavigation(view, tab);
         return view.getVisibility() != View.INVISIBLE;
+    }
+
+    /** Home's greeting header row holding just the button [name], handed over the way its builder does. */
+    private static boolean hidesGreetingButton(String name) {
+        LinearLayout row = new LinearLayout(RuntimeEnvironment.getApplication());
+        View button = namedView(name);
+        row.addView(button);
+        InterfaceControls.greetingHeader(row);
+        return button.getVisibility() != View.INVISIBLE;
     }
 
     private static boolean hidesMenuItem(String resource) {
