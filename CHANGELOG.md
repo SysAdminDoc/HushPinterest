@@ -5,7 +5,7 @@ Every HushPinterest release, newest first.
 ## Unreleased
 
 * The patches now target Pinterest 14.43.0, version code 14438020. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
-* The patches are now built on Morphe patcher 2.1.0, so you'll need Morphe Manager 2.3.0 or newer to apply them.
+* The patches are now built on Morphe patcher 2.2.0, so you'll need Morphe Manager 2.4.0 or newer to apply them.
 * Long-press download now covers the newer list-style long-press menu too. Download shows up there and saves the pin you pressed, and the switches that hide Save, Send and Search image work on that menu as well.
 * With GmsCore support, Continue with Google no longer does nothing when microG-RE can't be reached. You get a message saying to install it, turn it on or open it, and the setup guide says to add your Google account there first. Export report has a new Google sign-in section (no account names, no tokens) so a failure can be traced.
 * Two new switches under Pin actions, both off to start. Save pins you download also saves a pin you download from its menu, and Download pins you save downloads whatever you save, from any screen.
