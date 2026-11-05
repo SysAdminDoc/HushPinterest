@@ -20,6 +20,7 @@ Every HushPinterest release, newest first.
 * New `Smaller Save button on pins` switch draws the red Save button on a pin you open at four fifths of its size, still at the end of its row. It starts off. (#24)
 * New `Save button color` row paints that Save button in any hex color you type, like #3366FF or #36F. Light colors get dark text so the button stays readable, and Clear brings back Pinterest's red. The color goes into exported settings files along with your switches. (#23)
 * `Black pin menu` now paints the See more and See less cards in a pin's menu black too. They used to stay gray on the black sheet. (#21)
+* `Black comments` turns the quick replies above the reply box (the emoji and "Love it!" buttons) black as well. They stayed gray on Pinterest 14.43.0. (#21)
 * `Black comments` no longer flashes a gray bar across the top of a video pin's comments while they load. (#12)
 * The settings code drops a `Set when you patched` section that never had a page to show, along with its five translations. Nothing changes on screen.
 * **Tooling:** Release walks now bind the bundle, stock build and patch selection to the signed APK installed on the test device. Publish rejects missing or mismatched evidence, unsupported app versions, invalid times and reported problems. A survey of an installed app without matching build evidence stays diagnostic only.

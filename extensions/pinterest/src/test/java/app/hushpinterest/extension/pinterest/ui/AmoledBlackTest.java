@@ -429,6 +429,61 @@ public class AmoledBlackTest {
     }
 
     /**
+     * Seen on Pinterest 14.43.0 (#21): the quick replies above the reply box (the emoji and "Love
+     * it!" buttons) stayed #222226 on the black comments sheet. Each is a small button whose
+     * background is a ripple over a rounded shape, and Pinterest adds them to their row after the
+     * screen is built.
+     */
+    @Test public void theQuickRepliesAddedAfterTheCommentsAreBuiltTurnBlackAndOffGivesTheirGrayBack() {
+        Settings.BLACK_COMMENTS.save(true);
+        FrameLayout screen = sheet(true, "comments_feed", "comment_bottom_bar", "floating_comment_view",
+                "comment_reaction_header", "community_insight_comment_header", "comment_starters");
+        LinearLayout row = new LinearLayout(screen.getContext());
+        row.setId(6);
+        screen.addView(row);
+        View early = seeMoreCard(true, REACTIONS);
+        row.addView(early);
+        AmoledBlack.comments(screen);
+        assertEquals("a quick reply already in the row turns black with the sheet", Color.BLACK, rippleColor(early.getBackground()));
+        View later = seeMoreCard(true, REACTIONS);
+        row.addView(later);
+        screen.layout(0, 0, 320, 480);
+        assertEquals("one added after the build turns black on the next layout", Color.BLACK, rippleColor(later.getBackground()));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        screen.layout(0, 0, 320, 520);
+        assertEquals("Pause gives the gray back", REACTIONS, rippleColor(later.getBackground()));
+        PauseForTests.resume();
+        screen.layout(0, 0, 320, 480);
+        assertEquals(Color.BLACK, rippleColor(later.getBackground()));
+        Settings.BLACK_COMMENTS.save(false);
+        screen.layout(0, 0, 320, 520);
+        assertEquals("the switch off gives the gray back", REACTIONS, rippleColor(early.getBackground()));
+        assertEquals(REACTIONS, rippleColor(later.getBackground()));
+
+        Settings.BLACK_COMMENTS.save(true);
+        Settings.BLACK_PIN_MENU.save(true);
+        FrameLayout menu = sheet(true, "modal_header", "modal_container", "comment_starters");
+        LinearLayout menuRow = new LinearLayout(menu.getContext());
+        menuRow.setId(3);
+        menu.addView(menuRow);
+        View inMenu = seeMoreCard(true, REACTIONS);
+        menuRow.addView(inMenu);
+        AmoledBlack.pinMenu(menu);
+        menu.layout(0, 0, 320, 480);
+        assertEquals("a pin's menu doesn't paint a row of buttons", REACTIONS, rippleColor(inMenu.getBackground()));
+        FrameLayout light = sheet(false, "comments_feed", "comment_bottom_bar", "floating_comment_view",
+                "comment_reaction_header", "community_insight_comment_header", "comment_starters");
+        LinearLayout lightRow = new LinearLayout(light.getContext());
+        lightRow.setId(6);
+        light.addView(lightRow);
+        View day = seeMoreCard(false, REACTIONS);
+        lightRow.addView(day);
+        AmoledBlack.comments(light);
+        light.layout(0, 0, 320, 480);
+        assertEquals("light mode is left alone", REACTIONS, rippleColor(day.getBackground()));
+    }
+
+    /**
      * Seen on Pinterest 14.41.0 (#12): the comments screen fills the window, keeps the status bar's
      * height as its top padding and draws nothing there, so the window's #18181B stayed a gray band
      * above the black list.
