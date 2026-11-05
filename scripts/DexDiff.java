@@ -1947,7 +1947,15 @@ public class DexDiff {
         return b.append(" |maxreg=").append(maxReg).toString();
     }
 
-    /** Compiled contracts use the clean target, never a hook's own presence, to locate callers. */
+    /**
+     * Compiled contracts use the clean target, never a hook's own presence, to locate callers.
+     *
+     * <p>The index holds the classes*.dex at the APK's root alone, the app's own code and all the
+     * patcher reads. 14.43.0 added Facebook's Audience Network as assets/audience_network/classes.dex,
+     * which its SDK loads for itself at run time: 13 Intent.putExtra and one ClipData.newPlainText
+     * call there read as link tracking boundaries the patch had skipped. Every entry still counts in
+     * the body comparison, so a change to that dex is caught there.
+     */
     private static final class FeatureIndex {
         final Map<String, ClassDef> classes = new LinkedHashMap<>();
         final Map<String, Method> methods = new LinkedHashMap<>();
@@ -1958,7 +1966,7 @@ public class DexDiff {
 
         FeatureIndex(File apk) throws Exception {
             MultiDexContainer<? extends DexFile> container = DexFileFactory.loadDexContainer(apk, null);
-            for (String entry : container.getDexEntryNames()) for (ClassDef cd : container.getEntry(entry).getDexFile().getClasses()) {
+            for (String entry : container.getDexEntryNames()) if (entry.matches("classes\\d*\\.dex")) for (ClassDef cd : container.getEntry(entry).getDexFile().getClasses()) {
                 if (classes.putIfAbsent(cd.getType(), cd) != null) duplicates.add(cd.getType());
                 for (Method m : cd.getMethods()) {
                     String key = m.toString();
@@ -3897,8 +3905,11 @@ public class DexDiff {
                 ClassDef parameter = clean.classes.get(method.getParameterTypes().get(0).toString());
                 if (parameter == null || !event.equals(parameter.getSuperclass())) continue;
                 List<Instruction> body = instructions(method);
+                // The event's pin through its getter, or (14.43.0 on, the getter inlined) straight from its field.
                 if (body.stream().anyMatch(i -> reference(i) instanceof MethodReference call && call.getDefiningClass().equals(event)
-                                && call.getReturnType().equals(model) && call.getParameterTypes().isEmpty())
+                                && call.getReturnType().equals(model) && call.getParameterTypes().isEmpty()
+                                || i.getOpcode() == Opcode.IGET_OBJECT && reference(i) instanceof FieldReference field
+                                && field.getDefiningClass().equals(event) && field.getType().equals(model))
                         && body.stream().anyMatch(i -> i.getOpcode() == Opcode.CHECK_CAST && String.valueOf(reference(i)).equals(pin))
                         && body.stream().anyMatch(i -> String.valueOf(reference(i)).startsWith("Landroidx/compose/ui/platform/ComposeView;"))) dispatchers.add(method);
             }
@@ -3910,8 +3921,14 @@ public class DexDiff {
                 int at = sites.get(0);
                 Instruction first = body.get(0), built = at < 2 ? null : body.get(at - 1), builder = at < 2 ? null : body.get(at - 2);
                 Method building = builder == null ? null : clean.methods.get(String.valueOf(reference(builder)));
+                // 14.43.0 folded the older view menu into this dispatcher, and it builds a list of its
+                // own after the newer menu's ComposeView. The newer menu's is the one built before it.
+                int compose = -1;
+                for (int k = 0; k < body.size() && compose < 0; k++) if (body.get(k).getOpcode() == Opcode.NEW_INSTANCE
+                        && String.valueOf(reference(body.get(k))).equals("Landroidx/compose/ui/platform/ComposeView;")) compose = k;
+                final int composeAt = compose;
                 if (building == null || instructions(building).stream().noneMatch(i -> i.getOpcode() == Opcode.CHECK_CAST && String.valueOf(reference(i)).equals(type))
-                        || !callSites(body, String.valueOf(reference(builder))).equals(List.of(at - 2)))
+                        || composeAt < at || !callSites(body, String.valueOf(reference(builder))).stream().filter(k -> k < composeAt).toList().equals(List.of(at - 2)))
                     fail(itemsHook + " doesn't follow the dispatcher's one option list");
                 else if (first.getOpcode() != Opcode.MOVE_OBJECT_FROM16 || ((TwoRegisterInstruction) first).getRegisterB() != parameter(shown, 0)
                         || !isMoveResult(built.getOpcode()) || !arguments(body.get(at)).equals(List.of(firstRegister(built), firstRegister(first)))
@@ -6192,12 +6209,16 @@ public class DexDiff {
         /**
          * Each page of Home goes through the extension as soon as the callback holds it as the feed's own
          * type, and a stub reads the page's items. A build without the callback has nothing to claim.
+         * Home's callback hands the page to Home's own model; up to 14.42.0 it sat in that package, and
+         * 14.43.0 merged it into a shared lambda class elsewhere, so the call picks it, not the package.
          */
         void homePage(Contract c) {
-            String feed = c.strings.get(2);
+            String feed = c.strings.get(2), home = c.strings.get(1);
             List<Method> callbacks = new ArrayList<>();
-            for (ClassDef owner : clean.classes.values()) if (owner.getType().startsWith(c.strings.get(1)))
-                for (Method m : owner.getMethods()) if (m.getName().equals("invoke") && m.getImplementation() != null && handsBack(m, feed)) callbacks.add(m);
+            for (ClassDef owner : clean.classes.values()) if (!owner.getType().startsWith(OWN))
+                for (Method m : owner.getMethods()) if (m.getName().equals("invoke") && m.getImplementation() != null && handsBack(m, feed)
+                        && instructions(m).stream().anyMatch(i -> reference(i) instanceof MethodReference call && call.getDefiningClass().startsWith(home)
+                        && call.getParameterTypes().stream().anyMatch(p -> p.toString().equals(feed)))) callbacks.add(m);
             if (callbacks.isEmpty() || homeRequests().isEmpty()) { capability(c.callee, false); return; }
             boolean asked = homeFields();
             Method after = actual(unique(callbacks, "Home's page callback"));
