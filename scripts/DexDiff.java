@@ -4998,39 +4998,35 @@ public class DexDiff {
         }
 
         static final String TOPIC_BINDER = "Presenter bound to BubblesListView must be of type BubblesListPresenter";
-        static final String TOPIC_ROW = "Lcom/pinterest/feature/search/typeahead/view/SearchTypeaheadAutoCompleteUpsellCell;";
 
         /**
          * Pinterest's topic suggestion row. The binder that logs the row's presenter error reads an
          * int field of its own class from this and packed-switches on it. Every arm the switch starts,
          * the fall-through or a case, begins by casting the binder's view parameter to an interface, and
-         * the row's arm casts it to the one TOPIC_ROW implements (the fall-through in 14.39.0, a case in
-         * 14.40.0). The row hook goes right after that cast with the view parameter, reached only from
-         * the cast. The row's view, the one class implementing that interface, gains an onMeasure
-         * passing itself and each spec through the measure hook before its superclass measures. Both
-         * are found in the clean target, never from the hooks.
+         * the row's arm is the one whose code reaches that log line (the fall-through in 14.39.0 and
+         * 14.43.0, a case in 14.40.0). The row hook goes right after that arm's cast with the view
+         * parameter, reached only from the cast. The row's view, the one class implementing the cast's
+         * interface, gains an onMeasure passing itself and each spec through the measure hook before
+         * its superclass measures. Both are found in the clean target, never from the hooks.
          */
         void topicSuggestions(Contract c) {
             String rowHook = c.strings.get(0), measureHook = c.strings.get(1);
             List<Method> binders = new ArrayList<>();
             for (Method m : clean.holding(TOPIC_BINDER)) if (topicBinder(m)) binders.add(m);
             Method binder = unique(binders, "topic row binder");
-            ClassDef rowClass = clean.classes.get(TOPIC_ROW);
-            if (rowClass == null) fail("the topic row view " + TOPIC_ROW + " is missing");
             boolean row = false, measured = false;
-            if (binder != null && rowClass != null) {
+            if (binder != null) {
                 List<Instruction> was = instructions(binder);
                 int view = parameter(binder, 0);
                 List<Integer> arms = new ArrayList<>();
-                for (int start : topicArms(binder)) {
+                for (int start : topicArmsReachingLog(binder)) {
                     Instruction cast = was.get(start);
-                    if (cast.getOpcode() == Opcode.CHECK_CAST && firstRegister(cast) == view
-                            && rowClass.getInterfaces().contains(String.valueOf(reference(cast)))) arms.add(start);
+                    if (cast.getOpcode() == Opcode.CHECK_CAST && firstRegister(cast) == view) arms.add(start);
                 }
                 String face = null;
                 int arm = -1;
                 if (arms.size() != 1 || writes(was.get(0), view) || writes(was.get(1), view)) {
-                    fail("the topic row binder " + binder + " has no one arm casting its untouched view parameter to the row's interface");
+                    fail("the topic row binder " + binder + " has no one arm reaching its log line that casts its untouched view parameter");
                 } else {
                     arm = arms.get(0);
                     face = String.valueOf(reference(was.get(arm)));
@@ -5050,10 +5046,6 @@ public class DexDiff {
                 if (face != null) for (ClassDef cd : clean.classes.values())
                     if (!cd.getType().startsWith(OWN) && cd.getInterfaces().contains(face)) implementers.add(cd);
                 ClassDef rowView = face == null ? null : uniqueClass(implementers, "topic row view");
-                if (rowView != null && !rowView.getType().equals(TOPIC_ROW)) {
-                    fail("the topic row's interface " + face + " is implemented by " + rowView.getType() + ", not " + TOPIC_ROW);
-                    rowView = null;
-                }
                 if (rowView != null) measured = rowMeasure(rowView, measureHook, "topic row");
             }
             capability(c.callee, row && measured);
@@ -5070,6 +5062,33 @@ public class DexDiff {
                 if (index >= 0 && !starts.contains(index)) starts.add(index);
             }
             return starts;
+        }
+
+        /**
+         * The arm starts whose code reaches the binder's TOPIC_BINDER log line, along branches, cases
+         * and handlers, stopping at a return, a throw or another arm's start.
+         */
+        List<Integer> topicArmsReachingLog(Method m) {
+            List<Instruction> body = instructions(m);
+            List<Integer> starts = topicArms(m);
+            FeatureFlow graph = new FeatureFlow(m);
+            List<Integer> reaching = new ArrayList<>();
+            for (int start : starts) {
+                BitSet seen = new BitSet();
+                Deque<Integer> work = new ArrayDeque<>(List.of(start));
+                while (!work.isEmpty()) {
+                    int k = work.poll();
+                    if (seen.get(k)) continue;
+                    seen.set(k);
+                    if (reference(body.get(k)) instanceof StringReference s && s.getString().equals(TOPIC_BINDER)) {
+                        reaching.add(start);
+                        break;
+                    }
+                    for (int next : graph.normal.get(k)) if (!starts.contains(next)) work.add(next);
+                    for (int next : graph.handlers.get(k)) if (!starts.contains(next)) work.add(next);
+                }
+            }
+            return reaching;
         }
 
         /**
