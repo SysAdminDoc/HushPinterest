@@ -2939,6 +2939,20 @@ public class DexDiff {
                 }
                 // A build without the launch step keeps the capability off, and the patch only warns.
                 if (targets.isEmpty()) return false;
+            } else if (selector.equals("metaAds")) {
+                // The third-party consent check: an instance (vendor)Z whose vendor enum has a
+                // META_AUDIENCE_NETWORK constant of its own type. Ad model enums of that name are never asked.
+                Set<String> vendors = new HashSet<>();
+                for (ClassDef cd : clean.classes.values()) for (Field f : cd.getFields())
+                    if (f.getName().equals("META_AUDIENCE_NETWORK") && f.getType().equals(cd.getType())
+                            && AccessFlags.STATIC.isSet(f.getAccessFlags())) vendors.add(cd.getType());
+                for (Method m : clean.methods.values()) {
+                    if (m.getDefiningClass().startsWith(OWN) || AccessFlags.STATIC.isSet(m.getAccessFlags()) || m.getImplementation() == null
+                            || !m.getReturnType().equals("Z") || m.getParameterTypes().size() != 1) continue;
+                    if (vendors.contains(m.getParameterTypes().get(0).toString())) targets.add(m);
+                }
+                // A build without Meta's ad SDK keeps the capability off, and the patch only warns.
+                if (targets.isEmpty()) return false;
             } else if (selector.equals("saveToast")) {
                 ClassDef container = clean.classes.get(TOAST_CONTAINER);
                 if (container != null) for (Method m : container.getMethods()) {
@@ -2997,8 +3011,9 @@ public class DexDiff {
                     sendableStubs();
                     return original != null;
                 }
-                if (selector.equals("assistant")) {
-                    falseGuard(m, hook);
+                if (selector.equals("assistant") || selector.equals("metaAds")) {
+                    // The consent check hands its vendor to the hook; the assistant check hands nothing.
+                    falseGuard(m, hook, selector.equals("metaAds") ? List.of(parameter(m, 0)) : List.of());
                     return original != null;
                 }
                 if (selector.equals("update")) {
@@ -3013,12 +3028,12 @@ public class DexDiff {
         }
 
         /** A guard on a host method that answers a question: when the hook says so it answers false, and nothing else runs. */
-        void falseGuard(Method m, String hook) {
+        void falseGuard(Method m, String hook, List<Integer> arguments) {
             List<Integer> sites = calls(m, hook, 1);
             if (sites.size() != 1) return;
             List<Instruction> body = instructions(m);
             Layout layout = new Layout(m.getImplementation());
-            if (sites.get(0) != 0 || body.size() < 6 || !arguments(body.get(0)).isEmpty()) {
+            if (sites.get(0) != 0 || body.size() < 6 || !arguments(body.get(0)).equals(arguments)) {
                 fail(hook + " has the wrong guarded placement or arguments in " + m);
                 return;
             }

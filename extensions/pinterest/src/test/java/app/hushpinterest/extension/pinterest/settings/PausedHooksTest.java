@@ -275,6 +275,9 @@ public class PausedHooksTest {
         return UiHooks.recentSearchRowMeasureSpec(row, MEASURE_SPEC) != MEASURE_SPEC;
     }
 
+    /** Pinterest's consent vendors, the constant the Meta ad SDK check is asked with. */
+    private enum ConsentVendor { META_AUDIENCE_NETWORK }
+
     private static Map<BooleanSetting, List<Probe>> probes() {
         // Every hook is in this build, so the filter reads each family's switch.
         PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
@@ -290,6 +293,7 @@ public class PausedHooksTest {
                 },
                 () -> Ads.adViewVisibility(View.VISIBLE) != View.VISIBLE,
                 Ads::skipGoogleAds,
+                () -> Ads.skipMetaConsent(ConsentVendor.META_AUDIENCE_NETWORK),
                 () -> Ads.adViewMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC));
         // A pin Pinterest labels as AI-modified leaves the page.
         probes.put(Settings.HIDE_AI_PINS, Collections.singletonList(() -> {

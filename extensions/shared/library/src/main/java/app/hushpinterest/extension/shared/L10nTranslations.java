@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1236);
+        Map<String, String> table = new HashMap<>(1238);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -710,6 +710,8 @@ public final class L10nTranslations {
                 "Medienlink");
         table.put("Media link copied.",
                 "Medienlink kopiert.");
+        table.put("Meta ad SDK",
+                "Meta-Werbe-SDK");
         table.put("Missing",
                 "Nicht vorhanden");
         table.put("More settings",
@@ -796,11 +798,11 @@ public final class L10nTranslations {
                 "Bilder in Originalqualit\u00e4t");
         table.put("Painting the Save button %1$s. Tap to change it. The change shows on the next pin you open.",
                 "Die Merken-Schaltfl\u00e4che wird %1$s gef\u00e4rbt. Zum \u00c4ndern tippen. Die \u00c4nderung zeigt sich beim n\u00e4chsten Pin, den du \u00f6ffnest.");
-        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
-                "F\u00e4rbt die rote Merken-Schaltfl\u00e4che auf einem ge\u00f6ffneten Pin in einer Farbe deiner Wahl. Im Moment ist sie Pinterest-Rot.");
     }
 
     private static void fillDe6(Map<String, String> table) {
+        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
+                "F\u00e4rbt die rote Merken-Schaltfl\u00e4che auf einem ge\u00f6ffneten Pin in einer Farbe deiner Wahl. Im Moment ist sie Pinterest-Rot.");
         table.put("Pause",
                 "Pausieren");
         table.put("Pause HushPinterest",
@@ -919,11 +921,11 @@ public final class L10nTranslations {
                 "Verfeinere deine Empfehlungen");
         table.put("Refresh",
                 "Aktualisieren");
-        table.put("Release notes",
-                "Versionshinweise");
     }
 
     private static void fillDe7(Map<String, String> table) {
+        table.put("Release notes",
+                "Versionshinweise");
         table.put("Remove ad tracking permissions",
                 "Werbe-Tracking-Berechtigungen entfernen");
         table.put("Remove from history",
@@ -1042,11 +1044,11 @@ public final class L10nTranslations {
                 "Einstellungen importiert.");
         table.put("Settings imported. %1$d switch changed.",
                 "Einstellungen importiert. %1$d Schalter wurde ge\u00e4ndert.");
-        table.put("Settings imported. %1$d switches changed.",
-                "Einstellungen importiert. %1$d Schalter wurden ge\u00e4ndert.");
     }
 
     private static void fillDe8(Map<String, String> table) {
+        table.put("Settings imported. %1$d switches changed.",
+                "Einstellungen importiert. %1$d Schalter wurden ge\u00e4ndert.");
         table.put("Setup and backup guide",
                 "Hilfe zur Einrichtung und Sicherung");
         table.put("Share file",
@@ -1165,11 +1167,11 @@ public final class L10nTranslations {
                 "Die App der Datei ist zu langsam. Es wurde nichts ge\u00e4ndert.");
         table.put("The newest HushPinterest release is %1$s.",
                 "Die neueste Version von HushPinterest ist %1$s.");
-        table.put("The saved list reads back wrong. Save it again as a new file.",
-                "Die gespeicherte Liste ist fehlerhaft. Speichere sie als neue Datei.");
     }
 
     private static void fillDe9(Map<String, String> table) {
+        table.put("The saved list reads back wrong. Save it again as a new file.",
+                "Die gespeicherte Liste ist fehlerhaft. Speichere sie als neue Datei.");
         table.put("The setting couldn't finish updating. Its saved value is shown.",
                 "Aktualisierung unvollst\u00e4ndig. Der gespeicherte Wert wird angezeigt.");
         table.put("There's no diagnostic data to clear.",
@@ -1288,11 +1290,11 @@ public final class L10nTranslations {
                 "Deine stummgeschalteten W\u00f6rter und die Farbe der Merken-Schaltfl\u00e4che werden ge\u00e4ndert.");
         table.put("Your muted words will change.",
                 "Deine stummgeschalteten W\u00f6rter werden ge\u00e4ndert.");
-        table.put("Your switches already match that file, so nothing will change.",
-                "Deine Schalter entsprechen bereits dieser Datei, es \u00e4ndert sich also nichts.");
     }
 
     private static void fillDe10(Map<String, String> table) {
+        table.put("Your switches already match that file, so nothing will change.",
+                "Deine Schalter entsprechen bereits dieser Datei, es \u00e4ndert sich also nichts.");
         table.put("Your switches are working.",
                 "Deine Schalter sind aktiv.");
         table.put("ad buttons on pin closeups",
@@ -1332,7 +1334,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1236);
+        Map<String, String> table = new HashMap<>(1238);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -1995,6 +1997,8 @@ public final class L10nTranslations {
                 "Enlace del archivo");
         table.put("Media link copied.",
                 "Enlace del archivo copiado.");
+        table.put("Meta ad SDK",
+                "SDK de anuncios de Meta");
         table.put("Missing",
                 "No encontrado");
         table.put("More settings",
@@ -2081,11 +2085,11 @@ public final class L10nTranslations {
                 "Im\u00e1genes en calidad original");
         table.put("Painting the Save button %1$s. Tap to change it. The change shows on the next pin you open.",
                 "El bot\u00f3n Guardar se pinta de %1$s. Toca para cambiarlo. El cambio se ve en el siguiente pin que abras.");
-        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
-                "Pinta el bot\u00f3n rojo Guardar en un pin que abres del color que elijas. Por ahora es el rojo de Pinterest.");
     }
 
     private static void fillEs6(Map<String, String> table) {
+        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
+                "Pinta el bot\u00f3n rojo Guardar en un pin que abres del color que elijas. Por ahora es el rojo de Pinterest.");
         table.put("Pause",
                 "Pausar");
         table.put("Pause HushPinterest",
@@ -2204,11 +2208,11 @@ public final class L10nTranslations {
                 "Ajusta las recomendaciones");
         table.put("Refresh",
                 "Actualizar");
-        table.put("Release notes",
-                "Notas de la versi\u00f3n");
     }
 
     private static void fillEs7(Map<String, String> table) {
+        table.put("Release notes",
+                "Notas de la versi\u00f3n");
         table.put("Remove ad tracking permissions",
                 "Quitar permisos de seguimiento publicitario");
         table.put("Remove from history",
@@ -2327,11 +2331,11 @@ public final class L10nTranslations {
                 "Configuraci\u00f3n importada.");
         table.put("Settings imported. %1$d switch changed.",
                 "Configuraci\u00f3n importada. Cambi\u00f3 %1$d interruptor.");
-        table.put("Settings imported. %1$d switches changed.",
-                "Configuraci\u00f3n importada. Cambiaron %1$d interruptores.");
     }
 
     private static void fillEs8(Map<String, String> table) {
+        table.put("Settings imported. %1$d switches changed.",
+                "Configuraci\u00f3n importada. Cambiaron %1$d interruptores.");
         table.put("Setup and backup guide",
                 "Gu\u00eda de configuraci\u00f3n y copias de seguridad");
         table.put("Share file",
@@ -2450,11 +2454,11 @@ public final class L10nTranslations {
                 "La app del archivo tarda demasiado. No se cambi\u00f3 nada.");
         table.put("The newest HushPinterest release is %1$s.",
                 "La versi\u00f3n m\u00e1s reciente de HushPinterest es la %1$s.");
-        table.put("The saved list reads back wrong. Save it again as a new file.",
-                "La lista guardada no se lee bien. Gu\u00e1rdala como un archivo nuevo.");
     }
 
     private static void fillEs9(Map<String, String> table) {
+        table.put("The saved list reads back wrong. Save it again as a new file.",
+                "La lista guardada no se lee bien. Gu\u00e1rdala como un archivo nuevo.");
         table.put("The setting couldn't finish updating. Its saved value is shown.",
                 "No se pudo terminar de actualizar el ajuste. Se muestra su valor guardado.");
         table.put("There's no diagnostic data to clear.",
@@ -2573,11 +2577,11 @@ public final class L10nTranslations {
                 "Tus palabras silenciadas y el color del bot\u00f3n Guardar cambiar\u00e1n.");
         table.put("Your muted words will change.",
                 "Tus palabras silenciadas cambiar\u00e1n.");
-        table.put("Your switches already match that file, so nothing will change.",
-                "Tus interruptores ya coinciden con ese archivo, as\u00ed que no cambiar\u00e1 nada.");
     }
 
     private static void fillEs10(Map<String, String> table) {
+        table.put("Your switches already match that file, so nothing will change.",
+                "Tus interruptores ya coinciden con ese archivo, as\u00ed que no cambiar\u00e1 nada.");
         table.put("Your switches are working.",
                 "Tus interruptores est\u00e1n funcionando.");
         table.put("ad buttons on pin closeups",
@@ -2617,7 +2621,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1236);
+        Map<String, String> table = new HashMap<>(1238);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -3280,6 +3284,8 @@ public final class L10nTranslations {
                 "Tautan media");
         table.put("Media link copied.",
                 "Tautan media disalin.");
+        table.put("Meta ad SDK",
+                "SDK iklan Meta");
         table.put("Missing",
                 "Tidak ditemukan");
         table.put("More settings",
@@ -3366,11 +3372,11 @@ public final class L10nTranslations {
                 "Gambar kualitas asli");
         table.put("Painting the Save button %1$s. Tap to change it. The change shows on the next pin you open.",
                 "Tombol Simpan diwarnai %1$s. Ketuk untuk mengubahnya. Perubahan terlihat pada pin berikutnya yang Anda buka.");
-        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
-                "Mewarnai tombol Simpan merah di pin yang Anda buka dengan warna pilihan Anda. Saat ini masih merah Pinterest.");
     }
 
     private static void fillIn6(Map<String, String> table) {
+        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
+                "Mewarnai tombol Simpan merah di pin yang Anda buka dengan warna pilihan Anda. Saat ini masih merah Pinterest.");
         table.put("Pause",
                 "Jeda");
         table.put("Pause HushPinterest",
@@ -3489,11 +3495,11 @@ public final class L10nTranslations {
                 "Persempit rekomendasi Anda");
         table.put("Refresh",
                 "Muat ulang");
-        table.put("Release notes",
-                "Catatan rilis");
     }
 
     private static void fillIn7(Map<String, String> table) {
+        table.put("Release notes",
+                "Catatan rilis");
         table.put("Remove ad tracking permissions",
                 "Hapus izin pelacakan iklan");
         table.put("Remove from history",
@@ -3612,11 +3618,11 @@ public final class L10nTranslations {
                 "Pengaturan diimpor.");
         table.put("Settings imported. %1$d switch changed.",
                 "Pengaturan diimpor. %1$d sakelar berubah.");
-        table.put("Settings imported. %1$d switches changed.",
-                "Pengaturan diimpor. %1$d sakelar berubah.");
     }
 
     private static void fillIn8(Map<String, String> table) {
+        table.put("Settings imported. %1$d switches changed.",
+                "Pengaturan diimpor. %1$d sakelar berubah.");
         table.put("Setup and backup guide",
                 "Panduan penyiapan dan pencadangan");
         table.put("Share file",
@@ -3735,11 +3741,11 @@ public final class L10nTranslations {
                 "Aplikasi file itu terlalu lambat. Tidak ada yang diubah.");
         table.put("The newest HushPinterest release is %1$s.",
                 "Rilis HushPinterest terbaru adalah %1$s.");
-        table.put("The saved list reads back wrong. Save it again as a new file.",
-                "Daftar yang disimpan tidak cocok. Simpan lagi sebagai file baru.");
     }
 
     private static void fillIn9(Map<String, String> table) {
+        table.put("The saved list reads back wrong. Save it again as a new file.",
+                "Daftar yang disimpan tidak cocok. Simpan lagi sebagai file baru.");
         table.put("The setting couldn't finish updating. Its saved value is shown.",
                 "Pengaturan ini tidak dapat selesai diperbarui. Nilai yang tersimpan ditampilkan.");
         table.put("There's no diagnostic data to clear.",
@@ -3858,11 +3864,11 @@ public final class L10nTranslations {
                 "Kata yang Anda bisukan dan warna tombol Simpan akan berubah.");
         table.put("Your muted words will change.",
                 "Kata yang Anda bisukan akan berubah.");
-        table.put("Your switches already match that file, so nothing will change.",
-                "Sakelar Anda sudah sesuai dengan file itu, jadi tidak ada yang akan berubah.");
     }
 
     private static void fillIn10(Map<String, String> table) {
+        table.put("Your switches already match that file, so nothing will change.",
+                "Sakelar Anda sudah sesuai dengan file itu, jadi tidak ada yang akan berubah.");
         table.put("Your switches are working.",
                 "Sakelar Anda aktif.");
         table.put("ad buttons on pin closeups",
@@ -3902,7 +3908,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1236);
+        Map<String, String> table = new HashMap<>(1238);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -4565,6 +4571,8 @@ public final class L10nTranslations {
                 "Link da m\u00eddia");
         table.put("Media link copied.",
                 "Link da m\u00eddia copiado.");
+        table.put("Meta ad SDK",
+                "SDK de an\u00fancios da Meta");
         table.put("Missing",
                 "N\u00e3o encontrado");
         table.put("More settings",
@@ -4651,11 +4659,11 @@ public final class L10nTranslations {
                 "Imagens em qualidade original");
         table.put("Painting the Save button %1$s. Tap to change it. The change shows on the next pin you open.",
                 "O bot\u00e3o Salvar fica %1$s. Toque para mudar. A mudan\u00e7a aparece no pr\u00f3ximo pin que voc\u00ea abrir.");
-        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
-                "Pinta o bot\u00e3o vermelho Salvar em um pin que voc\u00ea abre com a cor que voc\u00ea escolher. Por enquanto \u00e9 o vermelho do Pinterest.");
     }
 
     private static void fillPt_rBR6(Map<String, String> table) {
+        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
+                "Pinta o bot\u00e3o vermelho Salvar em um pin que voc\u00ea abre com a cor que voc\u00ea escolher. Por enquanto \u00e9 o vermelho do Pinterest.");
         table.put("Pause",
                 "Pausar");
         table.put("Pause HushPinterest",
@@ -4774,11 +4782,11 @@ public final class L10nTranslations {
                 "Refinar suas recomenda\u00e7\u00f5es");
         table.put("Refresh",
                 "Atualizar");
-        table.put("Release notes",
-                "Notas da vers\u00e3o");
     }
 
     private static void fillPt_rBR7(Map<String, String> table) {
+        table.put("Release notes",
+                "Notas da vers\u00e3o");
         table.put("Remove ad tracking permissions",
                 "Remover permiss\u00f5es de rastreamento de an\u00fancios");
         table.put("Remove from history",
@@ -4897,11 +4905,11 @@ public final class L10nTranslations {
                 "Configura\u00e7\u00f5es importadas.");
         table.put("Settings imported. %1$d switch changed.",
                 "Configura\u00e7\u00f5es importadas. %1$d op\u00e7\u00e3o foi alterada.");
-        table.put("Settings imported. %1$d switches changed.",
-                "Configura\u00e7\u00f5es importadas. %1$d op\u00e7\u00f5es foram alteradas.");
     }
 
     private static void fillPt_rBR8(Map<String, String> table) {
+        table.put("Settings imported. %1$d switches changed.",
+                "Configura\u00e7\u00f5es importadas. %1$d op\u00e7\u00f5es foram alteradas.");
         table.put("Setup and backup guide",
                 "Guia de configura\u00e7\u00e3o e backup");
         table.put("Share file",
@@ -5020,11 +5028,11 @@ public final class L10nTranslations {
                 "O app do arquivo est\u00e1 lento demais. Nada foi alterado.");
         table.put("The newest HushPinterest release is %1$s.",
                 "A vers\u00e3o mais nova do HushPinterest \u00e9 %1$s.");
-        table.put("The saved list reads back wrong. Save it again as a new file.",
-                "A lista salva n\u00e3o confere. Salve de novo como um arquivo novo.");
     }
 
     private static void fillPt_rBR9(Map<String, String> table) {
+        table.put("The saved list reads back wrong. Save it again as a new file.",
+                "A lista salva n\u00e3o confere. Salve de novo como um arquivo novo.");
         table.put("The setting couldn't finish updating. Its saved value is shown.",
                 "A configura\u00e7\u00e3o n\u00e3o terminou de atualizar. O valor salvo aparece.");
         table.put("There's no diagnostic data to clear.",
@@ -5143,11 +5151,11 @@ public final class L10nTranslations {
                 "Suas palavras silenciadas e a cor do bot\u00e3o Salvar ser\u00e3o alteradas.");
         table.put("Your muted words will change.",
                 "Suas palavras silenciadas ser\u00e3o alteradas.");
-        table.put("Your switches already match that file, so nothing will change.",
-                "Suas op\u00e7\u00f5es j\u00e1 correspondem \u00e0s desse arquivo, ent\u00e3o nada ser\u00e1 alterado.");
     }
 
     private static void fillPt_rBR10(Map<String, String> table) {
+        table.put("Your switches already match that file, so nothing will change.",
+                "Suas op\u00e7\u00f5es j\u00e1 correspondem \u00e0s desse arquivo, ent\u00e3o nada ser\u00e1 alterado.");
         table.put("Your switches are working.",
                 "Suas op\u00e7\u00f5es est\u00e3o funcionando.");
         table.put("ad buttons on pin closeups",
@@ -5187,7 +5195,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1236);
+        Map<String, String> table = new HashMap<>(1238);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -5850,6 +5858,8 @@ public final class L10nTranslations {
                 "Medya ba\u011flant\u0131s\u0131");
         table.put("Media link copied.",
                 "Medya ba\u011flant\u0131s\u0131 kopyaland\u0131.");
+        table.put("Meta ad SDK",
+                "Meta reklam SDK's\u0131");
         table.put("Missing",
                 "Bulunamad\u0131");
         table.put("More settings",
@@ -5936,11 +5946,11 @@ public final class L10nTranslations {
                 "Orijinal kalitede g\u00f6rseller");
         table.put("Painting the Save button %1$s. Tap to change it. The change shows on the next pin you open.",
                 "Kaydet d\u00fc\u011fmesi %1$s rengine boyan\u0131yor. De\u011fi\u015ftirmek i\u00e7in dokun. De\u011fi\u015fiklik a\u00e7t\u0131\u011f\u0131n bir sonraki pinde g\u00f6r\u00fcn\u00fcr.");
-        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
-                "A\u00e7t\u0131\u011f\u0131n bir pindeki k\u0131rm\u0131z\u0131 Kaydet d\u00fc\u011fmesini se\u00e7ti\u011fin renge boyar. \u015eu an Pinterest'in k\u0131rm\u0131z\u0131s\u0131.");
     }
 
     private static void fillTr6(Map<String, String> table) {
+        table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
+                "A\u00e7t\u0131\u011f\u0131n bir pindeki k\u0131rm\u0131z\u0131 Kaydet d\u00fc\u011fmesini se\u00e7ti\u011fin renge boyar. \u015eu an Pinterest'in k\u0131rm\u0131z\u0131s\u0131.");
         table.put("Pause",
                 "Duraklat");
         table.put("Pause HushPinterest",
@@ -6059,11 +6069,11 @@ public final class L10nTranslations {
                 "\u00d6nerilerinizi daralt\u0131n");
         table.put("Refresh",
                 "Yenile");
-        table.put("Release notes",
-                "S\u00fcr\u00fcm notlar\u0131");
     }
 
     private static void fillTr7(Map<String, String> table) {
+        table.put("Release notes",
+                "S\u00fcr\u00fcm notlar\u0131");
         table.put("Remove ad tracking permissions",
                 "Reklam izleme izinlerini kald\u0131r");
         table.put("Remove from history",
@@ -6182,11 +6192,11 @@ public final class L10nTranslations {
                 "Ayarlar i\u00e7e aktar\u0131ld\u0131.");
         table.put("Settings imported. %1$d switch changed.",
                 "Ayarlar i\u00e7e aktar\u0131ld\u0131. %1$d anahtar de\u011fi\u015fti.");
-        table.put("Settings imported. %1$d switches changed.",
-                "Ayarlar i\u00e7e aktar\u0131ld\u0131. %1$d anahtar de\u011fi\u015fti.");
     }
 
     private static void fillTr8(Map<String, String> table) {
+        table.put("Settings imported. %1$d switches changed.",
+                "Ayarlar i\u00e7e aktar\u0131ld\u0131. %1$d anahtar de\u011fi\u015fti.");
         table.put("Setup and backup guide",
                 "Kurulum ve yedekleme rehberi");
         table.put("Share file",
@@ -6305,11 +6315,11 @@ public final class L10nTranslations {
                 "Dosyan\u0131n uygulamas\u0131 \u00e7ok yava\u015f. Hi\u00e7bir \u015fey de\u011fi\u015ftirilmedi.");
         table.put("The newest HushPinterest release is %1$s.",
                 "En yeni HushPinterest s\u00fcr\u00fcm\u00fc %1$s.");
-        table.put("The saved list reads back wrong. Save it again as a new file.",
-                "Kaydedilen liste yanl\u0131\u015f okunuyor. Yeni bir dosya olarak tekrar kaydet.");
     }
 
     private static void fillTr9(Map<String, String> table) {
+        table.put("The saved list reads back wrong. Save it again as a new file.",
+                "Kaydedilen liste yanl\u0131\u015f okunuyor. Yeni bir dosya olarak tekrar kaydet.");
         table.put("The setting couldn't finish updating. Its saved value is shown.",
                 "Ayar\u0131n g\u00fcncellenmesi tamamlanamad\u0131. Kay\u0131tl\u0131 de\u011feri g\u00f6steriliyor.");
         table.put("There's no diagnostic data to clear.",
@@ -6428,11 +6438,11 @@ public final class L10nTranslations {
                 "Sessize ald\u0131\u011f\u0131n kelimeler ve Kaydet d\u00fc\u011fmesinin rengi de\u011fi\u015fecek.");
         table.put("Your muted words will change.",
                 "Sessize ald\u0131\u011f\u0131n kelimeler de\u011fi\u015fecek.");
-        table.put("Your switches already match that file, so nothing will change.",
-                "Anahtarlar\u0131n zaten o dosyayla ayn\u0131, bu y\u00fczden hi\u00e7bir \u015fey de\u011fi\u015fmeyecek.");
     }
 
     private static void fillTr10(Map<String, String> table) {
+        table.put("Your switches already match that file, so nothing will change.",
+                "Anahtarlar\u0131n zaten o dosyayla ayn\u0131, bu y\u00fczden hi\u00e7bir \u015fey de\u011fi\u015fmeyecek.");
         table.put("Your switches are working.",
                 "Anahtarlar\u0131n \u00e7al\u0131\u015f\u0131yor.");
         table.put("ad buttons on pin closeups",
