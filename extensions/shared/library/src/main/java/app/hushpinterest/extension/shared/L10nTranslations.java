@@ -289,7 +289,7 @@ public final class L10nTranslations {
         table.put("Couldn't open that file. Nothing was changed.",
                 "Diese Datei lie\u00df sich nicht \u00f6ffnen. Es wurde nichts ge\u00e4ndert.");
         table.put("Couldn't open the Save button color. Try again.",
-                "Die Farbe der Merken-Schaltfl\u00e4che lie\u00df sich nicht \u00f6ffnen. Versuche es noch einmal.");
+                "Konnte die Farbe der Merken-Schaltfl\u00e4che nicht \u00f6ffnen. Versuche es erneut.");
         table.put("Couldn't open the file picker. Try again.",
                 "Die Dateiauswahl lie\u00df sich nicht \u00f6ffnen. Versuche es noch einmal.");
         table.put("Couldn't open the folder picker. Try again.",
@@ -328,7 +328,7 @@ public final class L10nTranslations {
         table.put("Couldn't save history for one result. Check Downloads.",
                 "F\u00fcr ein Ergebnis konnte kein Verlauf gespeichert werden. Pr\u00fcfe Downloads.");
         table.put("Couldn't save the Save button color. Try again.",
-                "Die Farbe der Merken-Schaltfl\u00e4che lie\u00df sich nicht speichern. Versuche es noch einmal.");
+                "Konnte die Farbe der Merken-Schaltfl\u00e4che nicht speichern. Versuche es erneut.");
         table.put("Couldn't save the muted words. Try again.",
                 "Stummgeschaltete W\u00f6rter lie\u00dfen sich nicht speichern. Versuche es noch einmal.");
         table.put("Couldn't save the pin list. Try again.",
@@ -738,6 +738,8 @@ public final class L10nTranslations {
                 "Keine sichtbaren Pins. \u00d6ffne ein Pin-Men\u00fc im Raster und versuch es erneut.");
         table.put("None of Pinterest's web addresses are selected for this app, so their links open elsewhere. Tap to select them in Android's settings.",
                 "Keine Webadresse von Pinterest ist f\u00fcr diese App ausgew\u00e4hlt, deshalb \u00f6ffnen sich ihre Links woanders. Tippe, um sie in den Android-Einstellungen auszuw\u00e4hlen.");
+        table.put("Not a hex color, so nothing changed. Try one like #3366FF.",
+                "Keine Hex-Farbe, also hat sich nichts ge\u00e4ndert. Versuche etwas wie #3366FF.");
         table.put("Not enough storage.",
                 "Nicht genug Speicherplatz.");
         table.put("Nothing was queued. The selection stopped or wasn't available.",
@@ -796,11 +798,11 @@ public final class L10nTranslations {
                 "Die Merken-Schaltfl\u00e4che wird %1$s gef\u00e4rbt. Zum \u00c4ndern tippen. Die \u00c4nderung zeigt sich beim n\u00e4chsten Pin, den du \u00f6ffnest.");
         table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
                 "F\u00e4rbt die rote Merken-Schaltfl\u00e4che auf einem ge\u00f6ffneten Pin in einer Farbe deiner Wahl. Im Moment ist sie Pinterest-Rot.");
-        table.put("Pause",
-                "Pausieren");
     }
 
     private static void fillDe6(Map<String, String> table) {
+        table.put("Pause",
+                "Pausieren");
         table.put("Pause HushPinterest",
                 "HushPinterest pausieren");
         table.put("Pause, backup and diagnostics",
@@ -919,11 +921,11 @@ public final class L10nTranslations {
                 "Aktualisieren");
         table.put("Release notes",
                 "Versionshinweise");
-        table.put("Remove ad tracking permissions",
-                "Werbe-Tracking-Berechtigungen entfernen");
     }
 
     private static void fillDe7(Map<String, String> table) {
+        table.put("Remove ad tracking permissions",
+                "Werbe-Tracking-Berechtigungen entfernen");
         table.put("Remove from history",
                 "Aus Verlauf entfernen");
         table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
@@ -1042,11 +1044,11 @@ public final class L10nTranslations {
                 "Einstellungen importiert. %1$d Schalter wurde ge\u00e4ndert.");
         table.put("Settings imported. %1$d switches changed.",
                 "Einstellungen importiert. %1$d Schalter wurden ge\u00e4ndert.");
-        table.put("Setup and backup guide",
-                "Hilfe zur Einrichtung und Sicherung");
     }
 
     private static void fillDe8(Map<String, String> table) {
+        table.put("Setup and backup guide",
+                "Hilfe zur Einrichtung und Sicherung");
         table.put("Share file",
                 "Datei teilen");
         table.put("Share image",
@@ -1141,10 +1143,8 @@ public final class L10nTranslations {
                 "Das Bild ist zu gro\u00df zum Teilen.");
         table.put("That isn't a HushPinterest settings file. Nothing was changed.",
                 "Das ist keine HushPinterest-Einstellungsdatei. Es wurde nichts ge\u00e4ndert.");
-        table.put("That isn't a hex color, so nothing changed. Try one like #3366FF.",
-                "Das ist keine Hex-Farbe, deshalb hat sich nichts ge\u00e4ndert. Versuche etwas wie #3366FF.");
-        table.put("The Save button is back to Pinterest's red on the next pin you open.",
-                "Die Merken-Schaltfl\u00e4che ist beim n\u00e4chsten Pin, den du \u00f6ffnest, wieder Pinterest-Rot.");
+        table.put("The Save button goes back to Pinterest's red on your next pin.",
+                "Die Merken-Schaltfl\u00e4che ist beim n\u00e4chsten Pin wieder Pinterest-Rot.");
         table.put("The Save button turns %1$s on the next pin you open.",
                 "Die Merken-Schaltfl\u00e4che wird beim n\u00e4chsten Pin, den du \u00f6ffnest, %1$s.");
         table.put("The app with the last pin list hasn't answered. Try later.",
@@ -2023,6 +2023,8 @@ public final class L10nTranslations {
                 "No hay pines visibles. Abre el men\u00fa de un pin en la cuadr\u00edcula.");
         table.put("None of Pinterest's web addresses are selected for this app, so their links open elsewhere. Tap to select them in Android's settings.",
                 "Ninguna direcci\u00f3n web de Pinterest est\u00e1 seleccionada para esta app, as\u00ed que sus enlaces se abren en otro sitio. Toca para seleccionarlas en los ajustes de Android.");
+        table.put("Not a hex color, so nothing changed. Try one like #3366FF.",
+                "No es un color hex, as\u00ed que no cambi\u00f3 nada. Prueba con uno como #3366FF.");
         table.put("Not enough storage.",
                 "No hay suficiente espacio.");
         table.put("Nothing was queued. The selection stopped or wasn't available.",
@@ -2081,11 +2083,11 @@ public final class L10nTranslations {
                 "El bot\u00f3n Guardar se pinta de %1$s. Toca para cambiarlo. El cambio se ve en el siguiente pin que abras.");
         table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
                 "Pinta el bot\u00f3n rojo Guardar en un pin que abres del color que elijas. Por ahora es el rojo de Pinterest.");
-        table.put("Pause",
-                "Pausar");
     }
 
     private static void fillEs6(Map<String, String> table) {
+        table.put("Pause",
+                "Pausar");
         table.put("Pause HushPinterest",
                 "Pausar HushPinterest");
         table.put("Pause, backup and diagnostics",
@@ -2204,11 +2206,11 @@ public final class L10nTranslations {
                 "Actualizar");
         table.put("Release notes",
                 "Notas de la versi\u00f3n");
-        table.put("Remove ad tracking permissions",
-                "Quitar permisos de seguimiento publicitario");
     }
 
     private static void fillEs7(Map<String, String> table) {
+        table.put("Remove ad tracking permissions",
+                "Quitar permisos de seguimiento publicitario");
         table.put("Remove from history",
                 "Eliminar del historial");
         table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
@@ -2327,11 +2329,11 @@ public final class L10nTranslations {
                 "Configuraci\u00f3n importada. Cambi\u00f3 %1$d interruptor.");
         table.put("Settings imported. %1$d switches changed.",
                 "Configuraci\u00f3n importada. Cambiaron %1$d interruptores.");
-        table.put("Setup and backup guide",
-                "Gu\u00eda de configuraci\u00f3n y copias de seguridad");
     }
 
     private static void fillEs8(Map<String, String> table) {
+        table.put("Setup and backup guide",
+                "Gu\u00eda de configuraci\u00f3n y copias de seguridad");
         table.put("Share file",
                 "Compartir archivo");
         table.put("Share image",
@@ -2426,10 +2428,8 @@ public final class L10nTranslations {
                 "La imagen es demasiado grande para compartirla.");
         table.put("That isn't a HushPinterest settings file. Nothing was changed.",
                 "Eso no es un archivo de configuraci\u00f3n de HushPinterest. No se cambi\u00f3 nada.");
-        table.put("That isn't a hex color, so nothing changed. Try one like #3366FF.",
-                "Eso no es un color hexadecimal, as\u00ed que no cambi\u00f3 nada. Prueba con uno como #3366FF.");
-        table.put("The Save button is back to Pinterest's red on the next pin you open.",
-                "El bot\u00f3n Guardar vuelve al rojo de Pinterest en el siguiente pin que abras.");
+        table.put("The Save button goes back to Pinterest's red on your next pin.",
+                "El bot\u00f3n Guardar vuelve al rojo de Pinterest en tu siguiente pin.");
         table.put("The Save button turns %1$s on the next pin you open.",
                 "El bot\u00f3n Guardar se vuelve %1$s en el siguiente pin que abras.");
         table.put("The app with the last pin list hasn't answered. Try later.",
@@ -3308,6 +3308,8 @@ public final class L10nTranslations {
                 "Tidak ada Pin terlihat. Buka menu Pin dari kisi lalu coba lagi.");
         table.put("None of Pinterest's web addresses are selected for this app, so their links open elsewhere. Tap to select them in Android's settings.",
                 "Tidak ada alamat web Pinterest yang dipilih untuk aplikasi ini, jadi tautannya terbuka di tempat lain. Ketuk untuk memilihnya di pengaturan Android.");
+        table.put("Not a hex color, so nothing changed. Try one like #3366FF.",
+                "Bukan warna hex, jadi tidak ada yang berubah. Coba seperti #3366FF.");
         table.put("Not enough storage.",
                 "Ruang penyimpanan tidak cukup.");
         table.put("Nothing was queued. The selection stopped or wasn't available.",
@@ -3366,11 +3368,11 @@ public final class L10nTranslations {
                 "Tombol Simpan diwarnai %1$s. Ketuk untuk mengubahnya. Perubahan terlihat pada pin berikutnya yang Anda buka.");
         table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
                 "Mewarnai tombol Simpan merah di pin yang Anda buka dengan warna pilihan Anda. Saat ini masih merah Pinterest.");
-        table.put("Pause",
-                "Jeda");
     }
 
     private static void fillIn6(Map<String, String> table) {
+        table.put("Pause",
+                "Jeda");
         table.put("Pause HushPinterest",
                 "Jeda HushPinterest");
         table.put("Pause, backup and diagnostics",
@@ -3489,11 +3491,11 @@ public final class L10nTranslations {
                 "Muat ulang");
         table.put("Release notes",
                 "Catatan rilis");
-        table.put("Remove ad tracking permissions",
-                "Hapus izin pelacakan iklan");
     }
 
     private static void fillIn7(Map<String, String> table) {
+        table.put("Remove ad tracking permissions",
+                "Hapus izin pelacakan iklan");
         table.put("Remove from history",
                 "Hapus dari riwayat");
         table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
@@ -3612,11 +3614,11 @@ public final class L10nTranslations {
                 "Pengaturan diimpor. %1$d sakelar berubah.");
         table.put("Settings imported. %1$d switches changed.",
                 "Pengaturan diimpor. %1$d sakelar berubah.");
-        table.put("Setup and backup guide",
-                "Panduan penyiapan dan pencadangan");
     }
 
     private static void fillIn8(Map<String, String> table) {
+        table.put("Setup and backup guide",
+                "Panduan penyiapan dan pencadangan");
         table.put("Share file",
                 "Bagikan file");
         table.put("Share image",
@@ -3711,10 +3713,8 @@ public final class L10nTranslations {
                 "Gambar itu terlalu besar untuk dibagikan.");
         table.put("That isn't a HushPinterest settings file. Nothing was changed.",
                 "Itu bukan file pengaturan HushPinterest. Tidak ada yang diubah.");
-        table.put("That isn't a hex color, so nothing changed. Try one like #3366FF.",
-                "Itu bukan warna hex, jadi tidak ada yang berubah. Coba seperti #3366FF.");
-        table.put("The Save button is back to Pinterest's red on the next pin you open.",
-                "Tombol Simpan kembali ke merah Pinterest pada pin berikutnya yang Anda buka.");
+        table.put("The Save button goes back to Pinterest's red on your next pin.",
+                "Tombol Simpan kembali ke merah Pinterest pada pin Anda berikutnya.");
         table.put("The Save button turns %1$s on the next pin you open.",
                 "Tombol Simpan menjadi %1$s pada pin berikutnya yang Anda buka.");
         table.put("The app with the last pin list hasn't answered. Try later.",
@@ -4593,6 +4593,8 @@ public final class L10nTranslations {
                 "Nenhum Pin vis\u00edvel. Abra o menu de um Pin na grade e tente de novo.");
         table.put("None of Pinterest's web addresses are selected for this app, so their links open elsewhere. Tap to select them in Android's settings.",
                 "Nenhum endere\u00e7o web do Pinterest est\u00e1 selecionado para este app, ent\u00e3o os links deles abrem em outro lugar. Toque para selecion\u00e1-los nas configura\u00e7\u00f5es do Android.");
+        table.put("Not a hex color, so nothing changed. Try one like #3366FF.",
+                "N\u00e3o \u00e9 uma cor hex, ent\u00e3o nada mudou. Tente uma como #3366FF.");
         table.put("Not enough storage.",
                 "Espa\u00e7o de armazenamento insuficiente.");
         table.put("Nothing was queued. The selection stopped or wasn't available.",
@@ -4651,11 +4653,11 @@ public final class L10nTranslations {
                 "O bot\u00e3o Salvar fica %1$s. Toque para mudar. A mudan\u00e7a aparece no pr\u00f3ximo pin que voc\u00ea abrir.");
         table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
                 "Pinta o bot\u00e3o vermelho Salvar em um pin que voc\u00ea abre com a cor que voc\u00ea escolher. Por enquanto \u00e9 o vermelho do Pinterest.");
-        table.put("Pause",
-                "Pausar");
     }
 
     private static void fillPt_rBR6(Map<String, String> table) {
+        table.put("Pause",
+                "Pausar");
         table.put("Pause HushPinterest",
                 "Pausar o HushPinterest");
         table.put("Pause, backup and diagnostics",
@@ -4774,11 +4776,11 @@ public final class L10nTranslations {
                 "Atualizar");
         table.put("Release notes",
                 "Notas da vers\u00e3o");
-        table.put("Remove ad tracking permissions",
-                "Remover permiss\u00f5es de rastreamento de an\u00fancios");
     }
 
     private static void fillPt_rBR7(Map<String, String> table) {
+        table.put("Remove ad tracking permissions",
+                "Remover permiss\u00f5es de rastreamento de an\u00fancios");
         table.put("Remove from history",
                 "Remover do hist\u00f3rico");
         table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
@@ -4897,11 +4899,11 @@ public final class L10nTranslations {
                 "Configura\u00e7\u00f5es importadas. %1$d op\u00e7\u00e3o foi alterada.");
         table.put("Settings imported. %1$d switches changed.",
                 "Configura\u00e7\u00f5es importadas. %1$d op\u00e7\u00f5es foram alteradas.");
-        table.put("Setup and backup guide",
-                "Guia de configura\u00e7\u00e3o e backup");
     }
 
     private static void fillPt_rBR8(Map<String, String> table) {
+        table.put("Setup and backup guide",
+                "Guia de configura\u00e7\u00e3o e backup");
         table.put("Share file",
                 "Compartilhar arquivo");
         table.put("Share image",
@@ -4996,10 +4998,8 @@ public final class L10nTranslations {
                 "Essa imagem \u00e9 grande demais para compartilhar.");
         table.put("That isn't a HushPinterest settings file. Nothing was changed.",
                 "Isso n\u00e3o \u00e9 um arquivo de configura\u00e7\u00f5es do HushPinterest. Nada foi alterado.");
-        table.put("That isn't a hex color, so nothing changed. Try one like #3366FF.",
-                "Isso n\u00e3o \u00e9 uma cor hex, ent\u00e3o nada mudou. Tente uma como #3366FF.");
-        table.put("The Save button is back to Pinterest's red on the next pin you open.",
-                "O bot\u00e3o Salvar volta ao vermelho do Pinterest no pr\u00f3ximo pin que voc\u00ea abrir.");
+        table.put("The Save button goes back to Pinterest's red on your next pin.",
+                "O bot\u00e3o Salvar volta ao vermelho do Pinterest no seu pr\u00f3ximo pin.");
         table.put("The Save button turns %1$s on the next pin you open.",
                 "O bot\u00e3o Salvar fica %1$s no pr\u00f3ximo pin que voc\u00ea abrir.");
         table.put("The app with the last pin list hasn't answered. Try later.",
@@ -5878,6 +5878,8 @@ public final class L10nTranslations {
                 "G\u00f6r\u00fcn\u00fcr Pin yok. Izgaradan bir Pin men\u00fcs\u00fc a\u00e7\u0131p tekrar dene.");
         table.put("None of Pinterest's web addresses are selected for this app, so their links open elsewhere. Tap to select them in Android's settings.",
                 "Pinterest'\u0131n web adreslerinden hi\u00e7biri bu uygulama i\u00e7in se\u00e7ili de\u011fil, bu y\u00fczden ba\u011flant\u0131lar\u0131 ba\u015fka yerde a\u00e7\u0131l\u0131r. Android ayarlar\u0131nda se\u00e7mek i\u00e7in dokun.");
+        table.put("Not a hex color, so nothing changed. Try one like #3366FF.",
+                "Hex renk de\u011fil, bu y\u00fczden hi\u00e7bir \u015fey de\u011fi\u015fmedi. #3366FF gibi bir renk dene.");
         table.put("Not enough storage.",
                 "Yeterli depolama alan\u0131 yok.");
         table.put("Nothing was queued. The selection stopped or wasn't available.",
@@ -5936,11 +5938,11 @@ public final class L10nTranslations {
                 "Kaydet d\u00fc\u011fmesi %1$s rengine boyan\u0131yor. De\u011fi\u015ftirmek i\u00e7in dokun. De\u011fi\u015fiklik a\u00e7t\u0131\u011f\u0131n bir sonraki pinde g\u00f6r\u00fcn\u00fcr.");
         table.put("Paints the red Save button on a pin you open in a color you pick. It's Pinterest's red for now.",
                 "A\u00e7t\u0131\u011f\u0131n bir pindeki k\u0131rm\u0131z\u0131 Kaydet d\u00fc\u011fmesini se\u00e7ti\u011fin renge boyar. \u015eu an Pinterest'in k\u0131rm\u0131z\u0131s\u0131.");
-        table.put("Pause",
-                "Duraklat");
     }
 
     private static void fillTr6(Map<String, String> table) {
+        table.put("Pause",
+                "Duraklat");
         table.put("Pause HushPinterest",
                 "HushPinterest'i duraklat");
         table.put("Pause, backup and diagnostics",
@@ -6059,11 +6061,11 @@ public final class L10nTranslations {
                 "Yenile");
         table.put("Release notes",
                 "S\u00fcr\u00fcm notlar\u0131");
-        table.put("Remove ad tracking permissions",
-                "Reklam izleme izinlerini kald\u0131r");
     }
 
     private static void fillTr7(Map<String, String> table) {
+        table.put("Remove ad tracking permissions",
+                "Reklam izleme izinlerini kald\u0131r");
         table.put("Remove from history",
                 "Ge\u00e7mi\u015ften kald\u0131r");
         table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
@@ -6182,11 +6184,11 @@ public final class L10nTranslations {
                 "Ayarlar i\u00e7e aktar\u0131ld\u0131. %1$d anahtar de\u011fi\u015fti.");
         table.put("Settings imported. %1$d switches changed.",
                 "Ayarlar i\u00e7e aktar\u0131ld\u0131. %1$d anahtar de\u011fi\u015fti.");
-        table.put("Setup and backup guide",
-                "Kurulum ve yedekleme rehberi");
     }
 
     private static void fillTr8(Map<String, String> table) {
+        table.put("Setup and backup guide",
+                "Kurulum ve yedekleme rehberi");
         table.put("Share file",
                 "Dosyay\u0131 payla\u015f");
         table.put("Share image",
@@ -6281,10 +6283,8 @@ public final class L10nTranslations {
                 "Bu g\u00f6rsel payla\u015f\u0131lamayacak kadar b\u00fcy\u00fck.");
         table.put("That isn't a HushPinterest settings file. Nothing was changed.",
                 "Bu bir HushPinterest ayar dosyas\u0131 de\u011fil. Hi\u00e7bir \u015fey de\u011fi\u015ftirilmedi.");
-        table.put("That isn't a hex color, so nothing changed. Try one like #3366FF.",
-                "Bu bir hex renk de\u011fil, bu y\u00fczden hi\u00e7bir \u015fey de\u011fi\u015fmedi. #3366FF gibi bir renk dene.");
-        table.put("The Save button is back to Pinterest's red on the next pin you open.",
-                "Kaydet d\u00fc\u011fmesi a\u00e7t\u0131\u011f\u0131n bir sonraki pinde Pinterest'in k\u0131rm\u0131z\u0131s\u0131na d\u00f6ner.");
+        table.put("The Save button goes back to Pinterest's red on your next pin.",
+                "Kaydet d\u00fc\u011fmesi bir sonraki pininde Pinterest'in k\u0131rm\u0131z\u0131s\u0131na d\u00f6ner.");
         table.put("The Save button turns %1$s on the next pin you open.",
                 "Kaydet d\u00fc\u011fmesi a\u00e7t\u0131\u011f\u0131n bir sonraki pinde %1$s olur.");
         table.put("The app with the last pin list hasn't answered. Try later.",
