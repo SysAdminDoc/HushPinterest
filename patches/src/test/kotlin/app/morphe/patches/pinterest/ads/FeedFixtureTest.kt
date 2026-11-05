@@ -24,6 +24,7 @@ import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef
 import java.io.File
@@ -135,7 +136,13 @@ class FeedFixtureTest {
                 matched.forEach { holders.getOrPut(it) { mutableListOf() } += classDef.type }
                 val googleAds = classDef.methods.any { method -> method.implementation?.instructions?.any {
                     ((it as? ReferenceInstruction)?.reference as? FieldReference)?.name == GOOGLE_MOBILE_ADS } == true }
-                val home = classDef.type.startsWith("Lcom/pinterest/feature/home/model/") || classDef.type == "Lcom/pinterest/legacy/feeds/DynamicFeed;"
+                // 14.43.0 moved Home's page callback into a shared lambda class, found by the page it hands to Home's model.
+                val handsToHome = classDef.methods.any { method -> method.implementation?.instructions?.any {
+                    val call = (it as? ReferenceInstruction)?.reference as? MethodReference
+                    call != null && call.definingClass.startsWith("Lcom/pinterest/feature/home/model/") &&
+                        call.parameterTypes.any { type -> type.toString() == "Lcom/pinterest/legacy/feeds/DynamicFeed;" }
+                } == true }
+                val home = classDef.type.startsWith("Lcom/pinterest/feature/home/model/") || classDef.type == "Lcom/pinterest/legacy/feeds/DynamicFeed;" || handsToHome
                 if (matched.isNotEmpty() || classDef.type in AD_ONLY_VIEWS || googleAds || home) wanted[classDef.type] = ImmutableClassDef.of(classDef)
             }
         }

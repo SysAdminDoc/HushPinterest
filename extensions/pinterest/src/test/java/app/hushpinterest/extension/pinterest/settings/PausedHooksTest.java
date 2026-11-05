@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
@@ -196,10 +197,29 @@ public class PausedHooksTest {
         return row.getVisibility() == View.GONE;
     }
 
+    /** The id Pinterest's resources give the title row's chevron, which the test app doesn't have. */
+    private static final int TITLE_CHEVRON_ID = 0x7f0b1234;
+
     /** A closeup title module taking a pin with a date: true when a line was added under its row. */
     private static boolean addsPostedDate() {
-        LinearLayout module = new LinearLayout(RuntimeEnvironment.getApplication());
-        module.addView(new TextView(RuntimeEnvironment.getApplication()));
+        // Pinterest's resources know the title row's chevron by name; the test app's don't.
+        Context app = RuntimeEnvironment.getApplication();
+        Resources base = app.getResources();
+        Resources named = new Resources(base.getAssets(), base.getDisplayMetrics(), base.getConfiguration()) {
+            @Override public int getIdentifier(String name, String type, String owner) {
+                return "closeup_metadata_expand_chevron".equals(name) && "id".equals(type) ? TITLE_CHEVRON_ID : super.getIdentifier(name, type, owner);
+            }
+        };
+        Context pinterest = new ContextWrapper(app) {
+            @Override public Resources getResources() { return named; }
+        };
+        LinearLayout module = new LinearLayout(pinterest);
+        LinearLayout row = new LinearLayout(pinterest);
+        row.addView(new TextView(pinterest));
+        View chevron = new View(pinterest);
+        chevron.setId(TITLE_CHEVRON_ID);
+        row.addView(chevron);
+        module.addView(row);
         ProbePin pin = new ProbePin();
         pin.createdAt = new Date(1_791_806_400_000L);
         PostedDate.show(module, pin);
