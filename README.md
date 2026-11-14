@@ -197,6 +197,8 @@ Then compare your bundle's SHA-256 with its line in `SHA256SUMS.txt`. Or let the
 
 Morphe Manager and Morphe Desktop don't check this signature, so checking it is up to you. If the key ever changes, verify the new fingerprint through both places before you trust it. A download that fails the check is a reason to stop, not to swap keys.
 
+Releases from v0.0.14 on also carry a Morphe signature, and that one Morphe Manager does check. Manager shows the signer when you add or update the source, and it should read `46a2 ea94 21d7 b269`. From then on it remembers that key and refuses an update signed by any other key, or by none. The full public key is in [`morphe-signing.pub`](morphe-signing.pub).
+
 ## Building from source
 
 You need JDK 21 and the Android SDK. The Morphe patcher comes from GitHub Packages, so you also need a GitHub token with `read:packages`.

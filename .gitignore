@@ -34,6 +34,10 @@ render.experimental.xml
 *.jks
 *.keystore
 
+# The bundle signing key's private half lives outside the tree. morphe-signing.pub is its public half.
+morphe-signing.key
+*.signing.key
+
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 

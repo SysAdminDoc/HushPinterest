@@ -20,13 +20,15 @@ function Import-ReleaseEnvironment {
         Takes the user-scope variables the stages read into this process, as the pre-push hook does,
         and puts every heavy job this run starts ahead of everyday builds in the queue.
     .DESCRIPTION
-        A shell started before one of them was set has an environment without it. The three signing
-        variables only stand in for parameters left out: a key or fingerprint is never written in a
+        A shell started before one of them was set has an environment without it. The three checksum
+        signing variables only stand in for parameters left out, and buildAndroid reads the bundle
+        signing key from HUSHPINTEREST_BUNDLE_SIGNING_KEY: a key or fingerprint is never written in a
         tracked file.
     #>
     foreach ($name in @('HUSHPINTEREST_DESKTOP_JAR', 'HUSHPINTEREST_FIXTURE_DIR', 'HUSHPINTEREST_APPLY_RECORDS',
             'HUSHPINTEREST_BUILD_WRAPPER', 'HUSHPINTEREST_PYTHON', 'BUILD_QUEUE_SCRIPT',
-            'HUSHPINTEREST_RELEASE_GNUPGHOME', 'HUSHPINTEREST_RELEASE_FINGERPRINT', 'HUSHPINTEREST_RELEASE_PUBLIC_KEY')) {
+            'HUSHPINTEREST_RELEASE_GNUPGHOME', 'HUSHPINTEREST_RELEASE_FINGERPRINT', 'HUSHPINTEREST_RELEASE_PUBLIC_KEY',
+            'HUSHPINTEREST_BUNDLE_SIGNING_KEY')) {
         if (-not (Test-Path "Env:\$name")) {
             $value = [Environment]::GetEnvironmentVariable($name, [EnvironmentVariableTarget]::User)
             if ($value) { Set-Item -LiteralPath "Env:\$name" -Value $value }
