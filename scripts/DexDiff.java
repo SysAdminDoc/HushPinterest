@@ -2999,13 +2999,19 @@ public class DexDiff {
             } else if (selector.equals("homeResume") || selector.equals("homeRefresh")) {
                 // The Home return check: the fragment's (J)V that hands the time away to the
                 // presenter's (JZ)V, which compares it with five minutes and calls the static
-                // refresh with a map and a default-argument mask. Its refresh is the second
-                // guarded method.
+                // refresh with a map and a default-argument mask. 14.44.0 inlines that check into
+                // the fragment's (J)V. Its refresh is the second guarded method.
                 List<Method> resumes = new ArrayList<>();
                 Set<Method> checks = new HashSet<>();
                 ClassDef home = clean.classes.get(HOME_FEED_FRAGMENT);
                 if (home != null) for (Method m : home.getMethods()) {
                     if (AccessFlags.STATIC.isSet(m.getAccessFlags()) || !descriptor(m).equals("(J)V")) continue;
+                    if (instructions(m).stream().anyMatch(a -> a instanceof WideLiteralInstruction
+                            && ((WideLiteralInstruction) a).getWideLiteral() == HOME_AWAY_MS) && !homeRefreshCalls(m).isEmpty()) {
+                        resumes.add(m);
+                        checks.add(m);
+                        continue;
+                    }
                     for (Instruction i : instructions(m)) if (reference(i) instanceof MethodReference r && descriptor(r).equals("(JZ)V")
                             && i.getOpcode().name.startsWith("invoke-virtual") && clean.methods.get(r.toString()) != null) {
                         Method check = clean.methods.get(r.toString());
@@ -3981,6 +3987,17 @@ public class DexDiff {
          * call ahead of the tap effect's first action that skips them all when it answers true, and
          * three stubs naming the option interface, Pinterest's Download icon and label, and the enum.
          */
+        /** The indices of [m]'s parameters whose class extends [event]. */
+        List<Integer> eventParameters(Method m, String event) {
+            List<Integer> out = new ArrayList<>();
+            List<? extends CharSequence> types = m.getParameterTypes();
+            for (int p = 0; p < types.size(); p++) {
+                ClassDef parameter = clean.classes.get(types.get(p).toString());
+                if (parameter != null && event.equals(parameter.getSuperclass())) out.add(p);
+            }
+            return out;
+        }
+
         boolean longPressCompose(String itemsHook, String clickHook, String event, String model, String pin, String icon, String strings) {
             String own = BASE + "actions/LongPressDownload;->", pair = "Lkotlin/Pair;";
             List<ClassDef> faces = new ArrayList<>();
@@ -4010,9 +4027,10 @@ public class DexDiff {
 
             List<Method> dispatchers = new ArrayList<>();
             for (Method method : clean.holding("android_longpress_menu_v2")) {
-                if (AccessFlags.STATIC.isSet(method.getAccessFlags()) || !method.getReturnType().equals("V") || method.getParameterTypes().size() != 1) continue;
-                ClassDef parameter = clean.classes.get(method.getParameterTypes().get(0).toString());
-                if (parameter == null || !event.equals(parameter.getSuperclass())) continue;
+                // Up to 14.43.0 the event bus handler itself, from 14.44.0 a helper it hands the
+                // activity, the event and the fragment to: one parameter is the pin long-press event.
+                if (AccessFlags.STATIC.isSet(method.getAccessFlags()) || !method.getReturnType().equals("V")
+                        || eventParameters(method, event).size() != 1) continue;
                 List<Instruction> body = instructions(method);
                 // The event's pin through its getter, or (14.43.0 on, the getter inlined) straight from its field.
                 if (body.stream().anyMatch(i -> reference(i) instanceof MethodReference call && call.getDefiningClass().equals(event)
@@ -4028,8 +4046,21 @@ public class DexDiff {
             if (shown != null && sites.size() == 1) {
                 List<Instruction> body = instructions(shown);
                 int at = sites.get(0);
-                Instruction first = body.get(0), built = at < 2 ? null : body.get(at - 1), builder = at < 2 ? null : body.get(at - 2);
+                // A list past v15 takes a range call, with a copy of the event in the register after the list.
+                boolean ranged = at >= 1 && body.get(at).getOpcode() == Opcode.INVOKE_STATIC_RANGE
+                        && body.get(at - 1).getOpcode() == Opcode.MOVE_OBJECT_FROM16;
+                int listed = ranged ? at - 1 : at;
+                Instruction built = listed < 2 ? null : body.get(listed - 1), builder = listed < 2 ? null : body.get(listed - 2);
                 Method building = builder == null ? null : clean.methods.get(String.valueOf(reference(builder)));
+                // The dispatcher copies its parameters into low registers first; one of those copies is the event's.
+                int eventRegister = parameter(shown, eventParameters(shown, event).get(0)), alias = -1, aliases = 0;
+                for (int k = 0; k < body.size() && body.get(k).getOpcode() == Opcode.MOVE_OBJECT_FROM16; k++)
+                    if (((TwoRegisterInstruction) body.get(k)).getRegisterB() == eventRegister) { alias = firstRegister(body.get(k)); aliases++; }
+                int list = built == null ? -1 : firstRegister(built);
+                boolean handed = ranged
+                        ? firstRegister(body.get(at - 1)) == list + 1 && ((TwoRegisterInstruction) body.get(at - 1)).getRegisterB() == alias
+                            && arguments(body.get(at)).equals(List.of(list, list + 1))
+                        : arguments(body.get(at)).equals(List.of(list, alias));
                 // 14.43.0 folded the older view menu into this dispatcher, and it builds a list of its
                 // own after the newer menu's ComposeView. The newer menu's is the one built before it.
                 int compose = -1;
@@ -4037,13 +4068,12 @@ public class DexDiff {
                         && String.valueOf(reference(body.get(k))).equals("Landroidx/compose/ui/platform/ComposeView;")) compose = k;
                 final int composeAt = compose;
                 if (building == null || instructions(building).stream().noneMatch(i -> i.getOpcode() == Opcode.CHECK_CAST && String.valueOf(reference(i)).equals(type))
-                        || composeAt < at || !callSites(body, String.valueOf(reference(builder))).stream().filter(k -> k < composeAt).toList().equals(List.of(at - 2)))
+                        || composeAt < at || !callSites(body, String.valueOf(reference(builder))).stream().filter(k -> k < composeAt).toList().equals(List.of(listed - 2)))
                     fail(itemsHook + " doesn't follow the dispatcher's one option list");
-                else if (first.getOpcode() != Opcode.MOVE_OBJECT_FROM16 || ((TwoRegisterInstruction) first).getRegisterB() != parameter(shown, 0)
-                        || !isMoveResult(built.getOpcode()) || !arguments(body.get(at)).equals(List.of(firstRegister(built), firstRegister(first)))
-                        || !isMoveResult(body.get(at + 1).getOpcode()) || firstRegister(body.get(at + 1)) != firstRegister(built))
+                else if (aliases != 1 || !isMoveResult(built.getOpcode()) || !handed
+                        || !isMoveResult(body.get(at + 1).getOpcode()) || firstRegister(body.get(at + 1)) != list)
                     fail(itemsHook + " doesn't replace the option list from the list and the event in " + shown);
-                remove(shown, at, at + 2);
+                remove(shown, listed, at + 2);
             }
 
             List<Method> effects = new ArrayList<>();
@@ -4294,6 +4324,12 @@ public class DexDiff {
          * Download image row, and six stubs bound to the sheet's menu data, row list, row factory and
          * the presenter method that closes it. A build without the sheet expects none of it.
          */
+        /** Whether [m] reads Pinterest's Download image title id, the row the sheet's mark goes on. */
+        boolean readsDownloadTitle(Method m) {
+            return instructions(m).stream().anyMatch(i -> i.getOpcode() == Opcode.SGET && reference(i) instanceof FieldReference title
+                    && title.getName().equals("save_to_device") && title.getType().equals("I"));
+        }
+
         void downloadSheet(String downloads, ClassDef menu) {
             ClassDef location = clean.classes.get("Lcom/pinterest/feature/GridActionsLocation$PIN_OVERFLOW_MENU_MODAL_FRAGMENT;");
             if (location == null) return;
@@ -4316,18 +4352,32 @@ public class DexDiff {
                     fail("download sheet hand-over at " + at + " is not the sheet itself in front of a return");
                 remove(m, at, at + 1);
             }
-            List<Integer> marks = calls(m, downloads + "->nativeRow(Landroid/view/View;)V", 1);
+            // Up to 14.43.0 onViewCreated builds the rows itself; from 14.44.0 it calls a method of the
+            // sheet's own that does, and the row mark goes there.
+            Method rows = builder;
+            if (!readsDownloadTitle(builder)) {
+                List<Method> rowBuilders = new ArrayList<>();
+                for (Method candidate : fragment.getMethods()) if (candidate.getImplementation() != null && readsDownloadTitle(candidate)) rowBuilders.add(candidate);
+                rows = unique(rowBuilders, "download sheet row list");
+                if (rows == null) return;
+                String called = rows.toString();
+                if (instructions(builder).stream().noneMatch(i -> reference(i) instanceof MethodReference r && r.toString().equals(called)))
+                    fail("download sheet builds its rows in " + rows.getName() + ", which onViewCreated never calls");
+            }
+            Method marked = rows == builder ? m : actual(rows);
+            List<Instruction> rowBody = marked == null ? List.of() : instructions(marked);
+            List<Integer> marks = marked == null ? List.of() : calls(marked, downloads + "->nativeRow(Landroid/view/View;)V", 1);
             if (marks.size() == 1) {
                 int at = marks.get(0);
                 boolean titled = false;
-                for (int i = Math.max(0, at - 9); i < at - 2; i++) if (reference(body.get(i)) instanceof FieldReference title
+                for (int i = Math.max(0, at - 9); i < at - 2; i++) if (reference(rowBody.get(i)) instanceof FieldReference title
                         && title.getName().equals("save_to_device")) titled = true;
-                if (at < 2 || body.get(at - 1).getOpcode() != Opcode.MOVE_RESULT_OBJECT
-                        || !(reference(body.get(at - 2)) instanceof MethodReference factory)
+                if (at < 2 || rowBody.get(at - 1).getOpcode() != Opcode.MOVE_RESULT_OBJECT
+                        || !(reference(rowBody.get(at - 2)) instanceof MethodReference factory)
                         || !factory.getDefiningClass().equals(fragment.getType()) || !factory.getReturnType().equals("Landroid/widget/RelativeLayout;")
-                        || !arguments(body.get(at)).equals(List.of(firstRegister(body.get(at - 1)))) || !titled)
+                        || !arguments(rowBody.get(at)).equals(List.of(firstRegister(rowBody.get(at - 1)))) || !titled)
                     fail("download sheet mark is not on the sheet's own Download image row");
-                remove(m, at, at + 1);
+                remove(marked, at, at + 1);
             }
             String type = fragment.getType();
             String pinType = "";
