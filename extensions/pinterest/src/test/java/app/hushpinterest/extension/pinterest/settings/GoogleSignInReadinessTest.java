@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -207,6 +208,23 @@ public class GoogleSignInReadinessTest {
         boolean[] answer = new boolean[1];
         SettingsContextRule.beforeThePauseIsDecided(() -> answer[0] = GoogleSignInReadiness.signsInThroughMicroG());
         assertTrue(answer[0]);
+    }
+
+    @Test public void whenAndroidCantSayTheProviderStepsAsideAsBefore() {
+        Context failing = new ContextWrapper(context) {
+            @Override public PackageManager getPackageManager() {
+                throw new IllegalStateException("package manager gone");
+            }
+        };
+        Context broken = new ContextWrapper(context) {
+            @Override public PackageManager getPackageManager() {
+                throw new NoClassDefFoundError("package manager class");
+            }
+        };
+        SettingsContextRule.withContext(failing, () -> assertTrue("microG-RE's state unknown", GoogleSignInReadiness.signsInThroughMicroG()));
+        SettingsContextRule.withContext(broken, () -> assertTrue("the check itself failed", GoogleSignInReadiness.signsInThroughMicroG()));
+        SettingsContextRule.withContext(null, () -> assertTrue("no context", GoogleSignInReadiness.signsInThroughMicroG()));
+        assertFalse("and with Android answering again, the provider answers for itself", GoogleSignInReadiness.signsInThroughMicroG());
     }
 
     @Test public void aStockBuildLeavesTheFrameworkCredentialProviderAlone() {
