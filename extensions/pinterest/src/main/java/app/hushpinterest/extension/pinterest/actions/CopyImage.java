@@ -7,12 +7,14 @@
 package app.hushpinterest.extension.pinterest.actions;
 
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Process;
 
 import androidx.annotation.Nullable;
 
@@ -109,12 +111,13 @@ final class CopyImage {
                 report(Result.FAILED);
                 return false;
             }
+            // Taken at the tap, while Pinterest has focus and Android lets it read the clipboard, and
+            // before the copy counts as running, so nothing here can leave it running.
+            Mark asked = Mark.read(app);
             if (!RUNNING.compareAndSet(false, true)) {
                 report(Result.BUSY);
                 return false;
             }
-            // Taken at the tap, while Pinterest has focus and Android lets it read the clipboard.
-            Mark asked = Mark.read(app);
             boolean queued = Utils.runOnBackgroundThread(() -> {
                 Fetch made;
                 try {
@@ -308,9 +311,10 @@ final class CopyImage {
 
     /**
      * Whether the clipboard still holds the clip [asked] saw, so the picture may replace it.
-     * Android answers an app without focus as if the clipboard were empty, so an empty clipboard
-     * counts as unchanged only while Pinterest's screen has focus. Anything it can't tell counts
-     * as changed: the picture is dropped rather than put over a copy made since.
+     * Android answers an app without focus, or one its clipboard app op turns away, as if the
+     * clipboard were empty, so an empty clipboard counts as unchanged only while Pinterest's screen
+     * has focus and the app op lets it read. Anything it can't tell counts as changed: the picture
+     * is dropped rather than put over a copy made since.
      */
     static boolean unchanged(Context app, @Nullable Mark asked) {
         if (asked == null) return false;
@@ -318,7 +322,21 @@ final class CopyImage {
         if (now == null || now.held != asked.held) return false;
         if (now.held) return now.sameClip(asked);
         Activity screen = Utils.getActivity();
-        return screen != null && screen.hasWindowFocus();
+        return screen != null && screen.hasWindowFocus() && mayRead(app);
+    }
+
+    /** The app op Android's clipboard checks after focus. Its name isn't in the public SDK. */
+    private static final String READ_CLIPBOARD_OP = "android:read_clipboard";
+
+    /** Whether the clipboard app op lets Pinterest read, as Android checks it. No answer counts as no. */
+    private static boolean mayRead(Context app) {
+        try {
+            AppOpsManager ops = (AppOpsManager) app.getSystemService(Context.APP_OPS_SERVICE);
+            return ops != null && ops.unsafeCheckOpNoThrow(READ_CLIPBOARD_OP, Process.myUid(), app.getPackageName())
+                    == AppOpsManager.MODE_ALLOWED;
+        } catch (RuntimeException unknown) {
+            return false;
+        }
     }
 
     private static void report(Result result) {

@@ -9,6 +9,7 @@ package app.hushpinterest.extension.pinterest.actions;
 import static org.junit.Assert.*;
 
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.Application;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -20,6 +21,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Looper;
+import android.os.Process;
 import android.provider.OpenableColumns;
 
 import org.junit.After;
@@ -34,6 +36,7 @@ import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.GraphicsMode;
+import org.robolectric.shadows.ShadowAppOpsManager;
 import org.robolectric.shadows.ShadowToast;
 
 import java.io.File;
@@ -509,8 +512,19 @@ public class CopyImageTest {
         assertEquals(TOAST_KEPT, ShadowToast.getTextOfLatestToast());
         assertEquals(0, ownedFiles());
 
-        // The same empty clipboard while Pinterest has focus takes the picture.
+        // Focused, but the clipboard app op turns Pinterest away (`appops set ... READ_CLIPBOARD
+        // ignore`, or a phone's own clipboard permission): Android answers empty there too.
         Utils.setActivity(screen.get());
+        ShadowToast.reset();
+        ShadowAppOpsManager ops = Shadows.shadowOf((AppOpsManager) app.getSystemService(Context.APP_OPS_SERVICE));
+        ops.setMode("android:read_clipboard", Process.myUid(), app.getPackageName(), AppOpsManager.MODE_IGNORED);
+        copyWhile(() -> { });
+        assertFalse(clipboard().hasPrimaryClip());
+        assertEquals(TOAST_KEPT, ShadowToast.getTextOfLatestToast());
+        assertEquals(0, ownedFiles());
+        ops.setMode("android:read_clipboard", Process.myUid(), app.getPackageName(), AppOpsManager.MODE_ALLOWED);
+
+        // The same empty clipboard while Pinterest has focus and may read takes the picture.
         copyWhile(() -> { });
         assertCopiedPicture();
     }
