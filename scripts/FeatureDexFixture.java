@@ -104,6 +104,9 @@ public final class FeatureDexFixture {
     private static final String SAVED_TEXT = "Lfixture/SavedText;";
     private static final String SAVE_SCREEN = "Lfixture/SaveScreen;";
     private static final String FRAMEWORK_PROVIDER = "Landroidx/credentials/CredentialProviderFrameworkImpl;";
+    private static final String PROVIDER_FACTORY = "Landroidx/credentials/CredentialProviderFactory;";
+    private static final String CREDENTIAL_REQUEST = "Landroidx/credentials/GetCredentialRequest;";
+    private static final String CREDENTIAL_OPTION = "Landroidx/credentials/CredentialOption;";
 
     /** What a fixture class has beyond its methods: its parent, its interfaces, its public fields as name:type, and whether it's an interface. */
     private record Shape(String parent, List<String> interfaces, List<String> fields, boolean contract) {}
@@ -117,6 +120,8 @@ public final class FeatureDexFixture {
         SHAPES.put(CAPTURE, new Shape(OBJECT, List.of("Landroid/app/Activity$ScreenCaptureCallback;"), List.of(), false));
         SHAPES.put(SHOT_FILES, new Shape("Landroid/database/ContentObserver;", List.of(), List.of(), false));
         SHAPES.put(FRAMEWORK_PROVIDER, new Shape(OBJECT, List.of(), List.of("credentialManager:Landroid/credentials/CredentialManager;"), false));
+        SHAPES.put(CREDENTIAL_REQUEST, new Shape(OBJECT, List.of(), List.of("credentialOptions:" + LIST), false));
+        SHAPES.put(CREDENTIAL_OPTION, new Shape(OBJECT, List.of(), List.of("type:Ljava/lang/String;"), false));
     }
 
     private static ImmutableMethodReference ref(String type, String name, String result, String... parameters) {
@@ -592,9 +597,9 @@ public final class FeatureDexFixture {
     }
 
     /**
-     * androidx's failure listener for the Sign in with Google request and Credential Manager's
-     * framework provider, with GmsCore support's hooks unless clean. Only a variant whose listener
-     * hook is right edits the provider, so each refusal names one cause.
+     * androidx's failure listener for the Sign in with Google request, Credential Manager's framework
+     * provider and its provider choice, with GmsCore support's hooks unless clean. Only a variant whose
+     * listener hook is right edits the provider and the choice, so each refusal names one cause.
      */
     private static void signInFailure(Map<String, List<Method>> classes, String variant) {
         Instruction hook = invoke(Opcode.INVOKE_STATIC, ref(SIGN_IN_READINESS, "requestFailed", VOID, "Ljava/lang/Exception;"),
@@ -615,11 +620,61 @@ public final class FeatureDexFixture {
         provider.add(new ImmutableInstruction11n(Opcode.CONST_4, 0, 1));
         provider.add(new ImmutableInstruction11x(Opcode.RETURN, 0));
         classes.put(FRAMEWORK_PROVIDER, List.of(method(FRAMEWORK_PROVIDER, "isAvailableOnDevice", "Z", false, 2, provider)));
+        classes.put(PROVIDER_FACTORY, List.of(method(PROVIDER_FACTORY, "choose", "Landroidx/credentials/CredentialProvider;", true, 4,
+                providerChoice(variant.equals("good") || variant.equals("false-capability")), PROVIDER_FACTORY, OBJECT)));
+        classes.put(CREDENTIAL_REQUEST, List.of());
+        classes.put(CREDENTIAL_OPTION, List.of());
         if (variant.equals("clean")) return;
+        List<Instruction> answer = List.of(readiness(), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), new ImmutableInstruction11x(Opcode.RETURN, 0));
         classes.put(SIGN_IN_READINESS, List.of(method(SIGN_IN_READINESS, "requestFailed", VOID, true, 2,
                 List.of(readiness(), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), end()), "Ljava/lang/Exception;"),
-                method(SIGN_IN_READINESS, "signsInThroughMicroG", "Z", true, 1,
-                        List.of(readiness(), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), new ImmutableInstruction11x(Opcode.RETURN, 0)))));
+                method(SIGN_IN_READINESS, "signsInThroughMicroG", "Z", true, 1, answer),
+                method(SIGN_IN_READINESS, "isGoogleIdOption", "Z", true, 2, answer, STRING)));
+    }
+
+    /**
+     * Credential Manager's provider choice: v0 and v1, then the factory and the request. The original
+     * body builds the framework provider and falls back to the factory's own Play services lookup when
+     * it's unavailable. Patched, a request whose options are all Google's takes that lookup first and
+     * anything else branches to the original body, 45 code units in (offsets are in code units).
+     */
+    private static List<Instruction> providerChoice(boolean patched) {
+        ImmutableTypeReference request = new ImmutableTypeReference(CREDENTIAL_REQUEST);
+        ImmutableTypeReference option = new ImmutableTypeReference(CREDENTIAL_OPTION);
+        ImmutableFieldReference options = new ImmutableFieldReference(CREDENTIAL_REQUEST, "credentialOptions", LIST);
+        ImmutableMethodReference lookup = ref(PROVIDER_FACTORY, "playServices", "Landroidx/credentials/CredentialProvider;");
+        String iterator = "Ljava/util/Iterator;";
+        List<Instruction> body = new ArrayList<>();
+        if (patched) body.addAll(List.of(
+                new ImmutableInstruction22c(Opcode.INSTANCE_OF, 0, 3, request), new ImmutableInstruction21t(Opcode.IF_EQZ, 0, 43),
+                new ImmutableInstruction12x(Opcode.MOVE_OBJECT, 0, 3), new ImmutableInstruction21c(Opcode.CHECK_CAST, 0, request),
+                new ImmutableInstruction22c(Opcode.IGET_OBJECT, 0, 0, options),
+                invoke(Opcode.INVOKE_INTERFACE, ref(LIST, "isEmpty", "Z"), 0), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 1),
+                new ImmutableInstruction21t(Opcode.IF_NEZ, 1, 32),
+                invoke(Opcode.INVOKE_INTERFACE, ref(LIST, "iterator", iterator), 0), new ImmutableInstruction11x(Opcode.MOVE_RESULT_OBJECT, 0),
+                invoke(Opcode.INVOKE_INTERFACE, ref(iterator, "hasNext", "Z"), 0), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 1),
+                new ImmutableInstruction21t(Opcode.IF_EQZ, 1, 17),
+                invoke(Opcode.INVOKE_INTERFACE, ref(iterator, "next", OBJECT), 0), new ImmutableInstruction11x(Opcode.MOVE_RESULT_OBJECT, 1),
+                new ImmutableInstruction21c(Opcode.CHECK_CAST, 1, option),
+                new ImmutableInstruction22c(Opcode.IGET_OBJECT, 1, 1, new ImmutableFieldReference(CREDENTIAL_OPTION, "type", STRING)),
+                invoke(Opcode.INVOKE_STATIC, ref(SIGN_IN_READINESS, "isGoogleIdOption", "Z", STRING), 1),
+                new ImmutableInstruction11x(Opcode.MOVE_RESULT, 1), new ImmutableInstruction21t(Opcode.IF_EQZ, 1, 8),
+                new ImmutableInstruction10t(Opcode.GOTO, -20),
+                invoke(Opcode.INVOKE_VIRTUAL, lookup, 2), new ImmutableInstruction11x(Opcode.MOVE_RESULT_OBJECT, 0),
+                new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0)));
+        body.addAll(List.of(
+                new ImmutableInstruction22c(Opcode.INSTANCE_OF, 0, 3, request), new ImmutableInstruction21t(Opcode.IF_EQZ, 0, 13),
+                new ImmutableInstruction21c(Opcode.CHECK_CAST, 3, request), new ImmutableInstruction22c(Opcode.IGET_OBJECT, 3, 3, options),
+                new ImmutableInstruction11n(Opcode.CONST_4, 0, 0), invoke(Opcode.INVOKE_INTERFACE, ref(LIST, "get", OBJECT, "I"), 3, 0),
+                new ImmutableInstruction11x(Opcode.MOVE_RESULT_OBJECT, 0), new ImmutableInstruction21c(Opcode.CHECK_CAST, 0, option),
+                new ImmutableInstruction21c(Opcode.NEW_INSTANCE, 3, new ImmutableTypeReference(FRAMEWORK_PROVIDER)),
+                invoke(Opcode.INVOKE_DIRECT, ref(FRAMEWORK_PROVIDER, "<init>", VOID), 3),
+                invoke(Opcode.INVOKE_VIRTUAL, ref(FRAMEWORK_PROVIDER, "isAvailableOnDevice", "Z"), 3),
+                new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), new ImmutableInstruction21t(Opcode.IF_EQZ, 0, 3),
+                new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 3),
+                invoke(Opcode.INVOKE_VIRTUAL, lookup, 2), new ImmutableInstruction11x(Opcode.MOVE_RESULT_OBJECT, 0),
+                new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0)));
+        return body;
     }
 
     /** Google's advertising ID getters and a Block Store wrapper, with Hide advertising ID's hooks unless clean. */

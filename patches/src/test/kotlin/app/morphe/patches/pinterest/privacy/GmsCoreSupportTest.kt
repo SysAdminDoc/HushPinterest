@@ -14,15 +14,22 @@ import app.morphe.PatchContexts
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patches.pinterest.misc.extension.SETTINGS_STATUS
 import app.morphe.patches.pinterest.misc.settings.EXTENSION_ROOT
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
@@ -87,7 +94,8 @@ class GmsCoreSupportTest {
                 for (method in original.methods) {
                     val before = method.texts()
                     val after = patched.methods.single { it.same(method) }.texts()
-                    if (method.isAvailabilityCheck() || method.isFrameworkProviderCheck(original) || method.isSignInFailureListener()) continue
+                    if (method.isAvailabilityCheck() || method.isFrameworkProviderCheck(original) || method.isProviderChoice() ||
+                        method.isSignInFailureListener()) continue
                     assertEquals("${build.name}: ${method.definingClass}->${method.name} kept its shape", before.size, after.size)
                     before.zip(after).forEach { (old, new) ->
                         val expected = old?.let { gmsCoreText(it) ?: it }
@@ -114,6 +122,40 @@ class GmsCoreSupportTest {
             assertEquals("${build.name}: true answers unavailable", 0, (guarded[3] as NarrowLiteralInstruction).narrowLiteral)
             assertEquals("${build.name}: false runs the provider's own body", 5, (guarded[2] as BuilderOffsetInstruction).target.location.index)
             assertEquals("${build.name}: the provider's own body stays", provider.implementation!!.instructions.map { it.opcode }, guarded.drop(5).map { it.opcode })
+
+            val choice = fixture.flatMap { it.methods }.single { it.isProviderChoice() }
+            val own = choice.implementation!!.instructions.toList()
+            val chosen = context.mutableClassDefBy(choice.definingClass).methods.single { it.same(choice) }.implementation!!.instructions.toList()
+            val added = chosen.size - own.size
+            assertEquals("${build.name}: the choice asks about each option first", listOf(
+                Opcode.INSTANCE_OF, Opcode.IF_EQZ, Opcode.MOVE_OBJECT, Opcode.CHECK_CAST, Opcode.IGET_OBJECT,
+                Opcode.INVOKE_INTERFACE, Opcode.MOVE_RESULT, Opcode.IF_NEZ, Opcode.INVOKE_INTERFACE, Opcode.MOVE_RESULT_OBJECT,
+                Opcode.INVOKE_INTERFACE, Opcode.MOVE_RESULT, Opcode.IF_EQZ, Opcode.INVOKE_INTERFACE, Opcode.MOVE_RESULT_OBJECT,
+                Opcode.CHECK_CAST, Opcode.IGET_OBJECT, Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT, Opcode.IF_EQZ, Opcode.GOTO,
+                Opcode.INVOKE_VIRTUAL, Opcode.MOVE_RESULT_OBJECT, Opcode.RETURN_OBJECT,
+            ), chosen.take(added).map { it.opcode })
+            assertEquals("${build.name}: the choice's own body stays", own.map { it.opcode }, chosen.drop(added).map { it.opcode })
+            assertEquals("${build.name}: the option hook", GOOGLE_ID_OPTION_HOOK, chosen[17].referenceText())
+            val request = choice.implementation!!.registerCount - 1
+            assertEquals("${build.name}: it tests the request itself", request, (chosen[0] as TwoRegisterInstruction).registerB)
+            assertEquals("${build.name}: and copies it rather than casting it", request, (chosen[2] as TwoRegisterInstruction).registerB)
+            assertEquals("${build.name}: only v0 and v1 change", setOf(0, 1),
+                listOf(0, 2, 3, 4, 6, 9, 11, 14, 15, 16, 18, 22).map { (chosen[it] as OneRegisterInstruction).registerA }.toSet())
+            // The stock body walks the same list and casts each option to the same class, and its
+            // restore credential arm makes the same Play services lookup.
+            val ownList = own.first { it.opcode == Opcode.IGET_OBJECT }
+            assertEquals("${build.name}: the request the stock body casts to", (own[own.indexOf(ownList) - 1]).referenceText(), chosen[3].referenceText())
+            assertEquals("${build.name}: the stock body's option list", ownList.referenceText(), chosen[4].referenceText())
+            val ownCast = own.first { it.opcode == Opcode.CHECK_CAST && it !== own[own.indexOf(ownList) - 1] }
+            assertEquals("${build.name}: the stock body's option class", ownCast.referenceText(), chosen[15].referenceText())
+            val typeField = (chosen[16] as ReferenceInstruction).reference as FieldReference
+            assertEquals("${build.name}: the option's type", listOf(ownCast.referenceText(), "Ljava/lang/String;"), listOf(typeField.definingClass, typeField.type))
+            assertEquals("${build.name}: the stock body's Play services lookup", own.first { it.opcode == Opcode.INVOKE_VIRTUAL &&
+                (it as ReferenceInstruction).reference.let { r -> r is MethodReference && r.definingClass == choice.definingClass } }.referenceText(),
+                chosen[21].referenceText())
+            assertEquals("${build.name}: on p0", request - 1, (chosen[21] as FiveRegisterInstruction).registerC)
+            for ((at, target) in listOf(1 to added, 7 to added, 19 to added, 12 to 21, 20 to 10))
+                assertEquals("${build.name}: branch $at", target, (chosen[at] as BuilderOffsetInstruction).target.location.index)
 
             val listener = fixture.flatMap { it.methods }.single { it.isSignInFailureListener() }
             val stock = listener.implementation!!.instructions.toList()
@@ -165,11 +207,12 @@ class GmsCoreSupportTest {
     fun `a build missing a check or the listener refuses before any edit`() {
         for (build in Fixtures.declaredBuilds()) {
             val fixture = rerouted(build)
-            for (left in listOf("availability check", "framework provider", "sign-in failure listener")) {
+            for (left in listOf("availability check", "framework provider", "provider choice", "sign-in failure listener")) {
                 val kept = fixture.filterNot { owner -> owner.methods.any {
                     when (left) {
                         "availability check" -> it.isAvailabilityCheck()
                         "framework provider" -> it.isFrameworkProviderCheck(owner)
+                        "provider choice" -> it.isProviderChoice()
                         else -> it.isSignInFailureListener()
                     }
                 } }
@@ -289,12 +332,27 @@ class GmsCoreSupportTest {
         assertEquals("GmsCore support", gmsCoreSupportPatch.name)
     }
 
-    /** The classes the patch reads in [build]: every method naming a rewritten text, both checks and the listener. */
-    private fun rerouted(build: File): List<ClassDef> = FixtureDex.classesWhere(build, { true }) { method ->
-        !method.definingClass.startsWith(EXTENSION_ROOT) && (method.texts().any { it != null && gmsCoreText(it) != null } ||
-            method.isAvailabilityCheck() || (method.name == "isAvailableOnDevice" && method.returnType == "Z") ||
-            method.isSignInFailureListener())
+    /**
+     * The classes the patch reads in [build]: every method naming a rewritten text, both checks, the
+     * provider choice and the classes it casts to (the option class holds the type the hook reads), and the listener.
+     */
+    private fun rerouted(build: File): List<ClassDef> {
+        val found = FixtureDex.classesWhere(build, { true }) { method ->
+            !method.definingClass.startsWith(EXTENSION_ROOT) && (method.texts().any { it != null && gmsCoreText(it) != null } ||
+                method.isAvailabilityCheck() || (method.name == "isAvailableOnDevice" && method.returnType == "Z") ||
+                method.isProviderChoice() || method.isSignInFailureListener())
+        }
+        val casts = found.flatMap { it.methods }.filter { it.isProviderChoice() }.flatMap { it.implementation!!.instructions }
+            .filter { it.opcode == Opcode.CHECK_CAST }.map { ((it as ReferenceInstruction).reference as TypeReference).type }.toSet()
+        return found + FixtureDex.classes(build, casts - found.map { it.type }.toSet()).values
     }
+
+    /** androidx's provider choice: static, taking its own class and the request, with the restore credential arm. */
+    private fun Method.isProviderChoice() = AccessFlags.STATIC.isSet(accessFlags) &&
+        parameterTypes.map(CharSequence::toString) == listOf(definingClass, "Ljava/lang/Object;") &&
+        "androidx.credentials.TYPE_CLEAR_RESTORE_CREDENTIAL" in texts()
+
+    private fun Instruction.referenceText() = (this as ReferenceInstruction).reference.toString()
 
     private fun Method.isAvailabilityCheck() = returnType == "I" &&
         parameterTypes.map(CharSequence::toString) == listOf("Landroid/content/Context;", "I") &&

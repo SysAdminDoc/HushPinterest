@@ -233,6 +233,24 @@ public class GoogleSignInReadinessTest {
         assertFalse(GoogleSignInReadiness.signsInThroughMicroG());
     }
 
+    /** The credential types androidx's options carry, from androidx.credentials and googleid. */
+    @Test public void onlyAGoogleIdOptionGoesToMicroGWithOrWithoutIt() {
+        PatchFamily.registerDiagnostics();
+        String google = "com.google.android.libraries.identity.googleid.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL";
+        assertTrue("without microG-RE, so its message shows", GoogleSignInReadiness.isGoogleIdOption(google));
+        installMicroG(true);
+        assertTrue("with it", GoogleSignInReadiness.isGoogleIdOption(google));
+        for (String other : new String[]{"android.credentials.TYPE_PASSWORD_CREDENTIAL",
+                "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL", "androidx.credentials.TYPE_RESTORE_CREDENTIAL",
+                "androidx.credentials.TYPE_DIGITAL_CREDENTIAL", google + "x", "", null}) {
+            assertFalse(String.valueOf(other), GoogleSignInReadiness.isGoogleIdOption(other));
+        }
+        String export = LogBufferManager.buildExportText();
+        assertTrue(export, export.contains("Google sign-in option sent to microG-RE"));
+        PushReadiness.gmsCoreForTests = false;
+        assertFalse("a stock build", GoogleSignInReadiness.isGoogleIdOption(google));
+    }
+
     @Test public void theSectionIsInTheExportAndAFailureCounts() {
         PatchFamily.registerDiagnostics();
         GoogleSignInReadiness.requestFailed(new Exception("17: person@example.com"));

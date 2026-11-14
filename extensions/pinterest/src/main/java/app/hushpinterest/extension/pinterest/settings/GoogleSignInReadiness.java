@@ -37,6 +37,8 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
     private static final String SPOOF_METADATA = PushReadiness.GMS_CORE + ".SPOOFED_PACKAGE_SIGNATURE";
     private static final int STATUS_CANCELED = 16;
     private static final String NO_REQUEST = "none this launch";
+    /** The credential type of Sign in with Google's options, both the ID token and the button's. */
+    static final String GOOGLE_ID_TOKEN = "com.google.android.libraries.identity.googleid.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL";
 
     /** What the last failed request came to since launch. Tests put it back through this field. */
     static volatile String lastRequest = NO_REQUEST;
@@ -67,8 +69,9 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
      * when this is true. While microG-RE is installed the provider steps aside, because Android
      * hands Google's requests to Google's own Play services, and androidx falls back to the Play
      * services provider the patch points at microG-RE. Without microG-RE the provider answers for
-     * itself, so a password manager can still offer a saved login. Before the settings are ready,
-     * or when Android can't say, it steps aside as the patch always had it. A build without
+     * itself, so a password manager can still offer a saved login. Google's own requests never get
+     * this far: {@link #isGoogleIdOption} sends them to microG-RE first. Before the settings are
+     * ready, or when Android can't say, it steps aside as the patch always had it. A build without
      * GmsCore support leaves the provider alone.
      */
     public static boolean signsInThroughMicroG() {
@@ -83,6 +86,26 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
         } catch (Throwable problem) {
             HookStatus.threw(FamilyNames.GMS_CORE_SUPPORT, "credential provider", problem);
             return true;
+        }
+    }
+
+    /**
+     * Placed in androidx Credential Manager's provider choice, once for each option of a request,
+     * with the option's credential type. When every option asks for a Google ID token, androidx
+     * sends the request straight to the Play services provider, which the patch points at
+     * microG-RE: Continue with Google signs in there, and without microG-RE it fails into
+     * {@link #requestFailed}, which says to install it. Anything else, a password or a passkey
+     * among them, keeps Android's own provider. A build without GmsCore support answers false.
+     */
+    public static boolean isGoogleIdOption(@Nullable String type) {
+        HookStatus.invoked(FamilyNames.GMS_CORE_SUPPORT);
+        try {
+            if (!PushReadiness.gmsCore() || !GOOGLE_ID_TOKEN.equals(type)) return false;
+            HookStatus.counted(FamilyNames.GMS_CORE_SUPPORT, "Google sign-in option sent to microG-RE");
+            return true;
+        } catch (Throwable problem) {
+            HookStatus.threw(FamilyNames.GMS_CORE_SUPPORT, "credential option", problem);
+            return false;
         }
     }
 

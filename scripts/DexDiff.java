@@ -277,7 +277,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 5),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 2), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("longPressChoices", 1), Map.entry("ownAuthorities", 1));
@@ -6443,7 +6443,7 @@ public class DexDiff {
                 if (found) remove(m, 0, 1);
                 else fail(hook + " doesn't get the exception ahead of " + m);
             }
-            if (found) found = frameworkProvider(c.strings.get(1));
+            if (found) found = frameworkProvider(c.strings.get(1)) && providerChoice(c.strings.get(2));
             capability(c.callee, found);
         }
 
@@ -6482,6 +6482,111 @@ public class DexDiff {
             if (!shaped) { fail(hook + " doesn't answer unavailable ahead of the untouched body of " + m); return false; }
             remove(m, 0, 5);
             return true;
+        }
+
+        /**
+         * Credential Manager's provider choice, the one static method taking its own class and the request
+         * that builds the framework provider and asks it isAvailableOnDevice()Z. A request whose options are
+         * all Sign in with Google goes to the class's own Play services lookup, and anything else (another
+         * option, an empty list, another request type) branches to the untouched original body. The prefix
+         * writes only the two locals below the parameters and reads the request's own list field and the
+         * option's one String field, both named by the clean body.
+         */
+        boolean providerChoice(String hook) {
+            List<Method> choices = new ArrayList<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN)) continue;
+                for (Method m : cd.getMethods()) {
+                    if (!AccessFlags.STATIC.isSet(m.getAccessFlags()) || m.getImplementation() == null || !m.getReturnType().startsWith("L")
+                            || m.getParameterTypes().size() != 2 || !m.getParameterTypes().get(0).toString().equals(cd.getType())
+                            || !m.getParameterTypes().get(1).toString().equals("Ljava/lang/Object;")) continue;
+                    boolean builds = false, asks = false;
+                    for (Instruction i : instructions(m)) {
+                        Reference r = reference(i);
+                        if (i.getOpcode() == Opcode.NEW_INSTANCE && holdsCredentialManager(r.toString())) builds = true;
+                        if (r instanceof MethodReference called && called.getName().equals("isAvailableOnDevice")
+                                && called.getReturnType().equals("Z") && called.getParameterTypes().isEmpty()) asks = true;
+                    }
+                    if (builds && asks) choices.add(m);
+                }
+            }
+            Method original = unique(choices, "Credential Manager provider choice");
+            Method m = actual(original);
+            List<Integer> sites = calls(m, hook, 1);
+            if (m == null || sites.size() != 1) return false;
+            int self = parameter(m, 0), request = parameter(m, 1);
+            Set<String> requests = new TreeSet<>(), lists = new TreeSet<>(), casts = new TreeSet<>(), lookups = new TreeSet<>();
+            for (Instruction i : instructions(original)) {
+                Reference r = reference(i);
+                if (i.getOpcode() == Opcode.INSTANCE_OF && ((TwoRegisterInstruction) i).getRegisterB() == request) requests.add(r.toString());
+                if (i.getOpcode() == Opcode.IGET_OBJECT && ((FieldReference) r).getType().equals("Ljava/util/List;")) lists.add(r.toString());
+                if (i.getOpcode() == Opcode.CHECK_CAST) casts.add(r.toString());
+                if ((i.getOpcode() == Opcode.INVOKE_VIRTUAL || i.getOpcode() == Opcode.INVOKE_DIRECT) && r instanceof MethodReference called
+                        && called.getDefiningClass().equals(m.getDefiningClass()) && called.getParameterTypes().isEmpty()
+                        && called.getReturnType().equals(m.getReturnType())) lookups.add(i.getOpcode().name + " " + r);
+            }
+            casts.removeAll(requests);
+            String typeField = null;
+            ClassDef option = casts.size() == 1 ? clean.classes.get(casts.iterator().next()) : null;
+            if (option != null) {
+                List<Field> types = new ArrayList<>();
+                for (Field f : option.getInstanceFields()) if (f.getType().equals("Ljava/lang/String;")) types.add(f);
+                if (types.size() == 1 && AccessFlags.PUBLIC.isSet(types.get(0).getAccessFlags()))
+                    typeField = option.getType() + "->" + types.get(0).getName() + ":Ljava/lang/String;";
+            }
+            List<Instruction> body = instructions(m);
+            boolean shaped = requests.size() == 1 && lists.size() == 1 && typeField != null && lookups.size() == 1
+                    && sites.get(0) == 17 && body.size() > 24;
+            int a = shaped ? firstRegister(body.get(0)) : -1, b = shaped ? firstRegister(body.get(6)) : -1;
+            shaped &= a >= 0 && b >= 0 && a != b && a < parameter(m, -1) && b < parameter(m, -1);
+            if (shaped) {
+                String requestType = requests.iterator().next(), lookup = lookups.iterator().next();
+                String[] opcodes = {"instance-of", "if-eqz", "move-object", "check-cast", "iget-object", "invoke-interface", "move-result",
+                        "if-nez", "invoke-interface", "move-result-object", "invoke-interface", "move-result", "if-eqz", "invoke-interface",
+                        "move-result-object", "check-cast", "iget-object", "invoke-static", "move-result", "if-eqz", "goto",
+                        lookup.substring(0, lookup.indexOf(' ')), "move-result-object", "return-object"};
+                // a and b are the two locals, r the request and s the class's own instance; "(x)" is an invoke's only argument.
+                String[] registers = {"a r", "a", "a r", "a", "a a", "(a)", "b", "b", "(a)", "a", "(a)", "b", "b", "(a)",
+                        "b", "b", "b b", "(b)", "b", "b", "", "(s)", "a", "a"};
+                Map<Integer, String> references = Map.ofEntries(Map.entry(0, requestType), Map.entry(3, requestType),
+                        Map.entry(4, lists.iterator().next()), Map.entry(5, "Ljava/util/List;->isEmpty()Z"),
+                        Map.entry(8, "Ljava/util/List;->iterator()Ljava/util/Iterator;"), Map.entry(10, "Ljava/util/Iterator;->hasNext()Z"),
+                        Map.entry(13, "Ljava/util/Iterator;->next()Ljava/lang/Object;"), Map.entry(15, option.getType()),
+                        Map.entry(16, typeField), Map.entry(21, lookup.substring(lookup.indexOf(' ') + 1)));
+                int[][] next = {{1}, {2, 24}, {3}, {4}, {5}, {6}, {7}, {8, 24}, {9}, {10}, {11}, {12}, {13, 21}, {14}, {15}, {16},
+                        {17}, {18}, {19}, {20, 24}, {10}, {22}, {23}, {}};
+                Map<Character, Integer> named = Map.of('a', a, 'b', b, 'r', request, 's', self);
+                FeatureFlow graph = flow(m);
+                for (int at = 0; shaped && at < 24; at++) {
+                    Instruction i = body.get(at);
+                    String op = i.getOpcode().name, want = registers[at];
+                    shaped = op.equals(opcodes[at]) || op.startsWith(opcodes[at] + "/") && !opcodes[at].startsWith("invoke");
+                    if (shaped && references.containsKey(at)) shaped = references.get(at).equals(String.valueOf(reference(i)));
+                    if (shaped && want.startsWith("(")) shaped = arguments(i).equals(List.of(named.get(want.charAt(1))));
+                    else if (shaped && !want.isEmpty()) {
+                        shaped = firstRegister(i) == named.get(want.charAt(0));
+                        if (shaped && want.length() > 1) shaped = i instanceof TwoRegisterInstruction
+                                && ((TwoRegisterInstruction) i).getRegisterB() == named.get(want.charAt(2));
+                    }
+                    Set<Integer> edges = new TreeSet<>();
+                    for (int target : next[at]) edges.add(target);
+                    if (shaped) shaped = new TreeSet<>(graph.normal.get(at)).equals(edges) && graph.handlers.get(at).isEmpty();
+                }
+                for (int k = 24; shaped && k < graph.normal.size(); k++) {
+                    for (int target : graph.normal.get(k)) shaped &= target >= 24;
+                    for (int target : graph.handlers.get(k)) shaped &= target >= 24;
+                }
+            }
+            if (!shaped) { fail(hook + " doesn't send only Google-only requests to the Play services lookup ahead of the untouched body of " + m); return false; }
+            remove(m, 0, 24);
+            return true;
+        }
+
+        boolean holdsCredentialManager(String type) {
+            ClassDef cd = clean.classes.get(type);
+            if (cd == null || cd.getType().startsWith(OWN)) return false;
+            for (Field f : cd.getInstanceFields()) if (f.getType().equals("Landroid/credentials/CredentialManager;")) return true;
+            return false;
         }
 
         /**
