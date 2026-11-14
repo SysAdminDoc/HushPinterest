@@ -257,10 +257,18 @@ Add-PublishEvent 'verify-index'
             selectedPatches=@($publishCatalog.patches[0].name); signedApkSha256='4' * 64
             completed='2026-10-21T15:59:00Z'
         }
+        # A whole walk's case list, case results, hook verdicts and process evidence.
+        $walked = @{
+            CaseList = [ordered]@{ version = $WalkCaseListVersion; complete = $true; leftOut = @(); extra = @(); hooksLeftOut = @() }
+            Cases = @(Get-WalkCaseList | ForEach-Object { [ordered]@{ id = $_.Id; kind = $_.Kind; result = 'pass' } })
+            Hooks = @(Get-WalkHookFamilies | ForEach-Object { [ordered]@{ family = $_.Family; case = $_.Case; verdict = 'pass' } })
+            Process = [ordered]@{ stoppedAt = '2026-10-21 12:00:00'; baseline = [ordered]@{ records = 0; newest = '' }
+                mainPid = '4242'; mainPidAtEnd = '4242'; restarts = @(); anrs = @(); exits = @() }
+        }
         $walk = New-WalkReceipt -Result PASS -Full $true -Serial 'TESTPHONE01' -Device 'SM-S908U1' -AppVersion '14.44.0' `
             -AppVersionCode '14448030' -Build $build `
             -BundleSha256 (Get-FileHash -LiteralPath (Join-Path $assets 'patches-0.0.7.mpp')).Hash -InstalledApkSha256 ('4' * 64) `
-            -Started '2026-10-21T16:00:00Z' -Finished '2026-10-21T16:30:00Z' -Screens 40 -Crashes 0
+            -Started '2026-10-21T16:00:00Z' -Finished '2026-10-21T16:30:00Z' -Screens 40 -Crashes 0 @walked
         foreach ($key in $Change.Keys) { $walk[$key] = $Change[$key] }
         Set-PublishFile 'build/walk-receipt.json' ($walk | ConvertTo-Json -Depth 8)
     }
@@ -399,7 +407,7 @@ Add-PublishEvent 'verify-index'
             @(@{ device = 'Pixel 9' }, "*Pixel 9 isn't one of the release walk phones*"),
             @(@{ device = 'Pixel 9'; emulator = $true }, "*Pixel 9 isn't one of the release walk phones*"),
             @(@{ bundleSha256 = ('5' * 64) }, '*patched with bundle*and this one is*'),
-            @(@{ schema = 1 }, "*isn't schema 2*"),
+            @(@{ schema = 1 }, "*isn't schema 3*"),
             @(@{ build = $null }, '*no versioned patch/build evidence*'),
             @(@{ installedApkSha256 = 'not-an-apk-hash' }, '*malformed build/install hash*'),
             @(@{ installedApkSha256 = ('6' * 64) }, '*installed APK does not match*'),

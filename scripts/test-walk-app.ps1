@@ -97,6 +97,22 @@ try {
     $catalogPath = if ($Root) { Join-Path $Root 'patches-list.json' } else { Join-Path (Split-Path -Parent $PSScriptRoot) 'patches-list.json' }
     $catalogHash = (Get-FileHash -LiteralPath $catalogPath -Algorithm SHA256).Hash.ToLowerInvariant()
     $firstPatch = (Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json).patches[0].name
+    # What a whole walk records besides its build: the case list it ran, every case and hook family
+    # passed, and one main process with only the deliberate stop since it.
+    $evidence = @{
+        CaseList = [ordered]@{ version = $WalkCaseListVersion; complete = $true; leftOut = @(); extra = @(); hooksLeftOut = @() }
+        Cases = @(Get-WalkCaseList | ForEach-Object {
+                [ordered]@{ id = $_.Id; kind = $_.Kind; result = 'pass'; activity = ''; anchor = ''; implementation = ''; detail = '' } })
+        Hooks = @(Get-WalkHookFamilies | ForEach-Object {
+                [ordered]@{ family = $_.Family; case = $_.Case; verdict = 'pass'; invoked = 1; missing = 0; ambiguous = 0; detail = '' } })
+        Process = [ordered]@{
+            stoppedAt = '2026-10-21 20:00:00'; runningBeforeStop = 400; baseline = [ordered]@{ records = 1; newest = '' }
+            mainPid = '4242'; mainPidAtEnd = '4242'; restarts = @(); anrs = @()
+            exits = @([ordered]@{ timestamp = '2026-10-21 20:00:00.500'; pid = '4100'; process = 'com.pinterest'; user = 0
+                    reason = '10 (USER REQUESTED)'; subreason = '21 (FORCE STOP)'; description = 'stop com.pinterest due to from pid 4000'
+                    class = 'initial stop' })
+        }
+    }
 
     function New-WalkReceiptFile([string]$Name, [string]$Result, [bool]$Full, [int]$Screens, [int]$Crashes, [string]$Sha, [string[]]$Problems) {
         $build = [ordered]@{
@@ -107,7 +123,7 @@ try {
         }
         $receipt = New-WalkReceipt -Result $Result -Full $Full -Serial 'emulator-5554' -Device 'sdk_gphone64_x86_64' `
             -AppVersion '14.44.0' -AppVersionCode '14448030' -Build $build -BundleSha256 $Sha -InstalledApkSha256 ('0' * 64) `
-            -Started $started -Finished $finished -Screens $Screens -Crashes $Crashes -Problems $Problems
+            -Started $started -Finished $finished -Screens $Screens -Crashes $Crashes -Problems $Problems @evidence
         $path = Join-Path $scratch $Name
         [IO.File]::WriteAllText($path, (ConvertTo-Json -InputObject $receipt -Depth 8) + "`n")
         return $path
@@ -180,7 +196,7 @@ try {
     $preciseBuild.build.completed = $started.AddMilliseconds(800).UtcDateTime.ToString('o')
     $preciseReceipt = New-WalkReceipt -Result 'PASS' -Full $true -Serial 'emulator-5554' -Device 'sdk_gphone64_x86_64' `
         -AppVersion '14.44.0' -AppVersionCode '14448030' -Build $preciseBuild.build -BundleSha256 $bundleSha256 `
-        -InstalledApkSha256 ('0' * 64) -Started $preciseStart -Finished $finished -Screens 17 -Crashes 0
+        -InstalledApkSha256 ('0' * 64) -Started $preciseStart -Finished $finished -Screens 17 -Crashes 0 @evidence
     $precisePath = Join-Path $scratch 'fractional.json'
     [IO.File]::WriteAllText($precisePath, (ConvertTo-Json -InputObject $preciseReceipt -Depth 8))
     Assert-True (Test-WalkReceipt -Path $precisePath -BundlePath $bundle -PatchList $catalogPath).Valid `

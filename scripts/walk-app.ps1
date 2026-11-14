@@ -13,24 +13,59 @@
     the release build stage has already staged that bundle, the two have to be the same file.
 
     The result the walk writes:
-      PASS      the whole app was walked, every screen and settings page opened, no crash.
-      PARTIAL   the settings pages were skipped, so it was not the whole app.
-      FAIL      a Pinterest crash, a screen or page that would not open, or Pinterest gone at the end.
+      PASS      every case of the canonical case list reached its destination, Pinterest's main
+                process stayed the one the launch started, and no crash, ANR or failing exit.
+      PARTIAL   a canonical case or hook family was left out (-SkipSettings, a -Visit,
+                -SettingsPages or -HookFamilies list without it), a hook family wasn't
+                exercised, or the installed build isn't bound to the bundle.
+      FAIL      a crash, an ANR, a failing exit, a restart or stop of the main process, a case that
+                didn't reach its destination, or Pinterest gone at the end.
     Only a PASS backs a release.
 
-    A screen is opened by its deep link (am start -W -a VIEW -d ... -p com.pinterest) and counts
-    when the start reports ok with Pinterest in front. No link reaches the Inbox (Pinterest sends
-    pinterest://notifications/ to the home feed), so the walk opens it from the home feed: the
-    bottom bar's Home, then the header's Inbox button, each read by its description from a fresh
-    dump, and the Inbox counts when its title shows. The Hush settings open through
+    The cases come from Get-WalkCaseList in walk-receipt.ps1, in order: the home feed, a home feed pin's overflow menu
+    and its long-press menu, the pin, the pin's own overflow menu, three searches, the Inbox, the
+    Hush settings list and each of its pages. A case passes only when its destination shows: the
+    anchors its entry names (resource ids, descriptions or texts in a fresh plain uiautomator
+    dump, for the menus Hush's own row too while that family's switch is on) and, for every case
+    inside Pinterest, its main activity resumed, so a login, error or fallback screen fails the
+    case by name. The receipt's cases field holds each case's result, resumed activity and
+    anchor, and for a menu which of Pinterest's implementations served it when the dump shows
+    one: the pop-up menu or the round long-press menu, unrecognized otherwise. Its caseList
+    field holds the list's version, the canonical cases and hook families left out, which keep a
+    walk from being full, and the extra links or pages walked, which count toward nothing.
+    Publish checks all of it again: the list's version, every canonical case and hook family
+    passed, and the process evidence below with no failing exit, ANR or restart.
+
+    A link is opened with am start -W -a VIEW -d ... -p com.pinterest and has to report Status: ok.
+    No link reaches the Inbox (Pinterest sends pinterest://notifications/ to the home feed), so
+    the walk opens it from the home feed: the bottom bar's Home, then the header's Inbox button,
+    each read by its description from a fresh dump. The Hush settings open through
     APPLICATION_PREFERENCES, the intent Android's App info page sends. Settings has no intent for a
     single page, so each page is opened from the settings list: a fresh uiautomator dump, the row
     whose text is exactly the page's name, a tap on its centre, and a page counts when its title
     shows and the list's search box is gone. Back returns to the list. Taps only ever
     land on Hush settings rows read from a dump taken after the last scroll or Back.
 
+    The menus are only read. A pin's overflow button is tapped from a fresh dump, the menu is
+    dumped, Back closes it and the screen it opened from has to show again with neither menu
+    over it. The long press starts from a fresh dump that has to show the home feed with no
+    menu over it, picks the pin from that dump and holds it in one shell command that dumps the
+    menu while it's held and lets go where it pressed, which picks nothing. A retry does all of
+    that again. No row or button of a menu is ever tapped.
+
+    Process health: just before the deliberate force-stop the walk lists the device's processes,
+    and two seconds after it saves Pinterest's exit records (dumpsys activity exit-info) as the
+    baseline. It follows the main process's pid, user 0's only, after every case. At the end it
+    reads the exit records again and the event log's am_anr lines, and Resolve-WalkExits classes
+    each record: old, the initial stop (the force-stop's own record for a pid that was running),
+    unrelated (another user's), a helper eviction or other helper exit, or a failure (an
+    in-window crash, ANR or failed start of any Pinterest process, or any other exit of the main
+    one). An ANR the event log has already dropped still shows as an exit record. A failure, an ANR or a main pid that changed or went away fails the
+    walk. The receipt's process field holds the baseline, every exit since the stop with its
+    class, the ANRs and the restarts.
+
     The walk also holds the patches' hooks to account. Before it restarts Pinterest it turns on the
-    switch of every family in -HookFamilies, and after the last settings page it saves the full
+    switch of every family in -HookFamilies (the canonical Get-WalkHookFamilies map by default), and after the last settings page it saves the full
     diagnostics report from Pause, backup and diagnostics, copies it to the output folder as
     diagnostics.txt and deletes the phone's copy. A family whose case opened with its switch on
     fails the walk, by name, when [HOOK STATUS] shows its hook never ran or lists a target it
@@ -42,9 +77,10 @@
     changes no device setting, only wakes the screen, and stops when the phone is locked rather than
     unlocking it. It never uninstalls or clears the installed app; an install that can't update
     the app in place is a problem the walk reports, not one it forces past. On the pin it only
-    swipes, and on the Inbox, which lists suggested people, it only reads the title and goes Back.
-    Every other tap lands on a Hush settings row, its export dialog, the bottom bar's Home or the
-    Inbox button.
+    opens its overflow menu and swipes, and on the Inbox, which lists suggested people, it only
+    reads the title and goes Back. Every other tap lands on a Hush settings row, its export
+    dialog, a pin's overflow button, the bottom bar's Home or the Inbox button. Nothing it does
+    sends a message, saves a pin or changes a board.
 
 .EXAMPLE
     scripts/walk-app.ps1 -Serial emulator-5578
@@ -61,45 +97,25 @@
 param(
     [string]$Serial,
     [string]$Package = 'com.pinterest',
-    # The patched screens to open, each a deep link. A link that won't open fails the walk rather
-    # than skipping it. The pin goes first, straight from the home feed: opened over a search,
-    # Pinterest 14.44.0 leaves the "Ideas you might love" row out of the pin's related grid.
-    [string[]]$Visit = @(
-        'pinterest://pin/1477812369124424/',
-        'pinterest://search/pins/?q=nature',
-        'pinterest://search/boards/?q=recipes',
-        'pinterest://search/users/?q=art'
-    ),
-    # Swipes up once a case has opened, for a surface below its first screen: Hide topic
-    # suggestions works on the pin's "Ideas you might love" row, in the related grid that loads
-    # four or five screens down. Swiping past it is harmless; it only has to be bound once.
-    [hashtable]$CaseSwipes = @{ 'pinterest://pin/1477812369124424/' = 7 },
-    # Which case reaches each hook family: 'home' for the home feed, 'inbox' for the Inbox opened
-    # from it, or a link above. Page, Switch
-    # and Key name the switch that turns it on: its settings page and English title, and its key as
-    # the diagnostics report prints it. A family left out is reported as not exercised.
-    [object[]]$HookFamilies = @(
-        @{ Family = 'Hide ads'; Case = 'home'; Page = 'Feed'; Switch = 'Hide ads'; Key = 'hushpinterest_hide_ads' }
-        @{ Family = 'Hide AI-labeled pins'; Case = 'home'; Page = 'Feed'; Switch = 'Hide AI-labeled pins'; Key = 'hushpinterest_hide_ai_pins' }
-        @{ Family = 'Hide shopping and product pins'; Case = 'home'; Page = 'Feed'; Switch = 'Hide shopping and product pins'; Key = 'hushpinterest_hide_shopping' }
-        @{ Family = 'Filter feed'; Case = 'home'; Page = 'Feed'; Switch = 'Hide Home suggestions'; Key = 'hushpinterest_hide_home_suggestions' }
-        @{ Family = 'Disable analytics'; Case = 'home'; Page = 'Privacy'; Switch = 'Disable analytics'; Key = 'hushpinterest_disable_analytics' }
-        @{ Family = 'Hide advertising ID'; Case = 'home'; Page = 'Privacy'; Switch = 'Hide advertising ID'; Key = 'hushpinterest_hide_ad_id' }
-        @{ Family = 'Download board'; Case = 'home'; Page = 'Pin actions'; Switch = 'Download board'; Key = 'hushpinterest_download_board' }
-        @{ Family = 'No screenshot share menu'; Case = 'home'; Page = 'Interface'; Switch = 'No screenshot share menu'; Key = 'hushpinterest_hide_screenshot_share' }
-        @{ Family = 'Hide Assistant'; Case = 'home'; Page = 'Interface'; Switch = 'Hide Assistant'; Key = 'hushpinterest_hide_assistant' }
-        @{ Family = 'Hide navigation buttons'; Case = 'home'; Page = 'Interface'; Switch = 'Hide Create button'; Key = 'hushpinterest_hide_nav_create' }
-        @{ Family = 'AMOLED black'; Case = 'home'; Page = 'Interface'; Switch = 'Black bottom bar'; Key = 'hushpinterest_black_bottom_bar' }
-        @{ Family = 'Original-quality images'; Case = 'home'; Page = 'Interface'; Switch = 'Original-quality images'; Key = 'hushpinterest_original_images' }
-        @{ Family = 'Hide closeup buttons'; Case = 'pinterest://pin/1477812369124424/'; Page = 'Interface'; Switch = 'Hide lens button on pins'; Key = 'hushpinterest_hide_closeup_lens' }
-        @{ Family = 'Hide comments'; Case = 'pinterest://pin/1477812369124424/'; Page = 'Interface'; Switch = 'Hide comments'; Key = 'hushpinterest_hide_comments' }
-        @{ Family = 'Hide topic suggestions'; Case = 'pinterest://pin/1477812369124424/'; Page = 'Interface'; Switch = 'Hide topic suggestions'; Key = 'hushpinterest_hide_topic_suggestions' }
-        @{ Family = 'Show posted date'; Case = 'pinterest://pin/1477812369124424/'; Page = 'Interface'; Switch = 'Show posted date'; Key = 'hushpinterest_show_posted_date' }
-        @{ Family = 'Hide Inbox updates'; Case = 'inbox'; Page = 'Notifications'; Switch = 'Hide Inbox updates'; Key = 'hushpinterest_hide_inbox_updates' }
-    ),
-    # The Hush settings pages, by the name each row shows in English. The walk opens every one.
-    [string[]]$SettingsPages = @('Feed', 'Privacy', 'Pin actions', 'Interface', 'Links', 'Notifications',
-        "Pinterest's own settings", 'Updates', 'Pause, backup and diagnostics', 'About'),
+    # The deep links to open, the canonical list's (Get-WalkCaseList) when not given. A canonical
+    # link left out makes the walk PARTIAL, and a link the list doesn't have is walked as an extra
+    # case that counts toward nothing. A link that won't open fails the walk rather than skipping it.
+    [string[]]$Visit = @(),
+    # Swipes up once a case has opened, by case id (an extra link's id is the link), for a surface
+    # below its first screen: Hide topic suggestions works on the pin's "Ideas you might love" row,
+    # in the related grid that loads four or five screens down. Swiping past it is harmless; it
+    # only has to be bound once.
+    [hashtable]$CaseSwipes = @{ pin = 7 },
+    # Which case reaches each hook family, by case id: 'home' for the home feed, 'grid-menu' and
+    # 'long-press' for a home feed pin's menus, 'pin' for the pin, 'inbox' for the Inbox opened from
+    # the home feed, or an extra link. Page, Switch and Key name the switch that turns it on: its
+    # settings page and English title, and its key as the diagnostics report prints it. The
+    # canonical map (Get-WalkHookFamilies) when not given. A family left out is reported as not
+    # exercised, and a canonical family left out or mapped differently makes the walk PARTIAL.
+    [object[]]$HookFamilies,
+    # The Hush settings pages to open, by the name each row shows in English, the canonical list's
+    # when not given. Leaving one out makes the walk PARTIAL; one the list doesn't have is extra.
+    [string[]]$SettingsPages = @(),
     # An unbound installed build can be surveyed, but only matching build evidence permits a
     # release walk. The sidecar comes from patch-for-device.ps1 after its checks pass.
     [switch]$SkipPatch,
@@ -131,12 +147,281 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'walk-receipt.ps1')
 
 $WalkMainActivity = 'com.pinterest.activity.PinterestActivity'
-# The settings list's search box, read by its hint. It sits above the list, so scrolling never hides
-# it, and a page hides it, so it going away is how a page is told from the list. (The list's own
-# headings scroll off the top once a lower row has been reached.)
-$WalkSettingsHome = 'Search settings'
 # Where Save full report leaves morphe-diagnostics-<time>-<id>.txt.
 $WalkReportFolder = '/sdcard/Download/Morphe'
+# The activity Pinterest's signed-in screens resume in: the home feed, pins, searches and the
+# Inbox. A case inside Pinterest passes only with it in front, so a login, error or fallback
+# screen can't stand in for one.
+$WalkHomeActivity = 'com.pinterest.activityLibrary.activity.task.activity.MainActivity'
+# What a signed-out Pinterest resumes instead, named when it's in front.
+$WalkLoginActivity = 'com.pinterest.identity.UnauthActivity'
+
+function Resolve-WalkPlan {
+    <#
+    .SYNOPSIS
+        The cases a walk runs, from the canonical list: every one, unless -Visit or -SettingsPages
+        names a shorter list or -SkipSettings drops the settings. LeftOut holds the canonical ids
+        the walk won't run (a walk with any is PARTIAL), Extra the ids of links and pages the list
+        doesn't have, which run as extra cases. A pin left out takes its menu with it.
+    #>
+    param([object[]]$Cases = @(Get-WalkCaseList), [AllowNull()][string[]]$Visit, [AllowNull()][string[]]$SettingsPages,
+        [bool]$SkipSettings)
+    $planned = [Collections.Generic.List[object]]::new()
+    $leftOut = [Collections.Generic.List[string]]::new()
+    $extra = [Collections.Generic.List[string]]::new()
+    $ids = [Collections.Generic.HashSet[string]]::new()
+    foreach ($case in @($Cases)) {
+        $keep = switch ($case.Kind) {
+            'link' { $null -eq $Visit -or @($Visit) -ccontains $case.Target }
+            'settings' { -not $SkipSettings }
+            'page' { -not $SkipSettings -and ($null -eq $SettingsPages -or @($SettingsPages) -ccontains $case.Target) }
+            default { -not $case.Origin -or $ids.Contains($case.Origin) }
+        }
+        if ($keep) { $planned.Add($case); [void]$ids.Add($case.Id) } else { $leftOut.Add($case.Id) }
+        if ($case.Id -ceq 'search-users') {
+            foreach ($link in @($Visit | Where-Object { $_ -and @($Cases | ForEach-Object { $_.Target }) -cnotcontains $_ } | Select-Object -Unique)) {
+                $planned.Add(@{ Id = $link; Kind = 'link'; Target = $link; Marks = @() }); $extra.Add($link)
+            }
+        }
+    }
+    if (-not $SkipSettings) {
+        foreach ($page in @($SettingsPages | Where-Object { $_ -and $WalkSettingsPages -cnotcontains $_ } | Select-Object -Unique)) {
+            $planned.Add(@{ Id = "settings:$page"; Kind = 'page'; Target = $page; Marks = @("text:$page"); Absent = @("text:$WalkSettingsHome") })
+            $extra.Add("settings:$page")
+        }
+    }
+    [pscustomobject]@{ Cases = @($planned); LeftOut = @($leftOut); Extra = @($extra) }
+}
+
+function Get-WalkNodes {
+    <#
+    .SYNOPSIS
+        Every node of a uiautomator dump: its resource id's name, text, content description,
+        package, bounds and centre. A failed dump has none.
+    #>
+    param([string]$Xml)
+    if ([string]::IsNullOrWhiteSpace($Xml) -or $Xml -notmatch '<hierarchy') { return @() }
+    $document = [xml]$Xml
+    foreach ($node in $document.SelectNodes('//node')) {
+        if ($node.GetAttribute('bounds') -notmatch '^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$') { continue }
+        $left = [int]$Matches[1]; $top = [int]$Matches[2]; $right = [int]$Matches[3]; $bottom = [int]$Matches[4]
+        $resource = [string]$node.GetAttribute('resource-id')
+        [pscustomobject]@{
+            Id = if ($resource -match ':id/(.+)$') { $Matches[1] } else { '' }
+            Text = [string]$node.GetAttribute('text'); Desc = [string]$node.GetAttribute('content-desc')
+            Package = [string]$node.GetAttribute('package')
+            Left = $left; Top = $top; Right = $right; Bottom = $bottom
+            X = [int](($left + $right) / 2); Y = [int](($top + $bottom) / 2)
+        }
+    }
+}
+
+function Test-WalkMark {
+    <#
+    .SYNOPSIS
+        Whether a node from Get-WalkNodes carries -Mark: kind:value for an exact match or
+        kind~pattern for a case-sensitive regex, where kind is id (the resource id's name), desc,
+        text, or any (the text or the description).
+    #>
+    param($Node, [string]$Mark)
+    if ($Mark -notmatch '^(id|desc|text|any)([:~])(.*)$') { throw "The walk mark $Mark isn't kind:value or kind~pattern." }
+    $kind = $Matches[1]; $exact = $Matches[2] -ceq ':'; $value = $Matches[3]
+    $fields = switch ($kind) { 'id' { @($Node.Id) } 'desc' { @($Node.Desc) } 'text' { @($Node.Text) } default { @($Node.Text, $Node.Desc) } }
+    foreach ($field in $fields) {
+        if ([string]::IsNullOrEmpty($field)) { continue }
+        if ($exact -and $field -ceq $value) { return $true }
+        if (-not $exact -and $field -cmatch $value) { return $true }
+    }
+    return $false
+}
+
+function Test-WalkAnchor {
+    <#
+    .SYNOPSIS
+        What keeps a dump from being a case's destination: one line for each of -Marks no Pinterest
+        node carries and each of -Absent one still does. Nothing when the dump is the destination.
+    #>
+    param([string]$Xml, [string[]]$Marks = @(), [string[]]$Absent = @(), [string]$Package = 'com.pinterest')
+    $nodes = @(Get-WalkNodes $Xml | Where-Object { $_.Package -ceq $Package })
+    if ($nodes.Count -eq 0) { return 'no Pinterest screen in the dump' }
+    foreach ($mark in @($Marks | Where-Object { $_ })) {
+        if (-not @($nodes | Where-Object { Test-WalkMark $_ $mark }).Count) { "no $mark" }
+    }
+    foreach ($mark in @($Absent | Where-Object { $_ })) {
+        if (@($nodes | Where-Object { Test-WalkMark $_ $mark }).Count) { "$mark still showing" }
+    }
+}
+
+function Get-WalkMenuKind {
+    <#
+    .SYNOPSIS
+        Which of Pinterest's implementations served a menu case, named only from what the dump
+        shows: for an overflow menu the pop-up menu (the modal header's dismiss button), for a long
+        press the round menu (a Send or Search image button with a description and no text, and no
+        pop-up menu). Anything else, Pinterest's full-screen sheet and its Compose long-press list
+        included, is unrecognized: neither has a mark the walk has seen on a device.
+    #>
+    param([string]$Xml, [string]$Kind, [string]$Package = 'com.pinterest')
+    $nodes = @(Get-WalkNodes $Xml | Where-Object { $_.Package -ceq $Package })
+    $popup = @($nodes | Where-Object { $_.Id -ceq 'modal_header_dismiss_bt' }).Count -gt 0
+    if ($Kind -ceq 'menu') { return $(if ($popup) { 'pop-up menu' } else { 'unrecognized' }) }
+    $round = @($nodes | Where-Object { -not $_.Text -and $_.Desc -cmatch '^(Send|Search image)$' }).Count -gt 0
+    if ($round -and -not $popup) { return 'round menu' }
+    'unrecognized'
+}
+
+function Get-WalkMainPids {
+    <#
+    .SYNOPSIS
+        The pids of -Package's main process for user 0 in ps -A -o PID,UID,NAME output, so a copy
+        running for a work profile or another user is never the one the walk follows. The UID
+        column is numeric (under 100000 for user 0) or a name like u0_a234.
+    #>
+    param([string[]]$Lines, [string]$Package = 'com.pinterest')
+    foreach ($line in @($Lines)) {
+        $fields = @("$line".Trim() -split '\s+')
+        if ($fields.Count -ne 3 -or $fields[0] -cnotmatch '^\d+$' -or $fields[2] -cne $Package) { continue }
+        if (($fields[1] -cmatch '^\d+$' -and [long]$fields[1] -lt 100000) -or $fields[1] -cmatch '^u0_') { $fields[0] }
+    }
+}
+
+function Get-WalkResumedActivity {
+    <#
+    .SYNOPSIS
+        The resumed activity in dumpsys activity activities output, as Package and Class with a
+        leading-dot class expanded. The topResumedActivity line wins over a display's own.
+    #>
+    param([string[]]$Lines)
+    $found = $null
+    foreach ($line in @($Lines)) {
+        if ($line -notmatch '(top)?ResumedActivity[=:]\s*ActivityRecord\{\S+ u\d+ ([\w.]+)/([\w.$]+)') { continue }
+        $className = if ($Matches[3].StartsWith('.')) { $Matches[2] + $Matches[3] } else { $Matches[3] }
+        $activity = [pscustomobject]@{ Package = $Matches[2]; Class = $className }
+        if ($Matches[1]) { return $activity }
+        if (-not $found) { $found = $activity }
+    }
+    $found
+}
+
+function Select-WalkGridPin {
+    <#
+    .SYNOPSIS
+        The first pin of a home feed dump that sits whole between the header and the bottom bar,
+        with its overflow button inside it and neither its centre nor that button under a banner:
+        the points to hold and to tap. $null when no pin qualifies.
+    #>
+    param([string]$Xml, [int]$Height, [string]$Package = 'com.pinterest')
+    $nodes = @(Get-WalkNodes $Xml | Where-Object { $_.Package -ceq $Package })
+    $header = @($nodes | Where-Object { $_.Id -ceq 'home_feed_greeting_header_view' })
+    $bar = @($nodes | Where-Object { $_.Id -ceq 'bottom_nav_bar' })
+    $top = if ($header.Count) { $header[0].Bottom } else { [int]($Height * 0.1) }
+    $bottom = if ($bar.Count) { $bar[0].Top } else { [int]($Height * 0.9) }
+    $covers = @($nodes | Where-Object { ($_.Id -ceq 'upsell_view' -or $_.Id -clike 'bannerOverlay*') -and $_.Right -gt $_.Left -and $_.Bottom -gt $_.Top })
+    foreach ($pin in @($nodes | Where-Object { $_.Id -ceq 'pin_rep_id' })) {
+        if ($pin.Top -lt $top -or $pin.Bottom -gt $bottom) { continue }
+        $menu = @($nodes | Where-Object { $_.Id -ceq 'pin_overflow_action_id' -and $_.Left -ge $pin.Left -and $_.Right -le $pin.Right -and
+                $_.Top -ge $pin.Top -and $_.Bottom -le $pin.Bottom })
+        if ($menu.Count -eq 0) { continue }
+        $hidden = $false
+        foreach ($cover in $covers) {
+            foreach ($point in @($pin, $menu[0])) {
+                if ($point.X -ge $cover.Left -and $point.X -le $cover.Right -and $point.Y -ge $cover.Top -and $point.Y -le $cover.Bottom) { $hidden = $true }
+            }
+        }
+        if ($hidden) { continue }
+        return [pscustomobject]@{ X = $pin.X; Y = $pin.Y; MenuX = $menu[0].X; MenuY = $menu[0].Y }
+    }
+    $null
+}
+
+function ConvertFrom-WalkExitInfo {
+    <#
+    .SYNOPSIS
+        The records of dumpsys activity exit-info <package>: each process exit with its time, pid,
+        uids, user, process name, reason, subreason, importance and description. Key, the
+        timestamp and pid together, tells one record from another across two dumps.
+    #>
+    param([string]$Text)
+    $record = $null
+    foreach ($line in @($Text -split "`r?`n")) {
+        if ($line -match '^\s*ApplicationExitInfo #\d+:') {
+            if ($record -and $record.Key) { [pscustomobject]$record }
+            $record = [ordered]@{ Key = $null }
+            continue
+        }
+        if (-not $record) { continue }
+        if ($line -match '^\s*timestamp=(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{3}) pid=(\d+) realUid=(\d+) packageUid=(\d+)\b.*\buser=(\d+)') {
+            $record.Timestamp = $Matches[1]
+            $record.Time = [datetime]::ParseExact($Matches[1], 'yyyy-MM-dd HH:mm:ss.fff', [Globalization.CultureInfo]::InvariantCulture)
+            $record.ProcessId = $Matches[2]; $record.RealUid = [int]$Matches[3]; $record.PackageUid = [int]$Matches[4]
+            $record.User = [int]$Matches[5]; $record.Key = "$($Matches[1])/$($Matches[2])"
+        } elseif ($line -match '^\s*process=(\S+) reason=(\d+) \(((?:[^()]|\([^()]*\))*)\) subreason=(\d+) \(((?:[^()]|\([^()]*\))*)\)') {
+            # Crash reasons nest a pair of parentheses: reason=4 (APP CRASH(EXCEPTION)).
+            $record.Process = $Matches[1]; $record.Reason = [int]$Matches[2]; $record.ReasonText = $Matches[3]
+            $record.Subreason = [int]$Matches[4]; $record.SubreasonText = $Matches[5]
+        } elseif ($line -match '^\s*importance=(\d+)\b.*?\bdescription=(.*?)(?:\s+state=.*)?$') {
+            $record.Importance = [int]$Matches[1]
+            $record.Description = if ($Matches[2] -ceq 'null') { '' } else { $Matches[2] }
+        }
+    }
+    if ($record -and $record.Key) { [pscustomobject]$record }
+}
+
+function Resolve-WalkExits {
+    <#
+    .SYNOPSIS
+        Each exit record from ConvertFrom-WalkExitInfo with the Class it earns against the walk:
+          old              from before the stop
+          unrelated        another user's, or a process that isn't Pinterest's or its helper's
+          initial stop     the force-stop itself: user requested (reason 10) with the force stop
+                           subreason (21) or a "stop <package>" description, of a pid running
+                           just before the stop, within 30 seconds of it
+          failure          a crash, native crash, ANR or failed start of any Pinterest process in
+                           the window, or any other exit of the main process
+          helper eviction  the system reclaiming a helper: exit self, low memory, other kills such
+                           as isolated not needed, the freezer, or a cached, empty or Android 17
+                           MemoryLimiter:AnonSwap kill
+          helper exit      anything else a helper did, recorded and not failing
+        -RunningBefore holds the pids listed just before the stop, -StoppedAt the device time then.
+        Being in the baseline saved after the stop earns a record nothing: one from after the stop
+        that isn't the stop is classed like any other, since S22 pids come round again within the
+        hour. An ANR is reason 6 here, so one the event log has already lost still fails the walk.
+    #>
+    param([object[]]$Records = @(), [string[]]$RunningBefore = @(), [datetime]$StoppedAt,
+        [string]$Package = 'com.pinterest', [int]$User = 0)
+    $running = [Collections.Generic.HashSet[string]]::new()
+    foreach ($id in @($RunningBefore | Where-Object { $_ })) { [void]$running.Add([string]$id) }
+    $stopText = "^stop $([regex]::Escape($Package))\b"
+    foreach ($record in @($Records | Where-Object { $_ })) {
+        $main = $record.Process -ceq $Package
+        $helper = -not $main -and ($record.Process -clike "${Package}:*" -or $record.RealUid -ne $record.PackageUid)
+        $stop = $record.Reason -eq 10 -and ($record.Subreason -eq 21 -or "$($record.Description)" -cmatch $stopText) -and
+            $running.Contains([string]$record.ProcessId) -and $record.Time -ge $StoppedAt -and $record.Time -le $StoppedAt.AddSeconds(30)
+        $class = if ($record.Time -lt $StoppedAt) { 'old' }
+        elseif ($record.User -ne $User -or -not ($main -or $helper)) { 'unrelated' }
+        elseif ($stop) { 'initial stop' }
+        elseif (@(4, 5, 6, 7) -contains $record.Reason) { 'failure' }
+        elseif ($main) { 'failure' }
+        elseif (@(1, 3, 13, 14) -contains $record.Reason -or
+            "$($record.Description) $($record.SubreasonText)" -match 'MemoryLimiter:AnonSwap|\bcached\b|\bempty\b|isolated not needed') { 'helper eviction' }
+        else { 'helper exit' }
+        $record | Add-Member -NotePropertyName Class -NotePropertyValue $class -Force -PassThru
+    }
+}
+
+function Get-WalkAnrLines {
+    <#
+    .SYNOPSIS
+        The event log's am_anr lines (logcat -b events -v epoch) for Pinterest or one of its :name
+        processes at or after -Since, device epoch seconds.
+    #>
+    param([string[]]$Lines, [long]$Since, [string]$Package = 'com.pinterest')
+    $name = [regex]::Escape($Package) + '(?::[\w.]+)?'
+    foreach ($line in @($Lines)) {
+        if ($line -notmatch '^\s*(\d+)\.\d+\s' -or [long]$Matches[1] -lt $Since) { continue }
+        if ($line -match "\bam_anr\s*:\s*\[\d+,\d+,$name,") { $line }
+    }
+}
 
 function Resolve-WalkOutcome {
     <#
@@ -298,7 +583,11 @@ function Resolve-WalkHooks {
             ambiguous = if ($counts) { $counts.Ambiguous } else { 0 }
             detail = ''
         }
-        $where = if ($entry.Case -ceq 'home') { 'the home feed' } elseif ($entry.Case -ceq 'inbox') { 'the Inbox' } else { $entry.Case }
+        $where = switch -CaseSensitive ($entry.Case) {
+            'home' { 'the home feed' } 'inbox' { 'the Inbox' } 'pin' { 'the pin' }
+            'grid-menu' { "a home feed pin's menu" } 'long-press' { "a home feed pin's long-press menu" }
+            'pin-menu' { "the pin's menu" } default { $entry.Case }
+        }
         if (-not $Report) { $verdict.detail = 'no diagnostics report to read' }
         elseif (@($Opened) -cnotcontains $entry.Case) { $verdict.detail = "$where didn't open" }
         elseif (@($SwitchedOn) -cnotcontains $entry.Family) { $verdict.detail = "its switch $($entry.Switch) couldn't be turned on" }
@@ -339,7 +628,7 @@ function Resolve-WalkHooks {
 function Invoke-WalkApp {
     param(
         [string]$Serial, [string]$Package, [string[]]$Visit, [string[]]$SettingsPages,
-        [hashtable]$CaseSwipes = @{}, [object[]]$HookFamilies = @(),
+        [hashtable]$CaseSwipes = @{}, [object[]]$HookFamilies = @(Get-WalkHookFamilies),
         [bool]$SkipPatch, [bool]$SkipSettings, [int]$SettleSeconds, [string]$OutDir,
         [string]$BuildEvidence, [string[]]$Exclude = @(),
         [string]$Keystore, [string]$KeyAlias, [string]$LeaseDirectory, [string]$ChatIdentity,
@@ -401,17 +690,35 @@ function Invoke-WalkApp {
         }
     }
 
+    # The cases this walk runs. A canonical case left out keeps it from being a full walk.
+    $planVisit = $null
+    if ($PSBoundParameters.ContainsKey('Visit')) { $planVisit = [string[]]@($Visit) }
+    $planPages = $null
+    if ($PSBoundParameters.ContainsKey('SettingsPages')) { $planPages = [string[]]@($SettingsPages) }
+    $plan = Resolve-WalkPlan -Visit $planVisit -SettingsPages $planPages -SkipSettings $SkipSettings
+    $planned = @{}
+    foreach ($case in $plan.Cases) { $planned[$case.Id] = $case }
+    if ($plan.LeftOut.Count -gt 0) { Write-Host "[walk] left out of this walk, so it can't be full: $($plan.LeftOut -join ', ')" }
+    # The canonical hook families the given map leaves out or maps differently, which keep it
+    # from being a full walk too.
+    $hooksLeftOut = @(Get-WalkHookShortfall -Families $HookFamilies)
+    if ($hooksLeftOut.Count -gt 0) { Write-Host "[walk] hook families not checked as the canonical map has them, so it can't be full: $($hooksLeftOut -join ', ')" }
+
     $lease = $null
     $problems = [Collections.Generic.List[string]]::new()
     $screens = 0
     $dumpPath = '/sdcard/hushpinterest-walk.xml'
-    # The cases that opened, the hook families whose switch is on, and the map entries whose
+    # The cases that passed, the hook families whose switch is on, and the map entries whose
     # switch the walk tapped, which it turns back.
     $opened = [Collections.Generic.List[string]]::new()
     $switchedOn = [Collections.Generic.HashSet[string]]::new()
     $flipped = [Collections.Generic.List[object]]::new()
     $hooks = @()
     $restore = $null
+    # Each case's result for the receipt, and the main process the walk follows from its launch.
+    $caseResults = [Collections.Generic.List[object]]::new()
+    $health = @{ MainPid = $null; FirstPid = $null; Restarts = [Collections.Generic.List[object]]::new() }
+    $processEvidence = $null
     try {
         $lease = Enter-HushDeviceLease -Adb $Adb -Serial $Serial -LeaseDirectory $LeaseDirectory -ChatIdentity $ChatIdentity
         # Ownership is checked on every call. The device identity was bound when the lease was
@@ -441,6 +748,131 @@ function Invoke-WalkApp {
             $resumed = @((& $walkAdb @('shell', 'dumpsys', 'activity', 'activities')).Output |
                 Where-Object { $_ -match 'ResumedActivity' }) -join ' '
             $resumed -match "\b$([regex]::Escape($Package))/"
+        }
+        $resumedActivity = { Get-WalkResumedActivity @((& $walkAdb @('shell', 'dumpsys', 'activity', 'activities')).Output) }
+        # The device's clock, in the form exit-info prints its timestamps in.
+        $deviceTime = {
+            $now = ((& $walkAdb @('shell', 'date', '+%Y-%m-%d_%H:%M:%S')).Output -join '').Trim()
+            [datetime]::ParseExact($now, 'yyyy-MM-dd_HH:mm:ss', [Globalization.CultureInfo]::InvariantCulture)
+        }
+        $readExits = { @(ConvertFrom-WalkExitInfo ((& $walkAdb @('shell', 'dumpsys', 'activity', 'exit-info', $Package)).Output -join "`n")) }
+        $mainPids = { @(Get-WalkMainPids -Lines @((& $walkAdb @('shell', 'ps', '-A', '-o', 'PID,UID,NAME')).Output) -Package $Package) }
+        # Whether the dump -Xml is -Case's destination: its marks shown, its Absent marks gone, and
+        # for a case inside Pinterest its main activity resumed. Answers the failures and the
+        # resumed activity.
+        $checkAnchor = {
+            param($Case, [string]$Xml)
+            $marks = @($Case.Marks)
+            if ($Case.Family -and $switchedOn.Contains($Case.Family)) { $marks += @($Case.HushMarks) }
+            $failures = @(Test-WalkAnchor -Xml $Xml -Marks $marks -Absent @($Case.Absent) -Package $Package)
+            $activity = & $resumedActivity
+            $where = if ($activity) { "$($activity.Package)/$($activity.Class)" } else { 'nothing' }
+            if (-not $activity -or $activity.Package -cne $Package) {
+                $failures = @("Pinterest wasn't in front ($where was)") + $failures
+            } elseif (@('page', 'settings') -cnotcontains $Case.Kind -and $activity.Class -cne $WalkHomeActivity) {
+                $what = if ($activity.Class -ceq $WalkLoginActivity) { "Pinterest's login screen" } else { $activity.Class }
+                $failures = @("$what was in front, not Pinterest's main screen") + $failures
+            }
+            $anchor = @($marks | Where-Object { $_ }) + @($Case.Absent | Where-Object { $_ } | ForEach-Object { "not $_" })
+            [pscustomobject]@{ Failures = $failures; Activity = $where; Anchor = $anchor -join ', ' }
+        }
+        # The main process after -After: the pid the launch started, or a restart or stop that fails
+        # the walk.
+        $checkHealth = {
+            param([string]$After)
+            if (-not $health.MainPid) { return }
+            $now = @(& $mainPids)
+            if ($now -ccontains $health.MainPid) { return }
+            $was = $health.MainPid
+            $health.MainPid = if ($now.Count) { $now[0] } else { $null }
+            $health.Restarts.Add([ordered]@{ after = $After; pid = $was; now = $health.MainPid })
+            if ($health.MainPid) { $problems.Add("Pinterest's main process restarted during $After (pid $was, then $($health.MainPid))") }
+            else { $problems.Add("Pinterest's main process stopped during $After (pid $was)") }
+            Write-Host "[walk] $($problems[$problems.Count - 1])"
+        }
+        # One case's result, in the receipt's order. A failure is a problem named after the case.
+        $record = {
+            param($Case, [bool]$Passed, [string]$Activity = '', [string]$Anchor = '', [string]$Implementation = '', [string]$Detail = '')
+            $caseResults.Add([ordered]@{
+                    id = $Case.Id; kind = $Case.Kind; result = if ($Passed) { 'pass' } else { 'fail' }
+                    activity = $Activity; anchor = $Anchor; implementation = $Implementation; detail = $Detail
+                })
+            if ($Passed) {
+                $opened.Add($Case.Id)
+                $served = if ($Implementation) { " ($Implementation)" } else { '' }
+                Write-Host "[walk] $($Case.Id): reached$served"
+            } else {
+                $problems.Add("the $($Case.Id) case didn't reach its destination: $Detail")
+                Write-Host "[walk] $($Case.Id): $Detail"
+            }
+            & $checkHealth $Case.Id
+        }
+        # -Origin's destination with no menu left over it. The long-press menu leaves the home
+        # feed's marks in the dump, so the marks of both menus have to be gone as well.
+        $menuGone = {
+            param($Origin)
+            @{ Id = $Origin.Id; Kind = $Origin.Kind; Marks = @($Origin.Marks)
+                Absent = @($Origin.Absent | Where-Object { $_ }) + @('id:modal_header_dismiss_bt', 'desc~^(Send|Search image)$') }
+        }
+        # A read-only menu case: the button at -X,-Y tapped from a fresh dump, the menu read, Back,
+        # and its origin's destination read again. No row of the menu is ever tapped.
+        $runMenu = {
+            param($Case, [int]$X, [int]$Y)
+            [void](& $walkAdb @('shell', 'input', 'tap', [string]$X, [string]$Y))
+            Start-Sleep -Seconds 2
+            $xml = & $readXml
+            $seen = & $checkAnchor $Case $xml
+            $kind = Get-WalkMenuKind -Xml $xml -Kind 'menu' -Package $Package
+            [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
+            Start-Sleep -Milliseconds 1500
+            $back = & $checkAnchor (& $menuGone $planned[$Case.Origin]) (& $readXml)
+            $detail = @($seen.Failures) + @($back.Failures | ForEach-Object { "after Back, $_" })
+            & $record $Case ($detail.Count -eq 0) $seen.Activity $seen.Anchor $kind ($detail -join '; ')
+        }
+        # The long-press case. Every hold starts from a fresh dump that shows the home feed with no
+        # menu over it and picks the pin to hold from that dump. One shell command holds the pin,
+        # dumps the menu while it's held and lets go where it pressed, which picks nothing. Back
+        # once more if the menu stays.
+        $runHold = {
+            param($Case)
+            $origin = & $menuGone $planned[$Case.Origin]
+            $xml = ''
+            $why = ''
+            for ($try = 0; $try -lt 2 -and $xml -notmatch '<hierarchy'; $try++) {
+                if ($try -gt 0) { Start-Sleep -Seconds 1 }
+                $originXml = & $readXml
+                $ready = & $checkAnchor $origin $originXml
+                # A hold whose dump failed can leave its menu open, which Back closes.
+                if ($try -gt 0 -and $ready.Failures.Count -and
+                    @(Test-WalkAnchor -Xml $originXml -Absent @($origin.Absent) -Package $Package | Where-Object { $_ -clike '* still showing' }).Count) {
+                    [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
+                    Start-Sleep -Milliseconds 1500
+                    $originXml = & $readXml
+                    $ready = & $checkAnchor $origin $originXml
+                }
+                if ($ready.Failures.Count) { $why = "before the hold, $($ready.Failures -join '; ')"; break }
+                $pin = Select-WalkGridPin -Xml $originXml -Height $height -Package $Package
+                if (-not $pin) { $why = 'the home feed showed no pin whole on screen with its menu button'; break }
+                [void](& $walkAdb @('shell', ("rm -f $dumpPath; input motionevent DOWN $($pin.X) $($pin.Y); sleep 1.5; " +
+                            "uiautomator dump $dumpPath >/dev/null 2>&1; input motionevent UP $($pin.X) $($pin.Y)")))
+                $xml = (& $walkAdb @('shell', 'cat', $dumpPath)).Output -join "`n"
+                [void](& $walkAdb @('shell', 'rm', '-f', $dumpPath))
+            }
+            if ($why) {
+                & $record $Case $false '' '' '' $why
+                return
+            }
+            Start-Sleep -Seconds 1
+            $seen = & $checkAnchor $Case $xml
+            $kind = if ($xml -match '<hierarchy') { Get-WalkMenuKind -Xml $xml -Kind 'hold' -Package $Package } else { '' }
+            $back = & $checkAnchor $origin (& $readXml)
+            if ($back.Failures.Count) {
+                [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
+                Start-Sleep -Milliseconds 1500
+                $back = & $checkAnchor $origin (& $readXml)
+            }
+            $detail = @($seen.Failures) + @($back.Failures | ForEach-Object { "after letting go, $_" })
+            & $record $Case ($detail.Count -eq 0) $seen.Activity $seen.Anchor $kind ($detail -join '; ')
         }
 
         [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP'))
@@ -643,75 +1075,101 @@ function Invoke-WalkApp {
             Write-Host "[walk] $($switchedOn.Count) switches on, $($flipped.Count) of them turned on by the walk"
         }
         # The restart also clears the hook counts, so the report counts only what the cases reach.
+        # Every process running just before it, so an exit the stop caused is told from a later
+        # one, and Pinterest's exit records just after it, the baseline nothing older gets past.
+        $stoppedAt = & $deviceTime
+        $runningBefore = @((& $walkAdb @('shell', 'ps', '-A', '-o', 'PID')).Output | ForEach-Object { "$_".Trim() } | Where-Object { $_ -match '^\d+$' })
         [void](& $walkAdb @('shell', 'am', 'force-stop', $Package))
+        Start-Sleep -Seconds 2
+        $baseline = @(& $readExits)
+        Write-Host "[walk] stopped Pinterest at $($stoppedAt.ToString('yyyy-MM-dd HH:mm:ss')) with $($runningBefore.Count) processes running; $($baseline.Count) exit records before the walk"
         $launch = & $walkAdb @('shell', 'am', 'start', '-W', '-n', "$Package/$WalkMainActivity")
         Start-Sleep -Seconds ($SettleSeconds * 2)
-        if (($launch.Output -join "`n") -match '(?m)^Status:\s*ok\s*$' -and (& $inFront)) {
-            $screens++
-            $opened.Add('home')
-            Write-Host '[walk] opened the home feed'
-        } else {
-            $problems.Add('Pinterest would not start on its home feed')
+        $homeCase = $planned['home']
+        $launched = ($launch.Output -join "`n") -match '(?m)^Status:\s*ok\s*$'
+        $health.MainPid = @(& $mainPids)[0]
+        $health.FirstPid = $health.MainPid
+        $homeXml = & $readXml
+        $seen = & $checkAnchor $homeCase $homeXml
+        $detail = @($seen.Failures)
+        if (-not $launched) { $detail = @('the launch didn''t report Status: ok') + $detail }
+        if (-not $health.MainPid) { $detail += "Pinterest's main process wasn't running" }
+        & $record $homeCase ($detail.Count -eq 0) $seen.Activity $seen.Anchor '' ($detail -join '; ')
+
+        # A home feed pin's menus, both read-only, while the feed is still at its top. The menu's
+        # pin comes from the launch's dump; the hold takes its own from a fresh one.
+        foreach ($id in @('grid-menu', 'long-press')) {
+            if (-not $planned.ContainsKey($id)) { continue }
+            $gridPin = if ($id -ceq 'grid-menu' -and $opened -ccontains 'home') { Select-WalkGridPin -Xml $homeXml -Height $height -Package $Package } else { $null }
+            if ($opened -cnotcontains 'home') { & $record $planned[$id] $false '' '' '' 'the home feed didn''t open' }
+            elseif ($id -ceq 'long-press') { & $runHold $planned[$id] }
+            elseif (-not $gridPin) { & $record $planned[$id] $false '' '' '' 'the home feed showed no pin whole on screen with its menu button' }
+            else { & $runMenu $planned[$id] $gridPin.MenuX $gridPin.MenuY }
         }
 
-        foreach ($link in $Visit) {
-            $start = & $walkAdb @('shell', 'am', 'start', '-W', '-a', 'android.intent.action.VIEW', '-d', "'$link'", '-p', $Package)
+        foreach ($case in @($plan.Cases | Where-Object { $_.Kind -ceq 'link' })) {
+            $start = & $walkAdb @('shell', 'am', 'start', '-W', '-a', 'android.intent.action.VIEW', '-d', "'$($case.Target)'", '-p', $Package)
             Start-Sleep -Seconds $SettleSeconds
             $ok = ($start.Output -join "`n") -match '(?m)^Status:\s*ok\s*$'
-            $front = & $inFront
-            if ($ok -and $front) {
-                $screens++
-                $opened.Add($link)
-                Write-Host "[walk] opened $link"
-                $swipes = if ($CaseSwipes -and $CaseSwipes.ContainsKey($link)) { [int]$CaseSwipes[$link] } else { 0 }
-                # What comes into view loads from the network, so each swipe gets time to bind it.
-                for ($done = 0; $done -lt $swipes -and (& $inFront); $done++) { & $drag 0.75 0.35; Start-Sleep -Milliseconds 600 }
-                if ($swipes -gt 0) { Write-Host "[walk] swiped $link up $done times" }
-            } else {
-                $problems.Add("$link would not open (status ok: $ok, Pinterest in front: $front)")
-                Write-Host "[walk] $link would not open"
+            $xml = & $readXml
+            $seen = & $checkAnchor $case $xml
+            $detail = @($seen.Failures)
+            if (-not $ok) { $detail = @("$($case.Target) didn't report Status: ok") + $detail }
+            & $record $case ($detail.Count -eq 0) $seen.Activity $seen.Anchor '' ($detail -join '; ')
+            if ($detail.Count) { continue }
+            # The pin's own overflow menu, read before the swipes move its button off screen.
+            $menuCase = @($plan.Cases | Where-Object { $_.Kind -ceq 'menu' -and $_.Origin -ceq $case.Id })
+            foreach ($menu in $menuCase) {
+                $button = @(Get-WalkNodes $xml | Where-Object { $_.Package -ceq $Package -and $_.Id -ceq 'overflow_button' })
+                if ($button.Count -ne 1) { & $record $menu $false '' '' '' "the $($case.Id) showed $($button.Count) overflow buttons, not one" }
+                else { & $runMenu $menu $button[0].X $button[0].Y }
             }
+            $swipes = if ($CaseSwipes -and $CaseSwipes.ContainsKey($case.Id)) { [int]$CaseSwipes[$case.Id] } else { 0 }
+            # What comes into view loads from the network, so each swipe gets time to bind it.
+            for ($done = 0; $done -lt $swipes -and (& $inFront); $done++) { & $drag 0.75 0.35; Start-Sleep -Milliseconds 600 }
+            if ($swipes -gt 0) { Write-Host "[walk] swiped $($case.Id) up $done times" }
         }
 
         # The Inbox, from the home feed. Each tap is on a button read from a dump taken after the
         # last change of screen, and the Inbox itself is only read: it lists suggested people.
-        $inboxOpen = $false
-        $inboxStop = 'Pinterest wasn''t in front'
+        $inboxCase = $planned['inbox']
+        $inboxStop = $null
         $homeTab = Find-WalkButton (& $readXml) 'Home' $Package
         if (-not $homeTab) { $inboxStop = 'the bottom bar''s Home button wasn''t on screen' }
-        elseif (& $inFront) {
+        elseif (-not (& $inFront)) { $inboxStop = 'Pinterest wasn''t in front' }
+        else {
             [void](& $walkAdb @('shell', 'input', 'tap', [string]$homeTab.X, [string]$homeTab.Y))
             Start-Sleep -Seconds $SettleSeconds
             $inboxButton = Find-WalkButton (& $readXml) 'Inbox' $Package
             if (-not $inboxButton) { $inboxStop = 'the home feed showed no Inbox button' }
-            elseif (& $inFront) {
+            elseif (-not (& $inFront)) { $inboxStop = 'Pinterest wasn''t in front' }
+            else {
                 [void](& $walkAdb @('shell', 'input', 'tap', [string]$inboxButton.X, [string]$inboxButton.Y))
                 Start-Sleep -Seconds $SettleSeconds
-                $inboxOpen = [bool](Find-WalkRow (& $readScreen) 'Inbox' $Package) -and (& $inFront)
-                if (-not $inboxOpen) { $inboxStop = 'the Inbox button didn''t open a page titled Inbox' }
             }
         }
-        if ($inboxOpen) {
-            $screens++
-            $opened.Add('inbox')
-            Write-Host '[walk] opened the Inbox from the home feed'
-            [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
-            Start-Sleep -Seconds 1
-        } else {
-            $problems.Add("the Inbox would not open from the home feed's Inbox button: $inboxStop")
-            Write-Host "[walk] the Inbox would not open: $inboxStop"
+        if ($inboxStop) { & $record $inboxCase $false '' '' '' $inboxStop }
+        else {
+            $seen = & $checkAnchor $inboxCase (& $readXml)
+            & $record $inboxCase ($seen.Failures.Count -eq 0) $seen.Activity $seen.Anchor '' (@($seen.Failures) -join '; ')
+            if ($seen.Failures.Count -eq 0) {
+                [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
+                Start-Sleep -Seconds 1
+            }
         }
 
-        $full = -not $SkipSettings -and $null -ne $build
-        if (-not $SkipSettings) {
-            if (-not (& $openSettings)) {
-                $problems.Add('the Hush settings would not open from App info''s intent')
-                Write-Host '[walk] the Hush settings would not open'
-            } else {
-                $screens++
-                Write-Host '[walk] opened the Hush settings'
+        $full = $null -ne $build -and $plan.LeftOut.Count -eq 0 -and $hooksLeftOut.Count -eq 0
+        $settingsCase = $planned['settings']
+        if ($settingsCase) {
+            $listOpen = & $openSettings
+            $seen = & $checkAnchor $settingsCase (& $readXml)
+            $detail = @($seen.Failures)
+            if (-not $listOpen -and $detail.Count -eq 0) { $detail = @('App info''s intent didn''t show the settings list') }
+            & $record $settingsCase ($detail.Count -eq 0) $seen.Activity $seen.Anchor '' ($detail -join '; ')
+            if ($detail.Count -eq 0) {
                 $nodes = & $readScreen
-                foreach ($page in $SettingsPages) {
+                foreach ($pageCase in @($plan.Cases | Where-Object { $_.Kind -ceq 'page' })) {
+                    $page = $pageCase.Target
                     $row = Find-WalkRow $nodes $page $Package
                     # Pages lower in the list come into view one swipe at a time, each followed by a
                     # fresh dump. The list is the Hush settings; nothing else is on screen to touch.
@@ -723,21 +1181,13 @@ function Invoke-WalkApp {
                         $row = Find-WalkRow $nodes $page $Package
                     }
                     if (-not $row) {
-                        $problems.Add("the settings page $page isn't in the list")
-                        Write-Host "[walk] no $page row in the settings list"
+                        & $record $pageCase $false '' '' '' "no row titled $page in the settings list"
                         continue
                     }
                     [void](& $walkAdb @('shell', 'input', 'tap', [string]$row.X, [string]$row.Y))
                     Start-Sleep -Seconds 2
-                    $nodes = & $readScreen
-                    $onPage = (Find-WalkRow $nodes $page $Package) -and -not (Find-WalkRow $nodes $WalkSettingsHome $Package)
-                    if ($onPage -and (& $inFront)) {
-                        $screens++
-                        Write-Host "[walk] opened the settings page $page"
-                    } else {
-                        $problems.Add("the settings page $page would not open")
-                        Write-Host "[walk] the settings page $page would not open"
-                    }
+                    $seen = & $checkAnchor $pageCase (& $readXml)
+                    & $record $pageCase ($seen.Failures.Count -eq 0) $seen.Activity $seen.Anchor '' (@($seen.Failures) -join '; ')
                     [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
                     Start-Sleep -Seconds 2
                     $nodes = & $readScreen
@@ -772,6 +1222,8 @@ function Invoke-WalkApp {
                 "$(@($hooks | Where-Object { $_.verdict -ceq 'not exercised' }).Count) not exercised")
             foreach ($hook in $hooks) { Write-Host "[walk]   $($hook.verdict): $($hook.family), $($hook.detail)" }
         }
+        # A full walk passes every family the map gives it; one not exercised is no pass.
+        $full = $full -and $checkHooks -and @($hooks | Where-Object { $null -ne $_.case -and $_.verdict -cne 'pass' }).Count -eq 0
         & $restore
 
         $crashLines = @((& $walkAdb @('logcat', '-b', 'crash', '-d', '-v', 'epoch')).Output)
@@ -780,8 +1232,43 @@ function Invoke-WalkApp {
             [IO.File]::WriteAllLines((Join-Path $OutDir 'crash-buffer.txt'), [string[]]$crashLines)
             $problems.Add("Pinterest crashed during the walk: $($fatal[0].Trim())")
         }
-        $alive = ((& $walkAdb @('shell', 'pidof', $Package)).Output -join '').Trim()
+        & $checkHealth 'the hook check and the switches turned back'
+        $alive = @(& $mainPids).Count -gt 0
         if (-not $alive) { $problems.Add('Pinterest was no longer running when the walk ended') }
+
+        # Every exit record since the stop, classed, and the ANRs the event log saw since the start.
+        $exits = @(Resolve-WalkExits -Records @(& $readExits) -RunningBefore $runningBefore -StoppedAt $stoppedAt -Package $Package)
+        foreach ($exit in @($exits | Where-Object { $_.Class -ceq 'failure' })) {
+            $what = if ($exit.Process -ceq $Package) { "Pinterest's main process" } else { "Pinterest's $($exit.Process)" }
+            $why = "$($exit.Reason) ($($exit.ReasonText)), subreason $($exit.Subreason) ($($exit.SubreasonText))"
+            if ($exit.Description) { $why = "$why, $($exit.Description)" }
+            $problems.Add("$what (pid $($exit.ProcessId)) exited at $($exit.Timestamp): reason $why")
+        }
+        $eventLines = @((& $walkAdb @('logcat', '-b', 'events', '-d', '-v', 'epoch')).Output)
+        $anrs = @(Get-WalkAnrLines -Lines $eventLines -Since $startedEpoch -Package $Package)
+        if ($anrs.Count -gt 0) {
+            [IO.File]::WriteAllLines((Join-Path $OutDir 'events-buffer.txt'), [string[]]$eventLines)
+            foreach ($line in $anrs) { $problems.Add("Pinterest stopped responding during the walk: $($line.Trim())") }
+        }
+        $newest = if ($baseline.Count) { $baseline[0] } else { $null }
+        $processEvidence = [ordered]@{
+            stoppedAt = $stoppedAt.ToString('yyyy-MM-dd HH:mm:ss'); runningBeforeStop = $runningBefore.Count
+            baseline = [ordered]@{
+                records = $baseline.Count
+                newest = if ($newest) { "$($newest.Timestamp) pid $($newest.ProcessId) $($newest.Process) reason $($newest.Reason) ($($newest.ReasonText))" } else { '' }
+            }
+            mainPid = $health.FirstPid; mainPidAtEnd = $health.MainPid; restarts = @($health.Restarts)
+            exits = @($exits | Where-Object { $_.Class -cne 'old' } | ForEach-Object {
+                    [ordered]@{
+                        timestamp = $_.Timestamp; pid = $_.ProcessId; process = $_.Process; user = $_.User
+                        reason = "$($_.Reason) ($($_.ReasonText))"; subreason = "$($_.Subreason) ($($_.SubreasonText))"
+                        description = $_.Description; class = $_.Class
+                    }
+                })
+            anrs = @($anrs | ForEach-Object { $_.Trim() })
+        }
+        Write-Host ("[walk] process health: main pid $($health.FirstPid) to $($health.MainPid), $($health.Restarts.Count) restarts, " +
+            "$(@($exits | Where-Object { $_.Class -cne 'old' }).Count) exits since the stop ($(@($exits | Where-Object { $_.Class -ceq 'failure' }).Count) failing), $($anrs.Count) ANRs")
 
         $identity = Confirm-HushLeasedDevice -Adb $Adb -Lease $lease
         $packageLines = @((& $walkAdb @('shell', 'dumpsys', 'package', $Package)).Output)
@@ -795,13 +1282,31 @@ function Invoke-WalkApp {
             $installedSha = (((& $walkAdb @('shell', 'sha256sum', $apkPath.Substring(8).Trim())).Output -join '') -split '\s+')[0]
         }
 
+        # Every planned case in the list's order, one a stop kept the walk from reaching included.
+        $byId = @{}
+        foreach ($entry in $caseResults) { $byId[$entry.id] = $entry }
+        $cases = @(foreach ($case in $plan.Cases) {
+                if ($byId.ContainsKey($case.Id)) { $byId[$case.Id] }
+                else {
+                    [ordered]@{ id = $case.Id; kind = $case.Kind; result = 'not run'; activity = ''; anchor = ''; implementation = ''
+                        detail = 'the walk stopped before it' }
+                }
+            })
+        $notRun = @($cases | Where-Object { $_.result -ceq 'not run' } | ForEach-Object { $_.id })
+        if ($notRun.Count -gt 0) { $problems.Add("the walk never reached $($notRun -join ', ')") }
+        $screens = @($cases | Where-Object { $_.result -ceq 'pass' }).Count
+        $caseList = [ordered]@{
+            version = $WalkCaseListVersion; complete = $plan.LeftOut.Count -eq 0
+            leftOut = @($plan.LeftOut); extra = @($plan.Extra); hooksLeftOut = @($hooksLeftOut)
+        }
+
         $full = $full -and $problems.Count -eq 0
         $result = Resolve-WalkOutcome -Screens $screens -Crashes $fatal.Count -Problems ([string[]]$problems) -Full $full
         $receipt = New-WalkReceipt -Result $result -Full $full -Serial $Serial -Device $identity.Model `
             -AppVersion $appVersion -AppVersionCode $appVersionCode -Build $build `
             -BundleSha256 $bundleSha256 -InstalledApkSha256 $installedSha `
             -Started $started -Finished ([DateTimeOffset]::UtcNow) -Screens $screens -Crashes $fatal.Count `
-            -Problems ([string[]]$problems) -Hooks $hooks
+            -Problems ([string[]]$problems) -Hooks $hooks -CaseList $caseList -Cases $cases -Process $processEvidence
         $receiptPath = Join-Path $OutDir 'walk-receipt.json'
         [IO.File]::WriteAllText($receiptPath, (ConvertTo-Json -InputObject $receipt -Depth 8) + "`n")
         if ($result -eq 'PASS') {
@@ -828,8 +1333,13 @@ function Invoke-WalkApp {
 }
 
 if ($MyInvocation.InvocationName -ne '.') {
-    $receiptPath = Invoke-WalkApp -Serial $Serial -Package $Package -Visit $Visit -SettingsPages $SettingsPages `
-        -CaseSwipes $CaseSwipes -HookFamilies $HookFamilies -SkipPatch:$SkipPatch -SkipSettings:$SkipSettings `
+    # A list left at its default walks the canonical one; one given is compared with it.
+    $listed = @{}
+    if ($PSBoundParameters.ContainsKey('Visit')) { $listed.Visit = $Visit }
+    if ($PSBoundParameters.ContainsKey('SettingsPages')) { $listed.SettingsPages = $SettingsPages }
+    if ($PSBoundParameters.ContainsKey('HookFamilies')) { $listed.HookFamilies = $HookFamilies }
+    $receiptPath = Invoke-WalkApp -Serial $Serial -Package $Package @listed `
+        -CaseSwipes $CaseSwipes -SkipPatch:$SkipPatch -SkipSettings:$SkipSettings `
         -BuildEvidence $BuildEvidence -Exclude $Exclude -SettleSeconds $SettleSeconds -OutDir $OutDir `
         -Keystore $Keystore -KeyAlias $KeyAlias -LeaseDirectory $LeaseDirectory -ChatIdentity $ChatIdentity `
         -Adb $Adb -Aapt2 $Aapt2 -Root $Root
