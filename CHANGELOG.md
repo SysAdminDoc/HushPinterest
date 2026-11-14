@@ -4,7 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
-* The patches now target Pinterest 14.43.0, version code 14438020. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
+* The patches now target Pinterest 14.44.0, version code 14448030. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
 * The patches are now built on Morphe patcher 2.2.0, so you'll need Morphe Manager 2.4.0 or newer to apply them.
 * Hide ads now covers Meta's ad network as well. Pinterest 14.43.0 started filling some ad slots through Meta Audience Network, and with Hide ads on, Pinterest's own consent check answers no for Meta, so that SDK never starts. Export report lists it as `Meta ad SDK` under Hide ads coverage.
 * Long-press download now covers the newer list-style long-press menu too. Download shows up there and saves the pin you pressed, and the switches that hide Save, Send and Search image work on that menu as well.
