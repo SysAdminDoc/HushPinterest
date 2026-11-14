@@ -246,6 +246,7 @@ function Read-WalkHookReport {
     #>
     param([string]$Text)
     $status = @{}; $patches = @{}; $notInBuild = [Collections.Generic.List[string]]::new()
+    $paused = [Collections.Generic.List[string]]::new()
     $sections = [Collections.Generic.HashSet[string]]::new()
     $section = $null
     foreach ($line in @($Text -split "`r?`n")) {
@@ -262,10 +263,11 @@ function Read-WalkHookReport {
         } elseif ($section -ceq 'PATCHES') {
             if ($line -match '^not in this build: (.+)$') {
                 foreach ($name in $Matches[1] -split ', ') { $notInBuild.Add($name.Trim()) }
-            } elseif ($line -match '^(?<family>.+?): (?:on|disabled by its switch|disabled while paused) \((?:saved )?(?<keys>[^)]*)\)') {
+            } elseif ($line -match '^(?<family>.+?): (?<state>on|disabled by its switch|disabled while paused) \((?:saved )?(?<keys>[^)]*)\)') {
                 $keys = @{}
                 foreach ($pair in [regex]::Matches($Matches.keys, '(\w+)=(\w+)')) { $keys[$pair.Groups[1].Value] = $pair.Groups[2].Value }
                 $patches[$Matches.family] = $keys
+                if ($Matches.state -ceq 'disabled while paused') { $paused.Add($Matches.family) }
             } elseif ($line -match '^(?<family>.+?): no switch, ') {
                 $patches[$Matches.family] = @{}
             }
@@ -273,7 +275,7 @@ function Read-WalkHookReport {
     }
     [pscustomobject]@{
         HasStatus = $sections.Contains('HOOK STATUS'); HasPatches = $sections.Contains('PATCHES')
-        Status = $status; Patches = $patches; NotInBuild = @($notInBuild)
+        Status = $status; Patches = $patches; NotInBuild = @($notInBuild); Paused = @($paused)
     }
 }
 
@@ -300,8 +302,14 @@ function Resolve-WalkHooks {
         if (-not $Report) { $verdict.detail = 'no diagnostics report to read' }
         elseif (@($Opened) -cnotcontains $entry.Case) { $verdict.detail = "$where didn't open" }
         elseif (@($SwitchedOn) -cnotcontains $entry.Family) { $verdict.detail = "its switch $($entry.Switch) couldn't be turned on" }
-        elseif (-not $Report.Patches.ContainsKey($entry.Family)) { $verdict.detail = 'not in this build' }
-        elseif ($Report.Patches[$entry.Family][$entry.Key] -cne 'on') {
+        elseif (-not $Report.Patches.ContainsKey($entry.Family)) {
+            $verdict.verdict = 'fail'
+            $verdict.detail = if (@($Report.NotInBuild) -ccontains $entry.Family) {
+                "is listed as not in this build, though the walk turned its switch $($entry.Switch) on"
+            } else { "has no line in the report's [PATCHES], though the walk turned its switch $($entry.Switch) on" }
+        } elseif (@($Report.Paused) -ccontains $entry.Family) {
+            $verdict.verdict = 'fail'; $verdict.detail = 'was disabled because Hush was paused'
+        } elseif ($Report.Patches[$entry.Family][$entry.Key] -cne 'on') {
             $verdict.verdict = 'fail'; $verdict.detail = "read its switch $($entry.Key) as off in the report, after the walk turned it on"
         } elseif ($verdict.invoked -eq 0) {
             $verdict.verdict = 'fail'; $verdict.detail = "never ran, with its switch on and $where open"
@@ -512,11 +520,11 @@ function Invoke-WalkApp {
             $after = & $seek -Switch $Title -Swipes 3
             [pscustomobject]@{ Found = $true; Tapped = $true; Lost = $false; On = [bool]$after -and $after.Checked }
         }
-        # Every switch in -Entries set to -On, a page at a time. Answers the entries whose switch
-        # this tapped; a switch that won't take is a problem named after its family.
+        # Every switch in -Entries set to -On, a page at a time. A switch this taps on joins
+        # $flipped right away, so a stop partway still turns it back; a switch that won't take is
+        # a problem named after its family.
         $setSwitches = {
             param([object[]]$Entries, [bool]$On)
-            $tapped = [Collections.Generic.List[object]]::new()
             $word = if ($On) { 'on' } else { 'back off' }
             foreach ($page in @($Entries | ForEach-Object { $_.Page } | Select-Object -Unique)) {
                 if (-not (& $openPage $page)) {
@@ -526,7 +534,7 @@ function Invoke-WalkApp {
                 $lost = $false
                 foreach ($entry in @($Entries | Where-Object { $_.Page -ceq $page })) {
                     $state = & $setSwitch $page $entry.Switch $On
-                    if ($state.Tapped) { $tapped.Add($entry) }
+                    if ($state.Tapped -and $On) { $flipped.Add($entry) }
                     if (-not $state.Found) { $problems.Add("$($entry.Family): the switch $($entry.Switch) isn't on the $page page") }
                     elseif ($state.Lost) { $problems.Add("$($entry.Family): after its switch $($entry.Switch) was tapped, the $page page wasn't in front"); $lost = $true; break }
                     elseif ($state.On -ne $On) { $problems.Add("$($entry.Family): the switch $($entry.Switch) on the $page page wouldn't turn $word") }
@@ -537,7 +545,6 @@ function Invoke-WalkApp {
                     break
                 }
             }
-            , $tapped
         }
         # Save full report from Pause, backup and diagnostics, copied to the output folder, and the
         # phone's copy deleted. Answers the local path or the problem that stopped it.
@@ -566,14 +573,33 @@ function Invoke-WalkApp {
                 Start-Sleep -Seconds 2
                 $new = @(& $listing | Where-Object { $before -cnotcontains $_ })
             }
-            if ($new.Count -ne 1) { return [pscustomobject]@{ Path = $null; Problem = "Save full report left $($new.Count) new reports in $WalkReportFolder" } }
+            # Every report this saved comes off the phone, its media store row with it so it doesn't
+            # linger in Downloads. Answers a problem when one is still there.
+            $dropNew = {
+                foreach ($name in @($new)) {
+                    [void](& $walkAdb @('shell', "content delete --uri content://media/external/file --where _display_name=\'$name\'"))
+                    [void](& $walkAdb @('shell', 'rm', '-f', "$WalkReportFolder/$name"))
+                }
+                $left = @(& $listing | Where-Object { @($new) -ccontains $_ })
+                if ($left.Count -gt 0) { "the diagnostics report $($left -join ', ') is still in $WalkReportFolder after its delete" }
+            }
+            if ($new.Count -ne 1) {
+                $problem = "Save full report left $($new.Count) new reports in $WalkReportFolder"
+                $left = & $dropNew
+                if ($left) { $problem = "$problem, and $left" }
+                return [pscustomobject]@{ Path = $null; Problem = $problem }
+            }
             $local = Join-Path $OutDir 'diagnostics.txt'
-            if (Test-Path -LiteralPath $local) { Remove-Item -LiteralPath $local -Force }
-            $pulled = & $walkAdb @('pull', "$WalkReportFolder/$($new[0])", $local)
-            # The media store's row goes with the file, so the report doesn't linger in Downloads.
-            [void](& $walkAdb @('shell', "content delete --uri content://media/external/file --where _display_name=\'$($new[0])\'"))
-            [void](& $walkAdb @('shell', 'rm', '-f', "$WalkReportFolder/$($new[0])"))
+            $pulled = $null
+            $left = $null
+            try {
+                if (Test-Path -LiteralPath $local) { Remove-Item -LiteralPath $local -Force }
+                $pulled = & $walkAdb @('pull', "$WalkReportFolder/$($new[0])", $local)
+            } finally {
+                $left = & $dropNew
+            }
             [void](& $backToList)
+            if ($left) { return [pscustomobject]@{ Path = $null; Problem = $left } }
             if ($pulled.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $local -PathType Leaf)) {
                 return [pscustomobject]@{ Path = $null; Problem = "the diagnostics report wouldn't copy off the phone" }
             }
@@ -587,7 +613,7 @@ function Invoke-WalkApp {
             Write-Host "[walk] turning the $($flipped.Count) switches it turned on back off"
             $known = $problems.Count
             try {
-                if (& $openSettings) { [void](& $setSwitches ([object[]]$flipped) $false) }
+                if (& $openSettings) { [void](& $setSwitches ([object[]]@($flipped)) $false) }
                 else { $problems.Add('the Hush settings would not open to turn the walk''s switches back off') }
                 [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
                 Start-Sleep -Seconds 1
@@ -612,7 +638,7 @@ function Invoke-WalkApp {
         $checkHooks = -not $SkipSettings -and @($HookFamilies).Count -gt 0
         if ($checkHooks) {
             Write-Host "[walk] turning on the switches of $(@($HookFamilies).Count) hook families"
-            if (& $openSettings) { $flipped.AddRange([object[]](& $setSwitches $HookFamilies $true)) }
+            if (& $openSettings) { [void](& $setSwitches $HookFamilies $true) }
             else { $problems.Add('the Hush settings would not open to turn the hook families'' switches on') }
             Write-Host "[walk] $($switchedOn.Count) switches on, $($flipped.Count) of them turned on by the walk"
         }
@@ -748,7 +774,7 @@ function Invoke-WalkApp {
         }
         & $restore
 
-        $crashLines =@((& $walkAdb @('logcat', '-b', 'crash', '-d', '-v', 'epoch')).Output)
+        $crashLines = @((& $walkAdb @('logcat', '-b', 'crash', '-d', '-v', 'epoch')).Output)
         $fatal = @(Get-WalkCrashLines -Lines $crashLines -Since $startedEpoch -Package $Package)
         if ($fatal.Count -gt 0) {
             [IO.File]::WriteAllLines((Join-Path $OutDir 'crash-buffer.txt'), [string[]]$crashLines)
@@ -776,7 +802,7 @@ function Invoke-WalkApp {
             -BundleSha256 $bundleSha256 -InstalledApkSha256 $installedSha `
             -Started $started -Finished ([DateTimeOffset]::UtcNow) -Screens $screens -Crashes $fatal.Count `
             -Problems ([string[]]$problems) -Hooks $hooks
-        $receiptPath =Join-Path $OutDir 'walk-receipt.json'
+        $receiptPath = Join-Path $OutDir 'walk-receipt.json'
         [IO.File]::WriteAllText($receiptPath, (ConvertTo-Json -InputObject $receipt -Depth 8) + "`n")
         if ($result -eq 'PASS') {
             $validated = Test-WalkReceipt -Path $receiptPath -BundlePath $bundle -PatchList (Join-Path $Root 'patches-list.json')
