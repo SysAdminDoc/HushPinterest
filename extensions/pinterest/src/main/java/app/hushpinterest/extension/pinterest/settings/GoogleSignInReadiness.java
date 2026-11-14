@@ -63,6 +63,30 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
     }
 
     /**
+     * Placed first in androidx Credential Manager's framework provider, which answers unavailable
+     * when this is true. While microG-RE is installed the provider steps aside, because Android
+     * hands Google's requests to Google's own Play services, and androidx falls back to the Play
+     * services provider the patch points at microG-RE. Without microG-RE the provider answers for
+     * itself, so a password manager can still offer a saved login. Before the settings are ready,
+     * or when Android can't say, it steps aside as the patch always had it. A build without
+     * GmsCore support leaves the provider alone.
+     */
+    public static boolean signsInThroughMicroG() {
+        HookStatus.invoked(FamilyNames.GMS_CORE_SUPPORT);
+        try {
+            if (!PushReadiness.gmsCore()) return false;
+            if (!Utils.settingsReady()) return true;
+            Context context = Utils.getContext();
+            if (context == null || microG(context) != MicroG.MISSING) return true;
+            HookStatus.counted(FamilyNames.GMS_CORE_SUPPORT, "Android's credential provider kept without microG-RE");
+            return false;
+        } catch (Throwable problem) {
+            HookStatus.threw(FamilyNames.GMS_CORE_SUPPORT, "credential provider", problem);
+            return true;
+        }
+    }
+
+    /**
      * The status code from an ApiException's "code: text" message, or -1. Only the leading digits are
      * read, because the text can carry private context.
      */

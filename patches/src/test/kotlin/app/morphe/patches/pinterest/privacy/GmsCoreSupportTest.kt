@@ -15,15 +15,20 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patches.pinterest.misc.extension.SETTINGS_STATUS
 import app.morphe.patches.pinterest.misc.settings.EXTENSION_ROOT
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
+import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction11n
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction11x
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
@@ -95,11 +100,20 @@ class GmsCoreSupportTest {
 
             val checks = fixture.flatMap { owner -> owner.methods.filter { it.isAvailabilityCheck() || it.isFrameworkProviderCheck(owner) } }
             assertEquals("${build.name}: the two checks", 2, checks.size)
-            for (check in checks) {
-                val body = context.mutableClassDefBy(check.definingClass).methods.single { it.same(check) }.implementation!!.instructions.toList()
-                assertEquals("${build.name}: ${check.name} answers first", 0, (body[0] as NarrowLiteralInstruction).narrowLiteral)
-                assertEquals("${build.name}: ${check.name} returns at once", Opcode.RETURN, body[1].opcode)
-            }
+            val availability = checks.single { it.isAvailabilityCheck() }
+            val answer = context.mutableClassDefBy(availability.definingClass).methods.single { it.same(availability) }.implementation!!.instructions.toList()
+            assertEquals("${build.name}: the availability check answers success first", 0, (answer[0] as NarrowLiteralInstruction).narrowLiteral)
+            assertEquals("${build.name}: and returns at once", Opcode.RETURN, answer[1].opcode)
+
+            val provider = checks.single { it !== availability }
+            val guarded = context.mutableClassDefBy(provider.definingClass).methods.single { it.same(provider) }.implementation!!.instructions.toList()
+            assertEquals("${build.name}: the provider asks the extension first",
+                listOf(Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT, Opcode.IF_EQZ, Opcode.CONST_4, Opcode.RETURN), guarded.take(5).map { it.opcode })
+            assertEquals("${build.name}: the provider's hook", CREDENTIAL_PROVIDER_HOOK, (guarded[0] as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: a local holds the answer", listOf(0, 0, 0, 0), guarded.subList(1, 5).map { (it as OneRegisterInstruction).registerA })
+            assertEquals("${build.name}: true answers unavailable", 0, (guarded[3] as NarrowLiteralInstruction).narrowLiteral)
+            assertEquals("${build.name}: false runs the provider's own body", 5, (guarded[2] as BuilderOffsetInstruction).target.location.index)
+            assertEquals("${build.name}: the provider's own body stays", provider.implementation!!.instructions.map { it.opcode }, guarded.drop(5).map { it.opcode })
 
             val listener = fixture.flatMap { it.methods }.single { it.isSignInFailureListener() }
             val stock = listener.implementation!!.instructions.toList()
@@ -180,6 +194,26 @@ class GmsCoreSupportTest {
             val context = PatchContexts.of(ExtensionDex.classes() + doubled)
             val refusal = assertThrows(PatchException::class.java) { gmsCorePreflightPatch.execute(context) }
             assertTrue(refusal.message, refusal.message.orEmpty().contains("sign-in failure listener has 2 matches"))
+        }
+    }
+
+    @Test
+    fun `a framework provider with no local register refuses before any edit`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val bare = rerouted(build).map { owner ->
+                val provider = owner.methods.singleOrNull { it.isFrameworkProviderCheck(owner) } ?: return@map owner
+                // `this` is its only register: const/4 p0, 0x1 then return p0.
+                val body = ImmutableMethodImplementation(1, listOf(ImmutableInstruction11n(Opcode.CONST_4, 0, 1),
+                    ImmutableInstruction11x(Opcode.RETURN, 0)), null, null)
+                val copy = ImmutableMethod(owner.type, provider.name, provider.parameters, provider.returnType,
+                    provider.accessFlags, provider.annotations, provider.hiddenApiRestrictions, body)
+                ImmutableClassDef(owner.type, owner.accessFlags, owner.superclass, owner.interfaces, owner.sourceFile,
+                    owner.annotations, owner.fields, owner.methods.filterNot { it === provider } + copy)
+            }
+            val context = PatchContexts.of(ExtensionDex.classes() + bare)
+            val refusal = assertThrows(PatchException::class.java) { gmsCorePreflightPatch.execute(context) }
+            assertTrue(refusal.message, refusal.message.orEmpty().contains("framework provider has no local register"))
+            assertEquals("${build.name}: the flag stayed off", 0, context.mutableClassDefBy(SETTINGS_STATUS).methods.flag("gmsCoreSupport"))
         }
     }
 

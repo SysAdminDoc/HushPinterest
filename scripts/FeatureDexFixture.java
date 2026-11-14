@@ -103,6 +103,7 @@ public final class FeatureDexFixture {
     private static final String TEXT_BUILDER = "Lfixture/TextBuilder;";
     private static final String SAVED_TEXT = "Lfixture/SavedText;";
     private static final String SAVE_SCREEN = "Lfixture/SaveScreen;";
+    private static final String FRAMEWORK_PROVIDER = "Landroidx/credentials/CredentialProviderFrameworkImpl;";
 
     /** What a fixture class has beyond its methods: its parent, its interfaces, its public fields as name:type, and whether it's an interface. */
     private record Shape(String parent, List<String> interfaces, List<String> fields, boolean contract) {}
@@ -115,6 +116,7 @@ public final class FeatureDexFixture {
         SHAPES.put(SAVED_TEXT, new Shape(OBJECT, List.of(TEXT_BUILDER), List.of(), false));
         SHAPES.put(CAPTURE, new Shape(OBJECT, List.of("Landroid/app/Activity$ScreenCaptureCallback;"), List.of(), false));
         SHAPES.put(SHOT_FILES, new Shape("Landroid/database/ContentObserver;", List.of(), List.of(), false));
+        SHAPES.put(FRAMEWORK_PROVIDER, new Shape(OBJECT, List.of(), List.of("credentialManager:Landroid/credentials/CredentialManager;"), false));
     }
 
     private static ImmutableMethodReference ref(String type, String name, String result, String... parameters) {
@@ -589,7 +591,11 @@ public final class FeatureDexFixture {
                 new ImmutableInstruction11x(Opcode.RETURN_OBJECT, 0));
     }
 
-    /** androidx's failure listener for the Sign in with Google request, with GmsCore support's hook unless clean. */
+    /**
+     * androidx's failure listener for the Sign in with Google request and Credential Manager's
+     * framework provider, with GmsCore support's hooks unless clean. Only a variant whose listener
+     * hook is right edits the provider, so each refusal names one cause.
+     */
     private static void signInFailure(Map<String, List<Method>> classes, String variant) {
         Instruction hook = invoke(Opcode.INVOKE_STATIC, ref(SIGN_IN_READINESS, "requestFailed", VOID, "Ljava/lang/Exception;"),
                 variant.equals("wrong-argument") ? 1 : 2);
@@ -600,9 +606,20 @@ public final class FeatureDexFixture {
         body.add(end());
         classes.put(HIDDEN_ACTIVITY, List.of(method(HIDDEN_ACTIVITY, "handleGetSignInIntent$lambda$6$lambda$5", VOID, true, 3, body,
                 HIDDEN_ACTIVITY, "Ljava/lang/Exception;")));
+        // The provider is v0 and this; patched, true answers unavailable and false branches to the original body.
+        List<Instruction> provider = new ArrayList<>();
+        if (variant.equals("good") || variant.equals("false-capability")) provider.addAll(List.of(
+                invoke(Opcode.INVOKE_STATIC, ref(SIGN_IN_READINESS, "signsInThroughMicroG", "Z")),
+                new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), new ImmutableInstruction21t(Opcode.IF_EQZ, 0, 4),
+                new ImmutableInstruction11n(Opcode.CONST_4, 0, 0), new ImmutableInstruction11x(Opcode.RETURN, 0)));
+        provider.add(new ImmutableInstruction11n(Opcode.CONST_4, 0, 1));
+        provider.add(new ImmutableInstruction11x(Opcode.RETURN, 0));
+        classes.put(FRAMEWORK_PROVIDER, List.of(method(FRAMEWORK_PROVIDER, "isAvailableOnDevice", "Z", false, 2, provider)));
         if (variant.equals("clean")) return;
         classes.put(SIGN_IN_READINESS, List.of(method(SIGN_IN_READINESS, "requestFailed", VOID, true, 2,
-                List.of(readiness(), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), end()), "Ljava/lang/Exception;")));
+                List.of(readiness(), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), end()), "Ljava/lang/Exception;"),
+                method(SIGN_IN_READINESS, "signsInThroughMicroG", "Z", true, 1,
+                        List.of(readiness(), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), new ImmutableInstruction11x(Opcode.RETURN, 0)))));
     }
 
     /** Google's advertising ID getters and a Block Store wrapper, with Hide advertising ID's hooks unless clean. */

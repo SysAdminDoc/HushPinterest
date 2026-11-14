@@ -189,6 +189,32 @@ public class GoogleSignInReadinessTest {
         assertFalse("the value stays out", report.contains("abc"));
     }
 
+    @Test public void withoutMicroGTheFrameworkCredentialProviderAnswersForItself() {
+        PatchFamily.registerDiagnostics();
+        assertFalse(GoogleSignInReadiness.signsInThroughMicroG());
+        String export = LogBufferManager.buildExportText();
+        assertTrue(export, export.contains("Android's credential provider kept without microG-RE"));
+    }
+
+    @Test public void withMicroGTheFrameworkCredentialProviderStepsAside() {
+        installMicroG(true);
+        assertTrue(GoogleSignInReadiness.signsInThroughMicroG());
+        installMicroG(false);
+        assertTrue("A disabled microG-RE is still the sign-in route", GoogleSignInReadiness.signsInThroughMicroG());
+    }
+
+    @Test public void beforeTheSettingsAreReadyTheProviderStepsAsideAsBefore() {
+        boolean[] answer = new boolean[1];
+        SettingsContextRule.beforeThePauseIsDecided(() -> answer[0] = GoogleSignInReadiness.signsInThroughMicroG());
+        assertTrue(answer[0]);
+    }
+
+    @Test public void aStockBuildLeavesTheFrameworkCredentialProviderAlone() {
+        installMicroG(true);
+        PushReadiness.gmsCoreForTests = false;
+        assertFalse(GoogleSignInReadiness.signsInThroughMicroG());
+    }
+
     @Test public void theSectionIsInTheExportAndAFailureCounts() {
         PatchFamily.registerDiagnostics();
         GoogleSignInReadiness.requestFailed(new Exception("17: person@example.com"));

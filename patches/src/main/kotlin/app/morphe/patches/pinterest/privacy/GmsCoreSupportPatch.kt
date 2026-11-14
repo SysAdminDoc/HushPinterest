@@ -13,12 +13,15 @@
 package app.morphe.patches.pinterest.privacy
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.util.proxy.mutableTypes.encodedValue.MutableStringEncodedValue
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.pinterest.misc.extension.EXTENSION_PACKAGE
 import app.morphe.patches.pinterest.misc.extension.enableCapability
 import app.morphe.patches.pinterest.misc.extension.enableStatus
@@ -62,6 +65,9 @@ internal const val SIGN_IN_FAILURE_TEXT = "During get sign-in intent, failure re
 private const val EXCEPTION = "Ljava/lang/Exception;"
 private const val SIGN_IN_READINESS = "$EXTENSION_PACKAGE/settings/GoogleSignInReadiness;"
 internal const val SIGN_IN_FAILURE_HOOK = "$SIGN_IN_READINESS->requestFailed($EXCEPTION)V"
+
+/** The extension's answer for the framework provider: true while microG-RE is installed, so the provider steps aside. */
+internal const val CREDENTIAL_PROVIDER_HOOK = "$SIGN_IN_READINESS->signsInThroughMicroG()Z"
 
 /** Play services permissions microG-RE defines under its own vendor. Morphe's list. */
 internal val GMS_PERMISSIONS = setOf(
@@ -380,8 +386,10 @@ internal data class GmsCorePlan(
  *   receiver open.
  * - androidx Credential Manager's framework provider, the one class holding Android's
  *   CredentialManager. On Android 14 and later androidx prefers it, and Android hands Google
- *   sign-in to Google's own Play services whatever the app asks for, so it answers unavailable
- *   and androidx falls back to the Play services provider, which the reroute sends to microG-RE.
+ *   sign-in to Google's own Play services whatever the app asks for, so while microG-RE is
+ *   installed it answers unavailable and androidx falls back to the Play services provider, which
+ *   the reroute sends to microG-RE. Without microG-RE it answers for itself: the Play services
+ *   provider is missing there too, and answering unavailable left androidx no provider at all.
  * - androidx's failure listener for the Sign in with Google request, the static method of its
  *   hidden activity taking that activity and an Exception and naming [SIGN_IN_FAILURE_TEXT]. It
  *   turns any failed request into "no credential", and Pinterest shows nothing for that, so the
@@ -425,6 +433,8 @@ internal fun BytecodePatchContext.resolveGmsCore(): GmsCorePlan {
     }
     shape(availability.size == 1, "Play services' availability check has ${availability.size} matches")
     shape(providers.size == 1, "Credential Manager's framework provider has ${providers.size} matches")
+    // Its only parameter is this, so any register below it is a local the answer can borrow on entry.
+    shape(providers.single().implementation!!.registerCount > 1, "Credential Manager's framework provider has no local register")
     shape(signInFailures.size == 1, "androidx's sign-in failure listener has ${signInFailures.size} matches")
     val rewritten = texts.map { text -> text.method.texts()[text.index] }.toSet()
     GMS_CORE_REQUIRED_TEXTS.firstOrNull { it !in rewritten }?.let { shape(false, "Pinterest no longer names $it") }
@@ -451,7 +461,16 @@ internal fun BytecodePatchContext.applyGmsCore(plan: GmsCorePlan) {
         for (field in held) (owner.staticFields.single { it.name == field.name }.initialValue as MutableStringEncodedValue).value = field.text
     }
     mutableClassDefBy(plan.availability.definingClass).methods.single { it.same(plan.availability) }.returnEarly(0)
-    mutableClassDefBy(plan.frameworkProvider.definingClass).methods.single { it.same(plan.frameworkProvider) }.returnEarly(false)
+    // The framework provider answers false while microG-RE is installed and otherwise runs its own
+    // body. v0 is a local the plan checked for, unread before the original body's first write.
+    val provider = mutableClassDefBy(plan.frameworkProvider.definingClass).methods.single { it.same(plan.frameworkProvider) }
+    provider.addInstructionsWithLabels(0, """
+        invoke-static {}, $CREDENTIAL_PROVIDER_HOOK
+        move-result v0
+        if-eqz v0, :framework
+        const/4 v0, 0x0
+        return v0
+    """, ExternalLabel("framework", provider.getInstruction(0)))
     mutableClassDefBy(plan.signInFailure.definingClass).methods.single { it.same(plan.signInFailure) }
         .addInstructions(0, "invoke-static/range { p1 .. p1 }, $SIGN_IN_FAILURE_HOOK")
 }
@@ -497,11 +516,15 @@ internal val gmsCorePreflightPatch = bytecodePatch {
     execute {
         requireStatusMethod("gmsCoreSupport")
         requireStatusMethod("signInFailure")
-        val hook = classDefByOrNull(SIGN_IN_READINESS)?.methods?.singleOrNull {
+        val readiness = classDefByOrNull(SIGN_IN_READINESS)?.methods?.toList().orEmpty()
+        val hook = readiness.singleOrNull {
             it.name == "requestFailed" && it.returnType == "V" && it.parameterTypes.map(CharSequence::toString) == listOf(EXCEPTION)
         }
         shape(hook != null && AccessFlags.PUBLIC.isSet(hook.accessFlags) && AccessFlags.STATIC.isSet(hook.accessFlags),
             "the extension has no callable $SIGN_IN_FAILURE_HOOK")
+        val provider = readiness.singleOrNull { it.name == "signsInThroughMicroG" && it.returnType == "Z" && it.parameterTypes.isEmpty() }
+        shape(provider != null && AccessFlags.PUBLIC.isSet(provider.accessFlags) && AccessFlags.STATIC.isSet(provider.accessFlags),
+            "the extension has no callable $CREDENTIAL_PROVIDER_HOOK")
         resolveGmsCore()
     }
 }

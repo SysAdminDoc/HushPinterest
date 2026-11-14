@@ -277,7 +277,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 5),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 2), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("longPressChoices", 1), Map.entry("ownAuthorities", 1));
@@ -6443,7 +6443,45 @@ public class DexDiff {
                 if (found) remove(m, 0, 1);
                 else fail(hook + " doesn't get the exception ahead of " + m);
             }
+            if (found) found = frameworkProvider(c.strings.get(1));
             capability(c.callee, found);
+        }
+
+        /**
+         * Credential Manager's framework provider, the one instance isAvailableOnDevice()Z on a class
+         * holding an android.credentials.CredentialManager: the extension's answer comes first, true
+         * returns unavailable from a local register, and false branches to the untouched original body.
+         */
+        boolean frameworkProvider(String hook) {
+            List<Method> providers = new ArrayList<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN)) continue;
+                boolean holds = false;
+                for (Field f : cd.getInstanceFields()) holds |= f.getType().equals("Landroid/credentials/CredentialManager;");
+                if (holds) for (Method m : cd.getMethods())
+                    if (m.getName().equals("isAvailableOnDevice") && m.getReturnType().equals("Z") && m.getParameterTypes().isEmpty()
+                            && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getImplementation() != null) providers.add(m);
+            }
+            Method m = actual(unique(providers, "Credential Manager framework provider"));
+            List<Integer> sites = calls(m, hook, 1);
+            if (m == null || sites.size() != 1) return false;
+            List<Instruction> body = instructions(m);
+            Layout layout = new Layout(m.getImplementation());
+            int answer = body.size() > 4 ? firstRegister(body.get(1)) : -1;
+            boolean shaped = sites.get(0) == 0 && arguments(body.get(0)).isEmpty() && body.size() > 5
+                    && body.get(1).getOpcode() == Opcode.MOVE_RESULT && body.get(2).getOpcode() == Opcode.IF_EQZ
+                    && body.get(3).getOpcode() == Opcode.CONST_4 && body.get(4).getOpcode() == Opcode.RETURN
+                    && answer >= 0 && answer < parameter(m, -1) && firstRegister(body.get(2)) == answer
+                    && firstRegister(body.get(3)) == answer && firstRegister(body.get(4)) == answer
+                    && body.get(3) instanceof NarrowLiteralInstruction && ((NarrowLiteralInstruction) body.get(3)).getNarrowLiteral() == 0
+                    && body.get(2) instanceof OffsetInstruction
+                    && layout.addresses.get(2) + ((OffsetInstruction) body.get(2)).getCodeOffset() == layout.addresses.get(5);
+            for (int at = 1; shaped && at < 5; at++) shaped = onlyFrom(m, at, at - 1);
+            FeatureFlow graph = flow(m);
+            for (int k = 0; shaped && k < graph.normal.size(); k++) shaped = !graph.normal.get(k).contains(0) && !graph.handlers.get(k).contains(0);
+            if (!shaped) { fail(hook + " doesn't answer unavailable ahead of the untouched body of " + m); return false; }
+            remove(m, 0, 5);
+            return true;
         }
 
         /**
