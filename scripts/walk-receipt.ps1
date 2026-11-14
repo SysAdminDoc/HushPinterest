@@ -37,7 +37,9 @@ function New-WalkReceipt {
         [int]$Screens,
         [int]$Crashes,
         [string[]]$Problems = @(),
-        $Build
+        $Build,
+        # The walk's verdict on each hook family: pass, fail or not exercised, with its counts.
+        [object[]]$Hooks = @()
     )
     return [ordered]@{
         schema = 2; result = $Result; full = $Full
@@ -46,7 +48,7 @@ function New-WalkReceipt {
         bundleSha256 = $BundleSha256.ToLowerInvariant(); installedApkSha256 = $InstalledApkSha256
         build = $Build
         started = $Started.UtcDateTime.ToString('o'); finished = $Finished.UtcDateTime.ToString('o')
-        screens = $Screens; crashes = $Crashes; problems = @($Problems)
+        screens = $Screens; crashes = $Crashes; problems = @($Problems); hooks = @($Hooks)
     }
 }
 
