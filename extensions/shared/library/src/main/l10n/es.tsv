@@ -695,3 +695,5 @@ Takes Pinterest's AI Assistant out of search, boards and pins. Search works as u
 # context: a Feed switch from the Filter feed patch. It takes pins the person has already saved to a board out of their home feed only; boards and search still show them. The title is also the name of that part of the patch in the build report.
 Hide pins you've already saved	Ocultar los pines que ya guardaste
 Takes pins you've saved out of your home feed. Your boards and search still show them.	Quita de tu feed de inicio los pines que guardaste. Tus tableros y la búsqueda los siguen mostrando.
+# context: toast when Download pin can't save a streamed video on the current network
+Your download settings block this network. Try again on Wi-Fi.	Tu configuración de descargas bloquea esta red. Inténtalo de nuevo con Wi-Fi.

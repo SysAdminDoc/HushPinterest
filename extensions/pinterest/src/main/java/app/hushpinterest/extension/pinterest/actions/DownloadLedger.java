@@ -69,6 +69,11 @@ public final class DownloadLedger {
     private static final Pattern SAVED_LINE = Pattern.compile("([0-9]{1,19}),(RUNNING|COMPLETED|FAILED),"
             + "(image/(?:jpeg|png|webp|gif)|video/mp4),"
             + "((?:content://media/[a-z0-9_.-]{1,40}/(?:images/media|video/media|downloads|file)/[0-9]{1,19})?)");
+    /**
+     * History IDs from here up belong to saves HushPinterest started itself and never handed to
+     * Android's Downloads (a streamed video). Android numbers its requests from 1, so it never gets near them.
+     */
+    static final long IN_APP = 1L << 62;
     static final String SENDER_PERMISSION = "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS";
     private static final Object LOCK = new Object();
     private static final Object RECEIVER_LOCK = new Object();
@@ -223,6 +228,31 @@ public final class DownloadLedger {
         } catch (RuntimeException failure) {
             HookStatus.threw(FamilyNames.DOWNLOAD_PINS, "record native download", failure);
             return false;
+        }
+    }
+
+    /**
+     * Records a save HushPinterest starts itself, with no request for Android (a streamed video),
+     * as being written. Returns its history ID, or -1 when the history couldn't be written.
+     */
+    static long recordInApp(Context context, String pinId, @Nullable String folder, String mime) {
+        if (context == null || !Utils.isMainProcess() || pinId == null || !pinId.matches("[0-9]{1,30}")) return -1;
+        try {
+            DownloadLedger ledger = new DownloadLedger(context);
+            synchronized (LOCK) {
+                long id = IN_APP;
+                for (Job job : ledger.load()) if (job.id >= id) id = job.id + 1;
+                for (Job job : ledger.earlier()) if (job.id >= id) id = job.id + 1;
+                // Claimed first, so the entry never reads as a save that stopped part way.
+                InAppDownloads.claim(id);
+                ledger.insert(id, pinId, -1, folder);
+                if (ledger.keep(new Saved(id, State.RUNNING, mime, null))) return id;
+                InAppDownloads.release(id);
+                return -1;
+            }
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.DOWNLOAD_PINS, "record in-app download", failure);
+            return -1;
         }
     }
 
@@ -590,13 +620,15 @@ public final class DownloadLedger {
         if (owned.isEmpty()) return Collections.emptyList();
         // Android no longer has a request HushPinterest took over, and never had one it saved itself.
         Map<Long, Saved> saves = saved();
-        long[] ids = owned.stream().filter(job -> job.id >= 0 && !saves.containsKey(job.id))
+        long[] ids = owned.stream().filter(job -> job.id >= 0 && job.id < IN_APP && !saves.containsKey(job.id))
                 .mapToLong(job -> job.id).toArray();
         Map<Long, Job> results = new LinkedHashMap<>();
         for (int i = 0; i < owned.size(); i++) {
             Job job = owned.get(i);
             Saved own = saves.get(job.id);
-            results.put(job.id, job.id < 0 ? job : own != null ? job.with(own) : job.with(State.MISSING, 0, null));
+            // A save of its own whose record didn't stick never finished.
+            results.put(job.id, job.id < 0 ? job : own != null ? job.with(own)
+                    : job.with(job.id >= IN_APP ? State.FAILED : State.MISSING, 0, null));
         }
         if (ids.length == 0) return Collections.unmodifiableList(new ArrayList<>(results.values()));
         try (Cursor cursor = manager().query(new DownloadManager.Query().setFilterById(ids))) {
@@ -633,7 +665,7 @@ public final class DownloadLedger {
             HookStatus.threw(FamilyNames.DOWNLOAD_PINS, "query native download history", failure);
             List<Job> unavailable = new ArrayList<>();
             for (Job job : owned) {
-                boolean android = job.id >= 0 && !saves.containsKey(job.id);
+                boolean android = job.id >= 0 && job.id < IN_APP && !saves.containsKey(job.id);
                 unavailable.add(android ? job.with(State.UNAVAILABLE, 0, null) : results.get(job.id));
             }
             return Collections.unmodifiableList(unavailable);
@@ -904,7 +936,7 @@ public final class DownloadLedger {
                 if (save.state == State.RUNNING && !InAppDownloads.saving(save.id)) abandoned.add(save);
             }
             Map<Long, Job> asked = new LinkedHashMap<>();
-            for (Job job : jobs) if (job.id >= 0 && !saves.containsKey(job.id)) asked.put(job.id, job);
+            for (Job job : jobs) if (job.id >= 0 && job.id < IN_APP && !saves.containsKey(job.id)) asked.put(job.id, job);
             List<Stalled> stalled = new ArrayList<>();
             boolean running = false;
             if (asked.isEmpty()) return new Queue(stalled, false, abandoned);

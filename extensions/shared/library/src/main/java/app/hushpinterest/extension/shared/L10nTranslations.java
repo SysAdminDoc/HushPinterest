@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1238);
+        Map<String, String> table = new HashMap<>(1240);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -1286,13 +1286,15 @@ public final class L10nTranslations {
                 "Deine Auswahl ist gespeichert, aber dieser Build enth\u00e4lt den Patch daf\u00fcr nicht.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Deine Auswahl bleibt gespeichert. Tippe auf Fortsetzen und starte Pinterest dann neu.");
+        table.put("Your download settings block this network. Try again on Wi-Fi.",
+                "Deine Download-Einstellungen sperren dieses Netzwerk. Versuch es im WLAN erneut.");
         table.put("Your muted words and Save button color will change.",
                 "Deine stummgeschalteten W\u00f6rter und die Farbe der Merken-Schaltfl\u00e4che werden ge\u00e4ndert.");
-        table.put("Your muted words will change.",
-                "Deine stummgeschalteten W\u00f6rter werden ge\u00e4ndert.");
     }
 
     private static void fillDe10(Map<String, String> table) {
+        table.put("Your muted words will change.",
+                "Deine stummgeschalteten W\u00f6rter werden ge\u00e4ndert.");
         table.put("Your switches already match that file, so nothing will change.",
                 "Deine Schalter entsprechen bereits dieser Datei, es \u00e4ndert sich also nichts.");
         table.put("Your switches are working.",
@@ -1334,7 +1336,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1238);
+        Map<String, String> table = new HashMap<>(1240);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -2573,13 +2575,15 @@ public final class L10nTranslations {
                 "Tu elecci\u00f3n est\u00e1 guardada, pero esta versi\u00f3n no incluye el parche para ella.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Tus preferencias est\u00e1n guardadas. Toca Reanudar y luego reinicia Pinterest.");
+        table.put("Your download settings block this network. Try again on Wi-Fi.",
+                "Tu configuraci\u00f3n de descargas bloquea esta red. Int\u00e9ntalo de nuevo con Wi-Fi.");
         table.put("Your muted words and Save button color will change.",
                 "Tus palabras silenciadas y el color del bot\u00f3n Guardar cambiar\u00e1n.");
-        table.put("Your muted words will change.",
-                "Tus palabras silenciadas cambiar\u00e1n.");
     }
 
     private static void fillEs10(Map<String, String> table) {
+        table.put("Your muted words will change.",
+                "Tus palabras silenciadas cambiar\u00e1n.");
         table.put("Your switches already match that file, so nothing will change.",
                 "Tus interruptores ya coinciden con ese archivo, as\u00ed que no cambiar\u00e1 nada.");
         table.put("Your switches are working.",
@@ -2621,7 +2625,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1238);
+        Map<String, String> table = new HashMap<>(1240);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -3860,13 +3864,15 @@ public final class L10nTranslations {
                 "Pilihan Anda tersimpan, tetapi build ini tidak menyertakan patch-nya.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Pilihan Anda tersimpan. Ketuk Lanjutkan, lalu mulai ulang Pinterest.");
+        table.put("Your download settings block this network. Try again on Wi-Fi.",
+                "Setelan unduhan Anda memblokir jaringan ini. Coba lagi melalui Wi-Fi.");
         table.put("Your muted words and Save button color will change.",
                 "Kata yang Anda bisukan dan warna tombol Simpan akan berubah.");
-        table.put("Your muted words will change.",
-                "Kata yang Anda bisukan akan berubah.");
     }
 
     private static void fillIn10(Map<String, String> table) {
+        table.put("Your muted words will change.",
+                "Kata yang Anda bisukan akan berubah.");
         table.put("Your switches already match that file, so nothing will change.",
                 "Sakelar Anda sudah sesuai dengan file itu, jadi tidak ada yang akan berubah.");
         table.put("Your switches are working.",
@@ -3908,7 +3914,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1238);
+        Map<String, String> table = new HashMap<>(1240);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -5147,13 +5153,15 @@ public final class L10nTranslations {
                 "Sua escolha est\u00e1 salva, mas esta vers\u00e3o n\u00e3o inclui o patch para ela.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Suas escolhas est\u00e3o salvas. Toque em Retomar e depois reinicie o Pinterest.");
+        table.put("Your download settings block this network. Try again on Wi-Fi.",
+                "Suas configura\u00e7\u00f5es de download bloqueiam esta rede. Tente de novo no Wi-Fi.");
         table.put("Your muted words and Save button color will change.",
                 "Suas palavras silenciadas e a cor do bot\u00e3o Salvar ser\u00e3o alteradas.");
-        table.put("Your muted words will change.",
-                "Suas palavras silenciadas ser\u00e3o alteradas.");
     }
 
     private static void fillPt_rBR10(Map<String, String> table) {
+        table.put("Your muted words will change.",
+                "Suas palavras silenciadas ser\u00e3o alteradas.");
         table.put("Your switches already match that file, so nothing will change.",
                 "Suas op\u00e7\u00f5es j\u00e1 correspondem \u00e0s desse arquivo, ent\u00e3o nada ser\u00e1 alterado.");
         table.put("Your switches are working.",
@@ -5195,7 +5203,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1238);
+        Map<String, String> table = new HashMap<>(1240);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -6434,13 +6442,15 @@ public final class L10nTranslations {
                 "Se\u00e7imin kaydedildi ama bu s\u00fcr\u00fcm onun yamas\u0131n\u0131 i\u00e7ermiyor.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Tercihlerin kay\u0131tl\u0131. Devam et'e dokun, sonra Pinterest'\u0131 yeniden ba\u015flat.");
+        table.put("Your download settings block this network. Try again on Wi-Fi.",
+                "\u0130ndirme ayarlar\u0131n bu a\u011f\u0131 engelliyor. Wi-Fi'da yeniden dene.");
         table.put("Your muted words and Save button color will change.",
                 "Sessize ald\u0131\u011f\u0131n kelimeler ve Kaydet d\u00fc\u011fmesinin rengi de\u011fi\u015fecek.");
-        table.put("Your muted words will change.",
-                "Sessize ald\u0131\u011f\u0131n kelimeler de\u011fi\u015fecek.");
     }
 
     private static void fillTr10(Map<String, String> table) {
+        table.put("Your muted words will change.",
+                "Sessize ald\u0131\u011f\u0131n kelimeler de\u011fi\u015fecek.");
         table.put("Your switches already match that file, so nothing will change.",
                 "Anahtarlar\u0131n zaten o dosyayla ayn\u0131, bu y\u00fczden hi\u00e7bir \u015fey de\u011fi\u015fmeyecek.");
         table.put("Your switches are working.",

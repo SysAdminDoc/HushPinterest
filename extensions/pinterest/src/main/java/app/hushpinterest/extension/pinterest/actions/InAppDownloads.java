@@ -23,11 +23,22 @@ import android.provider.MediaStore;
 
 import androidx.annotation.Nullable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
 
@@ -79,6 +90,213 @@ public final class InAppDownloads {
     /** Whether a save in this process is writing [id]. One recorded as running that isn't stopped part way. */
     static boolean saving(long id) {
         return SAVING.contains(id);
+    }
+
+    /** Marks [id] as written by a save in this process, before its history says it's running. */
+    static void claim(long id) {
+        SAVING.add(id);
+    }
+
+    static void release(long id) {
+        SAVING.remove(id);
+    }
+
+    /** The largest playlist read. Pinterest's are a few kilobytes. */
+    static final int PLAYLIST_BYTES = 1 << 20;
+    /** Where a streamed video's parts wait in the app's cache until they're joined. */
+    static final String STREAM_FOLDER = "hushpinterest-streams";
+
+    /** Saves streamed videos one at a time, on a thread of its own so a long one never holds the shared workers. */
+    private static final ThreadPoolExecutor STREAMS = streams();
+
+    private static ThreadPoolExecutor streams() {
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), work -> {
+            Thread thread = new Thread(() -> {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                work.run();
+            }, "hushpinterest-stream-save");
+            thread.setDaemon(true);
+            return thread;
+        });
+        pool.allowCoreThreadTimeOut(true);
+        return pool;
+    }
+
+    /**
+     * Saves the video Pinterest streams at [source], an HLS playlist, as one MP4 in [folder] (#27),
+     * with a history entry from the start. Android's Downloads can't fetch a stream, so HushPinterest
+     * fetches the best variant's parts and joins picture and sound itself. [alone] shows a toast when
+     * it ends. False when the history couldn't take the save, so nothing started.
+     */
+    static boolean stream(Context app, String pinId, PinMedia.Source source, @Nullable String folder, boolean alone) {
+        long id = DownloadLedger.recordInApp(app, pinId, folder, source.mime);
+        if (id < 0) return false;
+        try {
+            STREAMS.execute(() -> {
+                try {
+                    saveStream(app, id, pinId, source, folder, alone);
+                } finally {
+                    SAVING.remove(id);
+                }
+            });
+            return true;
+        } catch (RejectedExecutionException refused) {
+            SAVING.remove(id);
+            DownloadLedger.failed(app, id, source.mime);
+            return false;
+        }
+    }
+
+    private static void saveStream(Context app, long id, String pinId, PinMedia.Source source, @Nullable String folder,
+                                   boolean alone) {
+        ContentResolver resolver = app.getContentResolver();
+        File parts = new File(app.getCacheDir(), STREAM_FOLDER);
+        File video = new File(parts, id + ".video"), audio = new File(parts, id + ".audio");
+        Uri entry = null;
+        boolean finished = false;
+        try {
+            long deadline = clock.getAsLong() + VIDEO_MS;
+            Stream stream = read(source, deadline);
+            if (stream == null) {
+                HookStatus.counted(FamilyNames.DOWNLOAD_PINS, "stream download unreadable");
+                return;
+            }
+            Uri collection = collection(folder, source.mime);
+            if (collection == null) return;
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, PinDownloads.fileName(pinId, source));
+            values.put(MediaStore.MediaColumns.MIME_TYPE, source.mime);
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, (folder != null ? folder : Environment.DIRECTORY_DOWNLOADS) + "/");
+            values.put(MediaStore.MediaColumns.IS_PENDING, 1);
+            entry = resolver.insert(collection, values);
+            // The history entry is gone when the history was cleared meanwhile.
+            if (entry == null || !DownloadLedger.saving(app, id, source.mime, entry)) return;
+            if (!parts.isDirectory() && !parts.mkdirs()) throw new IOException("No cache folder for the stream");
+            long written = append(stream.video, video, VIDEO_BYTES, deadline);
+            if (stream.audio != null) append(stream.audio, audio, VIDEO_BYTES - written, deadline);
+            try (ParcelFileDescriptor out = resolver.openFileDescriptor(entry, "rw")) {
+                if (out == null) throw new IOException("No file for the saved entry");
+                StreamMux.join(video, stream.audio == null ? null : audio, out.getFileDescriptor());
+            }
+            ContentValues done = new ContentValues();
+            done.put(MediaStore.MediaColumns.IS_PENDING, 0);
+            if (resolver.update(entry, done, null, null) <= 0) return;
+            finished = true;
+            DownloadLedger.saved(app, id, source.mime, entry);
+            HookStatus.counted(FamilyNames.DOWNLOAD_PINS, "stream download saved");
+        } catch (IOException failed) {
+            HookStatus.counted(FamilyNames.DOWNLOAD_PINS, "stream download failed");
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.DOWNLOAD_PINS, "save a streamed video", failure);
+        } finally {
+            gone(video);
+            gone(audio);
+            if (!finished) {
+                if (entry != null) delete(resolver, entry);
+                try {
+                    DownloadLedger.failed(app, id, source.mime);
+                } catch (RuntimeException unrecorded) {
+                    HookStatus.threw(FamilyNames.DOWNLOAD_PINS, "record a streamed video that failed", unrecorded);
+                }
+            }
+            if (alone) {
+                Utils.showToastLong(finished
+                        ? L10n.f("Saved in %s.", folder != null ? folder : Environment.DIRECTORY_DOWNLOADS)
+                        : L10n.t("Couldn't save this pin."));
+            }
+        }
+    }
+
+    /** The files a streamed video is cut from: its picture (with the sound, for an older pin) and its sound. */
+    private static final class Stream {
+        final List<URI> video;
+        @Nullable final List<URI> audio;
+
+        Stream(List<URI> video, @Nullable List<URI> audio) {
+            this.video = video;
+            this.audio = audio;
+        }
+    }
+
+    /** Reads the playlists at [source] down to the files of its best variant. Null when they can't be saved. */
+    @Nullable
+    private static Stream read(PinMedia.Source source, long deadline) throws IOException {
+        URI first = PinMedia.mediaUri(source.url);
+        if (first == null) return null;
+        String text = playlist(first, deadline);
+        if (text == null) return null;
+        URI media = first, sound = null;
+        if (HlsPlaylist.master(text)) {
+            HlsPlaylist.Choice choice = HlsPlaylist.best(first, text);
+            if (choice == null) return null;
+            media = choice.media;
+            sound = choice.audio;
+            text = playlist(media, deadline);
+            if (text == null) return null;
+        }
+        List<URI> video = HlsPlaylist.parts(media, text);
+        if (video.isEmpty()) return null;
+        if (sound == null) return new Stream(video, null);
+        String sounds = playlist(sound, deadline);
+        List<URI> audio = sounds == null ? null : HlsPlaylist.parts(sound, sounds);
+        return audio == null || audio.isEmpty() ? null : new Stream(video, audio);
+    }
+
+    /** The playlist at [uri], or null when the media host didn't give one. */
+    @Nullable
+    private static String playlist(URI uri, long deadline) throws IOException {
+        ByteArrayOutputStream body = new ByteArrayOutputStream();
+        PinTransfer.Fetched got = PinTransfer.fetch(new PinMedia.Source(uri.toString(), HlsPlaylist.TYPE, ".m3u8"),
+                new PinTransfer.Sink() {
+                    @Override public OutputStream open() {
+                        return body;
+                    }
+
+                    @Override public void discard() {
+                        body.reset();
+                    }
+                }, PLAYLIST_BYTES, HlsPlaylist::type, connection, clock, left(deadline));
+        if (got.status != 200 || got.written == 0) return null;
+        String text = new String(body.toByteArray(), StandardCharsets.UTF_8);
+        return HlsPlaylist.playlist(text) ? text : null;
+    }
+
+    /** Fetches each of [parts] whole onto the end of [into], at most [most] bytes in all. Returns the bytes written. */
+    private static long append(List<URI> parts, File into, long most, long deadline) throws IOException {
+        long total = 0;
+        for (URI part : parts) {
+            if (!PinDownloads.active()) throw new IOException("Download pin was turned off");
+            PinTransfer.Fetched got = PinTransfer.fetch(new PinMedia.Source(part.toString(), "video/mp4", ".mp4"),
+                    new PinTransfer.Sink() {
+                        @Override public OutputStream open() throws IOException {
+                            return new FileOutputStream(into, true);
+                        }
+
+                        // The caller deletes the whole file.
+                        @Override public void discard() {}
+                    }, most - total, InAppDownloads::partType, connection, clock, left(deadline));
+            if (got.status != 200 || got.written == 0) throw new IOException("The media host didn't give part of the stream");
+            total += got.written;
+        }
+        return total;
+    }
+
+    /** Whether a Content-Type header is one a part of Pinterest's streams comes with. */
+    static boolean partType(@Nullable String header) {
+        if (header == null) return false;
+        String type = header.split(";", 2)[0].trim().toLowerCase(Locale.ROOT);
+        return type.equals("video/mp4") || type.equals("audio/mp4") || type.equals("application/mp4")
+                || type.equals("video/mp2t");
+    }
+
+    private static long left(long deadline) throws SocketTimeoutException {
+        long left = deadline - clock.getAsLong();
+        if (left <= 0) throw new SocketTimeoutException("The stream took too long to save");
+        return left;
+    }
+
+    private static void gone(File file) {
+        if (file.exists() && !file.delete()) file.deleteOnExit();
     }
 
     /** Looks at this app's requests {@link #GRACE_MS} from now, or from the latest call. */
@@ -313,5 +531,10 @@ public final class InAppDownloads {
         again.set(false);
         main().removeCallbacks(CHECK);
         watched = null;
+    }
+
+    /** Waits until every streamed video started so far has been saved or has failed. */
+    static void awaitStreamsForTests() throws Exception {
+        STREAMS.submit(() -> {}).get(30, TimeUnit.SECONDS);
     }
 }
