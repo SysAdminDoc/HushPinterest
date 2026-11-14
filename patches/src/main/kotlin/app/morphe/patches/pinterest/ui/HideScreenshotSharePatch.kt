@@ -11,6 +11,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.pinterest.misc.extension.enableCapability
 import app.morphe.patches.pinterest.misc.extension.enableStatus
 import app.morphe.patches.pinterest.misc.extension.handleTargets
+import app.morphe.patches.pinterest.misc.extension.localRegisterCount
 import app.morphe.patches.pinterest.misc.extension.pinterestExtensionPatch
 import app.morphe.patches.pinterest.misc.extension.requireStatusMethod
 import app.morphe.patches.pinterest.misc.extension.returnEarlyWhen
@@ -66,7 +67,9 @@ private fun BytecodePatchContext.screenshotManager(): String? {
             !AccessFlags.STATIC.isSet(it.accessFlags)
     }
     if (found.size != 1) return "Home's screenshot manager (${found.size} candidates, expected one)"
-    mutable(found.single()).returnEarlyWhen("Screenshot manager", SCREENSHOT_HOOK, "return-void")
+    val manager = mutable(found.single())
+    if (manager.localRegisterCount() < 1) return leftAlone("Home's screenshot manager", listOf("${manager.definingClass}->${manager.name}"))
+    manager.returnEarlyWhen("Screenshot manager", SCREENSHOT_HOOK, "return-void")
     return null
 }
 
@@ -82,11 +85,14 @@ private fun BytecodePatchContext.screenCaptureCallbacks(): String? {
         ) owners += owner.type
     }
     if (owners.isEmpty()) return "the screen capture callback (no class implements Activity.ScreenCaptureCallback)"
+    val tight = mutableListOf<String>()
     for (type in owners) {
-        mutableClassDefBy(type).methods.filter { it.isScreenCaptured() }
-            .forEach { it.returnEarlyWhen("Screen capture callback", SCREENSHOT_HOOK, "return-void") }
+        mutableClassDefBy(type).methods.filter { it.isScreenCaptured() }.forEach {
+            if (it.localRegisterCount() < 1) tight += "$type->${it.name}"
+            else it.returnEarlyWhen("Screen capture callback", SCREENSHOT_HOOK, "return-void")
+        }
     }
-    return null
+    return leftAlone("the screen capture callback", tight)
 }
 
 private fun Method.isScreenCaptured() =
@@ -116,12 +122,21 @@ private fun BytecodePatchContext.screenshotEventReceivers(): String? {
         owner.methods.filter { it.receives(event) }.forEach { receivers += owner.type to it }
     }
     if (receivers.isEmpty()) return "the screenshot event's receivers (nothing takes $event)"
+    val tight = mutableListOf<String>()
     for ((type, receiver) in receivers) {
-        mutableClassDefBy(type).methods.single { it.name == receiver.name && it.receives(event) }
-            .returnEarlyWhen("Screenshot event receiver", SCREENSHOT_HOOK, "return-void")
+        val method = mutableClassDefBy(type).methods.single { it.name == receiver.name && it.receives(event) }
+        if (method.localRegisterCount() < 1) tight += "$type->${method.name}"
+        else method.returnEarlyWhen("Screenshot event receiver", SCREENSHOT_HOOK, "return-void")
     }
-    return null
+    return leftAlone("the screenshot event's receivers", tight)
 }
+
+/**
+ * The guard needs one local for the hook's answer. A method R8 squeezed down to its parameters has
+ * none, so it is left as Pinterest wrote it and named in the patch log, while the rest are guarded.
+ */
+private fun leftAlone(what: String, tight: List<String>) =
+    if (tight.isEmpty()) null else "$what (${tight.joinToString()} left as is, with no free register for the guard)"
 
 private val PLATFORM = listOf("Ljava/", "Ljavax/", "Lkotlin/", "Landroid/", "Landroidx/")
 

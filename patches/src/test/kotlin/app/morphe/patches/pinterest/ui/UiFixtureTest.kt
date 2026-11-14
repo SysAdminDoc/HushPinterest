@@ -403,6 +403,29 @@ class UiFixtureTest {
         assertEquals(SCREENSHOT_HOOK, (context.mutable(callback).instructions()[0] as ReferenceInstruction).reference.toString())
     }
 
+    @Test fun `a screenshot handler with no free register stays as it is and is named, and the rest are still guarded`() {
+        val full = read(Fixtures.declaredBuilds().first())
+        val event = photosWatchers(full).flatMap { it.instructions() }.filter { it.opcode == Opcode.NEW_INSTANCE }
+            .map { (it as ReferenceInstruction).reference.toString() }.toSet().single()
+        // An R8 forwarder can be this tight: p0 and the event, with nothing left over for the hook's answer.
+        val tight = "Lhush/test/TightScreenshotForwarder;"
+        val forwarder = ImmutableClassDef(tight, AccessFlags.PUBLIC.value, "Ljava/lang/Object;", listOf(), null, setOf(), listOf(),
+            listOf(ImmutableMethod(tight, "onEventMainThread", listOf(ImmutableMethodParameter(event, null, null)), "V",
+                AccessFlags.PUBLIC.value, null, null, ImmutableMethodImplementation(2, listOf(ImmutableInstruction10x(Opcode.RETURN_VOID)), null, null))))
+        val classes = full + forwarder
+        val context = PatchContexts.of(ExtensionDex.classes() + classes)
+        val warnings = PatchLogCapture.warnings { hideScreenshotSharePatch.execute(context) }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertTrue(warnings.single(), warnings.single().contains("$tight->onEventMainThread"))
+        assertFlag(context, "hideScreenshotShare", true)
+        assertFlag(context, "screenshotShare", true)
+        assertEquals(listOf(Opcode.RETURN_VOID), context.mutable(forwarder.methods.single()).instructions().map { it.opcode })
+        val guarded = screenshotListeners(full)
+        assertEquals(7, guarded.size)
+        for (listener in guarded) assertEquals("${listener.definingClass}", SCREENSHOT_HOOK,
+            (context.mutable(listener).instructions()[0] as ReferenceInstruction).reference.toString())
+    }
+
     @Test fun `a missing family status refuses before changing any vendor method`() {
         for ((index, patch) in patches.withIndex()) {
             val context = PatchContexts.of(ExtensionDex.classes())
