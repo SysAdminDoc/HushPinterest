@@ -16,8 +16,6 @@ captures/
 .cxx/
 *.aab
 *.apk
-# The AppInventory contract's two tiny real-dex fixtures (scripts/checks/build-inventory-fixtures.ps1).
-!scripts/checks/inventory-fixture/*.apk
 *.apkm
 *.apks
 *.xapk

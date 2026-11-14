@@ -176,7 +176,7 @@ The repository's target and acceptance code is split across:
 | Runtime behavior and settings | `extensions/pinterest/**`, `extensions/shared/**` |
 | Fixture inventory and identities | `patches/src/test/kotlin/app/morphe/Fixtures.kt`, `FixtureDex.kt`, `obfuscated-identities.txt` |
 | Patch-specific fixtures | `patches/src/test/kotlin/app/morphe/patches/pinterest/**` |
-| Manifest delta review | `scripts/manifest-delta-allowlist.txt`, `scripts/release-receipt.ps1`, `scripts/test-manifest-contracts.ps1`, `scripts/test-script-contracts.ps1` |
+| Manifest delta review | `scripts/manifest-delta-allowlist.txt`, `scripts/release-receipt.ps1` |
 | Whole-catalog fixture verification | `scripts/verify-all-patches.ps1` |
 | Device installation safeguards | `scripts/patch-for-device.ps1`, `scripts/device-install.ps1`, `scripts/device-lease.ps1` |
 

@@ -5,6 +5,7 @@ Every HushPinterest release, newest first.
 ## Unreleased
 
 * **Tooling:** A release no longer waits on the source census. The audit still runs whenever you want to see which indexes list HushPinterest, but a stale or flaky answer from one of them can't stop a release anymore.
+* **Tooling:** The tests that only checked the build and release scripts are gone, about 10,000 lines of them. A push that changes a script now takes under a second instead of several minutes. Every test of the patches and the extension still runs.
 
 ## 0.0.14 (2026-11-14)
 

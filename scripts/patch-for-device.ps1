@@ -71,7 +71,7 @@ param(
     # An explicit final destination is reserved atomically and never overwritten.
     [string]$OutputApk,
     # The checkout whose catalog and release bundle are used, the one holding this script unless
-    # given. The contract tests point it at a fixture.
+    # given.
     [string]$Root,
     # The applied record store to look for a gate run of this bundle in.
     [string]$AppliedDir,
