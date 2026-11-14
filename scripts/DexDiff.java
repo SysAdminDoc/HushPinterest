@@ -5128,6 +5128,8 @@ public class DexDiff {
                 String type = m.getDefiningClass();
                 owners.add(type.contains("$") ? type.substring(0, type.indexOf('$')) + ";" : type);
             }
+            // Like the patch, a build where nothing reads the name has no bubble to hide, and the flag stays off.
+            if (owners.isEmpty()) { capability(c.callee, false); return; }
             List<Field> fields = new ArrayList<>();
             for (String owner : owners) {
                 ClassDef cd = clean.classes.get(owner);
