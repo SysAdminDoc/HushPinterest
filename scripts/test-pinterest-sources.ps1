@@ -81,11 +81,11 @@ foreach ($package in Get-SourcePackages) {
 # candidate and a historical reference. None changes a source's adoption status or the commit in
 # an adopted provenance rule.
 $browz = @($entries | Where-Object { $_.id -eq 'browzomje' })[0]
-Assert-True ($browz.branches[0].name -eq 'main' -and $browz.branches[0].commit -eq '5fa5c61905db70f1120b8e371cb855621a40a417' -and
-    @($browz.branches | Where-Object { $_.name -eq 'dev' -and $_.commit -eq 'b4773c6ea007843928564f8d6bf7a17dfdeba1fb' }).Count -eq 1 -and
-    $browz.patchCounts.'com.pinterest' -eq 31 -and $browz.targetVersions.'com.pinterest' -contains '14.39.0' -and
-    @($browz.features).Count -eq 25 -and $browz.features -contains 'Keep Home feed (dev)' -and $browz.disposition -eq 'candidate') `
-    'browzomje must keep its pinned main and dev commits, its 31 Pinterest patches on main and its dev-only Keep Home feed, as a candidate and not an adopted source.'
+Assert-True ($browz.branches[0].name -eq 'main' -and $browz.branches[0].commit -eq '32329eeff68575d5bb368f4ec15bdc90cc9cc9fe' -and
+    @($browz.branches | Where-Object { $_.name -eq 'dev' -and $_.commit -eq '32329eeff68575d5bb368f4ec15bdc90cc9cc9fe' }).Count -eq 1 -and
+    $browz.patchCounts.'com.pinterest' -eq 36 -and $browz.targetVersions.'com.pinterest' -contains '14.39.0' -and
+    @($browz.features).Count -eq 29 -and $browz.features -contains 'Keep Home feed' -and $browz.disposition -eq 'candidate') `
+    'browzomje must keep its pinned main and dev commits, its 36 Pinterest patches on main and its Keep Home feed, as a candidate and not an adopted source.'
 $oyasumi = @($entries | Where-Object { $_.id -eq 'oyasumi' })[0]
 Assert-True ($oyasumi.branches.Count -eq 1 -and $oyasumi.branches[0].name -eq 'dev' -and
     $oyasumi.branches[0].commit -eq '1875509177dca5fa4181cce5614202547a2dea6d' -and $oyasumi.patchCounts.'com.pinterest' -eq 13 -and
@@ -109,10 +109,10 @@ Assert-True ($stale.Count -eq 2 -and @($stale | Where-Object { $_.disposition -n
     'binarymend and satanmerde have no usable anchors and must stay rejected.'
 $sabopura = @($entries | Where-Object { $_.id -eq 'sabopura' })[0]
 Assert-True ($sabopura.upstream -eq 'https://github.com/binarymend/morphe-patches' -and $sabopura.lineage -eq 'sabopura' -and
-    $sabopura.branches[0].commit -eq '28c3f2d8736f520bdd721d08aa3f1cf7b4a29c48' -and $sabopura.patchCounts.'com.pinterest' -eq 3 -and
-    $sabopura.targetVersions.'com.pinterest' -contains '14.40.0' -and $sabopura.reason -like '*declaration, not proof*' -and
+    $sabopura.branches[0].commit -eq 'ce73637e4070caf2807ca3729f1ff004bf97f2f9' -and $sabopura.patchCounts.'com.pinterest' -eq 3 -and
+    $sabopura.targetVersions.'com.pinterest' -contains '14.42.0' -and $sabopura.reason -like '*declaration, not proof*' -and
     $sabopura.license.sha256 -eq '230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809' -and $sabopura.disposition -eq 'candidate') `
-    'sabopura must keep its reviewed commit, its declared-only 14.40.0, its CRLF GPL-3.0 hash and its Binarymend upstream, as a candidate.'
+    'sabopura must keep its reviewed commit, its declared-only 14.42.0, its CRLF GPL-3.0 hash and its Binarymend upstream, as a candidate.'
 # Two sources the 2026-10-18 audit found. Both declare builds nobody here has run, and neither is adopted.
 $quest = @($entries | Where-Object { $_.id -eq 'quest' })[0]
 Assert-True ($quest.repository -ceq 'https://github.com/archivesteak/Quest' -and
@@ -123,7 +123,7 @@ Assert-True ($quest.repository -ceq 'https://github.com/archivesteak/Quest' -and
     'Quest must keep its reviewed main and dev commit, its six 14.39.0 patches and its old name, as a candidate.'
 $wagg = @($entries | Where-Object { $_.id -eq 'wagg13patch' })[0]
 Assert-True ($wagg.repository -ceq 'https://github.com/WaggBR/Wagg13Patch_Morphe' -and
-    @($wagg.branches | Where-Object { $_.name -eq 'main' -and $_.commit -eq '99062638dc4dde907b93f428daf18a43cf4a1634' }).Count -eq 1 -and
+    @($wagg.branches | Where-Object { $_.name -eq 'main' -and $_.commit -eq '9f4b51f538ec6bd7e02bf0aa38a9f26d6ac6b6bc' }).Count -eq 1 -and
     $wagg.patchCounts.'com.pinterest' -eq 1 -and $wagg.targetVersions.'com.pinterest' -contains '14.40.0' -and
     $wagg.reason -like '*obfuscated classes per version*' -and
     $wagg.license.sha256 -eq '230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809' -and $wagg.disposition -eq 'candidate') `
