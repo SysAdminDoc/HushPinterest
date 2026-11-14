@@ -683,6 +683,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
         // Switches live in one application-wide store, while Pinterest can hold several accounts.
         about.addPreference(mark(info(context, L10n.t("Accounts"), L10n.t("Every switch here applies to all the "
                 + "accounts in this Pinterest app, not only the one you have open.")), SettingsIcons.ABOUT));
+        // A patch-time fact with no switch: which app this copy is, beside the stock one.
+        if (build.contains(PatchFamily.CHANGE_PACKAGE_NAME)) {
+            about.addPreference(mark(info(context, L10n.t("Change package name"), L10n.f("This copy runs as %1$s, so it "
+                    + "installs beside Pinterest with its own sign-in. Set when patching.",
+                    L10n.isolate(context.getPackageName()))), SettingsIcons.ABOUT));
+        }
 
         about.addPreference(mark(new SetupGuidancePreference(context), SettingsIcons.ABOUT));
 

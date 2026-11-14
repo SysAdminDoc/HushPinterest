@@ -8,6 +8,10 @@
     over adb when a serial is given. Installs require an exclusive whole-device lease and matching
     signers. Existing accounts, permissions and keys are preserved. Stock installs are refused.
 
+    Change package name stays out unless -AsCopy is given, so a build updates the patched
+    Pinterest on the phone. With it, the build is a copy under its own package that installs
+    beside Pinterest, and it's installed and read back under that package.
+
     The signing password comes from HUSHPINTEREST_SIDELOAD_KEYSTORE_PASSWORD. When it is unset, the
     local test keystore's documented password, sideload, is used. The Morphe arguments travel
     through a temporary Java argument file so the password value is not in the child process
@@ -43,6 +47,10 @@ param(
     # that is off by default, so a check of what Pinterest does without one of them needs a build
     # that leaves it out.
     [string[]]$Exclude = @(),
+    # Build a copy that installs beside the Pinterest on the phone: Change package name goes in
+    # with its defaults. Without it that patch is left out, so the build updates the patched
+    # Pinterest already there.
+    [switch]$AsCopy,
     # Patch with the release bundle even when a source file is newer than it, for replaying
     # an earlier build on purpose. Without it a stale bundle stops the run.
     [switch]$AllowStaleBundle,
@@ -178,11 +186,22 @@ if (-not $AllowStaleBundle) {
             '(or pass -AllowStaleBundle to patch with it as it is).')
     }
 }
-$names = @($catalog.patches | ForEach-Object { $_.name } | Where-Object { $_ -notin $Exclude })
+# The patch that gives a build an identity of its own, which only -AsCopy asks for.
+$copyPatches = @('Change package name')
+$catalogNames = @($catalog.patches | ForEach-Object { $_.name })
+if ($AsCopy -and @($copyPatches | Where-Object { $catalogNames -cnotcontains $_ }).Count -gt 0) {
+    throw "-AsCopy needs $($copyPatches -join ' and ') in the catalog."
+}
+if ($AsCopy -and @($copyPatches | Where-Object { $Exclude -contains $_ }).Count -gt 0) {
+    throw "-AsCopy builds with $($copyPatches -join ' and '), so it can't be left out too."
+}
+$names = @($catalogNames | Where-Object { $_ -notin $Exclude -and ($AsCopy -or $_ -notin $copyPatches) })
 foreach ($excluded in $Exclude) {
-    if ($excluded -notin ($catalog.patches | ForEach-Object { $_.name })) { throw "No patch named '$excluded' to exclude." }
+    if ($excluded -notin $catalogNames) { throw "No patch named '$excluded' to exclude." }
 }
 if ($Exclude.Count -gt 0) { Write-Host "[device] leaving out: $($Exclude -join ', ')" }
+$copyLeftOut = @($catalogNames | Where-Object { -not $AsCopy -and $_ -in $copyPatches -and $_ -notin $Exclude })
+if ($copyLeftOut.Count -gt 0) { Write-Host "[device] leaving out $($copyLeftOut -join ' and '); -AsCopy builds a copy beside Pinterest" }
 $dependencyNames = @(Get-PatchDependencyNames -PatchList $catalog -RequestedNames $names)
 
 New-Item -ItemType Directory -Force $OutDir | Out-Null
@@ -295,6 +314,9 @@ $patchedManifest = Get-ApkManifestFacts -Apk $out -Aapt2 $Aapt2
 $manifestCheck = Test-ManifestDelta -Stock $stockManifest -Patched $patchedManifest `
     -SelectedPatchNames $manifestSelection -ApprovedManifestDelta $approvedChanges
 if (-not $manifestCheck.Valid) { throw "Patching changed an unapproved compiled manifest fact: $($manifestCheck.Reason)" }
+# The CLI reports the package it was given. A copy installs under its own.
+$installedPackage = [string]$patchedManifest.package
+if ($installedPackage -cne $target.PackageName) { Write-Host "[device] a copy, installed as $installedPackage" }
 if ($recorded) {
     # Signing adds a signature block and leaves the dex alone, and these dex passed DexDiff and the
     # host reference check when the gate kept the run.
@@ -356,9 +378,9 @@ if (-not $adb) { throw 'No adb found. Put it on the PATH or install the platform
 $lease = Enter-HushDeviceLease -Adb $adb -Serial $Serial -LeaseToken $LeaseToken `
     -LeaseDirectory $LeaseDirectory -ChatIdentity $ChatIdentity
 try {
-    Install-HushAndroidApk -Adb $adb -Serial $Serial -Apk $out -PackageName $target.PackageName `
+    Install-HushAndroidApk -Adb $adb -Serial $Serial -Apk $out -PackageName $installedPackage `
         -Aapt2 $Aapt2 -Lease $lease
-    & $adb -s $Serial shell dumpsys package $target.PackageName | Select-String 'versionName' | Out-Host
+    & $adb -s $Serial shell dumpsys package $installedPackage | Select-String 'versionName' | Out-Host
 } finally { Exit-HushDeviceLease $lease }
 
 } finally {

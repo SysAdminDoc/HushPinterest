@@ -190,6 +190,9 @@ Pinterest's original signature is added to the app	A assinatura original do Pint
 GmsCore support	Suporte ao GmsCore
 Google sign-in and push notifications go through microG-RE instead of Google Play services, so microG-RE has to stay installed. Set when patching. Patch again without it to go back.	O login com Google e as notificações push passam pelo microG-RE em vez do Google Play Services, então o microG-RE precisa continuar instalado. Definido ao aplicar os patches. Aplique de novo sem ele para voltar.
 Google sign-in and push notifications go through microG-RE	O login com Google e as notificações push passam pelo microG-RE
+Change package name	Mudar o nome do pacote
+This copy runs as %1$s, so it installs beside Pinterest with its own sign-in. Set when patching.	Esta cópia roda como %1$s, então é instalada ao lado do Pinterest com login próprio. Definido ao aplicar os patches.
+This copy has its own package name, so it installs beside Pinterest	Esta cópia tem o próprio nome de pacote, então é instalada ao lado do Pinterest
 Download pins	Baixar Pins
 Open links in your browser	Abrir links no seu navegador
 Opens a pin's Visit link and profile websites in your browser.	Abre o link Visitar de um Pin e os sites de perfis no seu navegador.

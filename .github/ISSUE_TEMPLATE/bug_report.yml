@@ -66,10 +66,11 @@ body:
     id: selected_patches
     attributes:
       label: Which patches were in your build?
-      description: Every patch but GmsCore support and Spoof signature for Google sign-in is selected by default. Those two are only in your build if you picked them in Expert mode.
+      description: Every patch but GmsCore support, Spoof signature for Google sign-in and Change package name is selected by default. Those three are only in your build if you picked them in Expert mode.
       multiple: true
       options:
         - AMOLED black
+        - Change package name
         - Disable analytics
         - Disable update nag
         - Download board

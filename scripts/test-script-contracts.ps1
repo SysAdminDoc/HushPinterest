@@ -4471,6 +4471,12 @@ try {
     $releaseCatalog = Get-Content -LiteralPath (Join-Path $releaseRepo 'patches-list.json') -Raw | ConvertFrom-Json
     $releaseTarget = Get-PatchTarget -PatchList $releaseCatalog
     $releaseNames = @($releaseCatalog.patches | ForEach-Object { [string]$_.name })
+    # Change package name, which every-patch runs carry, moves the build to its own package; the
+    # stand-in CLI writes the .renamed.txt manifest when it's asked for.
+    $renamedPackage = "$($releaseTarget.PackageName).hushpinterest"
+    $copySelected = @($releaseNames) -ccontains 'Change package name'
+    $patchedPackageHere = if ($copySelected) { $renamedPackage } else { $releaseTarget.PackageName }
+    $patchedManifestSuffix = if ($copySelected) { 'renamed.txt' } else { 'patched.txt' }
     $releaseToolchain = Read-CatalogToolchain -Source 'the release fixture catalog' `
         -Text (Get-Content -LiteralPath (Join-Path $releaseRepo 'gradle/libs.versions.toml') -Raw)
     $releaseReceipt = Join-Path $releaseRepo "release-receipt-$releaseVersionHere.json"
@@ -4493,6 +4499,10 @@ try {
             "        A: http://schemas.android.com/apk/res/android:minSdkVersion(0x0101020c)=$binaryMinSdk",
             '      E: uses-permission (line=10)',
             "        A: $androidName`"android.permission.INTERNET`" (Raw: `"android.permission.INTERNET`")")
+        # Pinterest's own permissions are named after its package, so Change package name moves them.
+        foreach ($own in @('account.Credentials', 'DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION')) {
+            $lines += @('      E: uses-permission (line=10)', "        A: $androidName`"$Package.$own`" (Raw: `"$Package.$own`")")
+        }
         # Pinterest asks for the ad ID and Android's ad services, which Remove ad tracking
         # permissions takes out with the application's ad services property.
         $adTracking = $releaseNames -ccontains 'Remove ad tracking permissions'
@@ -4524,6 +4534,10 @@ try {
             }
         }
         $lines += '      E: application (line=20)'
+        if ($Patched -and $Package -cne $releaseTarget.PackageName) {
+            # Change package name labels the copy with a name of its own, as a raw string.
+            $lines += "        A: http://schemas.android.com/apk/res/android:label(0x01010001)=`"HushPinterest`" (Raw: `"HushPinterest`")"
+        }
         if ($adTracking) {
             # Another application property stays where the ad services one goes.
             $resizable = 'android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY'
@@ -4538,6 +4552,26 @@ try {
         $lines += @('        E: activity (line=21)',
             "          A: $androidName`"com.pinterest.activity.PinterestActivity`" (Raw: `"com.pinterest.activity.PinterestActivity`")",
             $androidExported)
+        # The launcher entry, which a copy labels with its own name, and the providers whose
+        # authorities sit under the package, one of them guarded by Pinterest's own permission.
+        $lines += @('        E: activity-alias (line=24)',
+            "          A: $androidName`"com.pinterest.activity.PinterestActivity`" (Raw: `"com.pinterest.activity.PinterestActivity`")")
+        if ($Patched -and $Package -cne $releaseTarget.PackageName) {
+            $lines += "          A: http://schemas.android.com/apk/res/android:label(0x01010001)=`"HushPinterest`" (Raw: `"HushPinterest`")"
+        }
+        $lines += @('          E: intent-filter (line=25)', '            E: action (line=26)',
+            "              A: $androidName`"android.intent.action.MAIN`" (Raw: `"android.intent.action.MAIN`")",
+            '            E: category (line=27)',
+            "              A: $androidName`"android.intent.category.LAUNCHER`" (Raw: `"android.intent.category.LAUNCHER`")")
+        foreach ($provider in @(@('androidx.startup.InitializationProvider', "$Package.androidx-startup", ''),
+                @('com.pinterest.account.CredentialsContentProvider', "$Package.CredentialsProvider", "$Package.account.Credentials"),
+                @('androidx.core.content.FileProvider', "$Package.provider", ''))) {
+            $lines += @('        E: provider (line=28)', "          A: $androidName`"$($provider[0])`" (Raw: `"$($provider[0])`")",
+                "          A: http://schemas.android.com/apk/res/android:authorities(0x01010018)=`"$($provider[1])`" (Raw: `"$($provider[1])`")")
+            if ($provider[2]) {
+                $lines += "          A: http://schemas.android.com/apk/res/android:permission(0x01010006)=`"$($provider[2])`" (Raw: `"$($provider[2])`")"
+            }
+        }
         if ($WithSplit) {
             $lines += @('        E: activity (line=40)',
                 "          A: $androidName`"com.pinterest.split.FeatureActivity`" (Raw: `"com.pinterest.split.FeatureActivity`")",
@@ -4617,7 +4651,7 @@ try {
             $stockFacts = ConvertFrom-ManifestXmlTree -Source 'receipt stock fixture' -Lines (
                 (Get-FixtureManifest -Build $Builds[$i] -Code $code) -split '\r?\n')
             $patchedFacts = ConvertFrom-ManifestXmlTree -Source 'receipt patched fixture' -Lines (
-                (Get-FixtureManifest -Build $Builds[$i] -Code $code -Patched) -split '\r?\n')
+                (Get-FixtureManifest -Build $Builds[$i] -Code $code -Patched -Package $patchedPackageHere) -split '\r?\n')
             $targetHere = [ordered]@{
                 source        = [ordered]@{ file = "pinterest-$($Builds[$i])-arm64-v8a.apk"
                     package = $releaseTarget.PackageName; versionName = $Builds[$i]; versionCode = $code
@@ -4731,7 +4765,7 @@ try {
         'if /i "%~nx4"=="ResourceTableCheck.java" goto resources',
         'if /i "%~nx4"=="DexDiff.java" goto dexdiff',
         'if /i "%~nx4"=="HostReferences.java" goto references',
-        'set "OUT=" & set "RESULT=" & set "LAST=" & set "PREV=" & set "FORCED=0"',
+        'set "OUT=" & set "RESULT=" & set "LAST=" & set "PREV=" & set "FORCED=0" & set "RENAMED=0"',
         'shift',
         'shift',
         'rem patch-for-device.ps1 hands the CLI one argument file, a quoted value a line with',
@@ -4755,6 +4789,7 @@ try {
         'if "!PREV!"=="-o" set "OUT=!V!"',
         'if "!PREV!"=="-r" set "RESULT=!V!"',
         'if "!V!"=="-f" set "FORCED=1"',
+        'if "!PREV!"=="-e" if "!V!"=="Change package name" set "RENAMED=1"',
         'set "PREV=!V!"',
         'set "LAST=!V!"',
         'exit /b 0',
@@ -4772,9 +4807,14 @@ try {
         'echo WARNING: a patch named a target this build lacks, and still applied 1>&2',
         'rem A case that needs something to change while a fixture is patched leaves this behind.',
         'if exist "!HERE!during-patch.cmd" call "!HERE!during-patch.cmd"',
-        'copy /y "!SRC!.result.json" "!RESULT!" >nul || exit /b 3',
+        'set "REPORT=!SRC!.result.json"',
+        'if "!RENAMED!"=="0" if exist "!SRC!.device.result.json" set "REPORT=!SRC!.device.result.json"',
+        'copy /y "!REPORT!" "!RESULT!" >nul || exit /b 3',
         'copy /y "!HERE!patched.apk" "!OUT!" >nul || exit /b 4',
-        'copy /y "!SRC!.patched.txt" "!OUT!.xmltree" >nul || exit /b 5',
+        'rem Change package name moves the build to the Pinterest package plus .hushpinterest.',
+        'set "MANIFEST=!SRC!.patched.txt"',
+        'if "!RENAMED!"=="1" set "MANIFEST=!SRC!.renamed.txt"',
+        'copy /y "!MANIFEST!" "!OUT!.xmltree" >nul || exit /b 5',
         'exit /b 0',
         'rem MergeSplits.java <bundle> <merged.apk>. A case can make it fail, or leave no APK behind.',
         ':merge',
@@ -4865,6 +4905,8 @@ try {
         'AndroidManifest.xml' = 'binary manifest'; 'classes.dex' = "dex`n035" })
 
     $dependencyNamesHere = @(Get-PatchDependencyNames -PatchList $releaseCatalog -RequestedNames $releaseNames)
+    $deviceNamesHere = @($releaseNames | Where-Object { $_ -cne 'Change package name' })
+    $deviceDependencyNamesHere = @(Get-PatchDependencyNames -PatchList $releaseCatalog -RequestedNames $deviceNamesHere)
     $fixturePaths = @{}
     # Beside the declared builds, a newer one the catalog doesn't declare, the kind a release run
     # patches under -f to see what still applies on it. Each declared build carries the version code
@@ -4885,14 +4927,21 @@ try {
             -Value (Get-FixtureManifest -Build $build -Code "$versionCode" -WithSplit -MinSdk $stockMinSdk)
         Set-Content -LiteralPath "$apkm.patched.txt" -Encoding ASCII -NoNewline `
             -Value (Get-FixtureManifest -Build $build -Code "$versionCode" -WithSplit -Patched -MinSdk $stockMinSdk)
+        Set-Content -LiteralPath "$apkm.renamed.txt" -Encoding ASCII -NoNewline `
+            -Value (Get-FixtureManifest -Build $build -Code "$versionCode" -WithSplit -Patched -MinSdk $stockMinSdk -Package $renamedPackage)
         # The report the CLI writes: every patch and the internal dependencies applied, one step,
-        # and the input's own version, which is what the CLI reports.
-        Set-Content -LiteralPath "$apkm.result.json" -Encoding ASCII -Value ([ordered]@{
-            patchingSteps = @([ordered]@{ success = $true })
-            appliedPatches = @(@($releaseNames) + @($dependencyNamesHere) | ForEach-Object { [ordered]@{ name = $_ } })
-            failedPatches = @()
-            packageName = $releaseTarget.PackageName
-            packageVersion = $build } | ConvertTo-Json -Depth 6)
+        # and the input's own version, which is what the CLI reports. patch-for-device.ps1 leaves
+        # Change package name out unless it's building a copy, so its run reports one patch fewer;
+        # the stand-in CLI hands that one over when Change package name wasn't asked for.
+        foreach ($fixtureReport in @(@{ File = "$apkm.result.json"; Names = $releaseNames; Dependencies = $dependencyNamesHere },
+                @{ File = "$apkm.device.result.json"; Names = $deviceNamesHere; Dependencies = $deviceDependencyNamesHere })) {
+            Set-Content -LiteralPath $fixtureReport.File -Encoding ASCII -Value ([ordered]@{
+                patchingSteps = @([ordered]@{ success = $true })
+                appliedPatches = @(@($fixtureReport.Names) + @($fixtureReport.Dependencies) | ForEach-Object { [ordered]@{ name = $_ } })
+                failedPatches = @()
+                packageName = $releaseTarget.PackageName
+                packageVersion = $build } | ConvertTo-Json -Depth 6)
+        }
         $fixturePaths[$build] = $apkm
     }
     # And another build of the oldest declared version, as one Pinterest release can come as several
@@ -4961,8 +5010,18 @@ try {
             $applications[0] -clike '*android.adservices.AD_SERVICES_CONFIG*' -and $applications[1] -cnotlike '*AD_SERVICES_CONFIG*' -and
             $applications[1] -clike '*PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY*') `
         "The fixture application does not lose its ad services property alone: $($applications -join ' -> ')"
-    $expectedChanges = @(@($releaseSelectedAllowlist | Where-Object { $_ -cne $propertyTemplate[0] }) +
-        @("component-removed $($applications[0])", "component-added $($applications[1])") | Sort-Object -Unique -CaseSensitive)
+    # Change package name, in every run of every patch, moves whole declarations where the allowlist
+    # approves only the attributes it changed, so the changes are the delta between the fixture's
+    # merged manifest and the renamed one the stand-in CLI writes. Taken against the base instead,
+    # the split's activity would show up as a change.
+    $expectedChanges = @(ConvertTo-ManifestDeltaEntries -Delta (Get-ManifestDelta `
+        -Stock (ConvertFrom-ManifestXmlTree -Source 'expected stock' -Lines (
+            (Get-FixtureManifest -Build $releaseTarget.PackageVersion -Code '1' -WithSplit) -split '\r?\n')) `
+        -Patched (ConvertFrom-ManifestXmlTree -Source 'expected patched' -Lines (
+            (Get-FixtureManifest -Build $releaseTarget.PackageVersion -Code '1' -WithSplit -Patched -Package $patchedPackageHere) -split '\r?\n'))))
+    Assert-True (@($expectedChanges | Where-Object { $_ -clike '*com.pinterest.split.FeatureActivity*' }).Count -eq 0 -and
+            $expectedChanges -ccontains "component-removed $($applications[0])") `
+        "The fixture's own changes are not the patches' alone: $($expectedChanges -join ', ')"
     $builtBuilds = @($releaseTarget.PackageVersions) + @($newerBuild)
     $allFixtures = @($builtBuilds | ForEach-Object { $fixturePaths[$_] })
     Remove-Item -LiteralPath $releaseQueueLog -Force -ErrorAction SilentlyContinue
@@ -5034,7 +5093,7 @@ try {
             @{ Build = $releaseTarget.PackageVersion; Stock = 21; Patched = 28; Expected = 29 },
             @{ Build = $releaseTarget.PackageVersion; Stock = 21; Patched = 30; Expected = 29 },
             @{ Build = $newerBuild; Stock = 36; Patched = 29; Expected = 36 })) {
-        $manifestPath = "$($fixturePaths[$wrongSdk.Build]).patched.txt"
+        $manifestPath = "$($fixturePaths[$wrongSdk.Build]).$patchedManifestSuffix"
         $manifestBytes = [System.IO.File]::ReadAllBytes($manifestPath)
         try {
             $text = [System.IO.File]::ReadAllText($manifestPath)
@@ -5139,7 +5198,7 @@ try {
     foreach ($wrongSdk in @(
             @{ Build = $releaseTarget.PackageVersion; Stock = 21; Patched = 28; Expected = 29 },
             @{ Build = $newerBuild; Stock = 36; Patched = 29; Expected = 36 })) {
-        $manifestPath = "$($fixturePaths[$wrongSdk.Build]).patched.txt"
+        $manifestPath = "$($fixturePaths[$wrongSdk.Build]).$patchedManifestSuffix"
         $manifestBytes = [System.IO.File]::ReadAllBytes($manifestPath)
         try {
             $text = [System.IO.File]::ReadAllText($manifestPath)
@@ -5172,10 +5231,13 @@ try {
     Set-Content -LiteralPath $plainFixture -Encoding ASCII -NoNewline `
         -Value (Get-FixtureManifest -Build $releaseTarget.PackageVersion -Code $newestCode)
     Copy-Item -LiteralPath "$newestFixture.result.json" -Destination "$plainFixture.result.json"
+    Copy-Item -LiteralPath "$newestFixture.device.result.json" -Destination "$plainFixture.device.result.json"
     # Patched from the plain APK itself: its manifest with the patches' change and no split's
     # component, which verify-all-patches.ps1 would refuse as a change nobody approved.
     Set-Content -LiteralPath "$plainFixture.patched.txt" -Encoding ASCII -NoNewline `
         -Value (Get-FixtureManifest -Build $releaseTarget.PackageVersion -Code $newestCode -Patched)
+    Set-Content -LiteralPath "$plainFixture.renamed.txt" -Encoding ASCII -NoNewline `
+        -Value (Get-FixtureManifest -Build $releaseTarget.PackageVersion -Code $newestCode -Patched -Package $renamedPackage)
     try {
         $said = Invoke-VerifyAll -Apk $plainFixture
         Assert-True ($said -like '*success: every requested patch applied*' -and $said -notlike '*into one APK for the CLI*' -and
@@ -5184,7 +5246,8 @@ try {
             (Get-Content -LiteralPath $resourceStock -Raw) -ceq (Get-Content -LiteralPath $plainFixture -Raw)) `
             "verify-all-patches.ps1 did not patch a plain APK as it is and hold the table to it: $said"
     } finally {
-        Remove-Item -LiteralPath $plainFixture, "$plainFixture.result.json", "$plainFixture.patched.txt" -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $plainFixture, "$plainFixture.result.json", "$plainFixture.device.result.json",
+            "$plainFixture.patched.txt", "$plainFixture.renamed.txt" -Force -ErrorAction SilentlyContinue
     }
     Assert-True (@(Get-ChildItem -LiteralPath (Join-Path $releaseRoot 'verify-work') -Directory -Filter 'verify-*').Count -eq 0) `
         'verify-all-patches.ps1 left a run folder behind.'
@@ -5268,7 +5331,7 @@ try {
         $said = Invoke-VerifyAll -Apk $fixturePaths[$build] -KeepIn $receiptStore -Force:($build -eq $newerBuild)
         $buildKey = [regex]::Match($said, 'kept this run as ([0-9a-f]{64})').Groups[1].Value
         Assert-True ([bool]$buildKey) "verify-all-patches.ps1 -KeepIn kept no run of ${build}: $said"
-        Copy-Item -LiteralPath "$($fixturePaths[$build]).patched.txt" -Destination (Join-Path $receiptStore "$buildKey/patched.apk.xmltree")
+        Copy-Item -LiteralPath "$($fixturePaths[$build]).$patchedManifestSuffix" -Destination (Join-Path $receiptStore "$buildKey/patched.apk.xmltree")
     }
     Assert-True (@(Get-AppliedRecords -Store $receiptStore).Count -eq $builtBuilds.Count) `
         "The store doesn't hold one kept run per fixture: $(@(Get-StoreEntries $receiptStore).Name -join ', ')"
@@ -5289,11 +5352,13 @@ try {
     }
 
     # patch-for-device.ps1 signs the kept APK for a phone instead of patching, says so, and still
-    # holds the report and the manifest to the build. -NoReuse patches with the CLI as before.
+    # holds the report and the manifest to the build. The gate run applies every patch, the copy
+    # patch too, so only -AsCopy asks for the same selection. A plain build leaves the copy patch
+    # out and patches. -NoReuse patches with the CLI as before.
     $apksignerLog = Join-Path $tools 'apksigner.log'
     $keptDevice = @{ Root = $releaseRepo; DesktopJar = $stubJar; Java = $stubJava; Aapt2 = $stubAapt2
         OutDir = (Join-Path $releaseRoot 'device-kept'); AndroidJar = $stubAndroidJar; ApiVersions = $stubApiVersions
-        Apk = $newestFixture; AppliedDir = $receiptStore }
+        Apk = $newestFixture; AppliedDir = $receiptStore; AsCopy = $copySelected }
     Remove-Item -LiteralPath $javaLog, $apksignerLog -Force -ErrorAction SilentlyContinue
     $said = @(& (Join-Path $PSScriptRoot 'patch-for-device.ps1') @keptDevice 6>&1 | ForEach-Object { "$_" })
     $handed = [string]$said[-1]
@@ -5301,6 +5366,14 @@ try {
         ($said -join "`n") -like '*passed every check in the gate run kept as*' -and
         (Get-Content -LiteralPath $apksignerLog -Raw) -like '*sign alias=sideload in=*patched.apk out=*') `
         "patch-for-device.ps1 did not sign the kept run instead of patching: $($said -join ' | ')"
+    if ($copySelected) {
+        $keptDevice['AsCopy'] = $false
+        Remove-Item -LiteralPath $javaLog, $apksignerLog -Force -ErrorAction SilentlyContinue
+        $said = @(& (Join-Path $PSScriptRoot 'patch-for-device.ps1') @keptDevice 6>&1 | ForEach-Object { "$_" })
+        Assert-True ((@(Get-Content -LiteralPath $javaLog -ErrorAction SilentlyContinue) -join '; ') -eq "patch $newestFixture merged forced=0" -and
+            -not (Test-Path -LiteralPath $apksignerLog) -and ($said -join "`n") -notlike '*gate run kept as*') `
+            "patch-for-device.ps1 reused the gate's copy build for an update of Pinterest itself: $($said -join ' | ')"
+    }
     $keptDevice['NoReuse'] = $true
     Remove-Item -LiteralPath $javaLog, $apksignerLog -Force -ErrorAction SilentlyContinue
     $said = @(& (Join-Path $PSScriptRoot 'patch-for-device.ps1') @keptDevice 6> $null)
@@ -5472,10 +5545,10 @@ try {
             $evidence.bundleSha256 -ceq (Get-Sha256Hex -Path $releaseBundle).ToLowerInvariant() -and
             $evidence.fixtureSha256 -ceq (Get-Sha256Hex -Path $fixturePaths[$build]).ToLowerInvariant() -and
             $evidence.catalogSha256 -ceq (Get-Sha256Hex -Path (Join-Path $releaseRepo 'patches-list.json')).ToLowerInvariant() -and
-            (@($evidence.selectedPatches) -join "`n") -ceq ($releaseNames -join "`n")) `
+            (@($evidence.selectedPatches) -join "`n") -ceq ($deviceNamesHere -join "`n")) `
             'The checked device APK was not bound to its exact patch inputs and selection.'
         $checkedSelection = @([IO.File]::ReadAllLines((Join-Path $tools 'selected-patches.txt')))
-        $expectedSelection = @($releaseNames) + @($dependencyNamesHere)
+        $expectedSelection = @($deviceNamesHere) + @($deviceDependencyNamesHere)
         Assert-True (($checkedSelection -join "`n") -ceq ($expectedSelection -join "`n")) `
             'The device builder did not pass its exact selected patches and dependencies to the bytecode check.'
     }
@@ -5523,12 +5596,18 @@ try {
             'The throwaway runner retained an APK with an unresolved inserted host call.'
     } finally { Remove-Item -LiteralPath $referenceFailureMarker -Force }
     $failureFixture = $fixturePaths[$releaseTarget.PackageVersions[-1]]
-    $failureReportPath = "$failureFixture.result.json"
-    $savedReport = [IO.File]::ReadAllBytes($failureReportPath)
+    # The verifier reads the report for every patch and a phone build the one without the copy
+    # patch, so the failure goes in both.
+    $failureReportPaths = @("$failureFixture.result.json", "$failureFixture.device.result.json" |
+        Where-Object { Test-Path -LiteralPath $_ -PathType Leaf })
+    $savedReports = @{}
+    foreach ($failureReportPath in $failureReportPaths) { $savedReports[$failureReportPath] = [IO.File]::ReadAllBytes($failureReportPath) }
     try {
-        $failedReport = Get-Content -LiteralPath $failureReportPath -Raw | ConvertFrom-Json
-        $failedReport.failedPatches = @([pscustomobject]@{ name = $releaseNames[0]; message = 'late preflight failed' })
-        Set-Content -LiteralPath $failureReportPath -Value ($failedReport | ConvertTo-Json -Depth 8) -Encoding UTF8
+        foreach ($failureReportPath in $failureReportPaths) {
+            $failedReport = Get-Content -LiteralPath $failureReportPath -Raw | ConvertFrom-Json
+            $failedReport.failedPatches = @([pscustomobject]@{ name = $releaseNames[0]; message = 'late preflight failed' })
+            Set-Content -LiteralPath $failureReportPath -Value ($failedReport | ConvertTo-Json -Depth 8) -Encoding UTF8
+        }
         $concurrentOut = Join-Path $releaseRoot 'concurrent-device'
         $patchScript = Join-Path $PSScriptRoot 'patch-for-device.ps1'
         $jobs = @()
@@ -5574,7 +5653,7 @@ try {
             'The throwaway verifier accepted an APK from a failed patch report.'
         Assert-True (@(Get-ChildItem -LiteralPath (Join-Path $releaseRoot 'verify-work') -Directory -Filter 'verify-*').Count -eq 0) `
             'The throwaway verifier retained a failed compiled APK.'
-        Set-Content -LiteralPath $failureReportPath -Value '{broken-json' -Encoding ASCII
+        foreach ($failureReportPath in $failureReportPaths) { Set-Content -LiteralPath $failureReportPath -Value '{broken-json' -Encoding ASCII }
         $malformedOut = Join-Path $releaseRoot 'malformed-device'
         Assert-Throws { Invoke-DeviceBuild -Apk $failureFixture -OutDir $malformedOut } '*JSON*' `
             'The device runner accepted a malformed result beside a compiled APK.'
@@ -5598,7 +5677,7 @@ try {
                 -not (Test-Path -LiteralPath (Join-Path $releaseRoot 'forbidden-leases'))) `
                 'A malformed report reached ADB or device lease acquisition.'
         } finally { $env:PATH = $savedPath }
-    } finally { [IO.File]::WriteAllBytes($failureReportPath, $savedReport) }
+    } finally { foreach ($failureReportPath in $failureReportPaths) { [IO.File]::WriteAllBytes($failureReportPath, $savedReports[$failureReportPath]) } }
     # Explicit destinations use atomic creation. A collision must fail before invoking tools.
     $explicitApk = Join-Path $releaseRoot 'explicit.apk'
     Invoke-DeviceBuild -Apk $fixturePaths[$releaseTarget.PackageVersion] -OutputApk $explicitApk

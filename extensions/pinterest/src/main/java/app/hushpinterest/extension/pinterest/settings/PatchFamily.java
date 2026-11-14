@@ -67,6 +67,9 @@ public enum PatchFamily {
     /** Google sign-in and push sent to microG-RE when patching: no switch, nothing to pause. */
     GMS_CORE_SUPPORT(FamilyNames.GMS_CORE_SUPPORT, "gmsCoreSupport",
             "Google sign-in and push notifications go through microG-RE"),
+    /** The copy's own package, set when patching: no switch, and a pause can't give it Pinterest's back. */
+    CHANGE_PACKAGE_NAME(FamilyNames.CHANGE_PACKAGE_NAME, "changePackageName",
+            "This copy has its own package name, so it installs beside Pinterest"),
     DOWNLOAD_PINS(FamilyNames.DOWNLOAD_PINS, "downloadPins", null, Settings.DOWNLOAD_PINS, Settings.SAVE_IN_PINTEREST_FOLDER,
             Settings.DOWNLOAD_UNMETERED_ONLY, Settings.DOWNLOAD_NO_ROAMING, Settings.COPY_IMAGE, Settings.SHARE_IMAGE,
             Settings.SAVE_DOWNLOADED_PINS, Settings.DOWNLOAD_SAVED_PINS),

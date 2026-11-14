@@ -36,9 +36,9 @@ The latest release is [v0.0.13](https://github.com/SysAdminDoc/HushPinterest/rel
 1. Install [Morphe Manager](https://github.com/MorpheApp/morphe-manager) 2.0.0 or newer.
 2. Add HushPinterest as a patch source with the link above. Or in Manager open **Sources**, tap **+**, choose **Remote** and enter `github.com/SysAdminDoc/HushPinterest`.
 3. Get Pinterest 14.41.0, version code 14418010. APKMirror has it as an arm64-v8a split bundle (`.apkm`) for Android 12L or newer. Pick that file in Manager and it merges the parts for you.
-4. Patch it with the default selection. It holds every switch, so you don't need Expert mode. Two patches are left out, GmsCore support and Spoof signature for Google sign-in. If you want one, turn on **Settings > Advanced > Expert mode** in Manager and pick it before you patch.
+4. Patch it with the default selection. It holds every switch, so you don't need Expert mode. GmsCore support, Spoof signature for Google sign-in and Change package name are left out. If you want one, turn on **Settings > Advanced > Expert mode** in Manager and pick it before you patch.
 
-A patched Pinterest can't install over the stock app, because Android only accepts an update signed with the same key. Save anything local you need, uninstall stock Pinterest, then install the patched one. Your boards and pins come back when you sign in. Local settings and drafts don't.
+A patched Pinterest can't install over the stock app, because Android only accepts an update signed with the same key. Save anything local you need, uninstall stock Pinterest, then install the patched one. Your boards and pins come back when you sign in. Local settings and drafts don't. If you'd rather keep stock Pinterest, patch with Change package name and the patched app installs beside it as a separate app with its own sign-in.
 
 ### Signing in
 
@@ -76,11 +76,12 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 35 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 36 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
 | `AMOLED black` | Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED screens. The comments sheet and a pin's menu can go black too, each with its own switch. Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface. |
+| `Change package name` | Gives the patched Pinterest its own package name and app name (HushPinterest unless you pick another), so it installs beside the Pinterest you already have instead of over it. It's a separate app with its own sign-in. It isn't selected by default. Works as soon as you patch it in, with no switch. |
 | `Disable analytics` | Stops Pinterest from sending usage reports, crash reports and ad-tracking data to outside companies, and turns off Google's analytics inside the app. Good if you'd rather share less. On by default. Turn it off in HushPinterest settings > Privacy. |
 | `Disable update nag` | Stops Pinterest's pop-ups asking you to update from the Play Store. You can still update Pinterest yourself. Good if the reminders get annoying. Starts off. Turn it on in HushPinterest settings > Updates. |
 | `Download board` | Adds Download board to a board's menu. It saves every pin Pinterest has loaded for that board, up to 500, and skips ones already in Download history, so you can keep a board without picking pins one at a time. Needs Download pins on too. Starts off. Turn it on in HushPinterest settings > Pin actions. |
@@ -116,7 +117,7 @@ There are 35 patches. Where a patch has a switch, its description names the sett
 | `Strip link tracking` | Removes tracking tags from links you copy or share from Pinterest. The link still goes to the same place. Its Plain pin links switch also turns short pin.it links into the pin's own pinterest.com link, so they don't show who shared them. Strip link tracking is on by default and Plain pin links starts off. Both are in HushPinterest settings > Privacy. |
 | `System share sheet` | Uses Android's own share menu when you share a pin link. Screenshot and download actions work as before. Good if you want your usual share targets. Starts off. Turn it on in HushPinterest settings > Pin actions. |
 
-Every patch but GmsCore support and Spoof signature for Google sign-in is in Manager's default selection, and the feature patches need the settings patch. Remove ad tracking permissions has no switch, so its manifest change stays until you patch again without it. The [patch reference](docs/pinterest-14.39.0-patch-reference.md) goes deeper into what each one touches.
+Every patch but GmsCore support, Spoof signature for Google sign-in and Change package name is in Manager's default selection, and the feature patches need the settings patch. Remove ad tracking permissions has no switch, so its manifest change stays until you patch again without it. The [patch reference](docs/pinterest-14.39.0-patch-reference.md) goes deeper into what each one touches.
 
 ## Help
 

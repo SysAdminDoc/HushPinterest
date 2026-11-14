@@ -687,6 +687,10 @@ function Test-ManifestDelta {
         the same two, moves every com.google.android.c2dm. name to app.revanced.android.c2dm., and
         adds a package query for app.revanced.android.gms to the first query block. Download pins
         may add only its unexported share preview provider, under the package's own authority.
+        Change package name may give the build a package of its own. Every permission asked for
+        under the stock package then moves under the new one wherever a declaration names it, as
+        does every provider authority under the stock package. The application and each activity
+        or alias a launcher lists take the copy's name as their label.
         All other declarations, including duplicates and separate vendor query blocks, survive.
     #>
     param(
@@ -719,10 +723,16 @@ function Test-ManifestDelta {
             }
         }
     }
+    $selected = [System.Collections.Generic.HashSet[string]]::new([string[]]$SelectedPatchNames, [StringComparer]::Ordinal)
+    $copy = $selected.Contains('Change package name')
     foreach ($field in @('package', 'versionName', 'versionCode')) {
+        if ($copy -and $field -ceq 'package') { continue }
         if ([string]$Stock.$field -cne [string]$Patched.$field) { return Fail "The patched manifest changed $field." }
     }
-    $selected = [System.Collections.Generic.HashSet[string]]::new([string[]]$SelectedPatchNames, [StringComparer]::Ordinal)
+    if ($copy -and ([string]$Patched.package -ceq [string]$Stock.package -or
+            [string]$Patched.package -cnotmatch '\A[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+\z')) {
+        return Fail "Change package name left the build as $($Patched.package), not a package of its own."
+    }
     $settings = $selected.Contains('HushPinterest settings')
     $analytics = $selected.Contains('Disable analytics')
     $browser = $selected.Contains('Open links in your browser')
@@ -730,7 +740,7 @@ function Test-ManifestDelta {
     $signature = $selected.Contains('Spoof signature for Google sign-in')
     $downloads = $selected.Contains('Download pins')
     $gmsCore = $selected.Contains('GmsCore support')
-    if (($analytics -or $browser -or $adTracking -or $signature -or $downloads -or $gmsCore) -and -not $settings) {
+    if (($analytics -or $browser -or $adTracking -or $signature -or $downloads -or $gmsCore -or $copy) -and -not $settings) {
         return Fail 'The selection omits the HushPinterest settings dependency.'
     }
     if ($settings) {
@@ -918,6 +928,96 @@ function Test-ManifestDelta {
         }
         $package = ConvertTo-ManifestDeclaration -Owner 'queries#0' -Node (Node 'package' @{ 'android:name' = $gmsPackage })
         $policies.Add("query-added $package"); $expected.queries.Add($package)
+    }
+    if ($copy) {
+        # Change package name renames the manifest last, after every other patch made its changes
+        # under the stock name. Pinterest's own permissions are signature permissions named after
+        # its package, and its provider authorities sit under it, so both move to the copy's
+        # package or Android refuses a copy beside Pinterest. Each move is approved by its owner
+        # and the attributes it changes, since the declarations around them differ between builds,
+        # and a label by its new value alone, since the stock one is a resource id.
+        $stockPrefix = "$($Stock.package)."
+        $copyPackage = [string]$Patched.package
+        function Move-Own([string]$name) { return $copyPackage + $name.Substring(([string]$Stock.package).Length) }
+        $ownPermissions = @($expected.permissions | Where-Object { $_.StartsWith($stockPrefix, [StringComparison]::Ordinal) })
+        foreach ($permission in $ownPermissions) {
+            $policies.Add("permission-removed $permission"); $policies.Add("permission-added $(Move-Own $permission)")
+            [void]$expected.permissions.Remove($permission); $expected.permissions.Add((Move-Own $permission))
+        }
+        $applications = @($Patched.components | Where-Object { ($_ | ConvertFrom-Json).tag -ceq 'application' })
+        if ($applications.Count -ne 1) { return Fail 'Change package name needs one application in the patched manifest.' }
+        $label = [string](($applications[0] | ConvertFrom-Json).attributes.'android:label')
+        if ($label.Length -eq 0 -or $label.Length -gt 30 -or $label -cne $label.Trim() -or $label[0] -in @('@', '?')) {
+            return Fail "Change package name gave the copy the label '$label', not a name of its own."
+        }
+        # The activities and aliases a launcher lists: any of their intent filters has the category.
+        $launchers = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+        foreach ($entry in $expected.intentFilters) {
+            $filter = $entry | ConvertFrom-Json
+            if ([string]$filter.owner -cnotmatch '\Aactivity(-alias)?:') { continue }
+            if (@($filter.declaration.children | Where-Object { $_.tag -ceq 'category' -and
+                        $_.attributes.'android:name' -ceq 'android.intent.category.LAUNCHER' }).Count -gt 0) {
+                [void]$launchers.Add([string]$filter.owner)
+            }
+        }
+        function Move-OwnNames($node, [bool]$provider) {
+            foreach ($attribute in @($node.attributes.PSObject.Properties | Where-Object { $null -ne $_ })) {
+                $value = [string]$attribute.Value
+                if ($ownPermissions -ccontains $value) { $attribute.Value = Move-Own $value; continue }
+                if (-not $provider -or $attribute.Name -cne 'android:authorities') { continue }
+                $attribute.Value = (@($value.Split(';') | ForEach-Object {
+                    $authority = $_.Trim()
+                    if ($authority.StartsWith($stockPrefix, [StringComparison]::Ordinal)) { $_.Replace($authority, (Move-Own $authority)) } else { $_ }
+                }) -join ';')
+            }
+            foreach ($child in @($node.children)) { if ($null -ne $child) { Move-OwnNames $child $false } }
+        }
+        # Only what changed: the attributes with their old values on the removed side (a label's
+        # left out) and their new ones on the added side, plus any child declaration that changed.
+        function Get-MoveTemplates([string]$kind, [string]$owner, $before, $after) {
+            $old = [ordered]@{}; $new = [ordered]@{}
+            foreach ($property in @($after.attributes.PSObject.Properties | Where-Object { $null -ne $_ })) {
+                $was = $before.attributes.PSObject.Properties[$property.Name]
+                if ($null -ne $was -and [string]$was.Value -ceq [string]$property.Value) { continue }
+                if ($property.Name -cne 'android:label' -and $null -ne $was) { $old[$property.Name] = [string]$was.Value }
+                $new[$property.Name] = [string]$property.Value
+            }
+            $beforeChildren = @(@($before.children) | Where-Object { $null -ne $_ })
+            $afterChildren = @(@($after.children) | Where-Object { $null -ne $_ })
+            $beforeForms = @($beforeChildren | ForEach-Object { ConvertTo-ManifestDeclaration -Node $_ })
+            $afterForms = @($afterChildren | ForEach-Object { ConvertTo-ManifestDeclaration -Node $_ })
+            $gone = @($beforeChildren | Where-Object { $afterForms -cnotcontains (ConvertTo-ManifestDeclaration -Node $_) })
+            $came = @($afterChildren | Where-Object { $beforeForms -cnotcontains (ConvertTo-ManifestDeclaration -Node $_) })
+            if ($old.Count -gt 0 -or $gone.Count -gt 0) {
+                "$kind-removed " + (ConvertTo-ManifestDeclaration -Owner $owner -Node (Node $before.tag $old $gone))
+            }
+            "$kind-added " + (ConvertTo-ManifestDeclaration -Owner $owner -Node (Node $after.tag $new $came))
+        }
+        foreach ($entry in @($expected.components.ToArray())) {
+            $before = $entry | ConvertFrom-Json
+            $after = $entry | ConvertFrom-Json
+            Move-OwnNames $after ($after.tag -ceq 'provider')
+            $owner = if ($after.tag -ceq 'application') { 'application' } else { "$($after.tag):$($after.attributes.'android:name')" }
+            if ($after.tag -ceq 'application' -or $launchers.Contains($owner)) {
+                $after.attributes | Add-Member -MemberType NoteProperty -Name 'android:label' -Value $label -Force
+            }
+            $moved = ConvertTo-ManifestDeclaration -Node $after
+            if ($moved -ceq $entry) { continue }
+            foreach ($template in @(Get-MoveTemplates 'component' $owner $before $after)) { $policies.Add($template) }
+            [void]$expected.components.Remove($entry); $expected.components.Add($moved)
+        }
+        # Elsewhere a mention of an own permission is approved as the whole declaration, the way
+        # GmsCore support's c2dm moves are. Pinterest's declared builds have none.
+        foreach ($pair in @(@('metadata', 'metadata'), @('query', 'queries'), @('filter', 'intentFilters'))) {
+            foreach ($entry in @($expected.($pair[1]).ToArray())) {
+                $parsed = $entry | ConvertFrom-Json
+                Move-OwnNames $parsed.declaration $false
+                $moved = ConvertTo-ManifestDeclaration -Node $parsed.declaration -Owner ([string]$parsed.owner)
+                if ($moved -ceq $entry) { continue }
+                $policies.Add("$($pair[0])-removed $entry"); $policies.Add("$($pair[0])-added $moved")
+                [void]$expected.($pair[1]).Remove($entry); $expected.($pair[1]).Add($moved)
+            }
+        }
     }
     foreach ($policy in $policies) {
         if (-not $reviewed.Contains($policy)) { return Fail "The selected manifest edit has no exact reviewed template: $policy" }

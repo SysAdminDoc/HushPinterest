@@ -42,6 +42,7 @@ family|hideAdvertisingId|Hide advertising ID|advertisingId,browserId
 family|removeAdTrackingPermissions|Remove ad tracking permissions|
 family|spoofSignature|Spoof signature for Google sign-in|
 family|gmsCoreSupport|GmsCore support|signInFailure
+family|changePackageName|Change package name|
 family|downloadPins|Download pins|pinDownloads,copyImage,shareImage,saveAndDownload
 family|downloadBoard|Download board|boardMenu,boardPins
 family|longPressDownload|Long-press download|longPressMenu,longPressChoices

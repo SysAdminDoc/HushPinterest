@@ -41,6 +41,62 @@
       "options": []
     },
     {
+      "name": "Change package name",
+      "description": "Gives the patched Pinterest its own package name and app name (HushPinterest unless you pick another), so it installs beside the Pinterest you already have instead of over it. It's a separate app with its own sign-in. It isn't selected by default. Works as soon as you patch it in, with no switch.",
+      "category": "Settings",
+      "use": false,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.44.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.44.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14448030
+              }
+            }
+          ]
+        }
+      ],
+      "options": [
+        {
+          "key": "packageName",
+          "title": "Package name",
+          "description": "The copy's package name. Each copy needs its own.",
+          "required": true,
+          "type": "kotlin.String",
+          "default": "com.pinterest.hushpinterest",
+          "values": null
+        },
+        {
+          "key": "appName",
+          "title": "App name",
+          "description": "The name under the copy's icon, up to 30 characters.",
+          "required": true,
+          "type": "kotlin.String",
+          "default": "HushPinterest",
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Disable analytics",
       "description": "Stops Pinterest from sending usage reports, crash reports and ad-tracking data to outside companies, and turns off Google's analytics inside the app. Good if you'd rather share less. On by default. Turn it off in HushPinterest settings > Privacy.",
       "category": "Privacy",

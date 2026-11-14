@@ -36,6 +36,7 @@ public final class FamilyNames {
     public static final String REMOVE_AD_TRACKING_PERMISSIONS = "Remove ad tracking permissions";
     public static final String SPOOF_SIGNATURE = "Spoof signature for Google sign-in";
     public static final String GMS_CORE_SUPPORT = "GmsCore support";
+    public static final String CHANGE_PACKAGE_NAME = "Change package name";
     public static final String DOWNLOAD_PINS = "Download pins";
     public static final String DOWNLOAD_BOARD = "Download board";
     public static final String LONG_PRESS_DOWNLOAD = "Long-press download";

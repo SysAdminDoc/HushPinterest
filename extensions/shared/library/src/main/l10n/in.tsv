@@ -193,6 +193,9 @@ Pinterest's original signature is added to the app	Tanda tangan asli Pinterest d
 GmsCore support	Dukungan GmsCore
 Google sign-in and push notifications go through microG-RE instead of Google Play services, so microG-RE has to stay installed. Set when patching. Patch again without it to go back.	Masuk dengan Google dan notifikasi push melewati microG-RE, bukan Google Play services, jadi microG-RE harus tetap terpasang. Diatur saat menambal. Tambal ulang tanpanya untuk kembali.
 Google sign-in and push notifications go through microG-RE	Masuk dengan Google dan notifikasi push melewati microG-RE
+Change package name	Ubah nama paket
+This copy runs as %1$s, so it installs beside Pinterest with its own sign-in. Set when patching.	Salinan ini berjalan sebagai %1$s, jadi terpasang di samping Pinterest dengan login sendiri. Diatur saat menambal.
+This copy has its own package name, so it installs beside Pinterest	Salinan ini punya nama paket sendiri, jadi terpasang di samping Pinterest
 Download pins	Unduh Pin
 Open links in your browser	Buka tautan di browser Anda
 Opens a pin's Visit link and profile websites in your browser.	Membuka tautan Kunjungi sebuah Pin dan situs web profil di browser Anda.

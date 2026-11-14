@@ -15,6 +15,7 @@ Every HushPinterest release, newest first.
 * New `Hide Assistant` switch under Interface takes Pinterest's AI Assistant out of search, boards and pins on accounts that get it. Regular search keeps working. It starts off.
 * New `Hide pins you've already saved` switch under Feed takes pins you've saved or own out of your home feed. Your boards and search still show them. It starts off.
 * New `Hide Home suggestions` switch under Feed, part of Filter feed. It takes Pinterest's "More ideas for your board" and "Inspired by your interests" rows off Home, and the "See more like this?" bubble off pins. It starts off. (#30)
+* New `Change package name` patch, not selected by default. Pick it in Expert mode and the patched app installs beside the Pinterest you already have instead of replacing it, as a separate app called HushPinterest with its own sign-in. You can choose the package name and the app name when you patch, and HushPinterest settings > About shows which package it runs as. (#28)
 * New `Hide Inbox updates` patch with its own switch under Notifications. It leaves the Updates section out of your Inbox so Pinterest doesn't load it. The pin ideas Pinterest puts there go, and the activity updates in that section go with them. Messages stay. It starts off. (#30)
 * `Hide lens button on pins` now also hides the lens on pins with several pictures, which have a second lens of their own in the picture carousel. (#20)
 * `Hide Search image label on pins` now also turns off the glow Pinterest puts around the lens. (#19)
