@@ -14,6 +14,8 @@ Every HushPinterest release, newest first.
 * Two new switches under Pin actions, both off to start. Save pins you download also saves a pin you download from its menu, and Download pins you save downloads whatever you save, from any screen.
 * New `Hide Assistant` switch under Interface takes Pinterest's AI Assistant out of search, boards and pins on accounts that get it. Regular search keeps working. It starts off.
 * New `Hide pins you've already saved` switch under Feed takes pins you've saved or own out of your home feed. Your boards and search still show them. It starts off.
+* New `Hide Home suggestions` switch under Feed, part of Filter feed. It takes Pinterest's "More ideas for your board" and "Inspired by your interests" rows off Home, and the "See more like this?" bubble off pins. It starts off. (#30)
+* New `Hide Inbox updates` patch with its own switch under Notifications. It leaves the Updates section out of your Inbox so Pinterest doesn't load it. The pin ideas Pinterest puts there go, and the activity updates in that section go with them. Messages stay. It starts off. (#30)
 * `Hide lens button on pins` now also hides the lens on pins with several pictures, which have a second lens of their own in the picture carousel. (#20)
 * `Hide Search image label on pins` now also turns off the glow Pinterest puts around the lens. (#19)
 * Hide closeup buttons has four new switches for the row under a pin's picture: like, comment, share and more, each on its own. Hiding more also hides the way into that pin's menu from there, Download pin included, and the row says so. They all start off and sit on the Interface page. (#22)
