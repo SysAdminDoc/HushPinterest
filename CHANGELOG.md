@@ -4,7 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
-* New `Black Save to sheet` switch under Interface, part of AMOLED black. In dark mode the sheet that lists your boards when you save a pin turns pure black, part way up and all the way up. The red Create board button keeps its color. It starts off. (#31)
+* New `Black Save to sheet` switch under Interface, part of AMOLED black. In dark mode the sheet that lists your boards when you save a pin turns pure black, part way up and all the way up, along with the strip under it. The red Create new board button keeps its color. It starts off. (#31)
 * New `Hide suggested boards` patch with its own switch under Interface. It takes the board Pinterest suggests under your own boards out of the Save to sheet. Your boards and Profile stay. It starts off. (#32)
 * New `Expand board list` patch with its own switch under Interface. The Save to sheet opens all the way up, so you see more of your boards without dragging it first. It starts off. (#33)
 * In Morphe Manager's patch list, `AMOLED black` now sits in its own Theme group and `Open links in your browser` in a Links group, so the Interface group still fits on one screen with the two new patches in it.

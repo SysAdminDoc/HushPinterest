@@ -169,11 +169,13 @@ public final class AmoledBlack {
      * background. The sheet that slides up carries the gray as a two-layer drawable, a rounded card
      * while it's part way up and a square one all the way up (14.44.0), and its header can take a
      * gray of its own. Both arrive after this call, so they turn black on the sheet's layout passes.
+     * The footer row holding the red Create new board button has a gray of its own (#222226 on a
+     * Galaxy S25, 14.44.0), set as a plain color when the footer is built.
      */
     public static void saveSheet(View sheet) {
         built(sheet, Settings.BLACK_SAVE_SHEET, false, null, "Save to sheet", "draggable_sheet",
                 "gestalt_sheet_header", "gestalt_sheet_container", "sheet_overlay_container", "sheet_scroll_view",
-                "sheet_scroll_inner_layout");
+                "sheet_scroll_inner_layout", "footer_container");
     }
 
     /** Off or Pause gives a card its gray back while the menu is still open, on the card's next layout pass. */
