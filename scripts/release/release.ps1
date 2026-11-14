@@ -117,12 +117,6 @@ switch ($Stage) {
 
         # Before anything is written: a bullet a release can't carry is named here, and nothing changes.
         Invoke-ReleaseText -Root $Root -What 'The Unreleased check' -Arguments @('check', '--unreleased')
-        # The source census publish holds the release to, asked before the cut. Publish checks it
-        # after the GitHub release exists, so a stale one found there leaves a release half out.
-        . (Join-Path $Root 'scripts/pinterest-sources.ps1')
-        $census = Test-SourceReleaseGate -Root $Root
-        if (-not $census.Valid) { throw "Nothing was prepared, since the release can't go out on this source census: $($census.Reason)" }
-        Write-ReleaseStep $census.Summary
         $utf8 = New-Object Text.UTF8Encoding $false
         try {
             $releaseDate = if ($Date) { $Date } else { (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd') }

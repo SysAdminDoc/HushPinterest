@@ -2,6 +2,10 @@
 
 Every HushPinterest release, newest first.
 
+## Unreleased
+
+* **Tooling:** A release no longer waits on the source census. The audit still runs whenever you want to see which indexes list HushPinterest, but a stale or flaky answer from one of them can't stop a release anymore.
+
 ## 0.0.14 (2026-11-14)
 
 * The patches now target Pinterest 14.44.0, version code 14448030. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
