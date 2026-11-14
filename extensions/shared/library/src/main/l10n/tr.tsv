@@ -666,6 +666,7 @@ Pinterest didn't send a usable image.	Pinterest kullanılabilir bir görsel gön
 Copying the image took too long. Try again.	Görseli kopyalamak çok uzun sürdü. Tekrar dene.
 Still copying the last image.	Son görsel hâlâ kopyalanıyor.
 Couldn't copy the image. Check your connection and try again.	Görsel kopyalanamadı. Bağlantını kontrol edip tekrar dene.
+The image wasn't copied, since the clipboard may have changed.	Pano değişmiş olabileceği için görsel kopyalanmadı.
 # context: Share image, a row in the pin menu that sends the pin's full-size picture through Android's share menu (#11)
 Share image	Görseli paylaş
 Adds Share image to the pin menu. It sends the full-size picture itself, not a link, through Android's share menu. Needs Download pins on. Videos don't get the row.	Pin menüsüne Görseli paylaş ekler. Bağlantı değil, görselin kendisini tam boyutuyla Android'in paylaşım menüsünden gönderir. Pinleri indir açık olmalı. Videolarda bu satır olmaz.

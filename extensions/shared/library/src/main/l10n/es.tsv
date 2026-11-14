@@ -666,6 +666,7 @@ Pinterest didn't send a usable image.	Pinterest no envió una imagen utilizable.
 Copying the image took too long. Try again.	Copiar la imagen tardó demasiado. Inténtalo de nuevo.
 Still copying the last image.	Aún se está copiando la última imagen.
 Couldn't copy the image. Check your connection and try again.	No se pudo copiar la imagen. Revisa tu conexión y reintenta.
+The image wasn't copied, since the clipboard may have changed.	La imagen no se copió porque el portapapeles podría haber cambiado.
 # context: Share image, a row in the pin menu that sends the pin's full-size picture through Android's share menu (#11)
 Share image	Compartir imagen
 Adds Share image to the pin menu. It sends the full-size picture itself, not a link, through Android's share menu. Needs Download pins on. Videos don't get the row.	Añade Compartir imagen al menú del pin. Envía la imagen a tamaño completo, no un enlace, por el menú para compartir de Android. Necesita Descargar pines activado. Los vídeos no tienen la fila.
