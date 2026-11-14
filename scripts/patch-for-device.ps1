@@ -31,6 +31,11 @@
     HUSHPINTEREST_APPLY_RECORDS, else the default one in the temp folder; -NoReuse always patches.
     Nothing this script makes is kept there: it skips the resource table check.
 
+    The signed APK's native libraries are held to the ones it was patched from, for 16 KB page
+    devices (native-alignment.ps1). A library that patching or signing changed, moved off its 16 KB
+    boundary or added stops the build. Libraries Pinterest itself ships unaligned are printed. The
+    measurement goes into the build evidence beside the APK, with its runtime check left pending.
+
 .EXAMPLE
     scripts/patch-for-device.ps1 -Serial $env:HUSHPINTEREST_DEVICE_SERIAL
 #>
@@ -87,6 +92,7 @@ $OutDir = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPat
 . (Join-Path $PSScriptRoot 'common.ps1')
 . (Join-Path $PSScriptRoot 'Resolve-Java.ps1')
 . (Join-Path $PSScriptRoot 'release-receipt.ps1')
+. (Join-Path $PSScriptRoot 'native-alignment.ps1')
 $Java = Resolve-Java -Explicit $Java
 $DesktopJar = Resolve-DesktopCli -Explicit $DesktopJar -Root $root -Required
 $catalogPath = Join-Path $root 'patches-list.json'
@@ -314,6 +320,14 @@ $patchedManifest = Get-ApkManifestFacts -Apk $out -Aapt2 $Aapt2
 $manifestCheck = Test-ManifestDelta -Stock $stockManifest -Patched $patchedManifest `
     -SelectedPatchNames $manifestSelection -ApprovedManifestDelta $approvedChanges
 if (-not $manifestCheck.Valid) { throw "Patching changed an unapproved compiled manifest fact: $($manifestCheck.Reason)" }
+# The native libraries are Pinterest's own, so patching and signing must leave them as they were
+# for 16 KB page devices (native-alignment.ps1). What Pinterest ships unaligned is only reported.
+$nativeAlignment = Measure-ApkNativeAlignment -StockApk $patchInput -PatchedApk $out `
+    -StockManifest $stockManifest -PatchedManifest $patchedManifest -Aapt2 $Aapt2
+if ($nativeAlignment.verdict -ceq 'damaged') { throw "Patching damaged the native libraries: $(@($nativeAlignment.damage) -join '; ')" }
+foreach ($finding in @($nativeAlignment.hostFindings)) { Write-Host "[device] 16 KB pages, as Pinterest ships it: $finding" }
+Write-Host ("[device] native libraries $($nativeAlignment.verdict): $($nativeAlignment.identical) of " +
+    "$($nativeAlignment.libraries) unchanged, zipalign -c -P 16 $($nativeAlignment.zipalign.patched) on the signed APK")
 # The CLI reports the package it was given. A copy installs under its own.
 $installedPackage = [string]$patchedManifest.package
 if ($installedPackage -cne $target.PackageName) { Write-Host "[device] a copy, installed as $installedPackage" }
@@ -347,6 +361,7 @@ $buildEvidence = [ordered]@{
     appVersionCode = [string]$stock.versionCode
     selectedPatches = @($names)
     signedApkSha256 = (Get-FileHash -LiteralPath $out -Algorithm SHA256).Hash.ToLowerInvariant()
+    nativeAlignment = $nativeAlignment
     completed = [DateTimeOffset]::UtcNow.UtcDateTime.ToString('o')
 }
 if (-not $evidenceStream) {

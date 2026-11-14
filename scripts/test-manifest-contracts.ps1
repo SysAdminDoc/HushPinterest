@@ -412,9 +412,10 @@ Assert-Manifest (-not $signatureAlone.Valid -and $signatureAlone.Reason -like '*
 $alreadySpoofed = Check-Manifest (Fixture-Facts -WithSignature) (Fixture-Facts -WithSignature -features @('settings')) @($settings, $signature)
 Assert-Manifest (-not $alreadySpoofed.Valid -and $alreadySpoofed.Reason -like '*already declares*') "A stock manifest already naming the signature was accepted: $($alreadySpoofed.Reason)"
 
-# Schema 4 requires facts and every delta array, and verifies every target independently.
+# From schema 4 a receipt requires facts and every delta array, and verifies every target
+# independently. Schema 5 adds the native library alignment.
 $receipt = [pscustomobject]@{
-    schemaVersion = 4
+    schemaVersion = 5
     release = @{ version = '1.0.0'; tag = 'v1.0.0'; commit = ('a' * 40); commitTimestamp = 1000; patchCount = $all.Count }
     toolchain = @{ patcherVersion = '1.15.0'; managerFloor = '1.33.0' }
     sbom = @{ file = 'patches-1.0.0.cdx.json'; sha256 = ('A' * 64); components = 1 }
@@ -424,14 +425,18 @@ $receipt = [pscustomobject]@{
             sha256 = ('A' * 64); forced = $false }
         patches = @($all | ForEach-Object { @{ name = $_; applied = $true } })
         sdk = @{ stockMinSdk = 29; patchedMinSdk = 29 }
-        manifest = @{ stock = $stock; patched = $patched }; manifestDelta = $valid.Delta })
+        manifest = @{ stock = $stock; patched = $patched }; manifestDelta = $valid.Delta
+        nativeAlignment = @{ schema = 1; pageSize = 16384; verdict = 'aligned'; abis = @('arm64-v8a'); libraries = 1
+            sixtyFourBitAligned = 1; sixtyFourBit = 1; identical = 1
+            extractNativeLibs = @{ stock = (Get-ManifestExtractNativeLibs -Manifest $stock); patched = (Get-ManifestExtractNativeLibs -Manifest $patched) }
+            zipalign = @{ stock = 'pass'; patched = 'pass' }; damage = @(); hostFindings = @(); runtime = 'pending' } })
 }
 $receipt = Copy-Manifest $receipt
 $arguments = @{ ExpectedVersion = '1.0.0'; ExpectedPatchNames = $all; ExpectedPatcherVersion = '1.15.0'
     ExpectedManagerFloor = '1.33.0'; ExpectedPackageName = 'com.pinterest'; ExpectedPackageVersions = @('14.39.0')
     ExpectedPackageVersionCodes = @{ '14.39.0' = '14398020' }; ApprovedManifestDelta = @(Read-ManifestDeltaAllowlist -Path $allowlist -SelectedPatchNames $all) }
 $check = Test-ReleaseReceipt -Receipt $receipt @arguments
-Assert-Manifest $check.Valid "Schema 4 receipt was refused: $($check.Reason)"
+Assert-Manifest $check.Valid "Schema 5 receipt was refused: $($check.Reason)"
 foreach ($property in $valid.Delta.PSObject.Properties) {
     $bad = Copy-Manifest $receipt; $bad.targets[0].manifestDelta.PSObject.Properties.Remove($property.Name)
     $check = Test-ReleaseReceipt -Receipt $bad @arguments

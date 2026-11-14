@@ -21,6 +21,11 @@
     The SBOM :patches:releaseSbom writes beside the bundle says what the bundle carries: every
     library and the version it resolved to. The receipt records its hash, and the SBOM records the
     bundle's, so neither can be swapped for another build's without the pair coming apart.
+
+    From schema 5 each target also records its native library alignment for 16 KB memory pages
+    (native-alignment.ps1): the ELF load alignment of every library, zipalign -c -P 16 on both
+    APKs, and whether anything patching did moved or changed a library. What Pinterest ships
+    unaligned is a host finding; what repackaging broke stops the build.
 #>
 
 function Get-ReleaseReceiptSchemaVersion {
@@ -37,8 +42,9 @@ function Get-ReleaseReceiptSchemaVersion {
         2 added sbom: the file name, SHA-256 and component count of the release SBOM.
         3 added each target's stock and patched binary minSdk, held to max(stock, 29) (28 before the Android 10 floor of 2026-10-10).
         4 added canonical stock/patched manifest facts and full declaration deltas, checked per target.
+        5 added each target's native library alignment for 16 KB pages (native-alignment.ps1).
     #>
-    return 4
+    return 5
 }
 
 function Resolve-ReceiptSchema {
@@ -47,8 +53,9 @@ function Resolve-ReceiptSchema {
         The schema a receipt should be held to: the one its own commit's builder wrote.
     .DESCRIPTION
         A receipt describes a release that has shipped. One cut before schema 2 has no SBOM,
-        one cut before schema 3 has no binary SDK facts, and one before 4 has no compiled
-        declaration attestation. Holding it to today's schema would
+        one cut before schema 3 has no binary SDK facts, one before 4 has no compiled
+        declaration attestation, and one before 5 has no native library alignment. Holding it
+        to today's schema would
         refuse every later push from the checkout that cut it, which is the trap
         Resolve-ReceiptToolchain describes for the patcher pin. So the
         number is read out of scripts/release-receipt.ps1 at the receipt's commit. On a release
@@ -80,7 +87,8 @@ function Resolve-ReceiptSchema {
         Note = ("the receipt is held to schema $version, which its own commit $short wrote, so " +
             $(if ($version -lt 2) { 'it names no SBOM, binary SDK or compiled declaration facts and those are not checked for its release' }
               elseif ($version -lt 3) { 'it names no binary SDK or compiled declaration facts and those are not checked for its release' }
-              else { 'it names no compiled declaration facts and those are not checked for its release' }))
+              elseif ($version -lt 4) { 'it names no compiled declaration facts and those are not checked for its release' }
+              else { 'it names no native library alignment and that is not checked for its release' }))
     }
 }
 
@@ -553,6 +561,100 @@ function Test-PatchedMinSdk {
     if ($PatchedMinSdk -ne $expected) {
         return [pscustomobject]@{ Valid = $false
             Reason = "The patched binary minSdk is $PatchedMinSdk; stock is $StockMinSdk, so it must be $expected (max(stock, 29))." }
+    }
+    return [pscustomobject]@{ Valid = $true; Reason = 'ok' }
+}
+
+function Get-ManifestExtractNativeLibs {
+    <# android:extractNativeLibs off Get-ApkManifestFacts' application declaration: 'true', 'false' or 'unset'. #>
+    param([Parameter(Mandatory = $true)]$Manifest)
+
+    foreach ($declaration in @($Manifest.components)) {
+        $parsed = "$declaration" | ConvertFrom-Json
+        if ($parsed.tag -cne 'application') { continue }
+        $property = $parsed.attributes.PSObject.Properties['android:extractNativeLibs']
+        if ($null -eq $property) { return 'unset' }
+        $value = "$($property.Value)".Trim()
+        if ($value -cmatch '^(true|(\(type 0x12\))?0xffffffff|-1)$') { return 'true' }
+        if ($value -cmatch '^(false|(\(type 0x12\))?0x0+|0)$') { return 'false' }
+        return $value
+    }
+    return 'unset'
+}
+
+function Test-NativeAlignmentRecord {
+    <#
+    .SYNOPSIS
+        Whether a recorded native library alignment (native-alignment.ps1) holds together and
+        shows no damage from repackaging.
+    .DESCRIPTION
+        Answers @{ Valid; Reason }. The record is the builder's own measurement of the stock and
+        patched APKs, so what can be held here is that zipalign ran on both, that the verdict is
+        the one its findings give, that its counts agree, and that the extractNativeLibs it read
+        is what the recorded manifest facts declare. Host findings pass: they describe libraries
+        Pinterest ships, which this project doesn't rebuild.
+    #>
+    param([AllowNull()]$Record, $StockManifest, $PatchedManifest, [string]$Label = 'the target')
+
+    function Fail { param([string]$Reason) return [pscustomobject]@{ Valid = $false; Reason = $Reason } }
+    function Test-Count { param($Value) return ($Value -is [int] -or $Value -is [long]) -and $Value -ge 0 }
+
+    if ($null -eq $Record) { return Fail "The receipt records no native library alignment for $Label." }
+    if ($Record.schema -ne 1 -or $Record.pageSize -ne 16384) {
+        return Fail "The native library alignment for $Label isn't schema 1 measured against 16384-byte pages."
+    }
+    foreach ($list in @('damage', 'hostFindings')) {
+        $values = $Record.$list
+        if ($values -isnot [array] -or @($values | Where-Object { $_ -isnot [string] -or [string]::IsNullOrWhiteSpace($_) }).Count -gt 0) {
+            return Fail "The native library alignment for $Label records no valid $list list."
+        }
+    }
+    if (@($Record.damage).Count -gt 0) {
+        return Fail "Patching damaged the native libraries of ${Label}: $(@($Record.damage) -join '; ')"
+    }
+    $findings = @($Record.hostFindings).Count
+    $verdict = if ($findings -gt 0) { 'host not 16 KB ready' } else { 'aligned' }
+    if ($Record.verdict -cne $verdict) {
+        return Fail "The native library alignment for $Label says '$($Record.verdict)', and its findings make it '$verdict'."
+    }
+    foreach ($side in @('stock', 'patched')) {
+        if ($null -eq $Record.zipalign -or @('pass', 'fail') -cnotcontains [string]$Record.zipalign.$side) {
+            return Fail "zipalign -c -P 16 4 didn't run on the $side APK of $Label."
+        }
+    }
+    if ($Record.zipalign.patched -ceq 'fail' -and $Record.zipalign.stock -ceq 'pass') {
+        return Fail "zipalign -c -P 16 4 fails on the patched APK of $Label and passes on the stock one."
+    }
+    if ($Record.zipalign.stock -ceq 'fail' -and $findings -eq 0) {
+        return Fail "zipalign fails on the stock APK of $Label, and the alignment records no host finding for it."
+    }
+    $extract = $Record.extractNativeLibs
+    if ($null -eq $extract -or [string]::IsNullOrWhiteSpace([string]$extract.stock) -or [string]$extract.stock -cne [string]$extract.patched) {
+        return Fail "The native library alignment for $Label records extractNativeLibs '$($extract.stock)' stock and '$($extract.patched)' patched."
+    }
+    foreach ($pair in @(@('stock', $StockManifest), @('patched', $PatchedManifest))) {
+        if ($null -ne $pair[1] -and (Get-ManifestExtractNativeLibs -Manifest $pair[1]) -cne [string]$extract.($pair[0])) {
+            return Fail "The $($pair[0]) manifest facts of $Label declare another extractNativeLibs than the alignment read."
+        }
+    }
+    foreach ($count in @('libraries', 'identical', 'sixtyFourBit', 'sixtyFourBitAligned')) {
+        if (-not (Test-Count $Record.$count)) { return Fail "The native library alignment for $Label records no $count count." }
+    }
+    if ($Record.identical -ne $Record.libraries -or $Record.sixtyFourBit -gt $Record.libraries -or
+        $Record.sixtyFourBitAligned -gt $Record.sixtyFourBit) {
+        return Fail ("The native library counts for $Label don't add up: $($Record.identical) of $($Record.libraries) identical, " +
+            "$($Record.sixtyFourBitAligned) of $($Record.sixtyFourBit) 64-bit libraries aligned.")
+    }
+    if ($Record.sixtyFourBitAligned -lt $Record.sixtyFourBit -and $findings -eq 0) {
+        return Fail "$Label has 64-bit libraries under 16 KB alignment, and the alignment records no host finding for them."
+    }
+    # 'pending' until a 16 KB device has run the build. A pass names the device it ran on.
+    if (@('pending', 'passed', 'failed') -cnotcontains [string]$Record.runtime) {
+        return Fail "The native library alignment for $Label doesn't say whether it was checked on a 16 KB device."
+    }
+    if ($Record.runtime -ceq 'failed') { return Fail "$Label failed its check on a 16 KB device." }
+    if ($Record.runtime -ceq 'passed' -and ($Record.runtimeDevice -isnot [string] -or [string]::IsNullOrWhiteSpace($Record.runtimeDevice))) {
+        return Fail "The native library alignment for $Label says it passed on a 16 KB device without naming the device."
     }
     return [pscustomobject]@{ Valid = $true; Reason = 'ok' }
 }
@@ -1526,7 +1628,8 @@ function Test-ReleaseReceipt {
         # receipt legitimately describes the commit it was generated at, not HEAD.
         [string]$ExpectedCommit,
         # The schema the receipt's own commit writes (Resolve-ReceiptSchema). From 2 a receipt
-        # names the release SBOM; 3 proves the SDK floor; 4 attests compiled declarations.
+        # names the release SBOM; 3 proves the SDK floor; 4 attests compiled declarations; 5 records
+        # native library alignment for 16 KB pages.
         [int]$ExpectedSchemaVersion = (Get-ReleaseReceiptSchemaVersion),
         # The SBOM itself, when the caller has it: its hash and component count have to be what
         # the receipt records, and with -BundlePath it has to describe that bundle.
@@ -1768,6 +1871,12 @@ function Test-ReleaseReceipt {
                     @(Compare-Sets -Left $property.Value -Right $recorded.Value -PreserveDuplicates).Count -gt 0) {
                     return Fail "The recorded $($property.Name) manifest delta disagrees with compiled facts for $label."
                 }
+            }
+            if ($ExpectedSchemaVersion -ge 5) {
+                $alignmentProperty = $target.PSObject.Properties['nativeAlignment']
+                $alignment = Test-NativeAlignmentRecord -Record $(if ($alignmentProperty) { $alignmentProperty.Value } else { $null }) `
+                    -StockManifest $target.manifest.stock -PatchedManifest $target.manifest.patched -Label $label
+                if (-not $alignment.Valid) { return $alignment }
             }
         } else {
             foreach ($entry in ConvertTo-ManifestDeltaEntries -Delta $target.manifestDelta -SchemaVersion $ExpectedSchemaVersion) {

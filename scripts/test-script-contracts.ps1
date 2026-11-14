@@ -4664,6 +4664,13 @@ try {
                 $targetHere.manifest = [ordered]@{ stock = $stockFacts; patched = $patchedFacts }
                 $targetHere.manifestDelta = Get-ManifestDelta -Stock $stockFacts -Patched $patchedFacts
             }
+            if ($Schema -ge 5) {
+                $targetHere.nativeAlignment = [ordered]@{ schema = 1; pageSize = 16384; verdict = 'aligned'; abis = @('arm64-v8a')
+                    libraries = 2; sixtyFourBitAligned = 2; sixtyFourBit = 2; identical = 2
+                    extractNativeLibs = [ordered]@{ stock = (Get-ManifestExtractNativeLibs -Manifest $stockFacts)
+                        patched = (Get-ManifestExtractNativeLibs -Manifest $patchedFacts) }
+                    zipalign = [ordered]@{ stock = 'pass'; patched = 'pass' }; damage = @(); hostFindings = @(); runtime = 'pending' }
+            }
             $targetHere
         })
         $document = [ordered]@{
@@ -4824,12 +4831,16 @@ try {
         '    exit /b 9',
         ')',
         'if exist "!HERE!merge-writes-nothing.txt" exit /b 0',
-        'copy /y "%~5.merged.txt" "%~6" >nul || exit /b 7',
+        'rem A real zip, since the native library check reads the merge, with its manifest beside it for aapt2.',
+        'copy /y "!HERE!stock.apk" "%~6" >nul || exit /b 7',
+        'copy /y "%~5.merged.txt" "%~6.xmltree" >nul || exit /b 7',
         '>"%~6.source" echo %~5',
         'exit /b 0',
         'rem ResourceTableCheck.java <stock> <patched> <report>: keeps what it was handed as the stock side.',
         ':resources',
-        'copy /y "%~5" "!HERE!resource-stock.txt" >nul || exit /b 8',
+        'set "STOCK=%~5"',
+        'if exist "%~5.xmltree" set "STOCK=%~5.xmltree"',
+        'copy /y "!STOCK!" "!HERE!resource-stock.txt" >nul || exit /b 8',
         'echo Note: the source launcher compiled with a warning 1>&2',
         'echo [resources] stand-in: every stock resource resolves in the patched table',
         'exit /b 0',
@@ -4903,6 +4914,10 @@ try {
         'exit /b 0')
     New-TestBundleArchive -Path (Join-Path $tools 'patched.apk') -Entries ([ordered]@{
         'AndroidManifest.xml' = 'binary manifest'; 'classes.dex' = "dex`n035" })
+    # The merge the stand-in MergeSplits writes, and a zipalign beside aapt2 that finds both aligned.
+    New-TestBundleArchive -Path (Join-Path $tools 'stock.apk') -Entries ([ordered]@{
+        'AndroidManifest.xml' = 'binary manifest'; 'classes.dex' = "dex`n035" })
+    Set-Content -LiteralPath (Join-Path $tools 'zipalign.cmd') -Encoding ASCII -Value @('@echo off', 'exit /b 0')
 
     $dependencyNamesHere = @(Get-PatchDependencyNames -PatchList $releaseCatalog -RequestedNames $releaseNames)
     $deviceNamesHere = @($releaseNames | Where-Object { $_ -cne 'Change package name' })
