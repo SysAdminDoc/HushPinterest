@@ -1245,6 +1245,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.BLACK_BOTTOM_BAR.key, "In dark mode", "bottom bar pure black", "Light mode stays", "next time the bar redraws");
         summaryContains(Settings.BLACK_COMMENTS.key, "In dark mode", "comments sheet and its reply bar pure black", "Light mode stays", "next time you open comments");
         summaryContains(Settings.BLACK_PIN_MENU.key, "In dark mode", "a pin's menu pure black", "Light mode stays", "next time you open the menu");
+        summaryContains(Settings.BLACK_SAVE_SHEET.key, "In dark mode", "lists your boards when you save a pin pure black", "Light mode stays", "next time you save a pin");
         summaryContains(Settings.HIDE_CLOSEUP_BACK.key, "back arrow that floats over a pin", "back gesture or button", "next pin you open");
         summaryContains(Settings.HIDE_CLOSEUP_LENS.key, "visual search button", "Search image in the pin menu still works", "next pin you open");
         summaryContains(Settings.HIDE_CLOSEUP_SEARCH_LABEL.key, "Search image label", "first pins each day", "Tapping the lens still searches", "next pin you open");
@@ -1317,6 +1318,7 @@ public class SettingsNavigationTest {
         ShadowLooper.idleMainLooper(2, java.util.concurrent.TimeUnit.SECONDS);
         assertTrue(contains(Settings.BLACK_COMMENTS.key));
         assertTrue(contains(Settings.BLACK_PIN_MENU.key));
+        assertTrue(contains(Settings.BLACK_SAVE_SHEET.key));
         assertFalse(contains(Settings.BLACK_BOTTOM_BAR.key));
     }
 

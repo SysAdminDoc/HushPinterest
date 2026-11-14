@@ -280,6 +280,7 @@ public class DexDiff {
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
+            Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
             Map.entry("longPressChoices", 1), Map.entry("ownAuthorities", 1));
 
     /**
@@ -5964,6 +5965,162 @@ public class DexDiff {
             return false;
         }
 
+        static final String SUGGESTED_BOARD_STATE = "SuggestedBoardItemVMState(itemId=", SHEET_HEIGHT_STATE = "Custom(percentage=";
+
+        /** The suggested board cell's model: the one clean class whose toString holds its state text. Null when the build has none. */
+        String suggestedBoardModel() {
+            List<Method> found = new ArrayList<>();
+            for (Method m : clean.holding(SUGGESTED_BOARD_STATE)) if (m.getName().equals("toString")) found.add(m);
+            if (found.isEmpty()) return null;
+            Method m = unique(found, "suggested board model");
+            return m == null ? null : m.getDefiningClass();
+        }
+
+        /** Each clean method outside the extension that builds a [type], with the index of each new-instance. The class itself is left out. */
+        List<Map.Entry<Method, Integer>> builders(String type) {
+            List<Map.Entry<Method, Integer>> sites = new ArrayList<>();
+            for (Method m : clean.methods.values()) {
+                if (m.getDefiningClass().startsWith(OWN) || m.getDefiningClass().equals(type) || m.getImplementation() == null) continue;
+                List<Instruction> body = instructions(m);
+                for (int k = 0; k < body.size(); k++)
+                    if (body.get(k).getOpcode() == Opcode.NEW_INSTANCE && reference(body.get(k)) instanceof TypeReference t && t.getType().equals(type))
+                        sites.add(Map.entry(m, k));
+            }
+            return sites;
+        }
+
+        /** The Save to sheet: the one class that builds a suggested board's cell and has an onViewCreated(View, Bundle). Null when there's none. */
+        ClassDef boardPicker() {
+            String model = suggestedBoardModel();
+            if (model == null) return null;
+            Set<String> owners = new TreeSet<>();
+            for (Map.Entry<Method, Integer> site : builders(model)) owners.add(site.getKey().getDefiningClass());
+            List<ClassDef> pickers = new ArrayList<>();
+            for (String type : owners) if (clean.classes.containsKey(type) && viewCreated(clean.classes.get(type)) != null) pickers.add(clean.classes.get(type));
+            if (pickers.isEmpty()) return null;
+            return uniqueClass(pickers, "Save to sheet");
+        }
+
+        static Method viewCreated(ClassDef owner) {
+            Method found = null;
+            for (Method m : owner.getMethods()) {
+                if (!m.getName().equals("onViewCreated") || AccessFlags.STATIC.isSet(m.getAccessFlags()) || m.getImplementation() == null
+                        || !descriptor(m).equals("(Landroid/view/View;Landroid/os/Bundle;)V")) continue;
+                if (found != null) return null;
+                found = m;
+            }
+            return found;
+        }
+
+        /**
+         * Black Save to sheet (#31): the Save to sheet's onViewCreated(View, Bundle) hands the sheet's
+         * view over first, a range call on its first parameter after the fragment.
+         */
+        void saveSheet(Contract c) {
+            String hook = c.strings.get(0);
+            ClassDef picker = boardPicker();
+            if (picker == null) { capability(c.callee, false); return; }
+            Method m = actual(viewCreated(picker));
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (m != null && sites.size() == 1) {
+                Instruction first = instructions(m).get(0);
+                placed = sites.get(0) == 0 && first.getOpcode() == Opcode.INVOKE_STATIC_RANGE && arguments(first).equals(List.of(parameter(m, 0)));
+                if (!placed) fail(hook + " isn't the first call, on the sheet's view, in " + m);
+                else remove(m, 0, 1);
+            }
+            capability(c.callee, placed);
+        }
+
+        /**
+         * Hide suggested boards (#32): the one add(Object) right after the suggested board's cell is
+         * built, on a list and that cell with nothing reading its answer, becomes the hook on the same
+         * two registers.
+         */
+        void suggestedBoard(Contract c) {
+            String hook = c.strings.get(0);
+            String model = suggestedBoardModel();
+            if (model == null) { capability(c.callee, false); return; }
+            List<Method> adds = new ArrayList<>();
+            Map<String, Integer> addAt = new HashMap<>();
+            for (Map.Entry<Method, Integer> site : builders(model)) {
+                int at = suggestedAdd(site.getKey(), site.getValue(), model);
+                if (at < 0) continue;
+                adds.add(site.getKey());
+                addAt.put(site.getKey().toString(), at);
+            }
+            Method old = unique(adds, "suggested board add");
+            Method m = actual(old);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean swapped = false;
+            if (m != null && sites.size() == 1) {
+                int at = addAt.get(old.toString());
+                Instruction was = instructions(old).get(at);
+                swapped = sites.get(0) == at && instructions(m).get(at).getOpcode() == Opcode.INVOKE_STATIC
+                        && arguments(instructions(m).get(at)).equals(arguments(was));
+                if (!swapped) fail(hook + " doesn't take the suggested board's add, on the same list and cell, in " + m);
+                else edits.computeIfAbsent(m.toString(), k -> new FeatureEdits()).replacements.put(at, was);
+            }
+            capability(c.callee, swapped);
+        }
+
+        /** The index of the add(Object) that puts the cell built at [built] into a list, or -1 when that isn't the shape. */
+        static int suggestedAdd(Method m, int built, String model) {
+            List<Instruction> body = instructions(m);
+            int cell = firstRegister(body.get(built)), init = -1;
+            for (int k = built + 1; k < body.size() && init < 0; k++)
+                if (reference(body.get(k)) instanceof MethodReference r && r.getDefiningClass().equals(model) && r.getName().equals("<init>")) init = k;
+            if (init < 0 || init + 1 >= body.size() || DexDiff.firstRegister(body.get(init)) != cell) return -1;
+            Instruction add = body.get(init + 1);
+            if ((add.getOpcode() != Opcode.INVOKE_VIRTUAL && add.getOpcode() != Opcode.INVOKE_INTERFACE)
+                    || !(reference(add) instanceof MethodReference r) || !r.getName().equals("add")
+                    || !descriptor(r).equals("(Ljava/lang/Object;)Z") || arguments(add).size() != 2 || arguments(add).get(1) != cell) return -1;
+            if (init + 2 < body.size() && isMoveResult(body.get(init + 2).getOpcode())) return -1;
+            return init + 1;
+        }
+
+        /**
+         * Expand board list (#33): the Save to sheet's height, the one class it builds whose toString
+         * starts with the height's state text, asks the hook for its percentage right in front of the
+         * getter's only return, and the answer goes back where the percentage was.
+         */
+        void boardListHeight(Contract c) {
+            String hook = c.strings.get(0);
+            ClassDef picker = boardPicker();
+            if (picker == null) { capability(c.callee, false); return; }
+            Set<String> built = new TreeSet<>();
+            for (Method m : picker.getMethods()) for (Instruction i : instructions(m))
+                if (i.getOpcode() == Opcode.NEW_INSTANCE && reference(i) instanceof TypeReference t) built.add(t.getType());
+            List<ClassDef> heights = new ArrayList<>();
+            for (String type : built) {
+                ClassDef cd = clean.classes.get(type);
+                if (cd == null) continue;
+                boolean height = false;
+                for (Method m : cd.getMethods()) if (m.getName().equals("toString"))
+                    for (String text : clean.texts.getOrDefault(m.toString(), Set.of())) height |= text.startsWith(SHEET_HEIGHT_STATE);
+                if (height) heights.add(cd);
+            }
+            ClassDef height = uniqueClass(heights, "Save to sheet height");
+            List<Method> getters = new ArrayList<>();
+            if (height != null) for (Method m : height.getMethods())
+                if (!m.getName().equals("hashCode") && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getImplementation() != null
+                        && descriptor(m).equals("()I")) getters.add(m);
+            Method m = actual(height == null ? null : unique(getters, "Save to sheet height percentage"));
+            List<Integer> sites = calls(m, hook, 1);
+            boolean asked = false;
+            if (m != null && sites.size() == 1) {
+                List<Instruction> body = instructions(m);
+                int at = sites.get(0);
+                asked = at + 2 < body.size() && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT && body.get(at + 2).getOpcode() == Opcode.RETURN
+                        && body.stream().filter(i -> i.getOpcode() == Opcode.RETURN).count() == 1
+                        && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at + 2))))
+                        && firstRegister(body.get(at + 1)) == firstRegister(body.get(at + 2)) && onlyFrom(m, at + 2, at + 1);
+                if (!asked) fail(hook + " doesn't take the percentage " + m + " answers, right in front of its only return");
+                else remove(m, at, at + 2);
+            }
+            capability(c.callee, asked);
+        }
+
         static boolean readsFlag(Instruction i, String flag) {
             return i.getOpcode() == Opcode.IGET_BOOLEAN && String.valueOf(reference(i)).equals(flag);
         }
@@ -7223,6 +7380,9 @@ public class DexDiff {
                     case "closeupVisitSite": closeupRows(c, true); break;
                     case "closeupSaveButton": closeupSaveButton(c); break;
                     case "postedDate": postedDate(c); break;
+                    case "saveSheet": saveSheet(c); break;
+                    case "suggestedBoard": suggestedBoard(c); break;
+                    case "boardListHeight": boardListHeight(c); break;
                     case "boardMenu": boardMenu(c); break;
                     case "surveyPrompts": surveyPrompts(c); break;
                     case "pinInvites": pinInvites(c); break;

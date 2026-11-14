@@ -518,6 +518,8 @@ Black comments	Schwarze Kommentare
 In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.	Färbt im dunklen Modus das Kommentarfenster und seine Antwortleiste tiefschwarz. Der helle Modus bleibt, wie er ist. Die Änderung zeigt sich, wenn du das nächste Mal die Kommentare öffnest.
 Black pin menu	Schwarzes Pin-Menü
 In dark mode, paints a pin's menu pure black. Light mode stays as it is. The change shows the next time you open the menu.	Färbt im dunklen Modus das Menü eines Pins tiefschwarz. Der helle Modus bleibt, wie er ist. Die Änderung zeigt sich, wenn du das Menü das nächste Mal öffnest.
+Black Save to sheet	Schwarzes Speichern-Menü
+In dark mode, paints the sheet that lists your boards when you save a pin pure black. Light mode stays as it is. The change shows the next time you save a pin.	Färbt im dunklen Modus das Fenster mit deinen Pinnwänden, das beim Speichern eines Pins aufgeht, tiefschwarz. Der helle Modus bleibt, wie er ist. Die Änderung zeigt sich, wenn du das nächste Mal einen Pin speicherst.
 # context: the two Hide closeup buttons switches on the Interface page. Pinterest calls the lens button's menu entry Search image.
 Hide back arrow on pins	Zurück-Pfeil auf Pins ausblenden
 Hides the back arrow that floats over a pin you open. Your phone's back gesture or button still leaves the pin. The change shows on the next pin you open.	Blendet den Zurück-Pfeil aus, der über einem geöffneten Pin schwebt. Mit der Zurück-Geste oder -Taste deines Handys verlässt du den Pin weiterhin. Die Änderung zeigt sich beim nächsten Pin, den du öffnest.
@@ -684,6 +686,10 @@ Home keeps the pins you were looking at when you come back to Pinterest or to th
 # context: an Interface switch under Original images, from the Show posted date patch. When it's on, the day a pin was posted shows in small text under the pin's title when the pin is opened. The title is also the patch's name in the build report and in the settings import preview. In Posted %1$s, %1$s is the date written the phone's way, such as Oct 12, 2026
 Show posted date	Veröffentlichungsdatum anzeigen
 Shows the day a pin was posted under its title. It shows on the next pin you open.	Zeigt unter dem Titel eines Pins, an welchem Tag er gepostet wurde. Das Datum erscheint beim nächsten Pin, den du öffnest.
+Hide suggested boards	Vorgeschlagene Pinnwände ausblenden
+When you save a pin, hides the board Pinterest suggests under your own boards. Your own boards stay. The change shows the next time you save a pin.	Blendet beim Speichern eines Pins die Pinnwand aus, die Pinterest unter deinen eigenen Pinnwänden vorschlägt. Deine eigenen Pinnwände bleiben. Die Änderung zeigt sich, wenn du das nächste Mal einen Pin speicherst.
+Expand board list	Pinnwandliste ganz öffnen
+Opens the sheet that lists your boards all the way up when you save a pin, so more boards show without dragging it. The change shows the next time you save a pin.	Öffnet das Fenster mit deinen Pinnwänden beim Speichern eines Pins ganz, damit mehr Pinnwände zu sehen sind, ohne es hochzuziehen. Die Änderung zeigt sich, wenn du das nächste Mal einen Pin speicherst.
 Posted %1$s	Gepostet am %1$s
 Install microG-RE to use Google sign-in.	Installiere microG-RE für die Google-Anmeldung.
 Turn on microG-RE to use Google sign-in.	Aktiviere microG-RE für die Google-Anmeldung.

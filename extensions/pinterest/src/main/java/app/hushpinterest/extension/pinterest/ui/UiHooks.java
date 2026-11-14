@@ -13,6 +13,7 @@ import android.widget.Toast;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -207,6 +208,34 @@ public final class UiHooks {
 
         @Override public void show() {
         }
+    }
+
+    /**
+     * Stands in for the Save to sheet's add of the board Pinterest suggests for the pin, which goes
+     * under your own boards. The cell goes into the list unless the switch is on, so off or paused
+     * the sheet keeps it. The add runs outside any catch, so nothing here can drop the cell by failing.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void suggestedBoard(Collection cells, Object board) {
+        if (enabled(FamilyNames.HIDE_SUGGESTED_BOARDS, Settings.HIDE_SUGGESTED_BOARDS)) {
+            HookStatus.counted(FamilyNames.HIDE_SUGGESTED_BOARDS, "suggested board hidden");
+            return;
+        }
+        cells.add(board);
+    }
+
+    /** All the way up, in the percent of the screen the Save to sheet opens at. */
+    static final int FULL_SHEET = 100;
+
+    /**
+     * The Save to sheet's opening height, in percent of the screen. Pinterest opens it part way up
+     * for anything under 100. While the switch is on it opens all the way, and otherwise, or paused,
+     * at the height Pinterest gave.
+     */
+    public static int saveSheetHeight(int percent) {
+        if (!enabled(FamilyNames.EXPAND_BOARD_LIST, Settings.EXPAND_BOARD_LIST) || percent >= FULL_SHEET) return percent;
+        HookStatus.counted(FamilyNames.EXPAND_BOARD_LIST, "sheet opened all the way");
+        return FULL_SHEET;
     }
 
     /** True has Pinterest's image model answer its original rendition first, where it has one. */

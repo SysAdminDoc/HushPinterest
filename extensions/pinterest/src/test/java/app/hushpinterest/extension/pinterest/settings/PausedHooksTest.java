@@ -27,8 +27,11 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.view.View;
@@ -428,8 +431,9 @@ public class PausedHooksTest {
             return header.getVisibility() != View.INVISIBLE;
         }));
         probes.put(Settings.BLACK_BOTTOM_BAR, Collections.singletonList(PausedHooksTest::paintsBottomBarBlack));
-        probes.put(Settings.BLACK_COMMENTS, Collections.singletonList(() -> paintsSheetBlack(true)));
-        probes.put(Settings.BLACK_PIN_MENU, Arrays.asList(() -> paintsSheetBlack(false), PausedHooksTest::paintsMenuCardBlack));
+        probes.put(Settings.BLACK_COMMENTS, Collections.singletonList(() -> paintsSheetBlack("comment_bottom_bar")));
+        probes.put(Settings.BLACK_PIN_MENU, Arrays.asList(() -> paintsSheetBlack("modal_container"), PausedHooksTest::paintsMenuCardBlack));
+        probes.put(Settings.BLACK_SAVE_SHEET, Collections.singletonList(() -> paintsSheetBlack("draggable_sheet")));
         probes.put(Settings.HIDE_CLOSEUP_BACK, Arrays.asList(() -> hidesCloseupButton(true), () -> keepsCloseupButtonHidden(true)));
         probes.put(Settings.HIDE_CLOSEUP_LENS, Arrays.asList(() -> hidesCloseupButton(false), () -> keepsCloseupButtonHidden(false)));
         probes.put(Settings.HIDE_CLOSEUP_SEARCH_LABEL, Collections.singletonList(() -> !CloseupButtons.searchLabel(true)));
@@ -471,6 +475,12 @@ public class PausedHooksTest {
             return !sizes.isEmpty();
         }));
         probes.put(Settings.SHOW_POSTED_DATE, Collections.singletonList(PausedHooksTest::addsPostedDate));
+        probes.put(Settings.HIDE_SUGGESTED_BOARDS, Collections.singletonList(() -> {
+            List<Object> cells = new ArrayList<>();
+            UiHooks.suggestedBoard(cells, "suggested board");
+            return cells.isEmpty();
+        }));
+        probes.put(Settings.EXPAND_BOARD_LIST, Collections.singletonList(() -> UiHooks.saveSheetHeight(73) != 73));
         probes.put(Settings.DISABLE_UPDATE_NAG, Collections.singletonList(UiHooks::disableUpdateNag));
         probes.put(Settings.FIX_PUSH_NOTIFICATIONS, Collections.singletonList(PushNotificationsTest::fixesACertificate));
         return probes;
@@ -654,13 +664,16 @@ public class PausedHooksTest {
     }
 
     /** A dark-mode comments screen or pin menu, with one of the gray fills Pinterest's ids name: true when it turned black. */
-    private static boolean paintsSheetBlack(boolean comments) {
+    /**
+     * A dark-mode sheet whose view [named] holds the gray, handed to the hook that sheet calls: true
+     * when it turned black. The Save to sheet holds its gray as a layer of a transition, as 14.44.0 does.
+     */
+    private static boolean paintsSheetBlack(String named) {
         Context context = RuntimeEnvironment.getApplication();
         Configuration night = new Configuration(context.getResources().getConfiguration());
         night.uiMode = Configuration.UI_MODE_NIGHT_YES | (night.uiMode & ~Configuration.UI_MODE_NIGHT_MASK);
         Context dark = context.createConfigurationContext(night);
         Resources original = dark.getResources();
-        String named = comments ? "comment_bottom_bar" : "modal_container";
         Resources resources = new Resources(dark.getAssets(), original.getDisplayMetrics(), original.getConfiguration()) {
             @Override public int getIdentifier(String name, String type, String owner) { return named.equals(name) ? 1 : 0; }
         };
@@ -671,11 +684,15 @@ public class PausedHooksTest {
         holder.setId(1);
         GradientDrawable fill = new GradientDrawable();
         fill.setColor(0xFF33332E);
-        holder.setBackground(fill);
+        boolean save = "draggable_sheet".equals(named);
+        holder.setBackground(save ? new TransitionDrawable(new Drawable[] {fill, new GradientDrawable()}) : fill);
         sheet.addView(holder);
-        if (comments) AmoledBlack.comments(sheet);
+        if ("comment_bottom_bar".equals(named)) AmoledBlack.comments(sheet);
+        else if (save) AmoledBlack.saveSheet(sheet);
         else AmoledBlack.pinMenu(sheet);
-        return fill.getColor().getDefaultColor() == Color.BLACK;
+        // Painting a transition mutates it, which rebuilds its layers, so the gray is read back from the view.
+        GradientDrawable painted = save ? (GradientDrawable) ((LayerDrawable) holder.getBackground()).getDrawable(0) : fill;
+        return painted.getColor().getDefaultColor() == Color.BLACK;
     }
 
     /** A dark-mode See more card from a pin's menu, its gray shape under a ripple: true when it turned black. */

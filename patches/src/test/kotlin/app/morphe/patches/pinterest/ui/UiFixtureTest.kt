@@ -68,7 +68,7 @@ class UiFixtureTest {
         "quietEmailReminder" to "emailReminder", "disableUpdateNag" to "updateNag",
         "amoledBlack" to "blackBottomBar", "hideInboxUpdates" to "inboxUpdates",
         // Capabilities past here have no patch of their own at the same index.
-        "amoledBlack" to "blackComments", "amoledBlack" to "blackPinMenu",
+        "amoledBlack" to "blackComments", "amoledBlack" to "blackPinMenu", "amoledBlack" to "blackSaveSheet",
         "hideSearchHistory" to "recentSearchRows", "hideSearchHistory" to "recentSearchHeading",
         "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
     )
@@ -87,12 +87,22 @@ class UiFixtureTest {
             assertFlag(rejectedComments, "comments", false)
             val context = PatchContexts.of(ExtensionDex.classes() + classes)
             val inbox = context.inboxUpdates()
+            val saveSheet = PatchContexts.of(ExtensionDex.classes() + classes).boardPickerViewCreated("test")
             val warnings = PatchLogCapture.warnings { patches.forEach { it.execute(context) } }
             assertEquals("${build.name} warnings", emptyList<String>(), warnings)
             for ((family, capability) in flags) {
                 assertFlag(context, family, true)
                 assertFlag(context, capability, true)
             }
+            // The Save to sheet hands its whole view over first, before Pinterest's own onViewCreated
+            // runs: the view is the method's first parameter after the fragment.
+            val created = context.mutable(saveSheet).implementation!!
+            val handOver = created.instructions.first()
+            assertEquals(build.name, Opcode.INVOKE_STATIC_RANGE, handOver.opcode)
+            assertEquals(build.name, SAVE_SHEET_HOOK, (handOver as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: the sheet's view", created.registerCount - 2, (handOver as RegisterRangeInstruction).startRegister)
+            assertEquals(build.name, 1, handOver.registerCount)
+            assertEquals(build.name, saveSheet.instructions().map { it.opcode }, created.instructions.drop(1).map { it.opcode })
             // The Inbox asks the hook right before it adds Updates, and a yes jumps past that one call.
             val sections = context.mutable(inbox.presenter).instructions()
             val inboxAsked = sections.indexOfFirst { (it as? ReferenceInstruction)?.reference?.toString() == INBOX_UPDATES_HOOK }
@@ -707,6 +717,8 @@ class UiFixtureTest {
         // The search page's Recent searches block is the view whose cell list the cell builder reads.
         found += FixtureDex.classes(build, found.values.flatMap { it.methods }.filter { it.buildsRecentSearchCell() }
             .flatMap { it.fields() }.filter { it.type == ARRAY_LIST }.map { it.definingClass }.toSet() - found.keys)
+        // The Save to sheet, which Black Save to sheet hands over.
+        boardPickerClasses(build).forEach { (type, owner) -> found.putIfAbsent(type, owner) }
         // Include every application superclass so final inherited methods are checked before an override is added.
         // The sheet a pin's menu is built into comes along too, so the patch can tell it's a view.
         val sheets = found[PIN_MENU]?.methods?.filter { it.name == "createModalView" }?.map { it.returnType }.orEmpty()

@@ -85,7 +85,7 @@ public enum PatchFamily {
             Settings.HIDE_NAV_CREATE, Settings.HIDE_NAV_NOTIFICATIONS, Settings.HIDE_NAV_SEARCH),
     HIDE_HEADER_BUTTONS(FamilyNames.HIDE_HEADER_BUTTONS, "hideHeaderButtons", null, Settings.HIDE_HEADER_BUTTONS),
     AMOLED_BLACK(FamilyNames.AMOLED_BLACK, "amoledBlack", null, Settings.BLACK_BOTTOM_BAR,
-            Settings.BLACK_COMMENTS, Settings.BLACK_PIN_MENU),
+            Settings.BLACK_COMMENTS, Settings.BLACK_PIN_MENU, Settings.BLACK_SAVE_SHEET),
     HIDE_CLOSEUP_BUTTONS(FamilyNames.HIDE_CLOSEUP_BUTTONS, "hideCloseupButtons", null,
             Settings.HIDE_CLOSEUP_BACK, Settings.HIDE_CLOSEUP_LENS, Settings.HIDE_CLOSEUP_SEARCH_LABEL,
             Settings.HIDE_CLOSEUP_LIKE, Settings.HIDE_CLOSEUP_COMMENTS, Settings.HIDE_CLOSEUP_SHARE,
@@ -102,6 +102,8 @@ public enum PatchFamily {
     HIDE_SAVE_TOASTS(FamilyNames.HIDE_SAVE_TOASTS, "hideSaveToasts", null, Settings.HIDE_SAVE_TOASTS),
     ORIGINAL_IMAGES(FamilyNames.ORIGINAL_IMAGES, "originalImages", null, Settings.ORIGINAL_IMAGES),
     SHOW_POSTED_DATE(FamilyNames.SHOW_POSTED_DATE, "showPostedDate", null, Settings.SHOW_POSTED_DATE),
+    HIDE_SUGGESTED_BOARDS(FamilyNames.HIDE_SUGGESTED_BOARDS, "hideSuggestedBoards", null, Settings.HIDE_SUGGESTED_BOARDS),
+    EXPAND_BOARD_LIST(FamilyNames.EXPAND_BOARD_LIST, "expandBoardList", null, Settings.EXPAND_BOARD_LIST),
     DISABLE_UPDATE_NAG(FamilyNames.DISABLE_UPDATE_NAG, "disableUpdateNag", null, Settings.DISABLE_UPDATE_NAG),
     FIX_PUSH_NOTIFICATIONS(FamilyNames.FIX_PUSH_NOTIFICATIONS, "fixPushNotifications", null, Settings.FIX_PUSH_NOTIFICATIONS);
 
@@ -158,7 +160,7 @@ public enum PatchFamily {
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
             HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
-            HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE));
+            HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST));
 
     /** Each independent hook, its owning family and the flag set only after it was inserted. */
     public enum Capability {
@@ -200,6 +202,7 @@ public enum PatchFamily {
         BOTTOM_BAR(AMOLED_BLACK, "blackBottomBar", "Black bottom bar"),
         BLACK_COMMENTS(AMOLED_BLACK, "blackComments", "Black comments"),
         BLACK_PIN_MENU(AMOLED_BLACK, "blackPinMenu", "Black pin menu"),
+        BLACK_SAVE_SHEET(AMOLED_BLACK, "blackSaveSheet", "Black Save to sheet"),
         CLOSEUP_BUTTONS(HIDE_CLOSEUP_BUTTONS, "closeupButtons", "Hide closeup buttons"),
         CLOSEUP_SEARCH_LABEL(HIDE_CLOSEUP_BUTTONS, "closeupSearchLabel", "Hide Search image label"),
         CLOSEUP_ACTION_BAR(HIDE_CLOSEUP_BUTTONS, "closeupActionBar", "Hide pin action buttons"),
@@ -218,6 +221,8 @@ public enum PatchFamily {
         IMAGE_CHOOSER(ORIGINAL_IMAGES, "imageChooser", "collage images"),
         CLOSEUP_IMAGE(ORIGINAL_IMAGES, "closeupImage", "pin closeups"),
         POSTED_DATE(SHOW_POSTED_DATE, "postedDate", "Show posted date"),
+        SUGGESTED_BOARDS(HIDE_SUGGESTED_BOARDS, "suggestedBoards", "Hide suggested boards"),
+        BOARD_LIST_HEIGHT(EXPAND_BOARD_LIST, "boardListHeight", "Expand board list"),
         UPDATE_NAG(DISABLE_UPDATE_NAG, "updateNag", "Disable update nag"),
         SIGN_IN_FAILURE(GMS_CORE_SUPPORT, "signInFailure", "Google sign-in failure message"),
         FIREBASE_CERTIFICATE(FIX_PUSH_NOTIFICATIONS, "firebaseCertificate", "Fix push notifications");

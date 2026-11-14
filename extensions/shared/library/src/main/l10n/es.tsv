@@ -518,6 +518,8 @@ Black comments	Comentarios en negro
 In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.	En modo oscuro, pinta de negro puro el panel de comentarios y su barra de respuesta. El modo claro se queda como está. El cambio se ve la próxima vez que abras los comentarios.
 Black pin menu	Menú del pin en negro
 In dark mode, paints a pin's menu pure black. Light mode stays as it is. The change shows the next time you open the menu.	En modo oscuro, pinta de negro puro el menú de un pin. El modo claro se queda como está. El cambio se ve la próxima vez que abras el menú.
+Black Save to sheet	Hoja de Guardar en negro
+In dark mode, paints the sheet that lists your boards when you save a pin pure black. Light mode stays as it is. The change shows the next time you save a pin.	En modo oscuro, pinta de negro puro la hoja con tus tableros que se abre al guardar un pin. El modo claro se queda como está. El cambio se ve la próxima vez que guardes un pin.
 # context: the two Hide closeup buttons switches on the Interface page. Pinterest calls the lens button's menu entry Search image.
 Hide back arrow on pins	Ocultar flecha atrás en los pines
 Hides the back arrow that floats over a pin you open. Your phone's back gesture or button still leaves the pin. The change shows on the next pin you open.	Oculta la flecha atrás que flota sobre un pin que abres. El gesto o botón atrás de tu teléfono te sigue sacando del pin. El cambio se ve en el siguiente pin que abras.
@@ -684,6 +686,10 @@ Home keeps the pins you were looking at when you come back to Pinterest or to th
 # context: an Interface switch under Original images, from the Show posted date patch. When it's on, the day a pin was posted shows in small text under the pin's title when the pin is opened. The title is also the patch's name in the build report and in the settings import preview. In Posted %1$s, %1$s is the date written the phone's way, such as Oct 12, 2026
 Show posted date	Mostrar fecha de publicación
 Shows the day a pin was posted under its title. It shows on the next pin you open.	Muestra bajo el título de un pin el día en que se publicó. Aparece en el próximo pin que abras.
+Hide suggested boards	Ocultar tableros sugeridos
+When you save a pin, hides the board Pinterest suggests under your own boards. Your own boards stay. The change shows the next time you save a pin.	Al guardar un pin, oculta el tablero que Pinterest sugiere debajo de tus propios tableros. Tus tableros se quedan. El cambio se ve la próxima vez que guardes un pin.
+Expand board list	Abrir toda la lista de tableros
+Opens the sheet that lists your boards all the way up when you save a pin, so more boards show without dragging it. The change shows the next time you save a pin.	Abre por completo la hoja con tus tableros al guardar un pin, para que se vean más tableros sin arrastrarla. El cambio se ve la próxima vez que guardes un pin.
 Posted %1$s	Publicado el %1$s
 Install microG-RE to use Google sign-in.	Instala microG-RE para iniciar sesión con Google.
 Turn on microG-RE to use Google sign-in.	Activa microG-RE para iniciar sesión con Google.

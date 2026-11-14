@@ -94,6 +94,7 @@ public final class SettingsStatus {
     public static boolean blackBottomBar() { return false; }
     public static boolean blackComments() { return false; }
     public static boolean blackPinMenu() { return false; }
+    public static boolean blackSaveSheet() { return false; }
     public static boolean hideCloseupButtons() { return false; }
     public static boolean closeupButtons() { return false; }
     public static boolean closeupSearchLabel() { return false; }
@@ -122,6 +123,10 @@ public final class SettingsStatus {
     public static boolean closeupImage() { return false; }
     public static boolean showPostedDate() { return false; }
     public static boolean postedDate() { return false; }
+    public static boolean hideSuggestedBoards() { return false; }
+    public static boolean suggestedBoards() { return false; }
+    public static boolean expandBoardList() { return false; }
+    public static boolean boardListHeight() { return false; }
     public static boolean disableUpdateNag() { return false; }
     public static boolean updateNag() { return false; }
     public static boolean fixPushNotifications() { return false; }

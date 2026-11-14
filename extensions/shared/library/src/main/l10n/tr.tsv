@@ -518,6 +518,8 @@ Black comments	Siyah yorumlar
 In dark mode, paints the comments sheet and its reply bar pure black. Light mode stays as it is. The change shows the next time you open comments.	Karanlık modda yorum panelini ve yanıt çubuğunu tamamen siyaha boyar. Aydınlık mod olduğu gibi kalır. Değişiklik yorumları bir sonraki açışında görünür.
 Black pin menu	Siyah pin menüsü
 In dark mode, paints a pin's menu pure black. Light mode stays as it is. The change shows the next time you open the menu.	Karanlık modda bir pinin menüsünü tamamen siyaha boyar. Aydınlık mod olduğu gibi kalır. Değişiklik menüyü bir sonraki açışında görünür.
+Black Save to sheet	Siyah Kaydet sayfası
+In dark mode, paints the sheet that lists your boards when you save a pin pure black. Light mode stays as it is. The change shows the next time you save a pin.	Karanlık modda, bir pini kaydederken açılan ve panolarını listeleyen sayfayı tamamen siyaha boyar. Aydınlık mod olduğu gibi kalır. Değişiklik bir sonraki pin kaydedişinde görünür.
 # context: the two Hide closeup buttons switches on the Interface page. Pinterest calls the lens button's menu entry Search image.
 Hide back arrow on pins	Pinlerde geri okunu gizle
 Hides the back arrow that floats over a pin you open. Your phone's back gesture or button still leaves the pin. The change shows on the next pin you open.	Açtığın bir pinin üzerinde duran geri okunu gizler. Telefonunun geri hareketi veya düğmesi seni yine pinden çıkarır. Değişiklik açtığın bir sonraki pinde görünür.
@@ -684,6 +686,10 @@ Home keeps the pins you were looking at when you come back to Pinterest or to th
 # context: an Interface switch under Original images, from the Show posted date patch. When it's on, the day a pin was posted shows in small text under the pin's title when the pin is opened. The title is also the patch's name in the build report and in the settings import preview. In Posted %1$s, %1$s is the date written the phone's way, such as Oct 12, 2026
 Show posted date	Paylaşım tarihini göster
 Shows the day a pin was posted under its title. It shows on the next pin you open.	Bir pinin paylaşıldığı günü başlığının altında gösterir. Açtığın bir sonraki pinde görünür.
+Hide suggested boards	Önerilen panoları gizle
+When you save a pin, hides the board Pinterest suggests under your own boards. Your own boards stay. The change shows the next time you save a pin.	Bir pini kaydederken Pinterest'in kendi panolarının altında önerdiği panoyu gizler. Kendi panoların kalır. Değişiklik bir sonraki pin kaydedişinde görünür.
+Expand board list	Pano listesini tam aç
+Opens the sheet that lists your boards all the way up when you save a pin, so more boards show without dragging it. The change shows the next time you save a pin.	Bir pini kaydederken panolarını listeleyen sayfayı sonuna kadar açar, böylece sürüklemeden daha fazla pano görünür. Değişiklik bir sonraki pin kaydedişinde görünür.
 Posted %1$s	%1$s tarihinde paylaşıldı
 Install microG-RE to use Google sign-in.	Google ile giriş için microG-RE'yi yükle.
 Turn on microG-RE to use Google sign-in.	Google ile giriş için microG-RE'yi aç.

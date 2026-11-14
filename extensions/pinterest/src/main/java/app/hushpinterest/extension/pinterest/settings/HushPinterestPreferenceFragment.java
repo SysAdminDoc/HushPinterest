@@ -471,8 +471,8 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide header buttons"),
                     L10n.t("Hides the small icon buttons at the end of the top bar. Back, text buttons and account "
                         + "controls stay. The change shows the next time the bar updates."), SettingsIcons.BLOCK);
-            // Each of the three has its own hook and its own switch, so a build where Pinterest's bottom bar,
-            // comments or pin menu wasn't found has no row for it, and the rows it does have keep their own words.
+            // Each surface has its own hook and its own switch, so a build where Pinterest's bottom bar, comments,
+            // pin menu or Save to sheet wasn't found has no row for it, and the rows it does have keep their own words.
             if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BOTTOM_BAR.installed()) {
                 ui.addPreference(mark(toggle(context, Settings.BLACK_BOTTOM_BAR, L10n.t("Black bottom bar"),
                         L10n.t("In dark mode, paints the bottom bar pure black to match the page, which also saves a "
@@ -488,6 +488,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                 ui.addPreference(mark(toggle(context, Settings.BLACK_PIN_MENU, L10n.t("Black pin menu"),
                         L10n.t("In dark mode, paints a pin's menu pure black. Light mode stays as it is. The change "
                             + "shows the next time you open the menu.")), SettingsIcons.DARK_MODE));
+            }
+            if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BLACK_SAVE_SHEET.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.BLACK_SAVE_SHEET, L10n.t("Black Save to sheet"),
+                        L10n.t("In dark mode, paints the sheet that lists your boards when you save a pin pure black. "
+                            + "Light mode stays as it is. The change shows the next time you save a pin.")),
+                        SettingsIcons.DARK_MODE));
             }
             patchToggle(ui, context, build, PatchFamily.HIDE_CLOSEUP_BUTTONS, Settings.HIDE_CLOSEUP_BACK,
                     L10n.t("Hide back arrow on pins"),
@@ -590,6 +596,14 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             patchToggle(ui, context, build, PatchFamily.SHOW_POSTED_DATE, Settings.SHOW_POSTED_DATE,
                     L10n.t("Show posted date"),
                     L10n.t("Shows the day a pin was posted under its title. It shows on the next pin you open."), SettingsIcons.ABOUT);
+            patchToggle(ui, context, build, PatchFamily.HIDE_SUGGESTED_BOARDS, Settings.HIDE_SUGGESTED_BOARDS,
+                    L10n.t("Hide suggested boards"),
+                    L10n.t("When you save a pin, hides the board Pinterest suggests under your own boards. Your own "
+                        + "boards stay. The change shows the next time you save a pin."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.EXPAND_BOARD_LIST, Settings.EXPAND_BOARD_LIST,
+                    L10n.t("Expand board list"),
+                    L10n.t("Opens the sheet that lists your boards all the way up when you save a pin, so more boards "
+                        + "show without dragging it. The change shows the next time you save a pin."), SettingsIcons.FEED);
         }
 
         // In every build: a patched Pinterest isn't verified for its own links, so Android opens them

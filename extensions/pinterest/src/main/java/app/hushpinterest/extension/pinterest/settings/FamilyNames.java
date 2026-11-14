@@ -58,6 +58,8 @@ public final class FamilyNames {
     public static final String HIDE_SAVE_TOASTS = "Hide save toasts";
     public static final String ORIGINAL_IMAGES = "Original-quality images";
     public static final String SHOW_POSTED_DATE = "Show posted date";
+    public static final String HIDE_SUGGESTED_BOARDS = "Hide suggested boards";
+    public static final String EXPAND_BOARD_LIST = "Expand board list";
     public static final String DISABLE_UPDATE_NAG = "Disable update nag";
     public static final String FIX_PUSH_NOTIFICATIONS = "Fix push notifications";
 
