@@ -51,6 +51,7 @@ import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ import app.hushpinterest.extension.shared.settings.AppLanguage;
 import app.hushpinterest.extension.shared.settings.BaseSettings;
 import app.hushpinterest.extension.shared.settings.BooleanSetting;
 import app.hushpinterest.extension.shared.settings.HushPinterestPause;
+import app.hushpinterest.extension.shared.settings.Setting;
 import app.hushpinterest.extension.shared.settings.preference.AbstractPreferenceFragment;
 import app.hushpinterest.extension.shared.settings.preference.ClearLogBufferPreference;
 import app.hushpinterest.extension.shared.settings.preference.ExportDiagnosticReportPreference;
@@ -558,6 +560,13 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                         L10n.t("Hides the row of suggested replies next to the comment box. You can still write and "
                             + "post your own comment. The change shows the next time you open comments.")),
                         SettingsIcons.BLOCK));
+            }
+            // The previews collapse under Hide comments too, so with it on this switch can't bring
+            // them back. The row says so then (updatePreferenceAvailability keeps that current) and
+            // keeps its own saved choice for when it's off.
+            if (build.contains(PatchFamily.HIDE_COMMENTS) && PatchFamily.Capability.COMMENT_PREVIEWS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_COMMENT_PREVIEWS, L10n.t("Hide comment previews"),
+                        commentPreviewsSummary(Settings.HIDE_COMMENTS.savedValue())), SettingsIcons.BLOCK));
             }
             patchToggle(ui, context, build, PatchFamily.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_TOPIC_SUGGESTIONS,
                     L10n.t("Hide topic suggestions"),
@@ -1317,6 +1326,28 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
         if (build.contains(family)) {
             category.addPreference(mark(toggle(context, setting, title, family.coverageSummary(summary)), icon));
         }
+    }
+
+    /**
+     * Every saved change, an import, its Undo and a change from another open page end here for each
+     * row, so Hide comment previews follows Hide comments however that switch changed.
+     */
+    @Override
+    protected void updatePreferenceAvailability(@NonNull Preference pref, @NonNull Setting<?> setting) {
+        super.updatePreferenceAvailability(pref, setting);
+        if (setting == Settings.HIDE_COMMENT_PREVIEWS) {
+            pref.setSummary(commentPreviewsSummary(Settings.HIDE_COMMENTS.savedValue()));
+        }
+    }
+
+    /** What Hide comment previews does, or why it can't while Hide comments hides the whole section. */
+    static String commentPreviewsSummary(boolean hideComments) {
+        if (hideComments) {
+            return L10n.t("Hide comments is on and already hides the whole comments section, previews included. This "
+                + "switch keeps its setting for when Hide comments is off.");
+        }
+        return L10n.t("Hides the comments and comment photos shown under a pin. The comment box and the way into all "
+            + "comments stay. The change shows the next time the screen updates.");
     }
 
     static SwitchPreference toggle(Context context, BooleanSetting setting, String title, String summary) {

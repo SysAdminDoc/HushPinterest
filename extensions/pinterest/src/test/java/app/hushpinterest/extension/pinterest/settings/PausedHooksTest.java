@@ -451,10 +451,15 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_COMMENTS, Arrays.asList(
                 () -> UiHooks.commentsVisibility(View.INVISIBLE) != View.INVISIBLE,
                 () -> UiHooks.commentsMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC,
-                () -> !UiHooks.commentsVisible(true)));
+                () -> !UiHooks.commentsVisible(true),
+                () -> UiHooks.commentPreviewsVisibility(View.INVISIBLE) != View.INVISIBLE,
+                () -> UiHooks.commentPreviewsMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC));
         probes.put(Settings.HIDE_SUGGESTED_REPLIES, Arrays.asList(
                 () -> UiHooks.suggestedRepliesVisibility(View.INVISIBLE) != View.INVISIBLE,
                 () -> UiHooks.suggestedRepliesMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC));
+        probes.put(Settings.HIDE_COMMENT_PREVIEWS, Arrays.asList(
+                () -> UiHooks.commentPreviewsVisibility(View.INVISIBLE) != View.INVISIBLE,
+                () -> UiHooks.commentPreviewsMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC));
         probes.put(Settings.HIDE_TOPIC_SUGGESTIONS, Arrays.asList(PausedHooksTest::hidesTopicRow, PausedHooksTest::foldsTopicRow));
         probes.put(Settings.HIDE_INBOX_UPDATES, Collections.singletonList(UiHooks::hideInboxUpdates));
         probes.put(Settings.QUIET_EMAIL_REMINDER, Collections.singletonList(UiHooks::quietEmailReminder));

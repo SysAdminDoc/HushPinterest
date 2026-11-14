@@ -15,6 +15,7 @@ package app.hushpinterest.extension.pinterest.settings;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -405,6 +406,73 @@ public class HushPinterestPreferenceFragmentTest {
             List<Preference> rows = new ArrayList<>();
             collect(page.getPreferenceScreen(), rows);
             assertEquals(indexOfKey(rows, Settings.HIDE_COMMENTS.key) + 1, indexOfKey(rows, Settings.HIDE_SUGGESTED_REPLIES.key));
+        }
+    }
+
+    /**
+     * Hide comment previews has its own hook, so its row shows only when that hook went in, under
+     * Hide suggested replies. With Hide comments on it can't bring the previews back, so its summary
+     * says why, follows Hide comments as it flips, and the switch keeps its own saved choice.
+     */
+    @Test
+    public void commentPreviewsShowsOnlyWhereItsHookWentInAndSaysWhenHideCommentsCoversIt() {
+        PatchFamily.inBuildForTests = EnumSet.allOf(PatchFamily.class);
+        Set<PatchFamily.Capability> withoutIt = EnumSet.allOf(PatchFamily.Capability.class);
+        withoutIt.remove(PatchFamily.Capability.COMMENT_PREVIEWS);
+        PatchFamily.capabilitiesForTests = withoutIt;
+        try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+            HushPinterestPreferenceFragment page = pageOf(controller);
+            assertNull(page.findPreference(Settings.HIDE_COMMENT_PREVIEWS.key));
+            assertNotNull(page.findPreference(Settings.HIDE_COMMENTS.key));
+            assertNotNull(page.findPreference(Settings.HIDE_SUGGESTED_REPLIES.key));
+        }
+        PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
+        String alone = HushPinterestPreferenceFragment.commentPreviewsSummary(false);
+        String covered = HushPinterestPreferenceFragment.commentPreviewsSummary(true);
+        assertNotEquals(alone, covered);
+        try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+            HushPinterestPreferenceFragment page = pageOf(controller);
+            SwitchPreference row = (SwitchPreference) page.findPreference(Settings.HIDE_COMMENT_PREVIEWS.key);
+            assertNotNull(row);
+            assertEquals("Hide comment previews", String.valueOf(row.getTitle()));
+            assertFalse("Hide comment previews starts off", row.isChecked());
+            assertEquals(alone, String.valueOf(row.getSummary()));
+            List<Preference> rows = new ArrayList<>();
+            collect(page.getPreferenceScreen(), rows);
+            assertEquals(indexOfKey(rows, Settings.HIDE_SUGGESTED_REPLIES.key) + 1, indexOfKey(rows, Settings.HIDE_COMMENT_PREVIEWS.key));
+
+            Settings.HIDE_COMMENT_PREVIEWS.save(true);
+            SwitchPreference comments = (SwitchPreference) page.findPreference(Settings.HIDE_COMMENTS.key);
+            comments.setChecked(true);
+            ShadowLooper.idleMainLooper();
+            assertTrue("turning Hide comments on goes through", Settings.HIDE_COMMENTS.savedValue());
+            assertEquals(covered, String.valueOf(row.getSummary()));
+            assertTrue("the preview switch keeps its own choice", Settings.HIDE_COMMENT_PREVIEWS.savedValue());
+            comments.setChecked(false);
+            ShadowLooper.idleMainLooper();
+            assertFalse("turning Hide comments off goes through", Settings.HIDE_COMMENTS.savedValue());
+            assertEquals(alone, String.valueOf(row.getSummary()));
+            assertTrue("the preview switch keeps its own choice", Settings.HIDE_COMMENT_PREVIEWS.savedValue());
+
+            // An import or its Undo writes the settings and then redraws the switches, without
+            // the Hide comments row's own change going through.
+            Settings.HIDE_COMMENTS.save(true);
+            page.refreshSwitches();
+            assertTrue("the import's value shows on the row", comments.isChecked());
+            assertEquals("an import that turns Hide comments on updates the summary", covered, String.valueOf(row.getSummary()));
+            Settings.HIDE_COMMENTS.save(false);
+            page.refreshSwitches();
+            assertEquals("an Undo that turns Hide comments off updates the summary", alone, String.valueOf(row.getSummary()));
+        } finally {
+            Settings.HIDE_COMMENT_PREVIEWS.resetToDefault();
+            Settings.HIDE_COMMENTS.resetToDefault();
+        }
+        Settings.HIDE_COMMENTS.save(true);
+        try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+            SwitchPreference row = (SwitchPreference) pageOf(controller).findPreference(Settings.HIDE_COMMENT_PREVIEWS.key);
+            assertEquals("a page opened with Hide comments on says so from the start", covered, String.valueOf(row.getSummary()));
+        } finally {
+            Settings.HIDE_COMMENTS.resetToDefault();
         }
     }
 

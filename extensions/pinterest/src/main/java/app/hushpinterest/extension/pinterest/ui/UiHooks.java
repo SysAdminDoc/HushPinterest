@@ -332,6 +332,24 @@ public final class UiHooks {
     }
 
     /**
+     * The comment previews and comment photos under a pin. Hide comments folds them with the rest
+     * of the module, and Hide comment previews folds only them, so the module's title, comment
+     * box and button to all comments stay. Off or paused, Pinterest's own value goes through.
+     */
+    public static int commentPreviewsVisibility(int requested) {
+        return previewsHidden() ? View.GONE : requested;
+    }
+
+    public static int commentPreviewsMeasureSpec(int requested) {
+        return previewsHidden() ? View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.EXACTLY) : requested;
+    }
+
+    private static boolean previewsHidden() {
+        return enabled(FamilyNames.HIDE_COMMENTS, Settings.HIDE_COMMENTS)
+                || enabled(FamilyNames.HIDE_COMMENTS, Settings.HIDE_COMMENT_PREVIEWS);
+    }
+
+    /**
      * The row of suggested replies by the comment box. It has its own switch in the Hide comments
      * family, so neither switch turns the other on. Pinterest 14.41.0 never sets the row's
      * visibility, so the zero measure is what folds it and its scroller.

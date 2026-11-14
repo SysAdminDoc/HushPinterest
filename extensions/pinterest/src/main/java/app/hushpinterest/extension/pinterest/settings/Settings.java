@@ -192,6 +192,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_comments", FALSE);
     public static final BooleanSetting HIDE_SUGGESTED_REPLIES =
             new BooleanSetting("hushpinterest_hide_suggested_replies", FALSE);
+    public static final BooleanSetting HIDE_COMMENT_PREVIEWS =
+            new BooleanSetting("hushpinterest_hide_comment_previews", FALSE);
     public static final BooleanSetting HIDE_TOPIC_SUGGESTIONS =
             new BooleanSetting("hushpinterest_hide_topic_suggestions", FALSE);
     /** The Inbox leaves out its Updates section, and doesn't load it. Messages stay. Off to start. */

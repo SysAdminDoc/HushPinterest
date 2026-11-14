@@ -74,7 +74,8 @@ public class UiHooksTest {
             Settings.HIDE_CLOSEUP_MORE, Settings.HIDE_CLOSEUP_REMIX, Settings.HIDE_CLOSEUP_VISIT_SITE,
             Settings.SMALLER_SAVE_BUTTON,
             Settings.HIDE_PIN_MENU_COLLAGE, Settings.HIDE_PIN_MENU_VISUAL_SEARCH, Settings.HIDE_PIN_MENU_PIN_BOOST,
-            Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
+            Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_COMMENT_PREVIEWS,
+            Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
             Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.DISABLE_UPDATE_NAG
     }; }
@@ -110,6 +111,8 @@ public class UiHooksTest {
         assertTrue(UiHooks.commentsVisible(true));
         assertEquals(View.INVISIBLE, UiHooks.suggestedRepliesVisibility(View.INVISIBLE));
         assertEquals(312, UiHooks.suggestedRepliesMeasureSpec(312));
+        assertEquals(View.INVISIBLE, UiHooks.commentPreviewsVisibility(View.INVISIBLE));
+        assertEquals(312, UiHooks.commentPreviewsMeasureSpec(312));
     }
 
     @Test public void assistantStaysUntilItsSwitchIsOnAndComesBackWhenPaused() {
@@ -481,6 +484,45 @@ public class UiHooksTest {
         Settings.HIDE_SUGGESTED_REPLIES.save(false);
         assertEquals(View.VISIBLE, UiHooks.suggestedRepliesVisibility(View.VISIBLE));
         assertEquals(spec, UiHooks.suggestedRepliesMeasureSpec(spec));
+    }
+
+    /**
+     * Every pairing of Hide comments, Hide comment previews and Hide suggested replies. The
+     * previews fold under either of the first two, the module only under Hide comments, the
+     * suggestions only under their own switch, and Pause hands Pinterest's values back in all of them.
+     */
+    @Test public void commentPreviewsFoldUnderEitherSwitchAndLeaveTheModuleToHideComments() {
+        int spec = View.MeasureSpec.makeMeasureSpec(200, View.MeasureSpec.AT_MOST);
+        for (int combination = 0; combination < 8; combination++) {
+            boolean comments = (combination & 1) != 0, previews = (combination & 2) != 0, replies = (combination & 4) != 0;
+            Settings.HIDE_COMMENTS.save(comments);
+            Settings.HIDE_COMMENT_PREVIEWS.save(previews);
+            Settings.HIDE_SUGGESTED_REPLIES.save(replies);
+            String label = "comments " + comments + ", previews " + previews + ", replies " + replies;
+            boolean previewsGone = comments || previews;
+            assertEquals(label, previewsGone ? View.GONE : View.VISIBLE, UiHooks.commentPreviewsVisibility(View.VISIBLE));
+            if (previewsGone) {
+                int folded = UiHooks.commentPreviewsMeasureSpec(spec);
+                assertEquals(label, 0, View.MeasureSpec.getSize(folded));
+                assertEquals(label, View.MeasureSpec.EXACTLY, View.MeasureSpec.getMode(folded));
+            } else {
+                assertEquals(label, spec, UiHooks.commentPreviewsMeasureSpec(spec));
+            }
+            assertEquals(label, comments ? View.GONE : View.VISIBLE, UiHooks.commentsVisibility(View.VISIBLE));
+            assertEquals(label, comments ? 0 : 200, View.MeasureSpec.getSize(UiHooks.commentsMeasureSpec(spec)));
+            assertEquals(label, !comments, UiHooks.commentsVisible(true));
+            assertEquals(label, replies ? View.GONE : View.VISIBLE, UiHooks.suggestedRepliesVisibility(View.VISIBLE));
+
+            PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+            try {
+                assertEquals("paused, " + label, View.INVISIBLE, UiHooks.commentPreviewsVisibility(View.INVISIBLE));
+                assertEquals("paused, " + label, spec, UiHooks.commentPreviewsMeasureSpec(spec));
+                assertEquals("paused, " + label, View.VISIBLE, UiHooks.commentsVisibility(View.VISIBLE));
+                assertEquals("paused, " + label, View.VISIBLE, UiHooks.suggestedRepliesVisibility(View.VISIBLE));
+            } finally {
+                PauseForTests.resume();
+            }
+        }
     }
 
     @Test public void navigationSwitchesHideOnlyTheirNamedTabsAndRestoreTheHostVisibility() {

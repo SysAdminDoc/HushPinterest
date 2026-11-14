@@ -70,7 +70,7 @@ class UiFixtureTest {
         // Capabilities past here have no patch of their own at the same index.
         "amoledBlack" to "blackComments", "amoledBlack" to "blackPinMenu",
         "hideSearchHistory" to "recentSearchRows", "hideSearchHistory" to "recentSearchHeading",
-        "hideComments" to "suggestedReplies",
+        "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
     )
 
     @Test fun `every interface family matches each supported vendor build without a warning`() {
@@ -116,6 +116,23 @@ class UiFixtureTest {
                 assertTrue("${build.name}: $type answers to the suggested replies switch", context.mutableClassDefBy(type).methods
                     .none { method -> method.calls().any { it.definingClass == UI_HOOKS && it.name.startsWith("suggestedReplies") } })
             }
+            // The previews, the comment photos and the module that shows only a quoted comment fold
+            // through the preview hooks, which either switch turns on, and the unified module itself
+            // answers only to Hide comments.
+            val insightModule = commentsModules.single { it.type != unifiedComments.type }
+            for (type in listOf(COMMENT_PREVIEW, COMMENTS_IMAGES, insightModule.type)) {
+                val view = context.mutableClassDefBy(type)
+                for ((name, hook) in listOf("setVisibility" to "commentPreviewsVisibility", "onMeasure" to "commentPreviewsMeasureSpec")) {
+                    assertEquals("${build.name}: $type->$name", listOf(hook), view.methods.single { it.name == name && it.returnType == "V" }
+                        .calls().filter { it.definingClass == UI_HOOKS }.map { it.name }.distinct())
+                }
+            }
+            for ((name, hook) in listOf("setVisibility" to "commentsVisibility", "onMeasure" to "commentsMeasureSpec")) {
+                assertEquals("${build.name}: ${unifiedComments.type}->$name", listOf(hook), context.mutableClassDefBy(unifiedComments.type)
+                    .methods.single { it.name == name && it.returnType == "V" }.calls().filter { it.definingClass == UI_HOOKS }.map { it.name }.distinct())
+            }
+            assertTrue("${build.name}: the unified module answers to the comment previews switch", context.mutableClassDefBy(unifiedComments.type)
+                .methods.none { method -> method.calls().any { it.definingClass == UI_HOOKS && it.name.startsWith("commentPreviews") } })
             val wasReplies = classes.single { it.type == COMMENTS_QUICK_REPLIES }
             val replies = context.mutableClassDefBy(COMMENTS_QUICK_REPLIES)
             assertEquals("${build.name}: the suggested replies row gained two overrides, nothing else",
@@ -303,6 +320,22 @@ class UiFixtureTest {
 
     private fun asksForAssistant(method: Method) = method.returnType == "Z" && method.parameterTypes.isEmpty() &&
         !AccessFlags.STATIC.isSet(method.accessFlags) && "ai_fwd_android_assistant_ask_mode" in method.strings()
+
+    @Test fun `a comments module without its photo strip keeps the preview switch and says the photos stay`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val classes = read(build)
+            val module = classes.filter { it.isCommentsModule() }.single { it.fields.any { field -> field.type == COMMENT_PREVIEW } }
+            val context = PatchContexts.of(ExtensionDex.classes() + classes)
+            context.mutableClassDefBy(module.type).fields.removeAll { it.type == COMMENTS_IMAGES }
+            val warnings = PatchLogCapture.warnings { hideCommentsPatch.execute(context) }
+            assertEquals("${build.name}: $warnings", 1, warnings.size)
+            assertTrue("${build.name}: $warnings", warnings.single().contains("Hide comment previews leaves comment photos"))
+            assertFlag(context, "comments", true)
+            assertFlag(context, "commentPreviews", true)
+            assertTrue("${build.name}: the photo strip got a hook anyway", context.mutableClassDefBy(COMMENTS_IMAGES).methods
+                .none { method -> method.calls().any { it.definingClass == UI_HOOKS } })
+        }
+    }
 
     @Test fun `the Assistant's availability answers no only when the switch says so and keeps its own body`() {
         for (build in Fixtures.declaredBuilds()) {
@@ -599,11 +632,17 @@ class UiFixtureTest {
                 assertTrue("$reason left a hook in the suggested replies row", context.mutableClassDefBy(COMMENTS_QUICK_REPLIES).methods
                     .none { method -> method.calls().any { it.definingClass == UI_HOOKS } })
             }
-            assertTrue("$reason took Hide comments out with it", context.mutableClassDefBy(COMMENT_PREVIEW).methods.any { method ->
-                method.name == "onMeasure" && method.calls().any { it.definingClass == UI_HOOKS && it.name == "commentsMeasureSpec" }
-            })
+            val stays = input.filter { it.isCommentsModule() }.map { module ->
+                module.type to if (module.fields.any { it.type == COMMENT_PREVIEW }) "commentsMeasureSpec" else "commentPreviewsMeasureSpec"
+            } + listOf(COMMENT_PREVIEW to "commentPreviewsMeasureSpec", COMMENTS_IMAGES to "commentPreviewsMeasureSpec")
+            for ((type, hook) in stays) {
+                assertTrue("$reason took $hook out of $type with it", context.mutableClassDefBy(type).methods.any { method ->
+                    method.name == "onMeasure" && method.calls().any { it.definingClass == UI_HOOKS && it.name == hook }
+                })
+            }
             assertFlag(context, "hideComments", true)
             assertFlag(context, "comments", true)
+            assertFlag(context, "commentPreviews", true)
             assertFlag(context, "suggestedReplies", false)
         }
     }
@@ -631,7 +670,7 @@ class UiFixtureTest {
         val anchors = setOf("sg_android_new_screenshot_api_14", "ai_fwd_android_assistant_ask_mode", "BottomNavTabModel(type=",
             "BottomNavBar tab insertion out of range", "confirmEmailButton", "inAppUpdateManager",
             "unifiedCommentsModulePresenterFactory", "CommentsZone(isVisible=", INBOX_UPDATES_FEED)
-        val required = (SEARCH_HISTORY_VIEWS + TYPEAHEAD_ROW + COMMENT_PREVIEW + COMMENTS_QUICK_REPLIES + HEADER_BAR + BOTTOM_BAR +
+        val required = (SEARCH_HISTORY_VIEWS + TYPEAHEAD_ROW + COMMENT_PREVIEW + COMMENTS_IMAGES + COMMENTS_QUICK_REPLIES + HEADER_BAR + BOTTOM_BAR +
             BLUR_VIEW + PIN_MENU + "Lcom/pinterest/activity/pin/view/modules/PinCloseupVideoModule;").toSet()
         val found = mutableMapOf<String, ClassDef>()
         // Every class with a section adder, kept below only when it holds the Updates feed.

@@ -217,6 +217,8 @@ Hide Promote pin menu item	Pin tanıt menü öğesini gizle
 Hide comments	Yorumları gizle
 # context: an Interface switch right under Hide comments. It hides the row of one-tap suggested replies Pinterest shows next to the comment box. It has its own switch, and Hide comments doesn't turn it on.
 Hide suggested replies	Önerilen yanıtları gizle
+# context: an Interface switch under Hide suggested replies. It hides only the comment previews and comment photos under a pin and keeps the comment box. Hide comments hides them too.
+Hide comment previews	Yorum önizlemelerini gizle
 Hide topic suggestions	Konu önerilerini gizle
 Quiet email reminders	E-posta hatırlatmalarını sustur
 Hide survey prompts	Anket davetlerini gizle
@@ -338,6 +340,8 @@ Hides Search image in pin menus you open from now on. A menu that's already open
 Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.	Bundan sonra açtığın pin menülerinde Pini tanıt öğesini gizler. Zaten açık olan menü değişmez.
 Hides comments and comment previews under pins. It doesn't change who can comment. The change shows the next time the screen updates.	Pinlerin altındaki yorumları ve yorum önizlemelerini gizler. Kimin yorum yapabileceğini değiştirmez. Değişiklik ekran bir sonraki güncellenişinde görünür.
 Hides the row of suggested replies next to the comment box. You can still write and post your own comment. The change shows the next time you open comments.	Yorum kutusunun yanındaki önerilen yanıt satırını gizler. Kendi yorumunu yazıp paylaşmaya devam edebilirsin. Değişiklik yorumları bir sonraki açışında görünür.
+Hides the comments and comment photos shown under a pin. The comment box and the way into all comments stay. The change shows the next time the screen updates.	Bir pinin altında görünen yorumları ve yorum fotoğraflarını gizler. Yorum kutusu ve tüm yorumlara giden yol kalır. Değişiklik ekran bir sonraki güncellenişinde görünür.
+Hide comments is on and already hides the whole comments section, previews included. This switch keeps its setting for when Hide comments is off.	Yorumları gizle açık ve önizlemeler dahil tüm yorum bölümünü zaten gizliyor. Bu anahtar, Yorumları gizle kapalıyken kullanılmak üzere ayarını saklar.
 Hides the "Ideas you might love" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.	Pinlerin altındaki konu baloncuklarından oluşan "Sevebileceğin fikirler" satırını, Pinterest onu bir sonraki gösterdiğinde gizler. Yorumlar ve ilgili Pinler yerinde kalır.
 Dismisses the optional reminder to confirm your email. A reminder that's already open stays. Account checks and sign-in still work as usual.	E-postanı doğrulamanı isteyen isteğe bağlı hatırlatmayı kapatır. Zaten açık olan hatırlatma kalır. Hesap kontrolleri ve giriş her zamanki gibi çalışır.
 Turns down Pinterest's "Got a minute?" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.	Pinterest'in "Bir dakikan var mı?" anket davetini, "Belki daha sonra" gibi, görünmeden önce reddeder, böylece o anket geri gelmez. Reklamverenlerin sponsorlu anketleri de açılmaz. Zaten açık olan bir davet kalır.

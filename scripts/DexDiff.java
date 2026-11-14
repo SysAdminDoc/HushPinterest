@@ -275,7 +275,7 @@ public class DexDiff {
 
     private static final Map<String, Integer> MUTATION_COLUMNS = Map.ofEntries(
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
-            Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 5),
+            Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
@@ -4475,7 +4475,11 @@ public class DexDiff {
         void comments(Contract c) {
             String[][] resources = {{"pin_closeup_unified_comments_module", "unified_comments_module_container"},
                     {"pin_closeup_new_comments_module", "new_comments_module_container"}};
-            for (String[] pair : resources) {
+            // The unified module folds through the comments hooks. The new module shows only one quoted
+            // comment, so it folds through the preview hooks, which Hide comments turns on as well.
+            String[][] hooks = {{c.strings.get(0), c.strings.get(1)}, {c.strings.get(4), c.strings.get(5)}};
+            for (int p = 0; p < resources.length; p++) {
+                String[] pair = resources[p];
                 List<ClassDef> modules = new ArrayList<>();
                 for (ClassDef cd : clean.classes.values()) {
                     boolean component = false;
@@ -4491,13 +4495,20 @@ public class DexDiff {
                 boolean inherits = false;
                 Set<String> visited = new HashSet<>();
                 for (String type = module.getSuperclass(); type != null && visited.add(type); ) {
-                    if (type.equals(c.strings.get(4))) { inherits = true; break; }
+                    if (type.equals(c.strings.get(3))) { inherits = true; break; }
                     ClassDef parent = clean.classes.get(type); type = parent == null ? null : parent.getSuperclass();
                 }
                 if (!inherits) fail("comments target does not inherit its dedicated module");
-                view(module.getType(), c.strings.get(0), c.strings.get(1), null);
+                view(module.getType(), hooks[p][0], hooks[p][1], null);
+                // The photo strip folds with the previews only where the unified module holds one, the
+                // same test the patch makes before it hooks the strip, so a build without one passes.
+                if (p == 0) for (Field field : module.getFields()) if (field.getType().equals(c.strings.get(6))) {
+                    view(c.strings.get(6), hooks[1][0], hooks[1][1], null);
+                    break;
+                }
             }
-            view(c.strings.get(3), c.strings.get(0), c.strings.get(1), null);
+            // The preview text inside the unified module is commentPreviews' own views rule, since
+            // either switch folds it.
             List<Method> descriptions = new ArrayList<>();
             for (Method method : clean.holding("CommentsZone(isVisible=")) if (method.getName().equals("toString")) descriptions.add(method);
             if (!descriptions.isEmpty()) {

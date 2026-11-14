@@ -106,6 +106,7 @@ public final class SettingsStatus {
     public static boolean hideComments() { return false; }
     public static boolean comments() { return false; }
     public static boolean suggestedReplies() { return false; }
+    public static boolean commentPreviews() { return false; }
     public static boolean hideTopicSuggestions() { return false; }
     public static boolean topicSuggestions() { return false; }
     public static boolean hideInboxUpdates() { return false; }

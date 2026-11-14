@@ -1267,6 +1267,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.LONG_PRESS_HIDE_SEARCH.key, "Pinterest's Search image button", "long-press menu", "The lens on a pin you open still searches");
         summaryContains(Settings.HIDE_COMMENTS.key, "comments and comment previews under pins", "next time the screen updates", "doesn't change who can comment");
         summaryContains(Settings.HIDE_SUGGESTED_REPLIES.key, "suggested replies next to the comment box", "write and post your own comment", "next time you open comments");
+        summaryContains(Settings.HIDE_COMMENT_PREVIEWS.key, "comment photos shown under a pin", "comment box and the way into all comments stay", "next time the screen updates");
         summaryContains(Settings.HIDE_TOPIC_SUGGESTIONS.key, "\"Ideas you might love\" row of topic bubbles under pins", "next time Pinterest shows it", "Comments and related pins stay");
         summaryContains(Settings.HIDE_INBOX_UPDATES.key, "Updates section out of your Inbox", "Pinterest doesn't load it", "Your messages stay");
         summaryContains(Settings.HIDE_HOME_SUGGESTIONS.key, "\"More ideas for your board\"", "\"See more like this?\" bubble off pins", "next time Home loads");

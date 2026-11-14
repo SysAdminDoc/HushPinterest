@@ -28,6 +28,7 @@ Every HushPinterest release, newest first.
 * New `Hide Remix button on pins` switch takes the Remix button off pins that show it. The Cutout button next to it stays. It starts off. (#25)
 * New `Hide Visit site button on pins` switch takes away the Visit site button under pins that link to a website. It starts off. (#26)
 * New `Smaller Save button on pins` switch draws the red Save button on a pin you open at four fifths of its size, still at the end of its row. It starts off. (#24)
+* New `Hide comment previews` switch under Interface, right under Hide suggested replies. It hides only the comments and comment photos shown under a pin, so the comment box and the way into all the comments stay. Hide comments still hides the whole section, previews included, and while it's on the new switch says so and keeps its own setting for later. It starts off.
 * New `Save button color` row paints that Save button in any hex color you type, like #3366FF or #36F. Light colors get dark text so the button stays readable, and Clear brings back Pinterest's red. The color goes into exported settings files along with your switches. (#23)
 * `Black pin menu` now paints the See more and See less cards in a pin's menu black too. They used to stay gray on the black sheet. (#21)
 * `Black comments` turns the quick replies above the reply box (the emoji and "Love it!" buttons) black as well. They stayed gray on Pinterest 14.43.0. (#21)

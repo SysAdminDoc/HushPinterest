@@ -217,6 +217,8 @@ Hide Promote pin menu item	Ocultar opción Promocionar pin
 Hide comments	Ocultar comentarios
 # context: an Interface switch right under Hide comments. It hides the row of one-tap suggested replies Pinterest shows next to the comment box. It has its own switch, and Hide comments doesn't turn it on.
 Hide suggested replies	Ocultar respuestas sugeridas
+# context: an Interface switch under Hide suggested replies. It hides only the comment previews and comment photos under a pin and keeps the comment box. Hide comments hides them too.
+Hide comment previews	Ocultar vistas previas de comentarios
 Hide topic suggestions	Ocultar sugerencias de temas
 Quiet email reminders	Ocultar recordatorios de correo
 Hide survey prompts	Ocultar invitaciones a encuestas
@@ -338,6 +340,8 @@ Hides Search image in pin menus you open from now on. A menu that's already open
 Hides Promote pin in pin menus you open from now on. A menu that's already open won't change.	Oculta Promocionar pin en los menús de pin que abras a partir de ahora. Un menú que ya está abierto no cambia.
 Hides comments and comment previews under pins. It doesn't change who can comment. The change shows the next time the screen updates.	Oculta los comentarios y sus vistas previas bajo los pines. No cambia quién puede comentar. El cambio se ve la próxima vez que se actualice la pantalla.
 Hides the row of suggested replies next to the comment box. You can still write and post your own comment. The change shows the next time you open comments.	Oculta la fila de respuestas sugeridas junto al cuadro de comentarios. Puedes seguir escribiendo y publicando tus propios comentarios. El cambio se ve la próxima vez que abras los comentarios.
+Hides the comments and comment photos shown under a pin. The comment box and the way into all comments stay. The change shows the next time the screen updates.	Oculta los comentarios y las fotos de comentarios que se ven bajo un pin. El cuadro de comentarios y el acceso a todos los comentarios se quedan. El cambio se ve la próxima vez que se actualice la pantalla.
+Hide comments is on and already hides the whole comments section, previews included. This switch keeps its setting for when Hide comments is off.	Ocultar comentarios está activado y ya oculta toda la sección de comentarios, vistas previas incluidas. Este interruptor guarda su ajuste para cuando Ocultar comentarios esté desactivado.
 Hides the "Ideas you might love" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.	Oculta la fila «Ideas que te pueden gustar» con burbujas de temas bajo los Pins la próxima vez que Pinterest la muestre. Los comentarios y los Pins relacionados se quedan.
 Dismisses the optional reminder to confirm your email. A reminder that's already open stays. Account checks and sign-in still work as usual.	Descarta el aviso opcional para confirmar tu correo. Un aviso que ya está abierto se queda. Las comprobaciones de la cuenta y el inicio de sesión funcionan como siempre.
 Turns down Pinterest's "Got a minute?" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.	Rechaza la invitación a la encuesta «¿Tienes un minuto?» de Pinterest antes de que aparezca, como lo hace «Quizás más tarde», para que esa encuesta no vuelva. Las encuestas patrocinadas por anunciantes tampoco aparecen. Una invitación que ya está abierta se queda.
