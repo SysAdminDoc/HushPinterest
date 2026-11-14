@@ -32,6 +32,7 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef
+import com.android.tools.smali.dexlib2.immutable.ImmutableField
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
 import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction11n
@@ -261,6 +262,40 @@ class GmsCoreSupportTest {
     }
 
     @Test
+    fun `a provider choice the hook can't read safely refuses before any edit`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val fixture = rerouted(build)
+            val choice = fixture.flatMap { it.methods }.single { it.isProviderChoice() }
+            val implementation = choice.implementation!!
+            val request = implementation.instructions.filter { it.opcode == Opcode.INSTANCE_OF }.map { it.typeText() }.toSet()
+            val options = implementation.instructions.filter { it.opcode == Opcode.CHECK_CAST }.map { it.typeText() }.toSet() - request
+            // The hook reads the option's one String field as its type; with a second, it can't know which.
+            val twoTypes = fixture.map { owner ->
+                if (owner.type !in options) return@map owner
+                val second = ImmutableField(owner.type, "hushSecondType", "Ljava/lang/String;", AccessFlags.PUBLIC.value, null, null, null)
+                ImmutableClassDef(owner.type, owner.accessFlags, owner.superclass, owner.interfaces, owner.sourceFile,
+                    owner.annotations, owner.fields + second, owner.methods)
+            }
+            // The hook names p0 and p1 in four-bit register forms, so a frame past v15 can't take it.
+            val wide = fixture.map { owner ->
+                if (owner.type != choice.definingClass) return@map owner
+                val body = ImmutableMethodImplementation(17, implementation.instructions, implementation.tryBlocks, implementation.debugItems)
+                val copy = ImmutableMethod(owner.type, choice.name, choice.parameters, choice.returnType,
+                    choice.accessFlags, choice.annotations, choice.hiddenApiRestrictions, body)
+                ImmutableClassDef(owner.type, owner.accessFlags, owner.superclass, owner.interfaces, owner.sourceFile,
+                    owner.annotations, owner.fields, owner.methods.filterNot { it.same(choice) } + copy)
+            }
+            for ((classes, reason) in listOf(twoTypes to "credential option has 2 String fields",
+                    wide to "more registers than the hook can name")) {
+                val context = PatchContexts.of(ExtensionDex.classes() + classes)
+                val refusal = assertThrows(reason, PatchException::class.java) { gmsCorePreflightPatch.execute(context) }
+                assertTrue(refusal.message, refusal.message.orEmpty().contains(reason))
+                assertEquals("${build.name}: the flag stayed off", 0, context.mutableClassDefBy(SETTINGS_STATUS).methods.flag("gmsCoreSupport"))
+            }
+        }
+    }
+
+    @Test
     fun `each declared manifest moves Firebase messaging to microG-RE and can see it`() {
         for (build in Fixtures.declaredBuilds()) {
             val stock = parse(Fixtures.manifest(build))
@@ -353,6 +388,8 @@ class GmsCoreSupportTest {
         "androidx.credentials.TYPE_CLEAR_RESTORE_CREDENTIAL" in texts()
 
     private fun Instruction.referenceText() = (this as ReferenceInstruction).reference.toString()
+
+    private fun Instruction.typeText() = ((this as ReferenceInstruction).reference as TypeReference).type
 
     private fun Method.isAvailabilityCheck() = returnType == "I" &&
         parameterTypes.map(CharSequence::toString) == listOf("Landroid/content/Context;", "I") &&

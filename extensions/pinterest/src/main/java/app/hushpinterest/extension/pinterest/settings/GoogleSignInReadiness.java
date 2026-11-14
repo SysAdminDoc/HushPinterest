@@ -69,10 +69,12 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
      * when this is true. While microG-RE is installed the provider steps aside, because Android
      * hands Google's requests to Google's own Play services, and androidx falls back to the Play
      * services provider the patch points at microG-RE. Without microG-RE the provider answers for
-     * itself, so a password manager can still offer a saved login. Google's own requests never get
-     * this far: {@link #isGoogleIdOption} sends them to microG-RE first. Before the settings are
-     * ready, or when Android can't say, it steps aside as the patch always had it. A build without
-     * GmsCore support leaves the provider alone.
+     * itself, so a password manager can still offer a saved login. A request that asks only for a
+     * Google ID token never gets this far: {@link #isGoogleIdOption} sends it to microG-RE first. One
+     * that mixes a Google ID option with a password, Pinterest's offer on the login screen, still
+     * comes here, so its Google half goes to the phone's own Play services, which turns a re-signed
+     * build away. Before the settings are ready, or when Android can't say, it steps aside as the
+     * patch always had it. A build without GmsCore support leaves the provider alone.
      */
     public static boolean signsInThroughMicroG() {
         HookStatus.invoked(FamilyNames.GMS_CORE_SUPPORT);
@@ -101,7 +103,9 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
         HookStatus.invoked(FamilyNames.GMS_CORE_SUPPORT);
         try {
             if (!PushReadiness.gmsCore() || !GOOGLE_ID_TOKEN.equals(type)) return false;
-            HookStatus.counted(FamilyNames.GMS_CORE_SUPPORT, "Google sign-in option sent to microG-RE");
+            // Counted per option: a later option that isn't Google's still keeps the request on
+            // Android's own provider, so this counts what the choice saw, not where it went.
+            HookStatus.counted(FamilyNames.GMS_CORE_SUPPORT, "Google sign-in option in a credential request");
             return true;
         } catch (Throwable problem) {
             HookStatus.threw(FamilyNames.GMS_CORE_SUPPORT, "credential option", problem);

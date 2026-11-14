@@ -246,7 +246,7 @@ public class GoogleSignInReadinessTest {
             assertFalse(String.valueOf(other), GoogleSignInReadiness.isGoogleIdOption(other));
         }
         String export = LogBufferManager.buildExportText();
-        assertTrue(export, export.contains("Google sign-in option sent to microG-RE"));
+        assertTrue(export, export.contains("Google sign-in option in a credential request"));
         PushReadiness.gmsCoreForTests = false;
         assertFalse("a stock build", GoogleSignInReadiness.isGoogleIdOption(google));
     }
