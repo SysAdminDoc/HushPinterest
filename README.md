@@ -1,7 +1,7 @@
 ![HushPinterest. Keep the pins. Lose the ads.](assets/readme-hero.png)
 
 <p>
-  <img src="https://img.shields.io/badge/version-0.0.13-E60023" alt="Version 0.0.13">
+  <img src="https://img.shields.io/badge/version-0.0.14-E60023" alt="Version 0.0.14">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue" alt="License GPL-3.0"></a>
   <img src="https://img.shields.io/badge/platform-Android%2010%2B-3DDC84" alt="Platform Android 10+">
   <img src="https://img.shields.io/badge/Pinterest-14.44.0-E60023" alt="Pinterest 14.44.0">
