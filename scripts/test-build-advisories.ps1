@@ -37,7 +37,7 @@ function Assert-Fails([scriptblock]$Action, [string]$Pattern) {
 }
 function New-Report {
     return [ordered]@{
-        schemaVersion = 1; gradleVersion = '9.7.1'
+        schemaVersion = 1; gradleVersion = '9.8.2'
         configurations = @('settings:classpath', ':patches:patcherProvidedClasspath', ':patches:testRuntimeClasspath')
         components = @([ordered]@{
             group = 'com.example'; name = 'build-only-tool'; version = '1.2.3'; purl = $purl
@@ -152,7 +152,7 @@ function New-ReviewedBuildReport {
             $_ + ':_internal-unified-test-platform-core'
         })
     return [ordered]@{
-        schemaVersion = 1; gradleVersion = '9.7.1'; configurations = @('settings:classpath', $core, $emulator) +
+        schemaVersion = 1; gradleVersion = '9.8.2'; configurations = @('settings:classpath', $core, $emulator) +
             @($guava | Where-Object { $_ -notin @('settings:classpath', $core, $emulator) })
         components = @(foreach ($package in $modules.Keys) {
             $parts = $package.Split(':')

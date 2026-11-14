@@ -32,6 +32,7 @@ Every HushPinterest release, newest first.
 * `Black comments` no longer flashes a gray bar across the top of a video pin's comments while they load. (#12)
 * The settings code drops a `Set when you patched` section that never had a page to show, along with its five translations. Nothing changes on screen.
 * **Tooling:** Release walks now bind the bundle, stock build and patch selection to the signed APK installed on the test device. Publish rejects missing or mismatched evidence, unsupported app versions, invalid times and reported problems. A survey of an installed app without matching build evidence stays diagnostic only.
+* **Tooling:** The build runs on Gradle 9.8.2. Gradle 9.7.1 had three high advisories against the build machine itself (the local daemon and worker deserialization, and a repository fallback), all fixed in 9.8.1. They never touched the patched app. The build advisory check now reads the Gradle version from the build's dependency report and refuses one in those affected ranges, since the per-library advisory lookup never covers Gradle itself.
 * **Tooling:** Changelog entries don't open with a "Pinterest:" label anymore. HushPinterest only patches Pinterest, so it repeated itself on every line. The release scripts stopped adding or asking for it, and drop it from any bullet that still has one when a release is cut.
 
 ## 0.0.13 (2026-10-23)
