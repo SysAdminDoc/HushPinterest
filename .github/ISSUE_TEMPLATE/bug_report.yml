@@ -17,7 +17,7 @@ body:
     attributes:
       label: HushPinterest and Pinterest versions
       description: Long-press the Pinterest icon and tap HushPinterest, or open Pinterest's App info page and tap Additional settings in the app. Then open About and copy the Version line.
-      placeholder: HushPinterest 0.0.13 on Pinterest 14.41.0
+      placeholder: HushPinterest 0.0.14 on Pinterest 14.44.0
     validations:
       required: true
   - type: input
