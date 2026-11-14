@@ -12,6 +12,8 @@ import android.app.Application;
 
 import androidx.annotation.Nullable;
 
+import app.hushpinterest.extension.pinterest.settings.SettingsStatus;
+
 /**
  * Pinterest's own content provider authorities, as the running app has them.
  *
@@ -22,8 +24,8 @@ import androidx.annotation.Nullable;
  * to {@link #name}, which answers the running app's.
  *
  * <p>The running package comes from the process name, which Android sets before any of the app's
- * code runs, so this answers even before HushPinterest has a context. No setting and no log is read
- * here, for the same reason.
+ * code runs, so this answers even before HushPinterest has a context. Only the flag patching
+ * compiles in for Change package name is read here, never a setting or the log, for the same reason.
  */
 @SuppressWarnings("unused")
 public final class OwnAuthorities {
@@ -34,17 +36,23 @@ public final class OwnAuthorities {
     @Nullable
     static volatile String runningPackage;
 
+    /** Whether a test's build has Change package name; null reads the flag patching compiled in. */
+    @Nullable
+    static volatile Boolean renamedForTests;
+
     private OwnAuthorities() {
     }
 
     /**
      * [pinterestName], one of Pinterest's own authorities or a content:// address on one, as the
      * running app has it: unchanged in Pinterest itself, under the copy's package in a renamed copy.
-     * Any other text comes back as it was.
+     * Any other text comes back as it was, and so does every name in a build without Change package
+     * name, the only patch that places this.
      */
     public static String name(@Nullable String pinterestName) {
         if (pinterestName == null) return null;
         try {
+            if (!renamed()) return pinterestName;
             String running = runningPackage();
             if (running == null || PINTEREST.equals(running)) return pinterestName;
             int start = pinterestName.startsWith(CONTENT) ? CONTENT.length() : 0;
@@ -68,6 +76,12 @@ public final class OwnAuthorities {
         } catch (Throwable failure) {
             return false;
         }
+    }
+
+    /** Whether this build was patched with Change package name. */
+    static boolean renamed() {
+        Boolean forced = renamedForTests;
+        return forced != null ? forced : SettingsStatus.changePackageName();
     }
 
     @Nullable

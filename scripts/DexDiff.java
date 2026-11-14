@@ -280,7 +280,7 @@ public class DexDiff {
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 1), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
-            Map.entry("longPressChoices", 1));
+            Map.entry("longPressChoices", 1), Map.entry("ownAuthorities", 1));
 
     /**
      * A start-call, next-call, sole-call or once-call line: its method reference, the next-call's
@@ -333,7 +333,8 @@ public class DexDiff {
                 boolean validMutation = family || (columns[2].equals("guard") ? mutationValues >= 2 && mutationValues % 2 == 0
                         : columns[2].equals("builtView") ? mutationValues >= 3 && mutationValues % 3 == 0
                         : MUTATION_COLUMNS.getOrDefault(columns[2], -1) == mutationValues);
-                // A family's capability column may be empty: a manifest-only patch changes no bytecode.
+                // A family's capability column may be empty: a patch applied whole, whose own installed
+                // flag a mutation rule may name when it changes bytecode too.
                 if ((family && columns.length != 4) || (!family && columns.length < 4)
                         || Arrays.stream(columns).limit(family ? 3 : columns.length).anyMatch(String::isBlank)
                         || !columns[1].matches("[A-Za-z][A-Za-z0-9]*(,[A-Za-z][A-Za-z0-9]*)*")
@@ -2367,6 +2368,8 @@ public class DexDiff {
         final List<String> findings = new ArrayList<>();
         final Map<String, Boolean> flags = new LinkedHashMap<>();
         final Map<String, String> owners = new LinkedHashMap<>();
+        /** Installed flags of the families with no capability, applied whole or not at all. */
+        final Set<String> wholeFamilies = new HashSet<>();
         final Map<String, FeatureEdits> edits = new LinkedHashMap<>();
         final Set<String> claimed = new HashSet<>();
         final Set<String> selected;
@@ -2522,7 +2525,7 @@ public class DexDiff {
         }
 
         boolean active(Contract rule) {
-            for (String cap : rule.callee.split(",")) if (flag(owners.get(cap))) return true;
+            for (String cap : rule.callee.split(",")) if (flag(wholeFamilies.contains(cap) ? cap : owners.get(cap))) return true;
             return rule.target.equals("settings");
         }
 
@@ -6323,6 +6326,64 @@ public class DexDiff {
             capability(c.callee, found);
         }
 
+        /** The authority a literal names: a content:// address's host, or the literal itself; null unless it's under Pinterest's package. */
+        static String ownAuthority(String literal) {
+            String authority = literal;
+            if (literal.startsWith("content://")) {
+                authority = literal.substring("content://".length());
+                for (char end : new char[] {'/', '?', '#'}) if (authority.indexOf(end) >= 0) authority = authority.substring(0, authority.indexOf(end));
+            }
+            return authority.startsWith("com.pinterest.") ? authority : null;
+        }
+
+        static String loadedString(Instruction i) {
+            return (i.getOpcode() == Opcode.CONST_STRING || i.getOpcode() == Opcode.CONST_STRING_JUMBO)
+                    && reference(i) instanceof StringReference s ? s.getString() : null;
+        }
+
+        /**
+         * Change package name's own providers: Pinterest's code spells their authorities out, and the
+         * patch hands each load of one to the hook, a range call on the register the load wrote, with
+         * the answer moved back into it. An authority routed once is routed at every load in
+         * Pinterest's code, and the methods are otherwise untouched. The patch itself refuses a
+         * build that routes none, since only the manifest knows which literals are providers.
+         */
+        void ownAuthorities(Contract c) {
+            String hook = c.strings.get(0);
+            Set<String> routed = new HashSet<>();
+            for (FeatureSite site : patched.ownCalls.getOrDefault(hook, List.of())) {
+                List<Instruction> body = instructions(site.method);
+                String literal = site.at > 0 ? loadedString(body.get(site.at - 1)) : null;
+                String authority = literal == null ? null : ownAuthority(literal);
+                if (authority == null) fail(hook + " doesn't take a literal naming one of Pinterest's own providers in " + site.method);
+                else routed.add(authority);
+            }
+            for (Method original : clean.methods.values()) {
+                if (original.getDefiningClass().startsWith(OWN) || original.getImplementation() == null) continue;
+                List<Instruction> was = instructions(original);
+                List<Integer> loads = new ArrayList<>();
+                for (int at = 0; at < was.size(); at++) {
+                    String literal = loadedString(was.get(at));
+                    if (literal != null && routed.contains(ownAuthority(literal))) loads.add(at);
+                }
+                if (loads.isEmpty()) continue;
+                Method m = actual(original);
+                List<Integer> sites = calls(m, hook, loads.size());
+                if (m == null || sites.size() != loads.size()) continue;
+                List<Instruction> body = instructions(m);
+                for (int k = 0; k < loads.size(); k++) {
+                    int at = sites.get(k);
+                    int register = firstRegister(was.get(loads.get(k)));
+                    boolean shaped = at == loads.get(k) + 2 * k + 1 && body.get(at).getOpcode() == Opcode.INVOKE_STATIC_RANGE
+                            && arguments(body.get(at)).equals(List.of(register)) && at + 1 < body.size()
+                            && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT && firstRegister(body.get(at + 1)) == register
+                            && onlyFrom(m, at, at - 1) && onlyFrom(m, at + 1, at);
+                    if (!shaped) fail(hook + " doesn't take the authority straight from its load, into the same register, in " + m);
+                    else remove(m, at, at + 2);
+                }
+            }
+        }
+
         static final String BLOCK_STORE = "Lcom/google/android/gms/auth/blockstore/";
 
         /**
@@ -6946,6 +7007,7 @@ public class DexDiff {
             for (Contract c : rules) if (c.kind.equals("family")) {
                 if (!names.add(c.target) || flags.containsKey(c.callee)) { fail("duplicate family " + c.target); continue; }
                 readFlag(c.callee);
+                if (c.strings.get(0).isEmpty()) wholeFamilies.add(c.callee);
                 for (String cap : c.strings.get(0).split(",")) {
                     if (cap.isEmpty()) continue;
                     if (owners.putIfAbsent(cap, c.callee) != null) fail("duplicate capability " + cap);
@@ -6966,7 +7028,7 @@ public class DexDiff {
             for (Contract c : rules) if (c.kind.equals("mutation")) {
                 for (String cap : c.callee.split(",")) {
                     coveredCapabilities.add(cap);
-                    if (!owners.containsKey(cap) && !cap.equals("settings")) fail("unowned mutation capability " + cap);
+                    if (!owners.containsKey(cap) && !cap.equals("settings") && !wholeFamilies.contains(cap)) fail("unowned mutation capability " + cap);
                 }
                 if (!active(c)) continue;
                 featureControls = !c.target.equals("settings");
@@ -6992,6 +7054,7 @@ public class DexDiff {
                     case "saveAndDownload": saveAndDownload(c); break;
                     case "homePage": homePage(c); break;
                     case "firebaseCertificate": firebaseCertificate(c); break;
+                    case "ownAuthorities": ownAuthorities(c); break;
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;
                     case "topicSuggestions": topicSuggestions(c); break;

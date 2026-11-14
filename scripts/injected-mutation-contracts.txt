@@ -29,8 +29,9 @@ no-call Landroid/content/pm/ShortcutManager;->removeAllDynamicShortcuts()V outsi
 # hook/builder name/anchor triples, "*" for a builder of any name, and all of a rule's triples are one surface.
 # The clean APK supplies the callers. Final flags do not excuse missing, duplicated or misplaced calls.
 # Feed ownership is shared. Ad views and the Play Core update prompt can be absent in a supported target.
-# An empty capability column is a family that changes no bytecode (a manifest-only patch): only its
-# installed flag is checked against the selected patches.
+# An empty capability column is a family applied whole when patching, or the patch fails: its
+# installed flag is checked against the selected patches, and a mutation rule may name that flag in
+# its capability column when the family changes bytecode too (Change package name does).
 family|hideAds|Hide ads|feedAds,adViews,googleAds,metaAds
 family|hideAiPins|Hide AI-labeled pins|feedAiPins
 family|hideShopping|Hide shopping and product pins|feedShopping
@@ -117,3 +118,6 @@ mutation|saveAndDownload|saveAndDownload|Lapp/hushpinterest/extension/pinterest/
 mutation|feedSavedPins|homePage|Lapp/hushpinterest/extension/pinterest/ads/SavedPins;->homePage(Ljava/lang/Object;)V|Lcom/pinterest/feature/home/model/|Lcom/pinterest/legacy/feeds/DynamicFeed;
 mutation|feedbackFlyout|feedbackFlyout|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->feedbackFlyout(Ljava/lang/Boolean;)Ljava/lang/Boolean;|show_feedback_flyout
 mutation|firebaseCertificate|firebaseCertificate|Lapp/hushpinterest/extension/pinterest/notifications/PushNotifications;->certificateHeader(Ljava/net/URLConnection;Ljava/lang/String;)Ljava/lang/String;
+# Change package name hands each load of a literal naming one of Pinterest's own providers to the
+# extension, which answers the running copy's authority.
+mutation|changePackageName|ownAuthorities|Lapp/hushpinterest/extension/pinterest/coexist/OwnAuthorities;->name(Ljava/lang/String;)Ljava/lang/String;

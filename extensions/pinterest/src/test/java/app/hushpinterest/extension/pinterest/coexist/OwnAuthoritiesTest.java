@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -24,9 +25,25 @@ import org.junit.Test;
 public class OwnAuthoritiesTest {
     private static final String PROVIDER = "com.pinterest.provider";
 
+    /** Change package name is the patch that places {@link OwnAuthorities#name}. */
+    @Before
+    public void renamedBuild() {
+        OwnAuthorities.renamedForTests = true;
+    }
+
     @After
     public void forget() {
         OwnAuthorities.runningPackage = null;
+        OwnAuthorities.renamedForTests = null;
+    }
+
+    /** A build without Change package name keeps Pinterest's names, whatever package it runs as. */
+    @Test
+    public void withoutThePatchEveryNameStays() {
+        OwnAuthorities.renamedForTests = false;
+        OwnAuthorities.runningPackage = "com.pinterest.hushpinterest";
+        assertEquals(PROVIDER, OwnAuthorities.name(PROVIDER));
+        assertEquals("content://com.pinterest.provider/cache/a.jpg", OwnAuthorities.name("content://com.pinterest.provider/cache/a.jpg"));
     }
 
     @Test
