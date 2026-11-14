@@ -221,6 +221,14 @@ function Invoke-SourceRequest {
                 Start-Sleep -Seconds $RateLimitWaitSeconds
                 continue
             }
+            # Jman's API answers a 503 now and then and a 200 a minute later. A server error that
+            # outlasts three more tries is still a source that couldn't be read.
+            if ($status -in @(502, 503, 504) -and $attempt -lt 4) {
+                $wait = [Math]::Min($RateLimitWaitSeconds, 20)
+                Write-Step "HTTP $status from $([Uri]$Uri | ForEach-Object { $_.Host }), trying again in $wait s"
+                Start-Sleep -Seconds $wait
+                continue
+            }
             return [pscustomobject]@{ Status = $status; Content = $null }
         }
     }
@@ -468,6 +476,35 @@ Invoke-Source 'Morphe Patch Tracker' {
     "$($seen.Count) Pinterest bundles; HushPinterest " + $(if ($listed['morphe-patch-tracker']) { 'listed' } else { 'not listed' })
 }
 
+function Resolve-JmanGitHubRelease {
+    <#
+        The repository behind a Jman row whose download address names none, or $null. Reseam's
+        rows point at its own forge's API (api.reseam.app) and name git.reseam.app as the source,
+        which this audit can't read, while the same files go out as GitHub releases too. A row
+        resolves to github.com/<namespace>/<repo> of its source only when that repository has a
+        release of the row's version with an asset whose digest is the file hash Jman recorded, so
+        a same-named stranger can't stand in for it.
+    #>
+    param($Bundle)
+
+    $source = Get-SourceProperty $Bundle 'source'
+    $namespace = [string](Get-SourceProperty $source 'namespace')
+    $name = [string](Get-SourceProperty $source 'repo')
+    $version = [string](Get-SourceProperty $Bundle 'version')
+    $hash = [string](Get-SourceProperty $Bundle 'file_hash')
+    if ($namespace -notmatch '^[A-Za-z0-9_.-]+$' -or $name -notmatch '^[A-Za-z0-9_.-]+$' -or -not $version -or
+            $hash -notmatch '^[0-9a-fA-F]{64}$') {
+        return $null
+    }
+    $answer = Invoke-SourceRequest -Auth github `
+        -Uri "https://api.github.com/repos/$namespace/$name/releases/tags/$([Uri]::EscapeDataString($version))"
+    if ($answer.Status -ne 200) { return $null }
+    $release = ConvertFrom-SourceJson -Text $answer.Content -What "$namespace/$name's $version release"
+    $digests = @(Get-JsonItems (Get-SourceProperty $release 'assets') | ForEach-Object { [string](Get-SourceProperty $_ 'digest') })
+    if ($digests -notcontains "sha256:$($hash.ToLowerInvariant())") { return $null }
+    return "https://github.com/$namespace/$name"
+}
+
 Invoke-Source 'Jman''s bundle index' {
     # config/sources.json names each repository the index follows. Its Git database went on
     # 2026-10-14 for an API (https://patch-bundles.api.jmancentral.com/api.json), where
@@ -500,6 +537,7 @@ Invoke-Source 'Jman''s bundle index' {
                 $address = [string]$bundle.download_url
                 $repository = if ($address -match '^(https://[^/]+/.+?)/(-/)?releases/') { $Matches[1] } else { $null }
                 $key = ConvertTo-SourceKey $repository
+                if (-not $key) { $key = ConvertTo-SourceKey (Resolve-JmanGitHubRelease $bundle) }
                 if (-not $key) {
                     Add-Finding -Kind 'index-unresolved' -Repository $null `
                         -Detail "Jman's index lists a Pinterest bundle ($($bundle.version)) whose download address names no repository: $address" -Evidence $null
@@ -541,17 +579,25 @@ Invoke-Source 'GitHub code search' {
             totalCount = 0; returnedCount = 0; pages = 0; complete = $false }
         $searchCoverage.Add($coverage)
         for ($page = 1; $page -le 10; $page++) {
-            if ($script:searchCount -gt 0 -and $SearchDelaySeconds -gt 0) { Start-Sleep -Milliseconds ([int]($SearchDelaySeconds * 1000)) }
-            $script:searchCount++
-            $answer = Invoke-SourceRequest -Uri ("https://api.github.com/search/code?q=" + [Uri]::EscapeDataString($query.Query) +
-                "&per_page=100&page=$page") -Auth github
-            if ($answer.Status -ne 200) { throw "the search '$($query.Query)' answered HTTP $($answer.Status)" }
-            $result = ConvertFrom-SourceJson -Text $answer.Content -What "the search '$($query.Query)'"
-            $total = Get-SourceProperty $result 'total_count'
-            $incomplete = Get-SourceProperty $result 'incomplete_results'
-            if (($total -isnot [int] -and $total -isnot [long]) -or $total -lt 0 -or $incomplete -isnot [bool]) {
-                $coverage.complete = $false
-                throw "the search '$($query.Query)' lacks a nonnegative total_count or boolean incomplete_results"
+            # GitHub's code index sometimes counts a hit it leaves off the page, or flags a page
+            # incomplete, and has it right on the next ask. A page asked three times that still
+            # comes back short or incomplete keeps the census from stamping, as before.
+            for ($ask = 1; $ask -le 3; $ask++) {
+                if ($script:searchCount -gt 0 -and $SearchDelaySeconds -gt 0) { Start-Sleep -Milliseconds ([int]($SearchDelaySeconds * 1000)) }
+                $script:searchCount++
+                $answer = Invoke-SourceRequest -Uri ("https://api.github.com/search/code?q=" + [Uri]::EscapeDataString($query.Query) +
+                    "&per_page=100&page=$page") -Auth github
+                if ($answer.Status -ne 200) { throw "the search '$($query.Query)' answered HTTP $($answer.Status)" }
+                $result = ConvertFrom-SourceJson -Text $answer.Content -What "the search '$($query.Query)'"
+                $total = Get-SourceProperty $result 'total_count'
+                $incomplete = Get-SourceProperty $result 'incomplete_results'
+                if (($total -isnot [int] -and $total -isnot [long]) -or $total -lt 0 -or $incomplete -isnot [bool]) {
+                    $coverage.complete = $false
+                    throw "the search '$($query.Query)' lacks a nonnegative total_count or boolean incomplete_results"
+                }
+                $expected = [Math]::Max(0, [Math]::Min(100, [long]$total - ($page - 1) * 100))
+                if (-not $incomplete -and @(Get-JsonItems $result.items).Count -ge $expected) { break }
+                if ($ask -lt 3) { Write-Step "the search '$($query.Query)' came back short on page $page, asking again" }
             }
             if ($page -eq 1) { $coverage.complete = $true }
             $coverage.pages = $page
