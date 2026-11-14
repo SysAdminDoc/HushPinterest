@@ -62,6 +62,10 @@ public final class FeatureDexFixture {
     private static final String ACTIVITY = "Lcom/pinterest/activity/PinterestActivity;";
     private static final String HOME_ACTIVITY = "Lcom/pinterest/activityLibrary/activity/task/activity/MainActivity;";
     private static final String OBSERVER = "Lfixture/ScreenshotObserver;";
+    private static final String CAPTURE = "Lfixture/ScreenCapture;";
+    private static final String SHOT_FILES = "Lfixture/ScreenshotFiles;";
+    private static final String SHOT_EVENT = "Lfixture/ScreenshotEvent;";
+    private static final String SHOT_RECEIVER = "Lfixture/ScreenshotReceiver;";
     private static final String FEED = "Lfixture/FeedPage;";
     private static final String SENDER = "Lfixture/OutgoingText;";
     private static final String VOID = "V";
@@ -109,6 +113,8 @@ public final class FeatureDexFixture {
         SHAPES.put(MESSAGE_TOAST, new Shape(TOAST, List.of(), List.of("text:Ljava/lang/String;"), false));
         SHAPES.put(TEXT_BUILDER, new Shape(OBJECT, List.of(), List.of(), true));
         SHAPES.put(SAVED_TEXT, new Shape(OBJECT, List.of(TEXT_BUILDER), List.of(), false));
+        SHAPES.put(CAPTURE, new Shape(OBJECT, List.of("Landroid/app/Activity$ScreenCaptureCallback;"), List.of(), false));
+        SHAPES.put(SHOT_FILES, new Shape("Landroid/database/ContentObserver;", List.of(), List.of(), false));
     }
 
     private static ImmutableMethodReference ref(String type, String name, String result, String... parameters) {
@@ -411,6 +417,23 @@ public final class FeatureDexFixture {
         if (variant.equals("misrouted")) methods.add(method(OBSERVER, "unrelated", VOID, true, 1,
                 List.of(invoke(Opcode.INVOKE_STATIC, ref(SCREENSHOT, "hideScreenshotShare", "Z")), new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0), end())));
         classes.put(OBSERVER, methods);
+        // The screen capture callback and the photos watcher's event receiver return at once on the
+        // same answer; the watcher that posts the event stays as it was.
+        List<Instruction> captured = new ArrayList<>(), received = new ArrayList<>(), changed = new ArrayList<>();
+        for (List<Instruction> guarded : List.of(captured, received)) if (calls) {
+            guarded.add(invoke(Opcode.INVOKE_STATIC, ref(SCREENSHOT, "hideScreenshotShare", "Z")));
+            guarded.add(new ImmutableInstruction11x(Opcode.MOVE_RESULT, 0));
+            guarded.add(new ImmutableInstruction21t(Opcode.IF_EQZ, 0, 3));
+            guarded.add(end());
+        }
+        captured.add(end());
+        received.add(end());
+        changed.add(literal("date_added", 0)); changed.add(literal("_data", 0));
+        changed.add(new ImmutableInstruction21c(Opcode.NEW_INSTANCE, 0, new ImmutableTypeReference(SHOT_EVENT))); changed.add(end());
+        classes.put(CAPTURE, List.of(method(CAPTURE, "onScreenCaptured", VOID, false, 2, captured)));
+        classes.put(SHOT_FILES, List.of(method(SHOT_FILES, "onChange", VOID, false, 4, changed, "Z", "Landroid/net/Uri;")));
+        classes.put(SHOT_EVENT, List.of());
+        classes.put(SHOT_RECEIVER, List.of(method(SHOT_RECEIVER, "onEventMainThread", VOID, false, 3, received, SHOT_EVENT)));
         if (!variant.equals("clean")) {
             List<Instruction> decision = new ArrayList<>();
             if (variant.equals("unreachable-control")) {

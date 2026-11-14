@@ -336,6 +336,73 @@ class UiFixtureTest {
         assertFlag(context, "assistantEntries", false)
     }
 
+    /** The observers that read the newest image's path and age to spot a screenshot file. */
+    private fun photosWatchers(classes: List<ClassDef>) = classes.filter { it.superclass == CONTENT_OBSERVER }
+        .flatMap { owner -> owner.methods.filter { it.name == "onChange" && "date_added" in it.strings() && "_data" in it.strings() } }
+
+    /** Android 14's callbacks, then every bus handler for the event the photos watchers post. */
+    private fun screenshotListeners(classes: List<ClassDef>): List<Method> {
+        val events = photosWatchers(classes).flatMap { it.instructions() }.filter { it.opcode == Opcode.NEW_INSTANCE }
+            .map { (it as ReferenceInstruction).reference.toString() }.toSet()
+        return classes.filter { SCREEN_CAPTURE_CALLBACK in it.interfaces }.flatMap { owner -> owner.methods.filter { it.name == "onScreenCaptured" } } +
+            classes.flatMap { owner -> owner.methods.filter { it.name == "onEventMainThread" && it.parameterTypes.size == 1 &&
+                it.parameterTypes.single().toString() in events } }
+    }
+
+    @Test fun `a pin closeup's screenshot callback and every screenshot event handler return at once only when the switch says so`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val classes = read(build)
+            val stock = screenshotListeners(classes)
+            // 14.44.0: the one callback lambda, then Home, both pin closeups, boards and two Pear screens (dex probe 2026-11-14).
+            assertEquals("${build.name}: one screen capture callback and six screenshot event handlers", 7, stock.size)
+            val watchers = photosWatchers(classes)
+            assertEquals("${build.name}: Pinterest's watcher and the merged observer's screenshot case", 2, watchers.size)
+            val context = PatchContexts.of(ExtensionDex.classes() + classes)
+            val warnings = PatchLogCapture.warnings { hideScreenshotSharePatch.execute(context) }
+            assertEquals("${build.name} warnings", emptyList<String>(), warnings)
+            for (listener in stock) {
+                val body = context.mutable(listener).instructions()
+                val where = "${build.name}: ${listener.definingClass}->${listener.name}"
+                assertEquals("$where, the guard's shape", listOf(Opcode.INVOKE_STATIC, Opcode.MOVE_RESULT, Opcode.IF_EQZ, Opcode.RETURN_VOID),
+                    body.take(4).map { it.opcode })
+                assertEquals("$where, the hook", SCREENSHOT_HOOK, (body[0] as ReferenceInstruction).reference.toString())
+                // A switch payload has to start on an even code unit, so the guard can add a NOP pad in front of it.
+                assertEquals("$where, the rest is Pinterest's own", listener.instructions().map { it.opcode }.filter { it != Opcode.NOP },
+                    body.drop(4).map { it.opcode }.filter { it != Opcode.NOP })
+            }
+            // The merged observer's other cases serve unrelated observers, so no watcher is touched.
+            for (watcher in watchers) assertEquals("${build.name}: ${watcher.definingClass} stays Pinterest's own",
+                watcher.instructions().map { it.opcode }, context.mutable(watcher).instructions().map { it.opcode })
+        }
+    }
+
+    @Test fun `a build without the screen capture callback keeps the other screenshot listeners and names the one it lacks`() {
+        val classes = read(Fixtures.declaredBuilds().first()).filter { SCREEN_CAPTURE_CALLBACK !in it.interfaces }
+        val context = PatchContexts.of(ExtensionDex.classes() + classes)
+        val warnings = PatchLogCapture.warnings { hideScreenshotSharePatch.execute(context) }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertTrue(warnings.single(), warnings.single().contains("screen capture callback"))
+        assertFlag(context, "hideScreenshotShare", true)
+        assertFlag(context, "screenshotShare", true)
+        val handlers = screenshotListeners(classes)
+        assertEquals(6, handlers.size)
+        for (handler in handlers) assertEquals("${handler.definingClass}", SCREENSHOT_HOOK,
+            (context.mutable(handler).instructions()[0] as ReferenceInstruction).reference.toString())
+    }
+
+    @Test fun `a build whose screenshot event has no handler keeps the callback and names what it lacks`() {
+        val full = read(Fixtures.declaredBuilds().first())
+        val handlers = screenshotListeners(full).filter { it.name == "onEventMainThread" }.map { it.definingClass }.toSet()
+        val classes = full.filter { it.type !in handlers }
+        val context = PatchContexts.of(ExtensionDex.classes() + classes)
+        val warnings = PatchLogCapture.warnings { hideScreenshotSharePatch.execute(context) }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertTrue(warnings.single(), warnings.single().contains("screenshot event's receivers"))
+        assertFlag(context, "hideScreenshotShare", true)
+        val callback = screenshotListeners(classes).single()
+        assertEquals(SCREENSHOT_HOOK, (context.mutable(callback).instructions()[0] as ReferenceInstruction).reference.toString())
+    }
+
     @Test fun `a missing family status refuses before changing any vendor method`() {
         for ((index, patch) in patches.withIndex()) {
             val context = PatchContexts.of(ExtensionDex.classes())
@@ -550,6 +617,8 @@ class UiFixtureTest {
             for (owner in dex.classes) {
                 if (owner.methods.any { it.name == INBOX_ADD_SECTIONS }) adders += ImmutableClassDef.of(owner)
                 val match = owner.type in required || owner.isCommentsModule() || owner.methods.any { it.buildsRecentSearchCell() } ||
+                    SCREEN_CAPTURE_CALLBACK in owner.interfaces || owner.superclass == CONTENT_OBSERVER ||
+                    owner.methods.any { it.name == "onEventMainThread" } ||
                     (owner.superclass == "Ljava/lang/Enum;" && owner.fields.map { it.name }
                         .containsAll(listOf("HOME", "PROFILE", "CREATE", "NOTIFICATIONS"))) ||
                     owner.methods.any { method -> method.strings().any { it in anchors } ||
@@ -563,6 +632,10 @@ class UiFixtureTest {
         val feeds = found.values.filter { owner -> owner.methods.any { it.name == "<init>" && INBOX_UPDATES_FEED in it.strings() } }
             .map { it.type }.toSet()
         adders.filter { owner -> owner.fields.any { it.type in feeds } }.forEach { found[it.type] = it }
+        // The event the photos watchers post, which No screenshot share menu checks is Pinterest's own class.
+        found += FixtureDex.classes(build, photosWatchers(found.values.toList()).flatMap { it.instructions() }
+            .filter { it.opcode == Opcode.NEW_INSTANCE }.map { (it as ReferenceInstruction).reference.toString() }
+            .toSet() - found.keys)
         // The greeting header's ids class, which Hide navigation buttons checks for Create's id.
         found += FixtureDex.classes(build, found.values.flatMap { it.methods }.flatMap { it.fields() }
             .filter { it.name == GREETING_NEWSHUB }.map { it.definingClass }.toSet() - found.keys)

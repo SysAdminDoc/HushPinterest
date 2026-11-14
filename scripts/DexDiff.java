@@ -2882,6 +2882,39 @@ public class DexDiff {
                 }
                 return true;
             }
+            if (selector.equals("screenshotCallback")) {
+                // Every screen capture callback in Pinterest's code returns at once while the switch is on.
+                List<Method> callbacks = new ArrayList<>();
+                for (ClassDef cd : clean.classes.values()) if (!cd.getType().startsWith(OWN)
+                        && cd.getInterfaces().contains("Landroid/app/Activity$ScreenCaptureCallback;"))
+                    for (Method m : cd.getMethods()) if (m.getName().equals("onScreenCaptured") && descriptor(m).equals("()V")
+                            && m.getImplementation() != null) callbacks.add(m);
+                if (callbacks.isEmpty()) { fail("no screen capture callback in this build"); return false; }
+                for (Method original : callbacks) guard(actual(original), hook, 0, List.of(), 0, false, false);
+                return true;
+            }
+            if (selector.equals("screenshotReceiver")) {
+                // The photos watchers post one event for a new screenshot file; every method taking only
+                // that event returns at once while the switch is on, and the watchers stay untouched.
+                Set<String> events = new TreeSet<>();
+                for (Method m : clean.holding("date_added")) if (m.getName().equals("onChange") && descriptor(m).equals("(ZLandroid/net/Uri;)V")
+                        && clean.texts.get(m.toString()).contains("_data") && clean.classes.containsKey(m.getDefiningClass())
+                        && "Landroid/database/ContentObserver;".equals(clean.classes.get(m.getDefiningClass()).getSuperclass()))
+                    for (Instruction i : instructions(m)) if (i.getOpcode() == Opcode.NEW_INSTANCE) {
+                        String type = String.valueOf(reference(i));
+                        if (clean.classes.containsKey(type) && List.of("Ljava/", "Ljavax/", "Lkotlin/", "Landroid/", "Landroidx/")
+                                .stream().noneMatch(type::startsWith)) events.add(type);
+                    }
+                if (events.size() != 1) { fail("the photos watchers post " + events.size() + " event types, expected one"); return false; }
+                String event = events.iterator().next();
+                List<Method> receivers = new ArrayList<>();
+                for (Method m : clean.methods.values()) if (!m.getDefiningClass().startsWith(OWN) && m.getImplementation() != null
+                        && !m.getName().startsWith("<") && m.getReturnType().equals("V") && m.getParameterTypes().size() == 1
+                        && m.getParameterTypes().get(0).toString().equals(event)) receivers.add(m);
+                if (receivers.isEmpty()) { fail("nothing receives the screenshot event " + event); return false; }
+                for (Method original : receivers) guard(actual(original), hook, 0, List.of(), 0, false, false);
+                return true;
+            }
             List<Method> targets = new ArrayList<>();
             int before = 0;
             boolean whole = true;
