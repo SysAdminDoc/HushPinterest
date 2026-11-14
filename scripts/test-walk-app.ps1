@@ -103,8 +103,11 @@ try {
         CaseList = [ordered]@{ version = $WalkCaseListVersion; complete = $true; leftOut = @(); extra = @(); hooksLeftOut = @() }
         Cases = @(Get-WalkCaseList | ForEach-Object {
                 [ordered]@{ id = $_.Id; kind = $_.Kind; result = 'pass'; activity = ''; anchor = ''; implementation = ''; detail = '' } })
+        # A real walk also lists the report's families the map leaves out, as not exercised.
         Hooks = @(Get-WalkHookFamilies | ForEach-Object {
-                [ordered]@{ family = $_.Family; case = $_.Case; verdict = 'pass'; invoked = 1; missing = 0; ambiguous = 0; detail = '' } })
+                [ordered]@{ family = $_.Family; case = $_.Case; verdict = 'pass'; invoked = 1; missing = 0; ambiguous = 0; detail = '' } }) +
+            @([ordered]@{ family = 'Keep Home feed'; case = $null; verdict = 'not exercised'; invoked = 0; missing = 0; ambiguous = 0
+                detail = 'no case of the walk is mapped to it' })
         Process = [ordered]@{
             stoppedAt = '2026-10-21 20:00:00'; runningBefore = @('1', '4000', '4100'); baseline = [ordered]@{ records = 1; newest = '' }
             mainPid = '4242'; mainPidAtEnd = '4242'; restarts = @(); anrs = @()

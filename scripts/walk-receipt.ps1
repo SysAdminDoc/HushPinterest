@@ -348,7 +348,15 @@ function Test-WalkReceipt {
             return Fail "the walk didn't check and pass the $($family.Family) hook on its $($family.Case) case"
         }
     }
-    if ($verdicts.Count -ne $canonicalFamilies.Count) { return Fail "the walk receipt has a hook family the canonical map doesn't" }
+    # The walk also lists every family the report names that the map leaves out, or the build lacks,
+    # as not exercised with no case. Any other extra family, or one claiming a verdict, isn't the map's.
+    foreach ($family in $verdicts.Keys) {
+        if (@($canonicalFamilies | Where-Object { $_.Family -ceq $family }).Count -gt 0) { continue }
+        $extra = $verdicts[$family]
+        if ($extra.verdict -cne 'not exercised' -or $null -ne $extra.case) {
+            return Fail "the walk receipt gives the $family hook, which the canonical map doesn't have, a verdict or a case"
+        }
+    }
     # One main process from launch to the end, and nothing since the stop but the stop itself,
     # helpers the system reclaimed and other users' processes.
     $process = $receipt.process
