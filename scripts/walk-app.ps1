@@ -50,19 +50,24 @@
     dumped, Back closes it and the screen it opened from has to show again with neither menu
     over it. The long press starts from a fresh dump that has to show the home feed with no
     menu over it, picks the pin from that dump and holds it in one shell command that dumps the
-    menu while it's held and lets go where it pressed, which picks nothing. A retry does all of
-    that again. No row or button of a menu is ever tapped.
+    menu while it's held and then cancels the touch, which can't pick anything whatever menu
+    came up. A retry does all of that again. No row or button of a menu is ever tapped.
 
-    Process health: just before the deliberate force-stop the walk lists the device's processes,
-    and two seconds after it saves Pinterest's exit records (dumpsys activity exit-info) as the
-    baseline. It follows the main process's pid, user 0's only, after every case. At the end it
-    reads the exit records again and the event log's am_anr lines, and Resolve-WalkExits classes
-    each record: old, the initial stop (the force-stop's own record for a pid that was running),
-    unrelated (another user's), a helper eviction or other helper exit, or a failure (an
-    in-window crash, ANR or failed start of any Pinterest process, or any other exit of the main
-    one). An ANR the event log has already dropped still shows as an exit record. A failure, an ANR or a main pid that changed or went away fails the
-    walk. The receipt's process field holds the baseline, every exit since the stop with its
-    class, the ANRs and the restarts.
+    Process health: Pinterest is started if it isn't running, so the deliberate force-stop always
+    leaves its own exit record. Just before the stop the walk lists the device's processes, and
+    two seconds after it saves Pinterest's exit records (dumpsys activity exit-info) as the
+    baseline. After every case it follows the main process's pid, user 0's only, and reads the
+    exit records again, keeping each one it hasn't seen, since the device keeps only the last
+    few. At the end Resolve-WalkExits (walk-receipt.ps1) classes them all: old, the initial stop
+    (the force-stop's own record for a pid that was running), unrelated (another user's), a
+    helper eviction or other helper exit, or a failure (a crash, ANR or failed start of any
+    Pinterest process, any other exit of the main one, or a helper still in use killed). An ANR
+    the event log has already dropped still shows as an exit record. A failure, an ANR in user
+    0 or a main pid that changed or went away fails the walk, and so does a crash in the crash
+    buffer unless the exit records place its pid in another user. The receipt's process field
+    holds the stop time, the pids running before it, the baseline, every exit since the stop
+    with the facts its class comes from, the ANRs and the restarts, and the publish gate
+    classes each exit again from those facts.
 
     The walk also holds the patches' hooks to account. Before it restarts Pinterest it turns on the
     switch of every family in -HookFamilies (the canonical Get-WalkHookFamilies map by default), and after the last settings page it saves the full
@@ -221,9 +226,14 @@ function Test-WalkMark {
     .SYNOPSIS
         Whether a node from Get-WalkNodes carries -Mark: kind:value for an exact match or
         kind~pattern for a case-sensitive regex, where kind is id (the resource id's name), desc,
-        text, or any (the text or the description).
+        text, or any (the text or the description). Marks joined by ' && ' all have to be on this
+        one node.
     #>
     param($Node, [string]$Mark)
+    if ($Mark.Contains(' && ')) {
+        foreach ($part in $Mark -split ' && ') { if (-not (Test-WalkMark $Node $part)) { return $false } }
+        return $true
+    }
     if ($Mark -notmatch '^(id|desc|text|any)([:~])(.*)$') { throw "The walk mark $Mark isn't kind:value or kind~pattern." }
     $kind = $Matches[1]; $exact = $Matches[2] -ceq ':'; $value = $Matches[3]
     $fields = switch ($kind) { 'id' { @($Node.Id) } 'desc' { @($Node.Desc) } 'text' { @($Node.Text) } default { @($Node.Text, $Node.Desc) } }
@@ -334,92 +344,75 @@ function Select-WalkGridPin {
     $null
 }
 
+function Get-WalkScrimPoint {
+    <#
+    .SYNOPSIS
+        A point on the long-press menu's backdrop for a touch that closes the menu, which stays
+        open after the hold is cancelled and lets Back through to the home feed, so Back leaves
+        Pinterest. The menu's buttons ring the finger, and the dump can't place them (each one's
+        bounds run to the screen's bottom right corner), so the point is the middle of the
+        screen's width in whichever half is the far one from -HoldY, clear of the bars.
+    #>
+    param([int]$HoldY, [int]$Width, [int]$Height)
+    $y = if ($HoldY -le $Height / 2) { 0.75 } else { 0.25 }
+    [pscustomobject]@{ X = [int]($Width / 2); Y = [int]($Height * $y) }
+}
+
 function ConvertFrom-WalkExitInfo {
     <#
     .SYNOPSIS
         The records of dumpsys activity exit-info <package>: each process exit with its time, pid,
         uids, user, process name, reason, subreason, importance and description. Key, the
-        timestamp and pid together, tells one record from another across two dumps.
+        timestamp and pid together, tells one record from another across two dumps. A record whose
+        timestamp line doesn't read comes back with no Time, which fails the walk, keyed by its
+        own lines.
     #>
     param([string]$Text)
     $record = $null
+    $finish = {
+        if (-not $record.Key) { $record.Key = 'unread/' + ($record.Lines -join '|') }
+        $record.Remove('Lines')
+        [pscustomobject]$record
+    }
     foreach ($line in @($Text -split "`r?`n")) {
         if ($line -match '^\s*ApplicationExitInfo #\d+:') {
-            if ($record -and $record.Key) { [pscustomobject]$record }
-            $record = [ordered]@{ Key = $null }
+            if ($record) { & $finish }
+            $record = [ordered]@{ Key = $null; Timestamp = ''; Time = $null; ProcessId = ''; Lines = [Collections.Generic.List[string]]::new() }
             continue
         }
         if (-not $record) { continue }
+        if ($line.Trim()) { $record.Lines.Add($line.Trim()) }
         if ($line -match '^\s*timestamp=(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{3}) pid=(\d+) realUid=(\d+) packageUid=(\d+)\b.*\buser=(\d+)') {
             $record.Timestamp = $Matches[1]
             $record.Time = [datetime]::ParseExact($Matches[1], 'yyyy-MM-dd HH:mm:ss.fff', [Globalization.CultureInfo]::InvariantCulture)
-            $record.ProcessId = $Matches[2]; $record.RealUid = [int]$Matches[3]; $record.PackageUid = [int]$Matches[4]
-            $record.User = [int]$Matches[5]; $record.Key = "$($Matches[1])/$($Matches[2])"
+            $record.ProcessId = $Matches[2]; $record.RealUid = [long]$Matches[3]; $record.PackageUid = [long]$Matches[4]
+            $record.User = [long]$Matches[5]; $record.Key = "$($Matches[1])/$($Matches[2])"
+        } elseif ($line -match '^\s*timestamp=.*?\bpid=(\d+)') {
+            $record.ProcessId = $Matches[1]
         } elseif ($line -match '^\s*process=(\S+) reason=(\d+) \(((?:[^()]|\([^()]*\))*)\) subreason=(\d+) \(((?:[^()]|\([^()]*\))*)\)') {
             # Crash reasons nest a pair of parentheses: reason=4 (APP CRASH(EXCEPTION)).
-            $record.Process = $Matches[1]; $record.Reason = [int]$Matches[2]; $record.ReasonText = $Matches[3]
-            $record.Subreason = [int]$Matches[4]; $record.SubreasonText = $Matches[5]
+            $record.Process = $Matches[1]; $record.Reason = [long]$Matches[2]; $record.ReasonText = $Matches[3]
+            $record.Subreason = [long]$Matches[4]; $record.SubreasonText = $Matches[5]
         } elseif ($line -match '^\s*importance=(\d+)\b.*?\bdescription=(.*?)(?:\s+state=.*)?$') {
-            $record.Importance = [int]$Matches[1]
+            $record.Importance = [long]$Matches[1]
             $record.Description = if ($Matches[2] -ceq 'null') { '' } else { $Matches[2] }
         }
     }
-    if ($record -and $record.Key) { [pscustomobject]$record }
-}
-
-function Resolve-WalkExits {
-    <#
-    .SYNOPSIS
-        Each exit record from ConvertFrom-WalkExitInfo with the Class it earns against the walk:
-          old              from before the stop
-          unrelated        another user's, or a process that isn't Pinterest's or its helper's
-          initial stop     the force-stop itself: user requested (reason 10) with the force stop
-                           subreason (21) or a "stop <package>" description, of a pid running
-                           just before the stop, within 30 seconds of it
-          failure          a crash, native crash, ANR or failed start of any Pinterest process in
-                           the window, or any other exit of the main process
-          helper eviction  the system reclaiming a helper: exit self, low memory, other kills such
-                           as isolated not needed, the freezer, or a cached, empty or Android 17
-                           MemoryLimiter:AnonSwap kill
-          helper exit      anything else a helper did, recorded and not failing
-        -RunningBefore holds the pids listed just before the stop, -StoppedAt the device time then.
-        Being in the baseline saved after the stop earns a record nothing: one from after the stop
-        that isn't the stop is classed like any other, since S22 pids come round again within the
-        hour. An ANR is reason 6 here, so one the event log has already lost still fails the walk.
-    #>
-    param([object[]]$Records = @(), [string[]]$RunningBefore = @(), [datetime]$StoppedAt,
-        [string]$Package = 'com.pinterest', [int]$User = 0)
-    $running = [Collections.Generic.HashSet[string]]::new()
-    foreach ($id in @($RunningBefore | Where-Object { $_ })) { [void]$running.Add([string]$id) }
-    $stopText = "^stop $([regex]::Escape($Package))\b"
-    foreach ($record in @($Records | Where-Object { $_ })) {
-        $main = $record.Process -ceq $Package
-        $helper = -not $main -and ($record.Process -clike "${Package}:*" -or $record.RealUid -ne $record.PackageUid)
-        $stop = $record.Reason -eq 10 -and ($record.Subreason -eq 21 -or "$($record.Description)" -cmatch $stopText) -and
-            $running.Contains([string]$record.ProcessId) -and $record.Time -ge $StoppedAt -and $record.Time -le $StoppedAt.AddSeconds(30)
-        $class = if ($record.Time -lt $StoppedAt) { 'old' }
-        elseif ($record.User -ne $User -or -not ($main -or $helper)) { 'unrelated' }
-        elseif ($stop) { 'initial stop' }
-        elseif (@(4, 5, 6, 7) -contains $record.Reason) { 'failure' }
-        elseif ($main) { 'failure' }
-        elseif (@(1, 3, 13, 14) -contains $record.Reason -or
-            "$($record.Description) $($record.SubreasonText)" -match 'MemoryLimiter:AnonSwap|\bcached\b|\bempty\b|isolated not needed') { 'helper eviction' }
-        else { 'helper exit' }
-        $record | Add-Member -NotePropertyName Class -NotePropertyValue $class -Force -PassThru
-    }
+    if ($record) { & $finish }
 }
 
 function Get-WalkAnrLines {
     <#
     .SYNOPSIS
         The event log's am_anr lines (logcat -b events -v epoch) for Pinterest or one of its :name
-        processes at or after -Since, device epoch seconds.
+        processes in -User at or after -Since, device epoch seconds. An am_anr line opens with the
+        user: [user,pid,process,flags,reason].
     #>
-    param([string[]]$Lines, [long]$Since, [string]$Package = 'com.pinterest')
-    $name = [regex]::Escape($Package) + '(?::[\w.]+)?'
+    param([string[]]$Lines, [long]$Since, [string]$Package = 'com.pinterest', [int]$User = 0)
+    $name = [regex]::Escape($Package) + '(?::[\w.-]+)?'
     foreach ($line in @($Lines)) {
         if ($line -notmatch '^\s*(\d+)\.\d+\s' -or [long]$Matches[1] -lt $Since) { continue }
-        if ($line -match "\bam_anr\s*:\s*\[\d+,\d+,$name,") { $line }
+        if ($line -match "\bam_anr\s*:\s*\[$User,\d+,$name,") { $line }
     }
 }
 
@@ -446,15 +439,21 @@ function Get-WalkCrashLines {
         The crash buffer lines that name a Pinterest crash at or after -Since (device epoch
         seconds): a Java crash's "Process: com.pinterest" line or a native crash's
         ">>> com.pinterest <<<" line, Pinterest's own :name processes included. Another app's
-        crash, or one from before the walk, is left out.
+        crash, one from before the walk, and one whose pid is in -OtherUserPids (the pids the exit
+        records give another user, a work profile or a clone) are left out. The pid comes from the
+        line itself: "PID: n" on a Java crash, "pid: n" on a native one.
     #>
-    param([string[]]$Lines, [long]$Since, [string]$Package = 'com.pinterest')
+    param([string[]]$Lines, [long]$Since, [string]$Package = 'com.pinterest', [string[]]$OtherUserPids = @())
     $current = $false
-    $name = [regex]::Escape($Package) + '(?::[\w.]+)?(?![\w.:])'
+    $name = [regex]::Escape($Package) + '(?::[\w.-]+)?(?![\w.:-])'
+    $others = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($id in @($OtherUserPids | Where-Object { $_ })) { [void]$others.Add([string]$id) }
     foreach ($line in @($Lines)) {
         if ($line -match '^\s*(\d+)\.\d+\s') { $current = [long]$Matches[1] -ge $Since }
         if (-not $current) { continue }
-        if ($line -match "Process:\s*$name" -or $line -match ">>>\s*$name\s*<<<") { $line }
+        if ($line -notmatch "Process:\s*$name" -and $line -notmatch ">>>\s*$name\s*<<<") { continue }
+        if ($line -cmatch '\b(?:PID|pid):\s*(\d+)' -and $others.Contains($Matches[1])) { continue }
+        $line
     }
 }
 
@@ -755,7 +754,18 @@ function Invoke-WalkApp {
             $now = ((& $walkAdb @('shell', 'date', '+%Y-%m-%d_%H:%M:%S')).Output -join '').Trim()
             [datetime]::ParseExact($now, 'yyyy-MM-dd_HH:mm:ss', [Globalization.CultureInfo]::InvariantCulture)
         }
+        # Its offset from UTC. Exit-info times carry none, so a change during the walk (a daylight
+        # saving fall-back) could put an exit before the stop.
+        $deviceZone = { ((& $walkAdb @('shell', 'date', '+%z')).Output -join '').Trim() }
         $readExits = { @(ConvertFrom-WalkExitInfo ((& $walkAdb @('shell', 'dumpsys', 'activity', 'exit-info', $Package)).Output -join "`n")) }
+        # Every exit record read so far, by key. The device keeps only the newest few per package,
+        # so the walk reads them after every case and keeps each one it hasn't seen.
+        $exitsSeen = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+        $collectExits = {
+            $now = @(& $readExits)
+            foreach ($entry in $now) { if (-not $exitsSeen.ContainsKey($entry.Key)) { $exitsSeen[$entry.Key] = $entry } }
+            $now
+        }
         $mainPids = { @(Get-WalkMainPids -Lines @((& $walkAdb @('shell', 'ps', '-A', '-o', 'PID,UID,NAME')).Output) -Package $Package) }
         # Whether the dump -Xml is -Case's destination: its marks shown, its Absent marks gone, and
         # for a case inside Pinterest its main activity resumed. Answers the failures and the
@@ -806,6 +816,7 @@ function Invoke-WalkApp {
                 Write-Host "[walk] $($Case.Id): $Detail"
             }
             & $checkHealth $Case.Id
+            [void](& $collectExits)
         }
         # -Origin's destination with no menu left over it. The long-press menu leaves the home
         # feed's marks in the dump, so the marks of both menus have to be gone as well.
@@ -831,8 +842,19 @@ function Invoke-WalkApp {
         }
         # The long-press case. Every hold starts from a fresh dump that shows the home feed with no
         # menu over it and picks the pin to hold from that dump. One shell command holds the pin,
-        # dumps the menu while it's held and lets go where it pressed, which picks nothing. Back
-        # once more if the menu stays.
+        # dumps the menu while it's held and cancels the touch, so no menu, known or not, takes a
+        # row from it. The round menu stays open after that, and Back goes past it and leaves
+        # Pinterest, so a menu still showing is closed by a touch on its backdrop, cancelled too.
+        $menuShowing = {
+            param($Origin, [string]$Xml)
+            @(Test-WalkAnchor -Xml $Xml -Absent @($Origin.Absent) -Package $Package | Where-Object { $_ -clike '* still showing' }).Count -gt 0
+        }
+        $closeMenu = {
+            param([int]$HoldY)
+            $point = Get-WalkScrimPoint -HoldY $HoldY -Width $width -Height $height
+            [void](& $walkAdb @('shell', "input motionevent DOWN $($point.X) $($point.Y); input motionevent CANCEL $($point.X) $($point.Y)"))
+            Start-Sleep -Milliseconds 1000
+        }
         $runHold = {
             param($Case)
             $origin = & $menuGone $planned[$Case.Origin]
@@ -842,11 +864,9 @@ function Invoke-WalkApp {
                 if ($try -gt 0) { Start-Sleep -Seconds 1 }
                 $originXml = & $readXml
                 $ready = & $checkAnchor $origin $originXml
-                # A hold whose dump failed can leave its menu open, which Back closes.
-                if ($try -gt 0 -and $ready.Failures.Count -and
-                    @(Test-WalkAnchor -Xml $originXml -Absent @($origin.Absent) -Package $Package | Where-Object { $_ -clike '* still showing' }).Count) {
-                    [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
-                    Start-Sleep -Milliseconds 1500
+                # A hold whose dump failed leaves its menu open, around the pin that try held.
+                if ($try -gt 0 -and $ready.Failures.Count -and (& $menuShowing $origin $originXml)) {
+                    & $closeMenu $pin.Y
                     $originXml = & $readXml
                     $ready = & $checkAnchor $origin $originXml
                 }
@@ -854,7 +874,7 @@ function Invoke-WalkApp {
                 $pin = Select-WalkGridPin -Xml $originXml -Height $height -Package $Package
                 if (-not $pin) { $why = 'the home feed showed no pin whole on screen with its menu button'; break }
                 [void](& $walkAdb @('shell', ("rm -f $dumpPath; input motionevent DOWN $($pin.X) $($pin.Y); sleep 1.5; " +
-                            "uiautomator dump $dumpPath >/dev/null 2>&1; input motionevent UP $($pin.X) $($pin.Y)")))
+                            "uiautomator dump $dumpPath >/dev/null 2>&1; input motionevent CANCEL $($pin.X) $($pin.Y)")))
                 $xml = (& $walkAdb @('shell', 'cat', $dumpPath)).Output -join "`n"
                 [void](& $walkAdb @('shell', 'rm', '-f', $dumpPath))
             }
@@ -865,13 +885,13 @@ function Invoke-WalkApp {
             Start-Sleep -Seconds 1
             $seen = & $checkAnchor $Case $xml
             $kind = if ($xml -match '<hierarchy') { Get-WalkMenuKind -Xml $xml -Kind 'hold' -Package $Package } else { '' }
-            $back = & $checkAnchor $origin (& $readXml)
-            if ($back.Failures.Count) {
-                [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
-                Start-Sleep -Milliseconds 1500
+            $afterXml = & $readXml
+            $back = & $checkAnchor $origin $afterXml
+            if ($back.Failures.Count -and (& $menuShowing $origin $afterXml)) {
+                & $closeMenu $pin.Y
                 $back = & $checkAnchor $origin (& $readXml)
             }
-            $detail = @($seen.Failures) + @($back.Failures | ForEach-Object { "after letting go, $_" })
+            $detail = @($seen.Failures) + @($back.Failures | ForEach-Object { "after closing the menu, $_" })
             & $record $Case ($detail.Count -eq 0) $seen.Activity $seen.Anchor $kind ($detail -join '; ')
         }
 
@@ -1077,11 +1097,17 @@ function Invoke-WalkApp {
         # The restart also clears the hook counts, so the report counts only what the cases reach.
         # Every process running just before it, so an exit the stop caused is told from a later
         # one, and Pinterest's exit records just after it, the baseline nothing older gets past.
+        # Pinterest is started first if it isn't running, so the stop leaves its own exit record.
+        if (@(& $mainPids).Count -eq 0) {
+            [void](& $walkAdb @('shell', 'am', 'start', '-W', '-n', "$Package/$WalkMainActivity"))
+            Start-Sleep -Seconds $SettleSeconds
+        }
         $stoppedAt = & $deviceTime
+        $zoneAtStop = & $deviceZone
         $runningBefore = @((& $walkAdb @('shell', 'ps', '-A', '-o', 'PID')).Output | ForEach-Object { "$_".Trim() } | Where-Object { $_ -match '^\d+$' })
         [void](& $walkAdb @('shell', 'am', 'force-stop', $Package))
         Start-Sleep -Seconds 2
-        $baseline = @(& $readExits)
+        $baseline = @(& $collectExits)
         Write-Host "[walk] stopped Pinterest at $($stoppedAt.ToString('yyyy-MM-dd HH:mm:ss')) with $($runningBefore.Count) processes running; $($baseline.Count) exit records before the walk"
         $launch = & $walkAdb @('shell', 'am', 'start', '-W', '-n', "$Package/$WalkMainActivity")
         Start-Sleep -Seconds ($SettleSeconds * 2)
@@ -1226,20 +1252,31 @@ function Invoke-WalkApp {
         $full = $full -and $checkHooks -and @($hooks | Where-Object { $null -ne $_.case -and $_.verdict -cne 'pass' }).Count -eq 0
         & $restore
 
-        $crashLines = @((& $walkAdb @('logcat', '-b', 'crash', '-d', '-v', 'epoch')).Output)
-        $fatal = @(Get-WalkCrashLines -Lines $crashLines -Since $startedEpoch -Package $Package)
-        if ($fatal.Count -gt 0) {
-            [IO.File]::WriteAllLines((Join-Path $OutDir 'crash-buffer.txt'), [string[]]$crashLines)
-            $problems.Add("Pinterest crashed during the walk: $($fatal[0].Trim())")
-        }
         & $checkHealth 'the hook check and the switches turned back'
         $alive = @(& $mainPids).Count -gt 0
         if (-not $alive) { $problems.Add('Pinterest was no longer running when the walk ended') }
 
-        # Every exit record since the stop, classed, and the ANRs the event log saw since the start.
-        $exits = @(Resolve-WalkExits -Records @(& $readExits) -RunningBefore $runningBefore -StoppedAt $stoppedAt -Package $Package)
+        # Every exit record the walk read since the stop, classed, the crash buffer's Pinterest
+        # crashes in user 0 and the ANRs the event log saw since the start.
+        $zoneAtEnd = & $deviceZone
+        if ($zoneAtEnd -cne $zoneAtStop -or $zoneAtStop -cnotmatch '\A[+-]\d{4}\z') {
+            $problems.Add("the device's offset from UTC went from '$zoneAtStop' to '$zoneAtEnd' during the walk, so its exit times can't be held to the stop")
+        }
+        [void](& $collectExits)
+        $exits = @(Resolve-WalkExits -Records @($exitsSeen.Values | Sort-Object Time -Descending) -RunningBefore $runningBefore -StoppedAt $stoppedAt -Package $Package)
+        $otherUserPids = [string[]]@($exits | Where-Object { $_.Class -ceq 'unrelated' } | ForEach-Object { [string]$_.ProcessId })
+        $crashLines = @((& $walkAdb @('logcat', '-b', 'crash', '-d', '-v', 'epoch')).Output)
+        $fatal = @(Get-WalkCrashLines -Lines $crashLines -Since $startedEpoch -Package $Package -OtherUserPids $otherUserPids)
+        if ($fatal.Count -gt 0) {
+            [IO.File]::WriteAllLines((Join-Path $OutDir 'crash-buffer.txt'), [string[]]$crashLines)
+            $problems.Add("Pinterest crashed during the walk: $($fatal[0].Trim())")
+        }
         foreach ($exit in @($exits | Where-Object { $_.Class -ceq 'failure' })) {
-            $what = if ($exit.Process -ceq $Package) { "Pinterest's main process" } else { "Pinterest's $($exit.Process)" }
+            if ($null -eq $exit.Time) {
+                $problems.Add("an exit record of Pinterest's didn't read, so it can't be told from a crash: $($exit.Key.Substring(7))")
+                continue
+            }
+            $what =if ($exit.Process -ceq $Package) { "Pinterest's main process" } else { "Pinterest's $($exit.Process)" }
             $why = "$($exit.Reason) ($($exit.ReasonText)), subreason $($exit.Subreason) ($($exit.SubreasonText))"
             if ($exit.Description) { $why = "$why, $($exit.Description)" }
             $problems.Add("$what (pid $($exit.ProcessId)) exited at $($exit.Timestamp): reason $why")
@@ -1252,19 +1289,13 @@ function Invoke-WalkApp {
         }
         $newest = if ($baseline.Count) { $baseline[0] } else { $null }
         $processEvidence = [ordered]@{
-            stoppedAt = $stoppedAt.ToString('yyyy-MM-dd HH:mm:ss'); runningBeforeStop = $runningBefore.Count
+            stoppedAt = $stoppedAt.ToString('yyyy-MM-dd HH:mm:ss'); runningBefore = @($runningBefore)
             baseline = [ordered]@{
                 records = $baseline.Count
                 newest = if ($newest) { "$($newest.Timestamp) pid $($newest.ProcessId) $($newest.Process) reason $($newest.Reason) ($($newest.ReasonText))" } else { '' }
             }
             mainPid = $health.FirstPid; mainPidAtEnd = $health.MainPid; restarts = @($health.Restarts)
-            exits = @($exits | Where-Object { $_.Class -cne 'old' } | ForEach-Object {
-                    [ordered]@{
-                        timestamp = $_.Timestamp; pid = $_.ProcessId; process = $_.Process; user = $_.User
-                        reason = "$($_.Reason) ($($_.ReasonText))"; subreason = "$($_.Subreason) ($($_.SubreasonText))"
-                        description = $_.Description; class = $_.Class
-                    }
-                })
+            exits = @($exits | Where-Object { $_.Class -cne 'old' } | ForEach-Object { ConvertTo-WalkExitEvidence $_ })
             anrs = @($anrs | ForEach-Object { $_.Trim() })
         }
         Write-Host ("[walk] process health: main pid $($health.FirstPid) to $($health.MainPid), $($health.Restarts.Count) restarts, " +

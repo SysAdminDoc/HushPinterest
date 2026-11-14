@@ -27,7 +27,7 @@ $WalkReceiptCatalog = Join-Path (Split-Path -Parent $PSScriptRoot) 'patches-list
 $WalkSettingsHome = 'Search settings'
 # Raised whenever a case or a hook family is added, dropped or given different anchors, so a
 # receipt says which list it walked and publish refuses one walked against another.
-$WalkCaseListVersion = 1
+$WalkCaseListVersion = 3
 $WalkPinLink = 'pinterest://pin/1477812369124424/'
 $WalkSettingsPages = @('Feed', 'Privacy', 'Pin actions', 'Interface', 'Links', 'Notifications',
     "Pinterest's own settings", 'Updates', 'Pause, backup and diagnostics', 'About')
@@ -52,7 +52,7 @@ function Get-WalkCaseList {
         # The same pin held down: Pinterest's long-press menu, with its Send or Search image button.
         # Not Save: the pop-up menu has a Save row too, and it has Share where this menu has Send.
         @{ Id = 'long-press'; Kind = 'hold'; Origin = 'home'; Marks = @('any~^(Send|Search image)$')
-            Absent = @('id:modal_header_dismiss_bt')
+            Absent = @('id:modal_header_dismiss_bt', 'id:pin_closeup_view')
             Family = 'Long-press download'; HushMarks = @('any:Download') }
         # Opened straight from the home feed: over a search, Pinterest 14.44.0 leaves the "Ideas
         # you might love" row out of the pin's related grid.
@@ -60,12 +60,16 @@ function Get-WalkCaseList {
         @{ Id = 'pin-menu'; Kind = 'menu'; Origin = 'pin'; Marks = @('text:Report')
             Family = 'Download pins'; HushMarks = @('text~^Download (pin|unavailable)$') }
         @{ Id = 'search-pins'; Kind = 'link'; Target = 'pinterest://search/pins/?q=nature'; Marks = @('desc:Search results: nature', 'id:pin_rep_id') }
-        # The pins tab lists a board or two among its pins, so the boards tab is the one with no pin.
+        # The pins tab lists a board or two among its pins and its filter chip reads just Filter, so
+        # the boards and profiles tabs are told by their own chip and by showing no pin.
         @{ Id = 'search-boards'; Kind = 'link'; Target = 'pinterest://search/boards/?q=recipes'
-            Marks = @('desc:Search results: recipes', 'desc~^(Group )?Board: '); Absent = @('id:pin_rep_id') }
+            Marks = @('desc:Search results: recipes', 'desc:Filter: Boards', 'desc~^(Group )?Board: '); Absent = @('id:pin_rep_id') }
         @{ Id = 'search-users'; Kind = 'link'; Target = 'pinterest://search/users/?q=art'
-            Marks = @('desc:Search results: art', 'id:user_rep_title'); Absent = @('id:pin_rep_id') }
-        @{ Id = 'inbox'; Kind = 'inbox'; Marks = @('text:Inbox') }
+            Marks = @('desc:Search results: art', 'desc:Filter: Profiles', 'id:user_rep_title'); Absent = @('id:pin_rep_id') }
+        # The home feed's bottom bar names the Inbox only in a content-desc. The Inbox is told by its
+        # title, one node with that id and text, and by the home feed's list being gone. Its Updates
+        # header isn't a mark, since Hide Inbox updates can take it away.
+        @{ Id = 'inbox'; Kind = 'inbox'; Marks = @('id:title_container_title && text:Inbox'); Absent = @('id:p_recycler_view_home') }
         @{ Id = 'settings'; Kind = 'settings'; Marks = @("text:$WalkSettingsHome") }
         foreach ($page in $WalkSettingsPages) {
             @{ Id = "settings:$page"; Kind = 'page'; Target = $page; Marks = @("text:$page"); Absent = @("text:$WalkSettingsHome") }
@@ -117,6 +121,112 @@ function Get-WalkHookShortfall {
     }
     foreach ($entry in @(Get-WalkHookFamilies)) {
         if (-not $given.Contains("$($entry.Family)|$($entry.Case)|$($entry.Page)|$($entry.Switch)|$($entry.Key)")) { $entry.Family }
+    }
+}
+
+function ConvertFrom-WalkTime {
+    <#
+    .SYNOPSIS
+        A device time in the form exit-info and the walk's stop write it, yyyy-MM-dd HH:mm:ss with
+        or without milliseconds, or $null. Both JSON readers keep that form a string. A DateTime
+        means the receipt held another form (ISO or /Date()/), so it reads as no time at all.
+    #>
+    param($Value)
+    if ($Value -isnot [string]) { return $null }
+    $parsed = [datetime]::MinValue
+    $formats = [string[]]@('yyyy-MM-dd HH:mm:ss.fff', 'yyyy-MM-dd HH:mm:ss')
+    if ([datetime]::TryParseExact($Value, $formats, [Globalization.CultureInfo]::InvariantCulture,
+            [Globalization.DateTimeStyles]::None, [ref]$parsed)) { return $parsed }
+    return $null
+}
+
+function Resolve-WalkExits {
+    <#
+    .SYNOPSIS
+        Each exit record with the Class it earns against the walk. A record carries Time,
+        ProcessId, Process, User, Reason, Subreason, SubreasonText, Importance and Description, as
+        ConvertFrom-WalkExitInfo reads them off the device or ConvertFrom-WalkExitEvidence out of
+        a receipt, so the walk and the publish gate class the same facts the same way:
+          old              from before the stop
+          unrelated        another user's, such as a work profile's or a clone's
+          initial stop     the force-stop itself: user requested (reason 10) with the force stop
+                           subreason (21) or a "stop <package>" description, of a pid running
+                           just before the stop, within 30 seconds of it
+          failure          a crash, native crash, ANR or failed start of any process, any other
+                           exit of the main process, any record missing its time or reason, and a
+                           helper still in use (importance under 400, cached) going any other way
+                           than the two below
+          helper eviction  the system reclaiming a helper: an isolated process no longer needed
+                           (subreason 17) at any importance, or a cached helper's exit self, low
+                           memory kill, other kill by the system, freeze, or cached, empty or
+                           MemoryLimiter:AnonSwap kill
+          helper exit      a helper's own exit (reason 1) while in use, or a cached helper gone
+                           some other way
+        The main process is the one named -Package. Every other process in the package's exit
+        records is a helper, whatever its name. -RunningBefore holds the pids listed just before
+        the stop, -StoppedAt the device time then. Being in the baseline read after the stop earns
+        a record nothing: S22 pids come round again within the hour. An ANR is reason 6 here, so
+        one the event log has already lost still fails the walk.
+    #>
+    param([object[]]$Records = @(), [string[]]$RunningBefore = @(), [datetime]$StoppedAt,
+        [string]$Package = 'com.pinterest', [int]$User = 0)
+    $running = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($id in @($RunningBefore | Where-Object { $_ })) { [void]$running.Add([string]$id) }
+    $stopText = "^stop $([regex]::Escape($Package))\b"
+    $reclaimText = 'MemoryLimiter:AnonSwap|\bcached\b|\bempty\b'
+    foreach ($record in @($Records | Where-Object { $_ })) {
+        $main = "$($record.Process)" -ceq $Package
+        $cached = $null -ne $record.Importance -and [long]$record.Importance -ge 400
+        $isolated = $null -ne $record.Subreason -and [long]$record.Subreason -eq 17
+        $stop = $null -ne $record.Time -and $record.Reason -eq 10 -and
+            ($record.Subreason -eq 21 -or "$($record.Description)" -cmatch $stopText) -and
+            $running.Contains([string]$record.ProcessId) -and $record.Time -ge $StoppedAt -and $record.Time -le $StoppedAt.AddSeconds(30)
+        $class = if ($null -eq $record.Time) { 'failure' }
+        elseif ($record.Time -lt $StoppedAt) { 'old' }
+        elseif ($null -ne $record.User -and [long]$record.User -ne $User) { 'unrelated' }
+        elseif ($stop) { 'initial stop' }
+        elseif ($null -eq $record.Reason -or @(4, 5, 6, 7) -contains [long]$record.Reason -or $main) { 'failure' }
+        elseif ($isolated) { 'helper eviction' }
+        elseif ($cached -and (@(1, 3, 13, 14) -contains [long]$record.Reason -or
+                "$($record.Description) $($record.SubreasonText)" -match $reclaimText)) { 'helper eviction' }
+        elseif ($cached -or [long]$record.Reason -eq 1) { 'helper exit' }
+        else { 'failure' }
+        $record | Add-Member -NotePropertyName Class -NotePropertyValue $class -Force -PassThru
+    }
+}
+
+function ConvertTo-WalkExitEvidence {
+    <#
+    .SYNOPSIS
+        One classed exit record as the receipt keeps it: the facts Resolve-WalkExits reads, so
+        the publish gate can class it again, and the class the walk gave it.
+    #>
+    param([Parameter(Mandatory = $true)]$Record)
+    [ordered]@{
+        timestamp = $Record.Timestamp; pid = [string]$Record.ProcessId; process = $Record.Process; user = $Record.User
+        reason = $Record.Reason; reasonText = $Record.ReasonText; subreason = $Record.Subreason; subreasonText = $Record.SubreasonText
+        importance = $Record.Importance; description = $Record.Description; class = $Record.Class
+    }
+}
+
+function ConvertFrom-WalkExitEvidence {
+    <#
+    .SYNOPSIS
+        A receipt's exit entry back as a record Resolve-WalkExits can class, with the class the
+        walk wrote as RecordedClass. A field of the wrong type comes back $null, which classes
+        as a failure or, for the user, as the walk's own.
+    #>
+    param($Entry)
+    $number = { param($Value) if ($Value -is [int] -or $Value -is [long]) { [long]$Value } else { $null } }
+    $text = { param($Value) if ($Value -is [string]) { $Value } else { '' } }
+    [pscustomobject]@{
+        Timestamp = & $text $Entry.timestamp; Time = ConvertFrom-WalkTime $Entry.timestamp
+        ProcessId = if ($Entry.pid -is [string] -or $Entry.pid -is [int] -or $Entry.pid -is [long]) { [string]$Entry.pid } else { '' }
+        Process = & $text $Entry.process; User = & $number $Entry.user
+        Reason = & $number $Entry.reason; ReasonText = & $text $Entry.reasonText
+        Subreason = & $number $Entry.subreason; SubreasonText = & $text $Entry.subreasonText
+        Importance = & $number $Entry.importance; Description = & $text $Entry.description
+        RecordedClass = & $text $Entry.class
     }
 }
 
@@ -203,34 +313,67 @@ function Test-WalkReceipt {
         $list.hooksLeftOut -isnot [Array] -or $list.hooksLeftOut.Count -ne 0) {
         return Fail "the walk didn't run all of case list version $WalkCaseListVersion and its hook map"
     }
+    # One result per case, every one of them a pass: each canonical case, and any other case one
+    # the list names as an extra the walk was asked for.
     $results = [Collections.Generic.Dictionary[string, string]]::new([StringComparer]::Ordinal)
     if ($receipt.cases -isnot [Array]) { return Fail 'the walk receipt has no case results' }
     foreach ($entry in $receipt.cases) {
-        if ($entry.id -is [string] -and $entry.result -is [string] -and -not $results.ContainsKey($entry.id)) { $results[$entry.id] = $entry.result }
+        if ($null -eq $entry -or $entry.id -isnot [string] -or $entry.result -isnot [string]) { return Fail 'a case result has no id or result' }
+        if ($results.ContainsKey($entry.id)) { return Fail "the walk receipt lists the $($entry.id) case more than once" }
+        $results[$entry.id] = $entry.result
     }
-    foreach ($case in @(Get-WalkCaseList)) {
+    $canonicalCases = @(Get-WalkCaseList)
+    foreach ($case in $canonicalCases) {
         if (-not $results.ContainsKey($case.Id) -or $results[$case.Id] -cne 'pass') { return Fail "the walk's $($case.Id) case didn't pass" }
     }
-    $verdicts = [Collections.Generic.Dictionary[string, string]]::new([StringComparer]::Ordinal)
+    $extraCases = if ($list.extra -is [Array]) { @($list.extra | ForEach-Object { "$_" }) } else { @() }
+    foreach ($id in $results.Keys) {
+        if (@($canonicalCases | Where-Object { $_.Id -ceq $id }).Count -eq 0 -and $extraCases -cnotcontains $id) {
+            return Fail "the walk receipt has a $id case that's neither in the case list nor a listed extra"
+        }
+        if ($results[$id] -cne 'pass') { return Fail "the walk's $id case didn't pass" }
+    }
+    # One verdict per canonical hook family, on the case the map gives it, and no other family.
+    $verdicts = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
     if ($receipt.hooks -isnot [Array]) { return Fail 'the walk receipt has no hook verdicts' }
     foreach ($entry in $receipt.hooks) {
-        if ($entry.family -is [string] -and $entry.verdict -is [string] -and -not $verdicts.ContainsKey($entry.family)) { $verdicts[$entry.family] = $entry.verdict }
+        if ($null -eq $entry -or $entry.family -isnot [string] -or $entry.verdict -isnot [string]) { return Fail 'a hook verdict has no family or verdict' }
+        if ($verdicts.ContainsKey($entry.family)) { return Fail "the walk receipt lists the $($entry.family) hook more than once" }
+        $verdicts[$entry.family] = $entry
     }
-    foreach ($family in @(Get-WalkHookFamilies)) {
-        if (-not $verdicts.ContainsKey($family.Family) -or $verdicts[$family.Family] -cne 'pass') {
-            return Fail "the walk didn't check and pass the $($family.Family) hook"
+    $canonicalFamilies = @(Get-WalkHookFamilies)
+    foreach ($family in $canonicalFamilies) {
+        $entry = if ($verdicts.ContainsKey($family.Family)) { $verdicts[$family.Family] } else { $null }
+        if ($null -eq $entry -or $entry.verdict -cne 'pass' -or "$($entry.case)" -cne $family.Case) {
+            return Fail "the walk didn't check and pass the $($family.Family) hook on its $($family.Case) case"
         }
     }
+    if ($verdicts.Count -ne $canonicalFamilies.Count) { return Fail "the walk receipt has a hook family the canonical map doesn't" }
     # One main process from launch to the end, and nothing since the stop but the stop itself,
     # helpers the system reclaimed and other users' processes.
     $process = $receipt.process
-    $benign = @('initial stop', 'unrelated', 'helper eviction', 'helper exit')
     if ($null -eq $process -or $null -eq $process.baseline -or $process.mainPid -isnot [string] -or $process.mainPid -cnotmatch '\A\d+\z' -or
-        $process.mainPidAtEnd -cne $process.mainPid -or $process.restarts -isnot [Array] -or $process.restarts.Count -ne 0 -or
-        $process.anrs -isnot [Array] -or $process.anrs.Count -ne 0 -or $process.exits -isnot [Array] -or
-        @($process.exits | Where-Object { $benign -cnotcontains $_.class }).Count -ne 0) {
-        return Fail "the walk's process evidence is missing or shows a failing exit, an ANR or a restart"
+        $process.mainPidAtEnd -isnot [string] -or $process.mainPidAtEnd -cne $process.mainPid -or $process.restarts -isnot [Array] -or $process.restarts.Count -ne 0 -or
+        $process.anrs -isnot [Array] -or $process.anrs.Count -ne 0 -or $process.exits -isnot [Array] -or $process.runningBefore -isnot [Array]) {
+        return Fail "the walk's process evidence is missing or shows an ANR or a restart"
     }
+    # Every exit classed again from the facts recorded with it, so a class the facts don't earn,
+    # or a failing one, refuses the receipt, and the stop's own record has to be there.
+    $stoppedAt = ConvertFrom-WalkTime $process.stoppedAt
+    if ($null -eq $stoppedAt) { return Fail "the walk's process evidence doesn't say when Pinterest was stopped" }
+    $runningBefore = [string[]]@($process.runningBefore | Where-Object { $null -ne $_ } | ForEach-Object { "$_" })
+    $benign = @('initial stop', 'unrelated', 'helper eviction', 'helper exit')
+    $stops = 0
+    foreach ($entry in $process.exits) {
+        $exit = ConvertFrom-WalkExitEvidence $entry
+        $class = @(Resolve-WalkExits -Records @($exit) -RunningBefore $runningBefore -StoppedAt $stoppedAt)[0].Class
+        if ($class -cne $exit.RecordedClass) {
+            return Fail "the walk's exit of pid $($exit.ProcessId) at $($exit.Timestamp) is written as '$($exit.RecordedClass)' but its facts make it '$class'"
+        }
+        if ($benign -cnotcontains $class) { return Fail "the walk recorded a failing exit: pid $($exit.ProcessId) $($exit.Process) at $($exit.Timestamp)" }
+        if ($class -ceq 'initial stop' -and $exit.Process -ceq 'com.pinterest') { $stops++ }
+    }
+    if ($stops -lt 1) { return Fail "the walk's process evidence has no record of the stop it started from" }
     # ConvertFrom-Json returns DateTime in newer PowerShell and text in 5.1. Normalize both
     # explicitly; a date without a zone is not evidence of an unambiguous instant.
     $times = @{}
@@ -282,7 +425,8 @@ function Test-WalkReceipt {
         $target = Get-PatchTarget -PatchList $catalog
         $catalogHash = (Get-FileHash -LiteralPath $PatchList -Algorithm SHA256).Hash.ToLowerInvariant()
     } catch { return Fail "the patch catalog could not be verified: $($_.Exception.Message)" }
-    if ($build.catalogSha256 -cne $catalogHash -or $build.packageName -cne $target.PackageName -or
+    if ($build.packageName -isnot [string] -or $build.appVersion -isnot [string] -or $build.appVersionCode -isnot [string] -or
+        $build.catalogSha256 -cne $catalogHash -or $build.packageName -cne $target.PackageName -or
         $receipt.appVersion -isnot [string] -or $receipt.appVersionCode -isnot [string] -or
         $receipt.appVersion -cne $build.appVersion -or $receipt.appVersionCode -cne $build.appVersionCode -or
         -not (Test-DeclaredBuild -Target $target -VersionName $receipt.appVersion -VersionCode $receipt.appVersionCode)) {

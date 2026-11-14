@@ -262,8 +262,11 @@ Add-PublishEvent 'verify-index'
             CaseList = [ordered]@{ version = $WalkCaseListVersion; complete = $true; leftOut = @(); extra = @(); hooksLeftOut = @() }
             Cases = @(Get-WalkCaseList | ForEach-Object { [ordered]@{ id = $_.Id; kind = $_.Kind; result = 'pass' } })
             Hooks = @(Get-WalkHookFamilies | ForEach-Object { [ordered]@{ family = $_.Family; case = $_.Case; verdict = 'pass' } })
-            Process = [ordered]@{ stoppedAt = '2026-10-21 12:00:00'; baseline = [ordered]@{ records = 0; newest = '' }
-                mainPid = '4242'; mainPidAtEnd = '4242'; restarts = @(); anrs = @(); exits = @() }
+            Process = [ordered]@{ stoppedAt = '2026-10-21 12:00:00'; runningBefore = @('4100'); baseline = [ordered]@{ records = 1; newest = '' }
+                mainPid = '4242'; mainPidAtEnd = '4242'; restarts = @(); anrs = @()
+                exits = @([ordered]@{ timestamp = '2026-10-21 12:00:00.400'; pid = '4100'; process = 'com.pinterest'; user = 0
+                        reason = 10; reasonText = 'USER REQUESTED'; subreason = 21; subreasonText = 'FORCE STOP'; importance = 100
+                        description = 'stop com.pinterest due to from pid 4000'; class = 'initial stop' }) }
         }
         $walk = New-WalkReceipt -Result PASS -Full $true -Serial 'TESTPHONE01' -Device 'SM-S908U1' -AppVersion '14.44.0' `
             -AppVersionCode '14448030' -Build $build `

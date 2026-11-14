@@ -106,11 +106,11 @@ try {
         Hooks = @(Get-WalkHookFamilies | ForEach-Object {
                 [ordered]@{ family = $_.Family; case = $_.Case; verdict = 'pass'; invoked = 1; missing = 0; ambiguous = 0; detail = '' } })
         Process = [ordered]@{
-            stoppedAt = '2026-10-21 20:00:00'; runningBeforeStop = 400; baseline = [ordered]@{ records = 1; newest = '' }
+            stoppedAt = '2026-10-21 20:00:00'; runningBefore = @('1', '4000', '4100'); baseline = [ordered]@{ records = 1; newest = '' }
             mainPid = '4242'; mainPidAtEnd = '4242'; restarts = @(); anrs = @()
             exits = @([ordered]@{ timestamp = '2026-10-21 20:00:00.500'; pid = '4100'; process = 'com.pinterest'; user = 0
-                    reason = '10 (USER REQUESTED)'; subreason = '21 (FORCE STOP)'; description = 'stop com.pinterest due to from pid 4000'
-                    class = 'initial stop' })
+                    reason = 10; reasonText = 'USER REQUESTED'; subreason = 21; subreasonText = 'FORCE STOP'; importance = 100
+                    description = 'stop com.pinterest due to from pid 4000'; class = 'initial stop' })
         }
     }
 
