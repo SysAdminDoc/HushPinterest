@@ -298,8 +298,6 @@ switch ($Stage) {
                 $built = Test-ReleaseAssets -Root $Root -Version $Version -Commit $commit -TrustedPublicKeyPath $signing.PublicKey `
                     -TrustedFingerprint $signing.Fingerprint -Gpg $Gpg
                 if ($built -ne $true) { throw "$tag's assets on GitHub don't verify for $commit ($built). Nothing was rebuilt." }
-                Invoke-ReleaseText -Root $Root -What "$tag's bundle signature check" `
-                    -Arguments @('signed', '--version', $Version, '--bundle', (Join-Path $assets "patches-$Version.mpp"))
             } catch {
                 Remove-Item -LiteralPath $assets -Recurse -Force -ErrorAction SilentlyContinue
                 throw

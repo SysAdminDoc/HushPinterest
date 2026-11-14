@@ -399,6 +399,16 @@ function Test-ReleaseAssets {
     } catch {
         return "its checksums don't verify: $($_.Exception.Message)"
     }
+    # Manager pins the first key it sees. A checkout that publishes a key holds every copy to it,
+    # assets built earlier and assets taken back from GitHub alike, the way the index step does.
+    if (Test-Path -LiteralPath (Join-Path $Root 'morphe-signing.pub') -PathType Leaf) {
+        try {
+            Invoke-ReleaseText -Root $Root -What "The $bundleName signature check" `
+                -Arguments @('signed', '--version', $Version, '--bundle', (Join-Path $assets $bundleName))
+        } catch {
+            return "its bundle isn't signed by morphe-signing.pub's key: $($_.Exception.Message)"
+        }
+    }
     return $true
 }
 
