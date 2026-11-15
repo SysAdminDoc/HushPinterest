@@ -90,8 +90,18 @@ function Assert-GradleDistribution {
             'GHSA-mvvg-497x-hmj8 and GHSA-j5m7-59rp-24f5. Build with the wrapper (Gradle 9.8.1 or later). ' +
             'Component OSV results and dependency checksums do not fix daemon deserialization.')
     }
-    Write-Host ("[build advisories] Gradle $($Report.Gradle) is outside the affected versions in the three " +
-        'maintainer distribution advisories dated 2026-10-07. Component results are separate.')
+    # The maintainer records of 2026-11-10: version catalog values running as code in generated
+    # accessors (critical) and the client trusting the daemon registry, stale entries included (high).
+    # They name 8.14.7 and 9.9.1 as the only fixes, so the October backports above are affected too.
+    # https://github.com/gradle/gradle/security/advisories/GHSA-3cfg-jpcr-gfp3
+    # https://github.com/gradle/gradle/security/advisories/GHSA-gqrr-4j89-5267
+    # https://github.com/gradle/gradle/security/advisories/GHSA-pcp8-98xm-c6pr
+    if ($gradle -lt [version]'8.14.7' -or ($gradle -ge [version]'9.0' -and $gradle -lt [version]'9.9.1')) {
+        throw ("Gradle $($Report.Gradle) is affected by the critical distribution advisory GHSA-3cfg-jpcr-gfp3 " +
+            'and the high GHSA-gqrr-4j89-5267 and GHSA-pcp8-98xm-c6pr. Build with the wrapper (Gradle 9.9.1 or later).')
+    }
+    Write-Host ("[build advisories] Gradle $($Report.Gradle) is outside the affected versions in the six " +
+        'maintainer distribution advisories dated 2026-10-07 and 2026-11-10. Component results are separate.')
 }
 
 function Assert-ReviewedToolingResolutions {
