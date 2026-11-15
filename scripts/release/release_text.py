@@ -45,6 +45,10 @@ BULLET = re.compile(r"^\* \*\*(?P<scope>[^*\n]+?):\*\* (?P<text>\S.*)$")
 DASHES = ("\u2014", "\u2013")
 REPOSITORY = "SysAdminDoc/HushPinterest"
 PACKAGE = "com.pinterest"
+# A markdown link to a file in this repo. It works in CHANGELOG.md on GitHub, but on a release page it
+# resolves under /releases/tag/ and in Morphe Manager it goes nowhere, so the notes and the index carry
+# it as a link to the file on main. A link with a scheme (https:, mailto:) or to an anchor is left alone.
+RELATIVE_LINK = re.compile(r"(?<=\]\()(?![A-Za-z][A-Za-z0-9+.-]*:|#)(?:\./|/)?([^()\s]+)(?=\))")
 
 
 class ReleaseTextError(Exception):
@@ -60,6 +64,11 @@ class Bullet:
     line: str
     scope: str
     text: str
+
+
+def absolute_links(text: str) -> str:
+    """The text with every relative link pointed at the file on main."""
+    return RELATIVE_LINK.sub(lambda link: f"https://github.com/{REPOSITORY}/blob/main/{link.group(1)}", text)
 
 
 def read(path: Path) -> tuple[str, str]:
@@ -345,8 +354,8 @@ def notes(args) -> None:
         if re.search(r"^## (What's new|Behind the scenes)\s*$", part, re.MULTILINE):
             fail(f"The {name} has a What's new or Behind the scenes heading of its own. Those two come from the "
                  "CHANGELOG, every bullet of the section.")
-    whats_new = ["- " + b.text for b in bullets if b.scope == "Pinterest"]
-    behind = ["- " + b.text for b in bullets if b.scope == "Tooling"]
+    whats_new = ["- " + absolute_links(b.text) for b in bullets if b.scope == "Pinterest"]
+    behind = ["- " + absolute_links(b.text) for b in bullets if b.scope == "Tooling"]
     parts = [intro, "## What's new\n\n" + "\n".join(whats_new)]
     if behind:
         parts.append("## Behind the scenes\n\n" + "\n".join(behind))
@@ -355,7 +364,7 @@ def notes(args) -> None:
     if any(dash in body for dash in DASHES):
         fail("The notes have an em or en dash. Rewrite the intro or the tail.")
     lines = set(body.split("\n"))
-    missing = [b.text[:60] for b in bullets if "- " + b.text not in lines]
+    missing = [b.text[:60] for b in bullets if "- " + absolute_links(b.text) not in lines]
     if missing:
         fail("These CHANGELOG bullets didn't make it into the notes: " + "; ".join(missing))
     write(Path(args.out), body)
@@ -448,7 +457,7 @@ def index(args) -> None:
     # shows them for every older release. They come after the facts checks above, which read the
     # prose alone: a bullet may name an older build or another patch count, and
     # validate-release-facts.ps1 reads the description only above its first ### line for that reason.
-    description += "\n\n### What's new\n\n" + "\n".join(b.line for b in bullets if b.scope == "Pinterest")
+    description += "\n\n### What's new\n\n" + "\n".join(absolute_links(b.line) for b in bullets if b.scope == "Pinterest")
     bundle_path = root / "patches-bundle.json"
     bundle_text, bundle_newline = read(bundle_path)
     bundle = json.loads(bundle_text)
