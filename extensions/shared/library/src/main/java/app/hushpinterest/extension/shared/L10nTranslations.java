@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1276);
+        Map<String, String> table = new HashMap<>(1278);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -1347,6 +1347,8 @@ public final class L10nTranslations {
                 "Collagenbilder");
         table.put("floating ad bars on pin closeups",
                 "schwebende Werbeleisten in Pin-Detailansichten");
+        table.put("full-screen ads when opening a pin",
+                "Vollbildwerbung beim \u00d6ffnen eines Pins");
         table.put("hiding Pinterest's long-press buttons",
                 "Ausblenden von Pinterests Schaltfl\u00e4chen beim Gedr\u00fcckthalten");
         table.put("loaded board pins",
@@ -1372,7 +1374,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1276);
+        Map<String, String> table = new HashMap<>(1278);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -2672,6 +2674,8 @@ public final class L10nTranslations {
                 "im\u00e1genes de collages");
         table.put("floating ad bars on pin closeups",
                 "barras flotantes de anuncios en las vistas ampliadas de pines");
+        table.put("full-screen ads when opening a pin",
+                "anuncios a pantalla completa al abrir un pin");
         table.put("hiding Pinterest's long-press buttons",
                 "ocultar los botones de Pinterest al mantener pulsado");
         table.put("loaded board pins",
@@ -2697,7 +2701,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1276);
+        Map<String, String> table = new HashMap<>(1278);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -3997,6 +4001,8 @@ public final class L10nTranslations {
                 "gambar kolase");
         table.put("floating ad bars on pin closeups",
                 "bilah iklan mengambang di tampilan dekat pin");
+        table.put("full-screen ads when opening a pin",
+                "iklan layar penuh saat membuka pin");
         table.put("hiding Pinterest's long-press buttons",
                 "menyembunyikan tombol tekan lama Pinterest");
         table.put("loaded board pins",
@@ -4022,7 +4028,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1276);
+        Map<String, String> table = new HashMap<>(1278);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -5322,6 +5328,8 @@ public final class L10nTranslations {
                 "imagens de colagens");
         table.put("floating ad bars on pin closeups",
                 "barras flutuantes de an\u00fancio nas visualiza\u00e7\u00f5es ampliadas de Pins");
+        table.put("full-screen ads when opening a pin",
+                "an\u00fancios em tela cheia ao abrir um pin");
         table.put("hiding Pinterest's long-press buttons",
                 "ocultar os bot\u00f5es de toque longo do Pinterest");
         table.put("loaded board pins",
@@ -5347,7 +5355,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1276);
+        Map<String, String> table = new HashMap<>(1278);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -6647,6 +6655,8 @@ public final class L10nTranslations {
                 "kolaj g\u00f6rselleri");
         table.put("floating ad bars on pin closeups",
                 "Pin yak\u0131n g\u00f6r\u00fcn\u00fcmlerindeki kayan reklam \u00e7ubuklar\u0131");
+        table.put("full-screen ads when opening a pin",
+                "pin a\u00e7\u0131l\u0131rken tam ekran reklamlar");
         table.put("hiding Pinterest's long-press buttons",
                 "Pinterest'in uzun basma d\u00fc\u011fmelerini gizleme");
         table.put("loaded board pins",

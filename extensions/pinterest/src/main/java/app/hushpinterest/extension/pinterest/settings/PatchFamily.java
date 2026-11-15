@@ -168,6 +168,7 @@ public enum PatchFamily {
         AD_VIEWS(HIDE_ADS, "adViews", "ad-only views"),
         GOOGLE_ADS(HIDE_ADS, "googleAds", "Google ad SDK start"),
         META_ADS(HIDE_ADS, "metaAds", "Meta ad SDK"),
+        INTERSTITIAL_ADS(HIDE_ADS, "interstitialAds", "full-screen ads when opening a pin"),
         FEED_AI_PINS(HIDE_AI_PINS, "feedAiPins", "AI-labeled pins in lists"),
         FEED_SHOPPING(HIDE_SHOPPING, "feedShopping", "Hide shopping and product pins"),
         FEED_VIDEO_PINS(FILTER_FEED, "feedVideoPins", "Hide video pins"),

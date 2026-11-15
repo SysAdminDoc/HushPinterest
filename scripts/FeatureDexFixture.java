@@ -1052,6 +1052,7 @@ public final class FeatureDexFixture {
             FLAGS.put("adViews", false);
             FLAGS.put("googleAds", false);
             FLAGS.put("metaAds", false);
+            FLAGS.put("interstitialAds", false);
             // These synthetic targets have no Home request, so Hide pins you've already saved stays out,
             // and no pin model, so the See more like this bubble stays out too.
             FLAGS.put("feedSavedPins", false);

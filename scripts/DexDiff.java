@@ -2990,6 +2990,25 @@ public class DexDiff {
                 }
                 // A build without Meta's ad SDK keeps the capability off, and the patch only warns.
                 if (targets.isEmpty()) return false;
+            } else if (selector.equals("interstitialKillswitch") || selector.equals("interstitialExperiment")) {
+                // The killswitch read: an instance ()Z naming the server experiment that turns interstitials off.
+                List<Method> reads = new ArrayList<>();
+                for (Method m : clean.holding("android_ad_interstitial_killswitch")) if (!m.getDefiningClass().startsWith(OWN)
+                        && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && descriptor(m).equals("()Z")) reads.add(m);
+                // The experiment check: an instance (kind, Z)Z naming both the house and the Google interstitial.
+                List<Method> checks = new ArrayList<>();
+                for (Method m : clean.holding("android_ad_house_interstitial")) if (!m.getDefiningClass().startsWith(OWN)
+                        && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getReturnType().equals("Z")
+                        && m.getParameterTypes().size() == 2 && m.getParameterTypes().get(1).toString().equals("Z")
+                        && clean.texts.get(m.toString()).contains("android_ad_gma_interstitial")) checks.add(m);
+                // The patch answers both questions or neither. Without exactly one of each in one class it
+                // only warns, so the capability stays off and none of these methods carries either hook.
+                if (reads.size() != 1 || checks.size() != 1 || !reads.get(0).getDefiningClass().equals(checks.get(0).getDefiningClass())) {
+                    for (Method m : reads) calls(actual(m), hook, 0);
+                    for (Method m : checks) calls(actual(m), hook, 0);
+                    return false;
+                }
+                targets.addAll(selector.equals("interstitialKillswitch") ? reads : checks);
             } else if (selector.equals("saveToast")) {
                 ClassDef container = clean.classes.get(TOAST_CONTAINER);
                 if (container != null) for (Method m : container.getMethods()) {
@@ -3054,9 +3073,13 @@ public class DexDiff {
                     sendableStubs();
                     return original != null;
                 }
-                if (selector.equals("assistant") || selector.equals("metaAds")) {
-                    // The consent check hands its vendor to the hook; the assistant check hands nothing.
+                if (selector.equals("assistant") || selector.equals("metaAds") || selector.equals("interstitialExperiment")) {
+                    // The consent check hands its vendor to the hook; the other checks hand nothing.
                     falseGuard(m, hook, selector.equals("metaAds") ? List.of(parameter(m, 0)) : List.of());
+                    return original != null;
+                }
+                if (selector.equals("interstitialKillswitch")) {
+                    answerGuard(m, hook, List.of(), 1);
                     return original != null;
                 }
                 if (selector.equals("update")) {
@@ -3072,6 +3095,11 @@ public class DexDiff {
 
         /** A guard on a host method that answers a question: when the hook says so it answers false, and nothing else runs. */
         void falseGuard(Method m, String hook, List<Integer> arguments) {
+            answerGuard(m, hook, arguments, 0);
+        }
+
+        /** The same guard answering [answer] (0 or 1) instead. */
+        void answerGuard(Method m, String hook, List<Integer> arguments, int answer) {
             List<Integer> sites = calls(m, hook, 1);
             if (sites.size() != 1) return;
             List<Instruction> body = instructions(m);
@@ -3080,14 +3108,14 @@ public class DexDiff {
                 fail(hook + " has the wrong guarded placement or arguments in " + m);
                 return;
             }
-            Instruction answer = body.get(1), branch = body.get(2), zero = body.get(3), done = body.get(4);
-            if (answer.getOpcode() != Opcode.MOVE_RESULT || branch.getOpcode() != Opcode.IF_EQZ || firstRegister(answer) != firstRegister(branch)
+            Instruction result = body.get(1), branch = body.get(2), constant = body.get(3), done = body.get(4);
+            if (result.getOpcode() != Opcode.MOVE_RESULT || branch.getOpcode() != Opcode.IF_EQZ || firstRegister(result) != firstRegister(branch)
                     || !(branch instanceof OffsetInstruction)
                     || layout.addresses.get(2) + ((OffsetInstruction) branch).getCodeOffset() != layout.addresses.get(5))
                 fail(hook + " has no false branch to its original body in " + m);
-            if (zero.getOpcode() != Opcode.CONST_4 || done.getOpcode() != Opcode.RETURN || firstRegister(zero) != firstRegister(done)
-                    || ((NarrowLiteralInstruction) zero).getNarrowLiteral() != 0)
-                fail(hook + " does not answer false only in its enabled branch in " + m);
+            if (constant.getOpcode() != Opcode.CONST_4 || done.getOpcode() != Opcode.RETURN || firstRegister(constant) != firstRegister(done)
+                    || ((NarrowLiteralInstruction) constant).getNarrowLiteral() != answer)
+                fail(hook + " does not answer " + (answer == 0 ? "false" : "true") + " only in its enabled branch in " + m);
             remove(m, 0, 5);
         }
 
