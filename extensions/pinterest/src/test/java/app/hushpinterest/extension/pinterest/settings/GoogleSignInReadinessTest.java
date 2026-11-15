@@ -190,6 +190,23 @@ public class GoogleSignInReadinessTest {
         assertFalse("the value stays out", report.contains("abc"));
     }
 
+    @Test public void reportSaysWhetherMicroGShowsGooglePinterestsOwnPackage() throws Exception {
+        assertTrue(report(), report().contains("spoof_package: missing"));
+        for (String[] shape : new String[][] {{"com.pinterest", "pinterest"}, {"com.pinterest.hushpinterest", "other"}}) {
+            ApplicationInfo own = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            own.metaData = new Bundle();
+            own.metaData.putString(SPOOF, "abc");
+            own.metaData.putString(MICRO_G + ".SPOOFED_PACKAGE_NAME", shape[0]);
+            PackageInfo installed = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            installed.applicationInfo.metaData = own.metaData;
+            pm.installPackage(installed);
+            String report = report();
+            assertTrue(report, report.contains("spoof_package: " + shape[1]));
+            assertTrue(report, report.contains("spoof_metadata: present"));
+            assertFalse("a copy's own package stays out", report.contains("hushpinterest"));
+        }
+    }
+
     @Test public void withoutMicroGTheFrameworkCredentialProviderAnswersForItself() {
         PatchFamily.registerDiagnostics();
         assertFalse(GoogleSignInReadiness.signsInThroughMicroG());

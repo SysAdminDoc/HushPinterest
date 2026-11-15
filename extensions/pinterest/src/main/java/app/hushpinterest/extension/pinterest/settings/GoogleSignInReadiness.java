@@ -12,6 +12,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
@@ -35,6 +36,8 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
     static final GoogleSignInReadiness REPORT = new GoogleSignInReadiness();
     private static final String SIGN_IN_SERVICE = PushReadiness.GMS_CORE + ".auth.api.identity.service.signin.START";
     private static final String SPOOF_METADATA = PushReadiness.GMS_CORE + ".SPOOFED_PACKAGE_SIGNATURE";
+    private static final String SPOOF_PACKAGE_METADATA = PushReadiness.GMS_CORE + ".SPOOFED_PACKAGE_NAME";
+    private static final String PINTEREST_PACKAGE = "com.pinterest";
     private static final int STATUS_CANCELED = 16;
     private static final String NO_REQUEST = "none this launch";
     /** The credential type of Sign in with Google's options, both the ID token and the button's. */
@@ -180,7 +183,9 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
         lines.add("provider_path: " + (gmsCore ? "microg-re" : "play services"));
         Context context = Utils.getContext();
         if (context == null) return Collections.unmodifiableList(lines);
-        lines.add("spoof_metadata: " + spoofMetadata(context));
+        Bundle metaData = ownMetaData(context);
+        lines.add("spoof_metadata: " + spoofMetadata(metaData));
+        lines.add("spoof_package: " + spoofPackage(metaData));
         if (gmsCore) {
             lines.add("microg_re: " + microGLine(context));
             lines.add("signin_service: " + signInService(context));
@@ -190,14 +195,31 @@ public final class GoogleSignInReadiness implements LogBufferManager.ReportSecti
         return lines;
     }
 
-    private static String spoofMetadata(Context context) {
+    /** The running app's own meta-data, an empty bundle when it has none, or null when it can't be read. */
+    private static Bundle ownMetaData(Context context) {
         try {
             ApplicationInfo app = context.getPackageManager().getApplicationInfo(
                     context.getPackageName(), PackageManager.GET_META_DATA);
-            return app.metaData != null && app.metaData.containsKey(SPOOF_METADATA) ? "present" : "missing";
+            return app.metaData != null ? app.metaData : new Bundle();
         } catch (PackageManager.NameNotFoundException | RuntimeException unavailable) {
-            return "unknown";
+            return null;
         }
+    }
+
+    private static String spoofMetadata(Bundle metaData) {
+        if (metaData == null) return "unknown";
+        return metaData.containsKey(SPOOF_METADATA) ? "present" : "missing";
+    }
+
+    /**
+     * Whether microG-RE gets Pinterest's own package to show Google: "pinterest", "other" for any
+     * other value (which isn't printed, a copy's custom package included), or "missing". A renamed
+     * copy without it shows Google its own package beside Pinterest's certificate (#28).
+     */
+    private static String spoofPackage(Bundle metaData) {
+        if (metaData == null) return "unknown";
+        if (!metaData.containsKey(SPOOF_PACKAGE_METADATA)) return "missing";
+        return PINTEREST_PACKAGE.equals(metaData.getString(SPOOF_PACKAGE_METADATA)) ? "pinterest" : "other";
     }
 
     private static String microGLine(Context context) {

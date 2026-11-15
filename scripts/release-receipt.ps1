@@ -784,9 +784,9 @@ function Test-ManifestDelta {
         authorize only these transformations. Existing matching browser queries are retained,
         Analytics may change only its application metadata values and remove their resources, and
         Remove ad tracking permissions may drop only its three permissions and the application's
-        ad services configuration property. Spoof signature for Google sign-in may add only its two
-        application metadata entries, and only to a manifest that has neither. GmsCore support adds
-        the same two, moves every com.google.android.c2dm. name to app.revanced.android.c2dm., and
+        ad services configuration property. Spoof signature for Google sign-in may add only its three
+        application metadata entries, and only to a manifest that has none of them. GmsCore support adds
+        the same three, moves every com.google.android.c2dm. name to app.revanced.android.c2dm., and
         adds a package query for app.revanced.android.gms to the first query block. Download pins
         may add only its unexported share preview provider, under the package's own authority.
         Change package name may give the build a package of its own. Every permission asked for
@@ -927,10 +927,13 @@ function Test-ManifestDelta {
         }
     }
     if ($signature -or $gmsCore) {
-        # Pinterest's own certificate, by SHA-1 for microG-RE and as DER hex for signature modules.
-        # The input names neither, so both are new application metadata and nothing else changes.
-        # GmsCore support brings the same two along, once whichever of the pair is selected.
+        # Pinterest's own package and certificate: the package and the certificate's SHA-1 for
+        # microG-RE, the certificate as DER hex for signature modules. The package stays
+        # com.pinterest on a renamed copy (#28). The input names none of them, so all three are new
+        # application metadata and nothing else changes. GmsCore support brings the same three
+        # along, once whichever of the pair is selected.
         $spoofed = [ordered]@{
+            'app.revanced.android.gms.SPOOFED_PACKAGE_NAME' = 'com.pinterest'
             'app.revanced.android.gms.SPOOFED_PACKAGE_SIGNATURE' = 'b6a74dbcb894b0f73d8c485c72eb1247a8f027ca'
             'fake-signature' = '3082024f308201b8a00302010202044f96d518300d06092a864886f70d0101050500306c310b3009060355040613025553310b3009060355040813024341311230100603550407130950616c6f20416c746f31163014060355040a130d50696e74657265737420496e633110300e060355040b1307416e64726f696431123010060355040313094361726c2052696365301e170d3132303432343136333031365a170d3337303431383136333031365a306c310b3009060355040613025553310b3009060355040813024341311230100603550407130950616c6f20416c746f31163014060355040a130d50696e74657265737420496e633110300e060355040b1307416e64726f696431123010060355040313094361726c205269636530819f300d06092a864886f70d010101050003818d0030818902818100bd8b325a2eb8ade0e16e44971e75130ec98f2c37c8a477044382a1c5c18aa3078bede3c1a49776441617f3bb6711d1a7d764785ea20bf8c694d78fdc82d575f88f340fc87b948558385636f80dba536481a9c8bf03505781adbbca1ef65b2f59281ca92e352d9f685d04024c19cb3b4e3e14e6eb69ca113e55b55d766ea860170203010001300d06092a864886f70d0101050500038181009e6766c1071e383b75c520221b502e4701d7a110933a9fe7e7417679be71581ad24a09c42bb5190acfb7e487969f843a634eac015424adc4380cdc0eb21b47616b4459f11a018b4f5185bfb75764d95c1d8bd01c21932911578a3406caf8d317bc65f2d4d5caef1b59e59ed695e235a672460b2ccff2d0a8f3c3b2604c599714'
         }
