@@ -179,6 +179,7 @@ public enum PatchFamily {
         INTERSTITIAL_ADS(HIDE_ADS, "interstitialAds", "full-screen ads when opening a pin"),
         FEED_AI_PINS(HIDE_AI_PINS, "feedAiPins", "AI-labeled pins in lists"),
         FEED_SHOPPING(HIDE_SHOPPING, "feedShopping", "Hide shopping and product pins"),
+        CLOSEUP_SHOPPING(HIDE_SHOPPING, "closeupShopping", "Shop the look under pins"),
         FEED_VIDEO_PINS(FILTER_FEED, "feedVideoPins", "Hide video pins"),
         FEED_MUTED_WORDS(FILTER_FEED, "feedMutedWords", "Muted words"),
         FEED_SAVED_PINS(FILTER_FEED, "feedSavedPins", "Hide pins you've already saved"),

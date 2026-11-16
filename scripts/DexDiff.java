@@ -275,7 +275,7 @@ public class DexDiff {
 
     private static final Map<String, Integer> MUTATION_COLUMNS = Map.ofEntries(
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
-            Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7),
+            Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7), Map.entry("closeupModule", 4),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("saveSound", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
@@ -2663,7 +2663,11 @@ public class DexDiff {
         }
 
         boolean canOverride(String type, String name, String shape) {
-            for (ClassDef cd = clean.classes.get(type); cd != null; cd = clean.classes.get(cd.getSuperclass())) {
+            // The view's own method is edited in place (requireOverride), so its final flag doesn't stop it.
+            ClassDef own = clean.classes.get(type);
+            if (own != null) for (Method m : own.getMethods()) if (m.getName().equals(name) && descriptor(m).equals(shape))
+                return m.getImplementation() != null && !AccessFlags.STATIC.isSet(m.getAccessFlags());
+            for (ClassDef cd = own == null ? null : clean.classes.get(own.getSuperclass()); cd != null; cd = clean.classes.get(cd.getSuperclass())) {
                 for (Method m : cd.getMethods()) if (m.getName().equals(name) && descriptor(m).equals(shape))
                     return !AccessFlags.FINAL.isSet(m.getAccessFlags()) && !AccessFlags.STATIC.isSet(m.getAccessFlags())
                             && !AccessFlags.PRIVATE.isSet(m.getAccessFlags()) && !AccessFlags.ABSTRACT.isSet(m.getAccessFlags())
@@ -4613,6 +4617,32 @@ public class DexDiff {
                 if (zone != null) prefix(zone, c.strings.get(2), List.of(parameter(zone, 0)), true);
             }
             capability(c.callee, true);
+        }
+
+        /**
+         * A closeup module picked by the component type its getComponentType returns, folded through
+         * a visibility and measure pair. The patch leaves the module alone, with a warning, when a
+         * build has no single module of that type or it doesn't build on the closeup base module, and
+         * the flag stays off then.
+         */
+        void closeupModule(Contract c) {
+            List<ClassDef> modules = new ArrayList<>();
+            for (ClassDef cd : clean.classes.values()) {
+                for (Method method : cd.getMethods()) {
+                    if (method.getName().equals("getComponentType") && method.getParameterTypes().isEmpty()
+                            && fieldNames(method).contains(c.strings.get(2))) { modules.add(cd); break; }
+                }
+            }
+            ClassDef module = modules.size() == 1 ? modules.get(0) : null;
+            if (module != null && clean.duplicates.contains(module.getType())) { fail(c.strings.get(2) + " module has duplicate clean classes"); return; }
+            boolean inherits = false;
+            Set<String> visited = new HashSet<>();
+            if (module != null) for (String type = module.getSuperclass(); type != null && visited.add(type); ) {
+                if (type.equals(c.strings.get(3))) { inherits = true; break; }
+                ClassDef parent = clean.classes.get(type); type = parent == null ? null : parent.getSuperclass();
+            }
+            if (inherits) view(module.getType(), c.strings.get(0), c.strings.get(1), null);
+            capability(c.callee, inherits);
         }
 
         int replacement(String original, String hook, String prefix, boolean fallback) {
@@ -8108,6 +8138,7 @@ public class DexDiff {
                     case "savedElsewhere": savedElsewhere(c); break;
                     case "homeBack": homeBack(c); break;
                     case "comments": comments(c); break;
+                    case "closeupModule": closeupModule(c); break;
                     case "links": links(c); break;
                     case "analytics": analytics(c); break;
                     case "answers": answers(c); break;

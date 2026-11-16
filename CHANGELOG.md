@@ -4,6 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* Hide shopping and product pins now takes the Shop the look section out from under a pin you open, the title and its row of products both. Pinterest builds that section from the pin itself, not from a feed story, so the switch used to miss it. The pin's Visit button stays, and Export report lists the part as `Shop the look under pins`. (#6)
 * New `Custom splash logo` patch with its own switch under Interface. On Android 13 and newer, the screen you see while Pinterest starts shows a logo you pick instead of Pinterest's. Pick a PNG, JPEG or WebP picture in the patch's Logo option when you patch, or leave it empty for HushPinterest's logo. All of the picture shows, centered in a circle, so a square one with a clear background looks best. It starts off, and the logo shows from the next start after you turn it on. (#41)
 * New `Custom save sound` patch with its own switch under Interface. Pick a sound file with Pick a save sound and it plays when you save a pin, instead of Pinterest's chime. Picking one turns the switch on, and the row can take you back to Pinterest's sound any time. If the file goes missing, Pinterest's chime plays. (#41)
 * New `Hide related pins` patch with its own switch under Interface. It leaves the grid of more pins out from under a pin you open, so Pinterest never loads it. The pin, its comments and its buttons stay. It starts off, and the change shows on the next pin you open. (#41)

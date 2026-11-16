@@ -16,6 +16,7 @@ import app.morphe.patches.pinterest.misc.extension.EXTENSION_PACKAGE
 import app.morphe.patches.pinterest.misc.extension.HOOK_TARGETS
 import app.morphe.patches.pinterest.misc.extension.PatchLogCapture
 import app.morphe.patches.pinterest.misc.extension.SETTINGS_STATUS
+import app.morphe.patches.pinterest.ui.UI_HOOKS
 import app.morphe.patches.pinterest.ui.calls
 import app.morphe.patches.pinterest.ui.mutable
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -73,9 +74,20 @@ class FeedFixtureTest {
             }
             assertEquals("${build.name} warnings", emptyList<String>(), warnings)
             assertEquals(build.name, 3, feedListHoldersHooked)
-            for (flag in listOf("hideAds", "feedAds", "adViews", "googleAds", "metaAds", "interstitialAds", "hideAiPins", "feedAiPins", "hideShopping", "feedShopping",
+            for (flag in listOf("hideAds", "feedAds", "adViews", "googleAds", "metaAds", "interstitialAds", "hideAiPins", "feedAiPins", "hideShopping", "feedShopping", "closeupShopping",
                     "filterFeed", "feedVideoPins", "feedMutedWords", "feedSavedPins", "feedSavedSearch", "feedSavedRelated", "feedHomeSuggestions",
                     "feedbackFlyout")) assertFlag(context, flag)
+            // #6: Shop the look under a pin is a closeup module of its own, and Hide shopping folds it.
+            val shopTheLook = classes.filter { it.isShopTheLookModule() }
+            assertEquals("${build.name}: $SHOP_THE_LOOK_COMPONENT modules", 1, shopTheLook.size)
+            val module = context.mutableClassDefBy(shopTheLook.single().type)
+            for ((parameters, hook) in listOf(listOf("I") to "closeupShoppingVisibility", listOf("I", "I") to "closeupShoppingMeasureSpec")) {
+                val name = if (parameters.size == 1) "setVisibility" else "onMeasure"
+                val code = module.methods.single { it.name == name && it.parameterTypes.map(CharSequence::toString) == parameters }
+                    .implementation!!.instructions.toList()
+                val calls = code.take(parameters.size * 2).mapNotNull { (it as? ReferenceInstruction)?.reference?.toString() }
+                assertEquals("${build.name}: ${module.type}->$name starts with the hook", List(parameters.size) { "$UI_HOOKS->$hook(I)I" }, calls)
+            }
             // The pin's "See more like this?" getter hands every answer through the hook on its way out, once.
             val flyout = context.feedbackFlyoutOrNull()!!
             context.installFeedbackFlyout(flyout)
@@ -307,7 +319,8 @@ class FeedFixtureTest {
                 val asksElsewhere = classDef.methods.any { method -> method.implementation?.instructions?.any {
                     ((it as? ReferenceInstruction)?.reference as? FieldReference)?.name in elsewhereSets } == true }
                 val elsewhere = fieldSets || asksElsewhere || classDef.type == ELSEWHERE_RELATED_FILTER
-                if (matched.isNotEmpty() || classDef.type in AD_ONLY_VIEWS || googleAds || home || interstitial || elsewhere) {
+                if (matched.isNotEmpty() || classDef.type in AD_ONLY_VIEWS || googleAds || home || interstitial || elsewhere ||
+                    classDef.isShopTheLookModule()) {
                     wanted[classDef.type] = ImmutableClassDef.of(classDef)
                 }
             }

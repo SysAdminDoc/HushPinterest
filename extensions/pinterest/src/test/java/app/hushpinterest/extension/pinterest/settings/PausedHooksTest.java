@@ -357,11 +357,12 @@ public class PausedHooksTest {
             says.gridTitle = "AI art";
             return filtersOut(says);
         }));
-        probes.put(Settings.HIDE_SHOPPING, Collections.singletonList(() -> {
+        probes.put(Settings.HIDE_SHOPPING, Arrays.asList(() -> {
             ProbePin product = new ProbePin();
             product.shoppable = true;
             return filtersOut(product);
-        }));
+        }, () -> UiHooks.closeupShoppingVisibility(View.INVISIBLE) != View.INVISIBLE,
+                () -> UiHooks.closeupShoppingMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC));
         // A pin Pinterest marks as a video leaves the page.
         probes.put(Settings.HIDE_VIDEO_PINS, Collections.singletonList(() -> {
             ProbePin video = new ProbePin();

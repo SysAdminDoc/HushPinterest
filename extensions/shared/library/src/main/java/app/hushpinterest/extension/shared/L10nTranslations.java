@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1356);
+        Map<String, String> table = new HashMap<>(1358);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -1144,6 +1144,8 @@ public final class L10nTranslations {
                 "Pin teilen");
         table.put("Sharing a pin link opens Android's own share menu.",
                 "Beim Teilen eines Pin-Links \u00f6ffnet sich das eigene Teilen-Men\u00fc von Android.");
+        table.put("Shop the look under pins",
+                "Shop the look unter Pins");
         table.put("Show AI content",
                 "KI-Inhalte anzeigen");
         table.put("Show posted date",
@@ -1166,11 +1168,11 @@ public final class L10nTranslations {
                 "Gr\u00f6\u00dfe: %s. Downloads suchen zuerst nach dem Original.");
         table.put("Size: the original image",
                 "Gr\u00f6\u00dfe: das Originalbild");
-        table.put("Skipped",
-                "\u00dcbersprungen");
     }
 
     private static void fillDe9(Map<String, String> table) {
+        table.put("Skipped",
+                "\u00dcbersprungen");
         table.put("Skipped because they're already in Download history: %d",
                 "\u00dcbersprungen, weil schon im Download-Verlauf: %d");
         table.put("Smaller Save button on pins",
@@ -1289,11 +1291,11 @@ public final class L10nTranslations {
                 "Dieser Build enth\u00e4lt die Teile nicht, die %1$s behandeln.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Dieser Build behandelt %1$s. Es fehlen die Teile f\u00fcr %2$s.");
-        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
-                "Diese Version leitet die Google-Anmeldung an microG-RE weiter. F\u00fcge dein Google-Konto zuerst in microG-RE hinzu. Wenn dein Telefon Hintergrund-Apps einschr\u00e4nkt, erlaube microG-RE, von selbst zu starten.");
     }
 
     private static void fillDe10(Map<String, String> table) {
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Diese Version leitet die Google-Anmeldung an microG-RE weiter. F\u00fcge dein Google-Konto zuerst in microG-RE hinzu. Wenn dein Telefon Hintergrund-Apps einschr\u00e4nkt, erlaube microG-RE, von selbst zu starten.");
         table.put("This copy has its own package name, so it installs beside Pinterest",
                 "Diese Kopie hat einen eigenen Paketnamen und wird deshalb neben Pinterest installiert");
         table.put("This copy runs as %1$s, so it installs beside Pinterest with its own sign-in. Set when patching.",
@@ -1412,11 +1414,11 @@ public final class L10nTranslations {
                 "Deine Schalter sind aktiv.");
         table.put("ad buttons on pin closeups",
                 "Werbeschaltfl\u00e4chen in Pin-Detailansichten");
-        table.put("ad-only views",
-                "reine Werbeansichten");
     }
 
     private static void fillDe11(Map<String, String> table) {
+        table.put("ad-only views",
+                "reine Werbeansichten");
         table.put("board menus",
                 "Pinnwand-Men\u00fcs");
         table.put("cake, wedding dress",
@@ -1456,7 +1458,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1356);
+        Map<String, String> table = new HashMap<>(1358);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -2553,6 +2555,8 @@ public final class L10nTranslations {
                 "Compartir pin");
         table.put("Sharing a pin link opens Android's own share menu.",
                 "Al compartir el enlace de un pin se abre el men\u00fa de compartir propio de Android.");
+        table.put("Shop the look under pins",
+                "Shop the look bajo los pines");
         table.put("Show AI content",
                 "Mostrar contenido de IA");
         table.put("Show posted date",
@@ -2575,11 +2579,11 @@ public final class L10nTranslations {
                 "Tama\u00f1o: %s. Las descargas buscan primero el original.");
         table.put("Size: the original image",
                 "Tama\u00f1o: la imagen original");
-        table.put("Skipped",
-                "Omitido");
     }
 
     private static void fillEs9(Map<String, String> table) {
+        table.put("Skipped",
+                "Omitido");
         table.put("Skipped because they're already in Download history: %d",
                 "Omitidos porque ya est\u00e1n en el Historial de descargas: %d");
         table.put("Smaller Save button on pins",
@@ -2698,11 +2702,11 @@ public final class L10nTranslations {
                 "Esta versi\u00f3n no incluye las partes que se encargan de %1$s.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Esta versi\u00f3n se encarga de %1$s. Faltan las partes para %2$s.");
-        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
-                "Esta versi\u00f3n env\u00eda el inicio de sesi\u00f3n con Google a microG-RE. Primero agrega tu cuenta de Google en microG-RE. Si tu tel\u00e9fono limita las aplicaciones en segundo plano, permite que microG-RE se inicie por s\u00ed solo.");
     }
 
     private static void fillEs10(Map<String, String> table) {
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Esta versi\u00f3n env\u00eda el inicio de sesi\u00f3n con Google a microG-RE. Primero agrega tu cuenta de Google en microG-RE. Si tu tel\u00e9fono limita las aplicaciones en segundo plano, permite que microG-RE se inicie por s\u00ed solo.");
         table.put("This copy has its own package name, so it installs beside Pinterest",
                 "Esta copia tiene su propio nombre de paquete, as\u00ed que se instala junto a Pinterest");
         table.put("This copy runs as %1$s, so it installs beside Pinterest with its own sign-in. Set when patching.",
@@ -2821,11 +2825,11 @@ public final class L10nTranslations {
                 "Tus interruptores est\u00e1n funcionando.");
         table.put("ad buttons on pin closeups",
                 "botones de anuncio en las vistas ampliadas de pines");
-        table.put("ad-only views",
-                "vistas solo de anuncios");
     }
 
     private static void fillEs11(Map<String, String> table) {
+        table.put("ad-only views",
+                "vistas solo de anuncios");
         table.put("board menus",
                 "men\u00fas de tableros");
         table.put("cake, wedding dress",
@@ -2865,7 +2869,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1356);
+        Map<String, String> table = new HashMap<>(1358);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -3962,6 +3966,8 @@ public final class L10nTranslations {
                 "Bagikan Pin");
         table.put("Sharing a pin link opens Android's own share menu.",
                 "Membagikan tautan pin membuka menu bagikan bawaan Android.");
+        table.put("Shop the look under pins",
+                "Shop the look di bawah pin");
         table.put("Show AI content",
                 "Tampilkan konten AI");
         table.put("Show posted date",
@@ -3984,11 +3990,11 @@ public final class L10nTranslations {
                 "Ukuran: %s. Unduhan mencari versi asli terlebih dahulu.");
         table.put("Size: the original image",
                 "Ukuran: gambar asli");
-        table.put("Skipped",
-                "Dilewati");
     }
 
     private static void fillIn9(Map<String, String> table) {
+        table.put("Skipped",
+                "Dilewati");
         table.put("Skipped because they're already in Download history: %d",
                 "Dilewati karena sudah ada di Riwayat unduhan: %d");
         table.put("Smaller Save button on pins",
@@ -4107,11 +4113,11 @@ public final class L10nTranslations {
                 "Build ini tidak menyertakan bagian yang menangani %1$s.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Build ini menangani %1$s. Bagian untuk %2$s tidak ada.");
-        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
-                "Versi ini meneruskan proses masuk dengan Google ke microG-RE. Tambahkan dulu akun Google kamu di microG-RE. Jika ponselmu membatasi aplikasi latar belakang, izinkan microG-RE berjalan sendiri.");
     }
 
     private static void fillIn10(Map<String, String> table) {
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Versi ini meneruskan proses masuk dengan Google ke microG-RE. Tambahkan dulu akun Google kamu di microG-RE. Jika ponselmu membatasi aplikasi latar belakang, izinkan microG-RE berjalan sendiri.");
         table.put("This copy has its own package name, so it installs beside Pinterest",
                 "Salinan ini punya nama paket sendiri, jadi terpasang di samping Pinterest");
         table.put("This copy runs as %1$s, so it installs beside Pinterest with its own sign-in. Set when patching.",
@@ -4230,11 +4236,11 @@ public final class L10nTranslations {
                 "Sakelar Anda aktif.");
         table.put("ad buttons on pin closeups",
                 "tombol iklan di tampilan dekat pin");
-        table.put("ad-only views",
-                "tampilan khusus iklan");
     }
 
     private static void fillIn11(Map<String, String> table) {
+        table.put("ad-only views",
+                "tampilan khusus iklan");
         table.put("board menus",
                 "menu papan");
         table.put("cake, wedding dress",
@@ -4274,7 +4280,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1356);
+        Map<String, String> table = new HashMap<>(1358);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -5371,6 +5377,8 @@ public final class L10nTranslations {
                 "Compartilhar Pin");
         table.put("Sharing a pin link opens Android's own share menu.",
                 "Ao compartilhar o link de um pin, abre o menu de compartilhamento do pr\u00f3prio Android.");
+        table.put("Shop the look under pins",
+                "Shop the look abaixo dos pins");
         table.put("Show AI content",
                 "Mostrar conte\u00fado de IA");
         table.put("Show posted date",
@@ -5393,11 +5401,11 @@ public final class L10nTranslations {
                 "Tamanho: %s. Os downloads procuram o original primeiro.");
         table.put("Size: the original image",
                 "Tamanho: a imagem original");
-        table.put("Skipped",
-                "Ignorado");
     }
 
     private static void fillPt_rBR9(Map<String, String> table) {
+        table.put("Skipped",
+                "Ignorado");
         table.put("Skipped because they're already in Download history: %d",
                 "Pulados porque j\u00e1 est\u00e3o no Hist\u00f3rico de downloads: %d");
         table.put("Smaller Save button on pins",
@@ -5516,11 +5524,11 @@ public final class L10nTranslations {
                 "Esta vers\u00e3o n\u00e3o inclui as partes que cuidam de %1$s.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Esta vers\u00e3o cuida de %1$s. Faltam as partes para %2$s.");
-        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
-                "Esta vers\u00e3o envia o login com o Google para o microG-RE. Adicione primeiro sua conta do Google no microG-RE. Se o seu celular limita apps em segundo plano, permita que o microG-RE inicie sozinho.");
     }
 
     private static void fillPt_rBR10(Map<String, String> table) {
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Esta vers\u00e3o envia o login com o Google para o microG-RE. Adicione primeiro sua conta do Google no microG-RE. Se o seu celular limita apps em segundo plano, permita que o microG-RE inicie sozinho.");
         table.put("This copy has its own package name, so it installs beside Pinterest",
                 "Esta c\u00f3pia tem o pr\u00f3prio nome de pacote, ent\u00e3o \u00e9 instalada ao lado do Pinterest");
         table.put("This copy runs as %1$s, so it installs beside Pinterest with its own sign-in. Set when patching.",
@@ -5639,11 +5647,11 @@ public final class L10nTranslations {
                 "Suas op\u00e7\u00f5es est\u00e3o funcionando.");
         table.put("ad buttons on pin closeups",
                 "bot\u00f5es de an\u00fancio nas visualiza\u00e7\u00f5es ampliadas de Pins");
-        table.put("ad-only views",
-                "telas s\u00f3 de an\u00fancios");
     }
 
     private static void fillPt_rBR11(Map<String, String> table) {
+        table.put("ad-only views",
+                "telas s\u00f3 de an\u00fancios");
         table.put("board menus",
                 "menus de pastas");
         table.put("cake, wedding dress",
@@ -5683,7 +5691,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1356);
+        Map<String, String> table = new HashMap<>(1358);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -6780,6 +6788,8 @@ public final class L10nTranslations {
                 "Pini payla\u015f");
         table.put("Sharing a pin link opens Android's own share menu.",
                 "Bir pin ba\u011flant\u0131s\u0131n\u0131 payla\u015fmak Android'in kendi payla\u015fma men\u00fcs\u00fcn\u00fc a\u00e7ar.");
+        table.put("Shop the look under pins",
+                "pinlerin alt\u0131ndaki Shop the look b\u00f6l\u00fcm\u00fc");
         table.put("Show AI content",
                 "Yapay zeka i\u00e7eri\u011fi g\u00f6ster");
         table.put("Show posted date",
@@ -6802,11 +6812,11 @@ public final class L10nTranslations {
                 "Boyut: %s. \u0130ndirmeler \u00f6nce \u00f6zg\u00fcn g\u00f6rseli arar.");
         table.put("Size: the original image",
                 "Boyut: \u00f6zg\u00fcn g\u00f6rsel");
-        table.put("Skipped",
-                "Atland\u0131");
     }
 
     private static void fillTr9(Map<String, String> table) {
+        table.put("Skipped",
+                "Atland\u0131");
         table.put("Skipped because they're already in Download history: %d",
                 "\u0130ndirme ge\u00e7mi\u015finde oldu\u011fu i\u00e7in atlananlar: %d");
         table.put("Smaller Save button on pins",
@@ -6925,11 +6935,11 @@ public final class L10nTranslations {
                 "Bu s\u00fcr\u00fcm %1$s ile ilgilenen par\u00e7alar\u0131 i\u00e7ermiyor.");
         table.put("This build handles %1$s. It's missing the parts for %2$s.",
                 "Bu s\u00fcr\u00fcm %1$s ile ilgileniyor. %2$s i\u00e7in par\u00e7alar eksik.");
-        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
-                "Bu s\u00fcr\u00fcm Google ile giri\u015fi microG-RE'ye y\u00f6nlendirir. \u00d6nce Google hesab\u0131n\u0131 microG-RE'ye ekle. Telefonun arka plan uygulamalar\u0131n\u0131 k\u0131s\u0131tl\u0131yorsa microG-RE'nin kendi kendine ba\u015flamas\u0131na izin ver.");
     }
 
     private static void fillTr10(Map<String, String> table) {
+        table.put("This build sends Google sign-in to microG-RE. Add your Google account in microG-RE first. If your phone limits background apps, let microG-RE start on its own.",
+                "Bu s\u00fcr\u00fcm Google ile giri\u015fi microG-RE'ye y\u00f6nlendirir. \u00d6nce Google hesab\u0131n\u0131 microG-RE'ye ekle. Telefonun arka plan uygulamalar\u0131n\u0131 k\u0131s\u0131tl\u0131yorsa microG-RE'nin kendi kendine ba\u015flamas\u0131na izin ver.");
         table.put("This copy has its own package name, so it installs beside Pinterest",
                 "Bu kopyan\u0131n kendi paket ad\u0131 var, bu y\u00fczden Pinterest'in yan\u0131na kurulur");
         table.put("This copy runs as %1$s, so it installs beside Pinterest with its own sign-in. Set when patching.",
@@ -7048,11 +7058,11 @@ public final class L10nTranslations {
                 "Anahtarlar\u0131n \u00e7al\u0131\u015f\u0131yor.");
         table.put("ad buttons on pin closeups",
                 "Pin yak\u0131n g\u00f6r\u00fcn\u00fcmlerindeki reklam d\u00fc\u011fmeleri");
-        table.put("ad-only views",
-                "yaln\u0131zca reklam g\u00f6r\u00fcn\u00fcmleri");
     }
 
     private static void fillTr11(Map<String, String> table) {
+        table.put("ad-only views",
+                "yaln\u0131zca reklam g\u00f6r\u00fcn\u00fcmleri");
         table.put("board menus",
                 "pano men\u00fcleri");
         table.put("cake, wedding dress",

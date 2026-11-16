@@ -1012,7 +1012,7 @@
     },
     {
       "name": "Hide shopping and product pins",
-      "description": "Hides shoppable pins, shopping stories and featured boards. Good if you want to browse ideas, not products. Starts off. Turn it on in HushPinterest settings > Feed.",
+      "description": "Hides shoppable pins, shopping stories, featured boards and the Shop the look section under a pin. Good if you want to browse ideas, not products. Starts off. Turn it on in HushPinterest settings > Feed.",
       "category": "Feed",
       "use": true,
       "dependencies": [

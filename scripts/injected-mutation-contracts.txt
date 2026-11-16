@@ -34,7 +34,7 @@ no-call Landroid/content/pm/ShortcutManager;->removeAllDynamicShortcuts()V outsi
 # its capability column when the family changes bytecode too (Change package name does).
 family|hideAds|Hide ads|feedAds,adViews,googleAds,metaAds,interstitialAds
 family|hideAiPins|Hide AI-labeled pins|feedAiPins
-family|hideShopping|Hide shopping and product pins|feedShopping
+family|hideShopping|Hide shopping and product pins|feedShopping,closeupShopping
 family|filterFeed|Filter feed|feedVideoPins,feedMutedWords,feedSavedPins,feedSavedSearch,feedSavedRelated,feedHomeSuggestions,feedbackFlyout
 family|keepHomeFeed|Keep Home feed|homeFeed,homeBack
 family|disableAnalytics|Disable analytics|analyticsTasks,analyticsUploads
@@ -119,6 +119,7 @@ mutation|pinMenuItems|menu|Lapp/hushpinterest/extension/pinterest/ui/InterfaceCo
 mutation|comments|comments|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentsVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentsMeasureSpec(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentsVisible(Z)Z|Lcom/pinterest/activity/pin/view/modules/PinCloseupBaseModule;|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentPreviewsVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentPreviewsMeasureSpec(I)I|Lcom/pinterest/activity/pin/view/unifiedcomments/CommentsImagesView;
 mutation|suggestedReplies|views|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->suggestedRepliesVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->suggestedRepliesMeasureSpec(I)I|Lcom/pinterest/activity/pin/view/unifiedcomments/CommentsQuickReplies;
 mutation|commentPreviews|views|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentPreviewsVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentPreviewsMeasureSpec(I)I|Lcom/pinterest/activity/pin/view/unifiedcomments/CommentPreviewView;
+mutation|closeupShopping|closeupModule|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->closeupShoppingVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->closeupShoppingMeasureSpec(I)I|STELA_PRODUCTS|Lcom/pinterest/activity/pin/view/modules/PinCloseupBaseModule;
 mutation|topicSuggestions|topicSuggestions|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->topicSuggestions(Ljava/lang/Object;)V|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->topicSuggestionsMeasureSpec(Landroid/view/View;I)I
 mutation|inboxUpdates|inboxUpdates|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideInboxUpdates()Z|news_hub/feed/|addDataSources
 mutation|recentSearchRows|recentSearchRows|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->recentSearchRow(Landroid/view/View;Z)V|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->recentSearchRowMeasureSpec(Landroid/view/View;I)I

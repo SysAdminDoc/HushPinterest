@@ -88,7 +88,7 @@ public class UiHooksTest {
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
             Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.CUSTOM_SAVE_SOUND, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
-            Settings.DISABLE_UPDATE_NAG
+            Settings.DISABLE_UPDATE_NAG, Settings.HIDE_SHOPPING
     }; }
 
     @After public void restore() {
@@ -652,6 +652,24 @@ public class UiHooksTest {
         assertEquals(spec, UiHooks.searchHistoryMeasureSpec(spec));
         assertEquals(spec, UiHooks.commentsMeasureSpec(spec));
         assertTrue(UiHooks.commentsVisible(true));
+    }
+
+    /** The Shop the look section under a pin (#6) folds with Hide shopping and comes back when it's off or paused. */
+    @Test public void shopTheLookFoldsWithHideShopping() {
+        int spec = View.MeasureSpec.makeMeasureSpec(200, View.MeasureSpec.AT_MOST);
+        assertEquals("off by default", View.VISIBLE, UiHooks.closeupShoppingVisibility(View.VISIBLE));
+        assertEquals("off by default", spec, UiHooks.closeupShoppingMeasureSpec(spec));
+        Settings.HIDE_SHOPPING.save(true);
+        assertEquals(View.GONE, UiHooks.closeupShoppingVisibility(View.VISIBLE));
+        assertEquals(0, View.MeasureSpec.getSize(UiHooks.closeupShoppingMeasureSpec(spec)));
+        assertEquals(View.MeasureSpec.EXACTLY, View.MeasureSpec.getMode(UiHooks.closeupShoppingMeasureSpec(spec)));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertEquals(View.INVISIBLE, UiHooks.closeupShoppingVisibility(View.INVISIBLE));
+        assertEquals(spec, UiHooks.closeupShoppingMeasureSpec(spec));
+        PauseForTests.resume();
+        Settings.HIDE_SHOPPING.save(false);
+        assertEquals(View.VISIBLE, UiHooks.closeupShoppingVisibility(View.VISIBLE));
+        assertEquals(spec, UiHooks.closeupShoppingMeasureSpec(spec));
     }
 
     /** The suggested replies over the comment box fold on their own switch, and Hide comments never folds them. */

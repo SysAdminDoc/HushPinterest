@@ -456,6 +456,16 @@ public final class UiHooks {
         return foldedMeasure(HIDDEN_RECENT_ROWS, FamilyNames.HIDE_SEARCH_HISTORY, Settings.HIDE_SEARCH_HISTORY, row, requested);
     }
 
+    /** The Shop the look section under a pin (#6), its own closeup module, folds under Hide shopping. */
+    public static int closeupShoppingVisibility(int requested) {
+        return enabled(FamilyNames.HIDE_SHOPPING, Settings.HIDE_SHOPPING) ? View.GONE : requested;
+    }
+
+    public static int closeupShoppingMeasureSpec(int requested) {
+        return enabled(FamilyNames.HIDE_SHOPPING, Settings.HIDE_SHOPPING)
+                ? View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.EXACTLY) : requested;
+    }
+
     public static int commentsVisibility(int requested) {
         return enabled(FamilyNames.HIDE_COMMENTS, Settings.HIDE_COMMENTS) ? View.GONE : requested;
     }
