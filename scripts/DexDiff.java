@@ -4250,10 +4250,10 @@ public class DexDiff {
         /** An extension stub the patch filled: these opcodes, naming these references, its input cast first. */
         static final String LONG_PRESS_MENU = "Lcom/pinterest/ui/menu/ContextMenuView;", LONG_PRESS_ITEM = "Lcom/pinterest/ui/menu/ContextMenuItemView;",
                 LONG_PRESS_SAVE = "context_save", LONG_PRESS_SEND = "context_share", LONG_PRESS_SEARCH = "context_visual_search",
-                LONG_PRESS_CLOSEUP_SEARCH = "context_closeup_visual_search";
+                LONG_PRESS_CLOSEUP_SEARCH = "context_closeup_visual_search", LONG_PRESS_SEND_APP = "context_share_recent";
 
         /**
-         * The long-press hide switches (#11): buttonKind tells Save, Send and Search image apart by the
+         * The long-press hide switches (#11, #35): buttonKind tells Save, Send, Search image and Send with an app apart by the
          * id a button's builder writes into it, compared with the ids the menu's hover test reads. Found
          * the way the patch finds them. A build without a public hover test keeps the stub's plain
          * "other" answer and the switches stay out.
@@ -4289,15 +4289,20 @@ public class DexDiff {
                 return;
             }
 
+            // Each id and the kind it answers: Save 1, Send 2, Search image 3 for both search ids, and
+            // Send with an app 4 (#35). The answers come after the ids, "other" first.
             List<String> checked = new ArrayList<>(List.of(LONG_PRESS_SAVE, LONG_PRESS_SEND, LONG_PRESS_SEARCH));
-            if (publicId(ids, LONG_PRESS_CLOSEUP_SEARCH)) checked.add(LONG_PRESS_CLOSEUP_SEARCH);
+            List<Integer> kinds = new ArrayList<>(List.of(1, 2, 3));
+            if (publicId(ids, LONG_PRESS_CLOSEUP_SEARCH)) { checked.add(LONG_PRESS_CLOSEUP_SEARCH); kinds.add(3); }
+            if (publicId(ids, LONG_PRESS_SEND_APP)) { checked.add(LONG_PRESS_SEND_APP); kinds.add(4); }
+            int answers = 5;
             List<Opcode> opcodes = new ArrayList<>(List.of(Opcode.INSTANCE_OF, Opcode.IF_EQZ, Opcode.CHECK_CAST, Opcode.IGET));
             List<String> references = new ArrayList<>(Arrays.asList(LONG_PRESS_ITEM, null, LONG_PRESS_ITEM, LONG_PRESS_ITEM + "->" + field + ":I"));
             for (String id : checked) {
                 opcodes.addAll(List.of(Opcode.SGET, Opcode.IF_EQ));
                 references.addAll(Arrays.asList(owner + "->" + id + ":I", null));
             }
-            for (int kind = 0; kind < 4; kind++) {
+            for (int kind = 0; kind < answers; kind++) {
                 opcodes.addAll(List.of(Opcode.CONST_4, Opcode.RETURN));
                 references.addAll(Arrays.asList(null, null));
             }
@@ -4311,19 +4316,18 @@ public class DexDiff {
                         && firstRegister(body.get(1)) == firstRegister(body.get(0)) && firstRegister(body.get(2)) == input
                         && ((TwoRegisterInstruction) body.get(3)).getRegisterB() == input
                         && code.addresses.get(1) + ((OffsetInstruction) body.get(1)).getCodeOffset() == code.addresses.get(other);
-                // Each id is compared with the button's own and jumps to its answer: Save, Send, then
-                // Search image for both search ids.
+                // Each id is compared with the button's own and jumps to its own kind's answer.
                 for (int n = 0; n < checked.size(); n++) {
-                    int at = 4 + 2 * n, answer = other + 2 * Math.min(n + 1, 3);
+                    int at = 4 + 2 * n, answer = other + 2 * kinds.get(n);
                     TwoRegisterInstruction test = (TwoRegisterInstruction) body.get(at + 1);
                     bound &= firstRegister(body.get(at)) != kept && test.getRegisterA() == kept && test.getRegisterB() == firstRegister(body.get(at))
                             && code.addresses.get(at + 1) + ((OffsetInstruction) body.get(at + 1)).getCodeOffset() == code.addresses.get(answer);
                 }
-                for (int kind = 0; kind < 4; kind++) {
+                for (int kind = 0; kind < answers; kind++) {
                     int at = other + 2 * kind;
                     bound &= ((NarrowLiteralInstruction) body.get(at)).getNarrowLiteral() == kind && firstRegister(body.get(at + 1)) == firstRegister(body.get(at));
                 }
-                if (!bound) { fail(key + " doesn't answer Save, Send and Search image from the button's own id"); resolved = false; }
+                if (!bound) { fail(key + " doesn't answer Save, Send, Search image and Send with an app from the button's own id"); resolved = false; }
             } else resolved = false;
             capability(c.callee, resolved);
         }
