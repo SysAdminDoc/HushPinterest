@@ -26,7 +26,9 @@ import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -742,7 +744,10 @@ public class PausedHooksTest {
         return tint != null && tint.getDefaultColor() == Color.BLACK;
     }
 
-    /** A dark-mode board header with no image picked, its view in the secondary gray: true when it turned black. */
+    /**
+     * A dark-mode board header with no image picked, its view holding the secondary gray as the
+     * rounded bitmap Pinterest's image view makes of it: true when it turned black.
+     */
     private static boolean paintsBoardHeaderBlack() {
         Context dark = dark();
         Resources original = dark.getResources();
@@ -754,11 +759,13 @@ public class PausedHooksTest {
         };
         View image = new View(dark);
         image.setId(1);
-        ColorDrawable fill = new ColorDrawable(0xFF333339);
-        image.setBackground(fill);
+        Bitmap gray = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        gray.eraseColor(0x4D72727E);
+        image.setBackground(new BitmapDrawable(original, gray));
         header.addView(image);
         AmoledBlack.boardHeader(header);
-        return fill.getColor() == Color.BLACK;
+        Drawable now = image.getBackground();
+        return now instanceof ColorDrawable && ((ColorDrawable) now).getColor() == Color.BLACK;
     }
 
     /** A dark-mode row of profile filter buttons, one in Pinterest's gray: true when its tint turned black. */

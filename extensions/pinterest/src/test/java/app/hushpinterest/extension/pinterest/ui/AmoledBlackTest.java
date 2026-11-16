@@ -20,6 +20,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -515,6 +516,27 @@ public class AmoledBlackTest {
         assertEquals("light mode stays as it is", ELEVATION, cardColor(lightCard.getBackground()));
     }
 
+    /**
+     * Seen on a Galaxy S25 (14.44.0): Add collaborators showed its board as a #222226 card on the
+     * black sheet. The card is Pinterest's see-through secondary gray, set as a plain color once the
+     * board is in, and it read as the sheet's own gray before.
+     */
+    @Test public void addCollaboratorsBoardCardTurnsBlackWithItsSheetAndOffGivesItsGrayBack() {
+        Settings.BLACK_SHEETS.save(true);
+        FrameLayout collaborators = sheet(true, "draggable_sheet", "gestalt_sheet_header", "gestalt_sheet_container",
+                "sheet_overlay_container", "sheet_scroll_view", "sheet_scroll_inner_layout", "gestalt_sheet_footer",
+                "footer_container", "collab_board_rep");
+        AmoledBlack.gestaltSheet(collaborators);
+        View board = fill(collaborators, 9, new ColorDrawable(0x4D72727E));
+        View other = fill(collaborators, View.NO_ID, new ColorDrawable(0x4D72727E));
+        collaborators.layout(0, 0, 320, 480);
+        assertEquals(Color.BLACK, color(board));
+        assertEquals("other see-through grays keep theirs", 0x4D72727E, color(other));
+        Settings.BLACK_SHEETS.save(false);
+        collaborators.layout(0, 0, 320, 490);
+        assertEquals(0x4D72727E, color(board));
+    }
+
     @Test public void aSheetWithASwitchOfItsOwnKeepsItWhicheverIsHandedOverFirst() {
         Settings.BLACK_SHEETS.save(true);
         FrameLayout save = gestalt(true);
@@ -621,9 +643,13 @@ public class AmoledBlackTest {
 
     private static final int[] PICKED = {android.R.attr.state_selected};
 
-    /** A filter button's tint the way Pinterest's default button toggle gives it at night: white when picked. */
+    /**
+     * A filter button's tint the way Pinterest's default button toggle gives it at night (14.44.0):
+     * white when picked, otherwise base_color_grayscale_translucent_400, a light gray at 30% that
+     * reads #333339 over the page.
+     */
     private static ColorStateList toggleTint() {
-        return new ColorStateList(new int[][] {PICKED, new int[0]}, new int[] {Color.WHITE, REACTIONS});
+        return new ColorStateList(new int[][] {PICKED, new int[0]}, new int[] {Color.WHITE, 0x4D72727E});
     }
 
     /** One of the row's buttons, a rounded fill under a tint, added after the row was handed over. */
@@ -633,23 +659,33 @@ public class AmoledBlackTest {
         return button;
     }
 
+    /**
+     * Seen on a Galaxy S25 (14.44.0): the empty header on Edit board stayed #333339. Its gray is
+     * sema_color_background_secondary, a light gray at 30% at night that reads #333339 over the page,
+     * and Pinterest's rounded image view keeps it as a small bitmap, not as a color.
+     */
     @Test public void theEmptyBoardHeaderTurnsBlackOnceItsViewsAreInAndOffGivesTheGrayBack() {
-        int secondary = 0xFF333339;
+        Bitmap gray = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        gray.eraseColor(0x4D72727E);
+        Drawable rounded = new BitmapDrawable(null, gray);
+        Drawable roundedBlur = new BitmapDrawable(null, gray);
         // Another test class in this sandbox may have read the ids from resources of its own.
         AmoledBlack.headerImage = -1;
         AmoledBlack.headerBlur = -1;
         Settings.BLACK_BOARDS.save(true);
         FrameLayout header = sheet(true, "board_header_image", "board_header_image_blur");
         AmoledBlack.boardHeader(header);
-        View image = fill(header, 1, new ColorDrawable(secondary));
-        View blur = fill(header, 2, new ColorDrawable(secondary));
+        View image = fill(header, 1, rounded);
+        View blur = fill(header, 2, roundedBlur);
         header.layout(0, 0, 320, 180);
         assertEquals(Color.BLACK, color(image));
         assertEquals("its blurred copy", Color.BLACK, color(blur));
+        header.layout(0, 0, 320, 190);
+        assertEquals("a second pass keeps it black", Color.BLACK, color(image));
         Settings.BLACK_BOARDS.save(false);
         header.layout(0, 0, 320, 200);
-        assertEquals(secondary, color(image));
-        assertEquals(secondary, color(blur));
+        assertSame(rounded, image.getBackground());
+        assertSame(roundedBlur, blur.getBackground());
     }
 
     @Test public void eachSheetFollowsItsOwnSwitchAndLightModeIsLeftAlone() {

@@ -90,6 +90,8 @@ public final class AmoledBlack {
     private static final Map<View, Piece> pieces = new WeakHashMap<>();
     /** The tint each board tool bar had before it turned black, null when it had none. */
     private static final Map<View, ColorStateList> cards = new WeakHashMap<>();
+    /** The background each board header image had before it turned black. */
+    private static final Map<View, Drawable> headerFills = new WeakHashMap<>();
     /**
      * The lightest gray the profile's filter buttons turn black from. Their gray is #222226 at night
      * (14.44.0); each channel is stretched so this level lands on black and white stays white.
@@ -172,7 +174,7 @@ public final class AmoledBlack {
      * so each one is painted on the screen's layout passes.
      */
     public static void comments(View sheet) {
-        built(sheet, Settings.BLACK_COMMENTS, false, false, true, "comment_starters", "comments",
+        built(sheet, Settings.BLACK_COMMENTS, false, false, true, "comment_starters", null, "comments",
                 "comments_feed", "comment_bottom_bar", "floating_comment_view", "comment_reaction_header",
                 "community_insight_comment_header");
     }
@@ -182,7 +184,7 @@ public final class AmoledBlack {
      * header and the scrolling list under it carry the gray.
      */
     public static void pinMenu(View sheet) {
-        built(sheet, Settings.BLACK_PIN_MENU, false, false, false, null, "pin menu", "modal_header", "modal_container");
+        built(sheet, Settings.BLACK_PIN_MENU, false, false, false, null, null, "pin menu", "modal_header", "modal_container");
     }
 
     /**
@@ -194,7 +196,7 @@ public final class AmoledBlack {
      * Galaxy S25, 14.44.0), set as a plain color when the footer is built.
      */
     public static void saveSheet(View sheet) {
-        built(sheet, Settings.BLACK_SAVE_SHEET, false, false, false, null, "Save to sheet", "draggable_sheet",
+        built(sheet, Settings.BLACK_SAVE_SHEET, false, false, false, null, null, "Save to sheet", "draggable_sheet",
                 "gestalt_sheet_header", "gestalt_sheet_container", "sheet_overlay_container", "sheet_scroll_view",
                 "sheet_scroll_inner_layout", "footer_container");
     }
@@ -203,12 +205,14 @@ public final class AmoledBlack {
      * Called with each of Pinterest's Gestalt sheets as it's set up, the whole sheet already built:
      * Create, a board's Board view and sort sheets, Add collaborators and the others that slide up
      * (14.44.0, #39). The sheet is a rounded card in the gray, and the footer holding its buttons
-     * carries it too (#222226 on a Galaxy S22). The buttons and Create's tiles keep their own gray.
-     * The Save to sheet and the comments sheet hand themselves over first, and a sheet handed over by
-     * its own switch, or one inside or around it, keeps that switch.
+     * carries it too (#222226 on a Galaxy S22). Add collaborators shows the board as a card in the
+     * see-through secondary gray, which reads as the sheet's gray over the sheet and as #222226 over
+     * black (Galaxy S25), so it turns black with the sheet. The buttons and Create's tiles keep their
+     * own gray. The Save to sheet and the comments sheet hand themselves over first, and a sheet
+     * handed over by its own switch, or one inside or around it, keeps that switch.
      */
     public static void gestaltSheet(View sheet) {
-        built(sheet, Settings.BLACK_SHEETS, true, false, false, null, "sheet", "draggable_sheet", "gestalt_sheet_header",
+        built(sheet, Settings.BLACK_SHEETS, true, false, false, null, "collab_board_rep", "sheet", "draggable_sheet", "gestalt_sheet_header",
                 "gestalt_sheet_container", "sheet_overlay_container", "sheet_scroll_view", "sheet_scroll_inner_layout",
                 "gestalt_sheet_footer", "footer_container");
     }
@@ -221,7 +225,7 @@ public final class AmoledBlack {
      * keeps its gray.
      */
     public static void legoModal(View menu) {
-        built(menu, Settings.BLACK_SHEETS, true, true, false, null, "menu", "modal_header", "modal_container",
+        built(menu, Settings.BLACK_SHEETS, true, true, false, null, null, "menu", "modal_header", "modal_container",
                 "lego_modal_scroll_view", "lego_modal_container", "lego_modal_content_container", "lego_close_container",
                 "lego_close_container_sticky");
     }
@@ -261,7 +265,7 @@ public final class AmoledBlack {
     /**
      * Called with a board's header image right after it becomes a layout, before its views are in.
      * With no image picked, Edit board shows the header as an empty card in Pinterest's secondary
-     * gray (#333339 at night, 14.44.0, #39), the plain color behind the image and behind its blurred
+     * gray (#333339 over the page at night, 14.44.0, #39), the color behind the image and behind its blurred
      * copy. Both turn black on the header's layout passes. A picked image draws over that color, and
      * the wash Pinterest lays over a picked image stays.
      */
@@ -296,9 +300,28 @@ public final class AmoledBlack {
             default:
                 if (headerImage < 0) headerImage = id(view, "board_header_image");
                 if (headerBlur < 0) headerBlur = id(view, "board_header_image_blur");
-                if (headerImage != 0) paint(view.findViewById(headerImage), black);
-                if (headerBlur != 0) paint(view.findViewById(headerBlur), black);
+                if (headerImage != 0) paintHeaderFill(view.findViewById(headerImage), black);
+                if (headerBlur != 0) paintHeaderFill(view.findViewById(headerBlur), black);
         }
+    }
+
+    /**
+     * The header's gray is sema_color_background_secondary, at night a light gray at 30% (#4D72727E
+     * in 14.44.0) that reads #333339 over the page. Pinterest's image view hands its background to
+     * the rounded image inside it, which turns any fill into a small bitmap with no color to change
+     * (seen on a Galaxy S25, #39), so the whole background is swapped for black and given back.
+     */
+    private static void paintHeaderFill(View view, boolean black) {
+        if (view == null) return;
+        if (!black) {
+            Drawable original = headerFills.remove(view);
+            if (original != null) view.setBackground(original);
+            return;
+        }
+        Drawable background = view.getBackground();
+        if (background == null || headerFills.containsKey(view)) return;
+        headerFills.put(view, background);
+        view.setBackground(new ColorDrawable(Color.BLACK));
     }
 
     /** board_header_image's and board_header_image_blur's ids, read once, 0 for a build without one. */
@@ -336,13 +359,20 @@ public final class AmoledBlack {
         Logger.printDebug(() -> "Profile filter " + view.getClass().getSimpleName() + " tinted black");
     }
 
-    /** [color] with each channel stretched so DARKEST_KEPT and below land on black and white stays white. Alpha stays. */
+    /**
+     * [color] as it shows over black, each channel stretched so DARKEST_KEPT and below land on
+     * black and white stays white, drawn solid. Pinterest's button gray at night is a light gray at
+     * 30% (#4D72727E in 14.44.0), which the curve alone would only lighten. No color stays none.
+     */
     static int leveled(int color) {
-        return Color.argb(Color.alpha(color), level(Color.red(color)), level(Color.green(color)), level(Color.blue(color)));
+        int alpha = Color.alpha(color);
+        if (alpha == 0) return color;
+        return Color.rgb(level(Color.red(color), alpha), level(Color.green(color), alpha), level(Color.blue(color), alpha));
     }
 
-    private static int level(int channel) {
-        return Math.max(0, Math.min(255, Math.round((channel - DARKEST_KEPT) * 255f / (255 - DARKEST_KEPT))));
+    private static int level(int channel, int alpha) {
+        float overBlack = channel * alpha / 255f;
+        return Math.max(0, Math.min(255, Math.round((overBlack - DARKEST_KEPT) * 255f / (255 - DARKEST_KEPT))));
     }
 
     /**
@@ -455,19 +485,20 @@ public final class AmoledBlack {
     /**
      * Pinterest's ids are read by name each time a sheet is built, which is once per time it opens.
      * [chips] names a row whose every child is painted, see-through grays included, or is null.
-     * A [generic] sheet is any sheet or menu, and one with a switch of its own, the same view or
+     * [card] names one view painted the same way, or is null. A [generic] sheet is any sheet or menu, and one with a switch of its own, the same view or
      * one inside or around it, keeps that switch: the generic one follows it, whichever was handed
      * over first. An [own] sheet carries the gray on its own fill as well.
      */
     private static void built(View sheet, BooleanSetting setting, boolean generic, boolean own, boolean topBand,
-                              String chips, String what, String... fills) {
+                              String chips, String card, String what, String... fills) {
         try {
             if (sheet == null) return;
             Sheet before = sheets.get(sheet);
             if (generic && before != null && !before.generic) return;
             int[] ids = new int[fills.length];
             for (int index = 0; index < fills.length; index++) ids[index] = id(sheet, fills[index]);
-            Sheet known = new Sheet(setting, generic, own, topBand, ids, chips == null ? 0 : id(sheet, chips));
+            Sheet known = new Sheet(setting, generic, own, topBand, ids, chips == null ? 0 : id(sheet, chips),
+                    card == null ? 0 : id(sheet, card));
             sheets.put(sheet, known);
             if (before == null) {
                 sheet.addOnLayoutChangeListener(REPAINT_SHEET);
@@ -526,6 +557,8 @@ public final class AmoledBlack {
                 if (chip != null) paintFill(chip, black, true);
             }
         }
+        View card = known.card == 0 ? null : sheet.findViewById(known.card);
+        if (card != null) paintFill(card, black, true);
         if (known.topBand) band(sheet, known, black);
         View root = sheet.getRootView();
         View strip = stripIn(root);
@@ -680,7 +713,8 @@ public final class AmoledBlack {
         }
         Drawable background = fill.getBackground();
         if (background instanceof LayerDrawable) paint((LayerDrawable) background, black, washes);
-        else paint(fill, black);
+        else if (background instanceof GradientDrawable) paint((GradientDrawable) background, black, washes);
+        else if (background instanceof ColorDrawable) paint((ColorDrawable) background, black, washes);
     }
 
     /**
@@ -708,18 +742,21 @@ public final class AmoledBlack {
         final int[] fills;
         /** The row whose children each carry the gray, 0 for none. */
         final int chips;
+        /** A view inside the sheet that carries the gray, see-through or not, 0 for none. */
+        final int card;
         /** The strip behind the gesture handle in the window the sheet was last laid out in. */
         WeakReference<View> strip;
         /** The black band over the sheet's top padding while it's drawn, null otherwise. */
         ColorDrawable band;
 
-        Sheet(BooleanSetting setting, boolean generic, boolean own, boolean topBand, int[] fills, int chips) {
+        Sheet(BooleanSetting setting, boolean generic, boolean own, boolean topBand, int[] fills, int chips, int card) {
             this.setting = setting;
             this.generic = generic;
             this.own = own;
             this.topBand = topBand;
             this.fills = fills;
             this.chips = chips;
+            this.card = card;
         }
     }
 
@@ -886,6 +923,11 @@ public final class AmoledBlack {
     }
 
     private static void paint(ColorDrawable fill, boolean black) {
+        paint(fill, black, false);
+    }
+
+    /** [washes] also takes a fill that is partly see-through, never one that is fully clear. */
+    private static void paint(ColorDrawable fill, boolean black, boolean washes) {
         if (!black) {
             Integer original = colors.remove(fill);
             // Pinterest gives the strip each page's own color, and a color it set since isn't ours to undo.
@@ -893,7 +935,8 @@ public final class AmoledBlack {
             return;
         }
         int color = fill.getColor();
-        if (!opaque(color) || color == Color.BLACK) return;
+        int alpha = Color.alpha(color);
+        if ((washes ? alpha == 0 : alpha != 0xFF) || color == Color.BLACK) return;
         fill.mutate();
         colors.put(fill, color);
         fill.setColor(Color.BLACK);

@@ -6,7 +6,7 @@
   "patches": [
     {
       "name": "AMOLED black",
-      "description": "Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED screens. The comments sheet, a pin's menu and the Save to sheet that lists your boards can go black too, each with its own switch. Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface.",
+      "description": "Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED screens. The comments sheet, a pin's menu, the Save to sheet that lists your boards, the other menus and sheets, and the buttons over boards and profiles can go black too, each with its own switch. Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Theme",
       "use": true,
       "dependencies": [
