@@ -153,6 +153,22 @@ class FeedFixtureTest {
         }
     }
 
+    // #30: the board-tab Home's "More ideas for your board" row is a story of one of these types, which
+    // the app's own story binder compares. Hide Home suggestions names them, so a build that renames
+    // them would show the row again.
+    @Test
+    fun `each declared build still compares the board ideas upsell story types`() {
+        val types = listOf("boards_more_ideas_feed_upsell_list_items", "boards_more_ideas_feed_upsell_list_cards")
+        fun strings(method: Method) = method.implementation?.instructions
+            ?.mapNotNull { ((it as? ReferenceInstruction)?.reference as? StringReference)?.string }.orEmpty()
+        for (build in Fixtures.declaredBuilds()) {
+            val comparing = FixtureDex.methodsWhere(build, { true }) { method -> strings(method).any { it in types } }
+            for (type in types) {
+                assertTrue("${build.name}: some method compares $type", comparing.any { type in strings(it) })
+            }
+        }
+    }
+
     // The hooks above can all land while a retyped pin field quietly stops every filter that reads it.
     @Test
     fun `the pin model in each declared build keeps the JSON names and types the feed filters read`() {
