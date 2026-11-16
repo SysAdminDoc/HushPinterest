@@ -51,6 +51,11 @@ public final class UiHooksForTests {
         }
     }
 
+    /** Custom splash logo's answer for the next start: true when Android would be handed the picked logo. */
+    public static boolean nextStartShowsPickedLogo() {
+        return SplashLogo.wanted(RuntimeEnvironment.getApplication());
+    }
+
     public static void saveToast(Class<?> type) {
         UiHooks.saveToastForTests = type;
     }

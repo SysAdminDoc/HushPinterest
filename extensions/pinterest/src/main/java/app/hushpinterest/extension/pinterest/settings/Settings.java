@@ -235,6 +235,13 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_creator_name", FALSE);
     public static final BooleanSetting CUSTOM_SAVE_SOUND =
             new BooleanSetting("hushpinterest_custom_save_sound", FALSE);
+    /**
+     * The logo picked when patching on the screen Android shows while Pinterest starts, on Android
+     * 13 and newer ({@link app.hushpinterest.extension.pinterest.ui.SplashLogo}). Android keeps the
+     * answer, so a change shows from the next start. Off to start.
+     */
+    public static final BooleanSetting CUSTOM_SPLASH_LOGO =
+            new BooleanSetting("hushpinterest_custom_splash_logo", FALSE, true);
     public static final BooleanSetting HIDE_SAVE_TOASTS =
             new BooleanSetting("hushpinterest_hide_save_toasts", FALSE);
     public static final BooleanSetting ORIGINAL_IMAGES =

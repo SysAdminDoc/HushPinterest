@@ -237,6 +237,8 @@ That app won't let Pinterest keep the sound. Pick one saved on the phone.	Esse a
 Saving a pin will play the sound you picked.	Salvar um pin vai tocar o som que você escolheu.
 Saving a pin will play %s.	Salvar um pin vai tocar %s.
 Saving a pin will play Pinterest's sound again.	Salvar um pin vai tocar o som do Pinterest de novo.
+Custom splash logo	Logo de abertura personalizado
+Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.	Mostra o logo escolhido ao aplicar o patch na tela que você vê enquanto o Pinterest abre, no lugar do logo do Pinterest. Android 13 ou mais recente. Aparece a partir da próxima abertura.
 Disable update nag	Ocultar aviso de atualização
 Download pin	Baixar Pin
 Share pin	Compartilhar Pin

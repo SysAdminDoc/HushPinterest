@@ -66,6 +66,7 @@ family|hidePopupBanners|Hide pop-up banners|popupBanners
 family|hideRelatedPins|Hide related pins|relatedPins
 family|hideCreatorName|Hide creator name on pins|creatorName
 family|customSaveSound|Custom save sound|saveSound
+family|customSplashLogo|Custom splash logo|
 family|hideSaveToasts|Hide save toasts|saveToasts
 family|originalImages|Original-quality images|imageChooser,closeupImage
 family|showPostedDate|Show posted date|postedDate

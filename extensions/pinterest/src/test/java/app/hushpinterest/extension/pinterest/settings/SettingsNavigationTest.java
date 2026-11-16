@@ -1291,6 +1291,8 @@ public class SettingsNavigationTest {
                 "still opens their profile", "next pin you open");
         summaryContains(Settings.CUSTOM_SAVE_SOUND.key, "sound you pick below", "when you save a pin",
                 "With no sound picked, Pinterest's plays");
+        summaryContains(Settings.CUSTOM_SPLASH_LOGO.key, "logo picked when patching", "Android 13 and newer",
+                "from the next start");
     }
 
     @Test public void aliasesKeepAccentMatchingGroupingAndTheSpokenResultCount() {

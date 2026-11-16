@@ -240,6 +240,8 @@ That app won't let Pinterest keep the sound. Pick one saved on the phone.	Bu uyg
 Saving a pin will play the sound you picked.	Bir pini kaydetmek artık seçtiğin sesi çalacak.
 Saving a pin will play %s.	Bir pini kaydetmek artık %s sesini çalacak.
 Saving a pin will play Pinterest's sound again.	Bir pini kaydetmek yeniden Pinterest'in sesini çalacak.
+Custom splash logo	Özel açılış logosu
+Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.	Yamalama sırasında seçilen logoyu, Pinterest açılırken gördüğün ekranda Pinterest'inkinin yerine gösterir. Android 13 ve sonrası. Bir sonraki açılıştan itibaren görünür.
 Disable update nag	Güncelleme uyarısını kapat
 Download pin	Pini indir
 Share pin	Pini paylaş

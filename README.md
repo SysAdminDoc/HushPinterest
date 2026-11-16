@@ -78,13 +78,14 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 42 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 43 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
 | `AMOLED black` | Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED screens. The comments sheet, a pin's menu, the Save to sheet that lists your boards, the other menus and sheets, and the buttons over boards and profiles can go black too, each with its own switch. Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface. |
 | `Change package name` | Gives the patched Pinterest its own package name and app name (HushPinterest unless you pick another), so it installs beside the Pinterest you already have instead of over it. It's a separate app with its own sign-in. It isn't selected by default. Works as soon as you patch it in, with no switch. |
 | `Custom save sound` | Plays a sound file you pick on your phone when you save a pin, in place of Pinterest's chime. Pinterest's other sounds stay. Starts off. Pick the sound with Pick a save sound in HushPinterest settings > Interface, which turns the switch on for you. |
+| `Custom splash logo` | Shows a logo you pick on the screen you see while Pinterest starts, in place of Pinterest's, on Android 13 and newer. Pick the picture in the patch's Logo option when you patch. Leave it empty for HushPinterest's logo. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Disable analytics` | Stops Pinterest from sending usage reports, crash reports and ad-tracking data to outside companies, and turns off Google's analytics inside the app. Good if you'd rather share less. On by default. Turn it off in HushPinterest settings > Privacy. |
 | `Disable update nag` | Stops Pinterest's pop-ups asking you to update from the Play Store. You can still update Pinterest yourself. Good if the reminders get annoying. Starts off. Turn it on in HushPinterest settings > Updates. |
 | `Download board` | Adds Download board to a board's menu. It saves every pin Pinterest has loaded for that board, up to 500, and skips ones already in Download history, so you can keep a board without picking pins one at a time. Needs Download pins on too. Starts off. Turn it on in HushPinterest settings > Pin actions. |

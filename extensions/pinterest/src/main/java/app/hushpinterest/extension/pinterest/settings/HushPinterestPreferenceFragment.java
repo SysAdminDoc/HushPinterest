@@ -599,6 +599,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             if (build.contains(PatchFamily.CUSTOM_SAVE_SOUND)) {
                 ui.addPreference(mark(new SaveSoundPreference(this, context), SettingsIcons.BELL));
             }
+            patchToggle(ui, context, build, PatchFamily.CUSTOM_SPLASH_LOGO, Settings.CUSTOM_SPLASH_LOGO,
+                    L10n.t("Custom splash logo"),
+                    L10n.t("Shows the logo picked when patching on the screen you see while Pinterest starts, "
+                        + "instead of Pinterest's. Android 13 and newer. It shows from the next start."),
+                    SettingsIcons.OPENING);
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),
                     L10n.t("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's "

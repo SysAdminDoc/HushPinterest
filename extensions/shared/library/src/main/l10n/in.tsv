@@ -240,6 +240,8 @@ That app won't let Pinterest keep the sound. Pick one saved on the phone.	Aplika
 Saving a pin will play the sound you picked.	Menyimpan pin akan memutar suara yang kamu pilih.
 Saving a pin will play %s.	Menyimpan pin akan memutar %s.
 Saving a pin will play Pinterest's sound again.	Menyimpan pin akan memutar suara Pinterest lagi.
+Custom splash logo	Logo pembuka khusus
+Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.	Menampilkan logo yang dipilih saat menambal di layar yang kamu lihat saat Pinterest dimulai, bukan logo Pinterest. Android 13 dan yang lebih baru. Tampil mulai dari pembukaan berikutnya.
 Disable update nag	Sembunyikan pemberitahuan pembaruan
 Download pin	Unduh Pin
 Share pin	Bagikan Pin
