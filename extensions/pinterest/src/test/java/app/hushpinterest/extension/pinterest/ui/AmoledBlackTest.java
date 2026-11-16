@@ -18,7 +18,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
@@ -588,36 +587,50 @@ public class AmoledBlackTest {
         assertNull("light mode stays as it is", light.getBackgroundTintList());
     }
 
-    @Test public void theProfileFiltersAreDrawnThroughALayerThatTakesTheirGrayToBlackAndKeepsWhite() {
+    /**
+     * Seen on a Galaxy S22 (14.44.0): a hardware layer with a color filter on the row left the
+     * buttons gray, so each button's own tint is what changes. The row is handed over before
+     * Compose puts its buttons in, and Pinterest tints a button again when it's picked.
+     */
+    @Test public void theProfileFilterButtonsTurnBlackThroughTheirTintAndThePickedOneStaysWhite() {
         Settings.BLACK_BOARDS.save(true);
-        View row = fill(sheet(true), View.NO_ID, null);
-        row.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        FrameLayout row = sheet(true);
         AmoledBlack.profileFilters(row);
-        assertEquals(View.LAYER_TYPE_HARDWARE, row.getLayerType());
-        ColorMatrix levels = AmoledBlack.levelsMatrix();
-        assertEquals("the buttons' gray", Color.BLACK, through(levels, REACTIONS));
-        assertEquals("a selected button", Color.WHITE, through(levels, Color.WHITE));
-        assertEquals("clear space stays clear", Color.TRANSPARENT, through(levels, Color.TRANSPARENT));
-        Settings.BLACK_BOARDS.save(false);
+        Activity activity = Robolectric.buildActivity(Activity.class).setup().get();
+        activity.setContentView(row);
+        ColorStateList gray = toggleTint();
+        View button = filterButton(row, gray);
         row.layout(0, 0, 320, 48);
-        assertEquals("back on the layer it had", View.LAYER_TYPE_SOFTWARE, row.getLayerType());
+        ColorStateList tint = button.getBackgroundTintList();
+        assertEquals("the buttons' gray", Color.BLACK, tint.getDefaultColor());
+        assertEquals("a picked button", Color.WHITE, tint.getColorForState(PICKED, Color.TRANSPARENT));
+        // Picking a button: Pinterest hands it its tint again.
+        button.setBackgroundTintList(gray);
+        row.getViewTreeObserver().dispatchOnPreDraw();
+        assertEquals("black again by the next frame", Color.BLACK, button.getBackgroundTintList().getDefaultColor());
+        Settings.BLACK_BOARDS.save(false);
+        row.getViewTreeObserver().dispatchOnPreDraw();
+        assertSame("off gives back Pinterest's tint", gray, button.getBackgroundTintList());
         Settings.BLACK_BOARDS.save(true);
-        View light = fill(sheet(false), View.NO_ID, null);
+        FrameLayout light = sheet(false);
         AmoledBlack.profileFilters(light);
-        assertEquals("light mode stays as it is", View.LAYER_TYPE_NONE, light.getLayerType());
+        View lightButton = filterButton(light, gray);
+        light.layout(0, 0, 320, 48);
+        assertSame("light mode stays as it is", gray, lightButton.getBackgroundTintList());
     }
 
-    /** [color] after [matrix], each channel clamped the way a color filter clamps it. */
-    private static int through(ColorMatrix matrix, int color) {
-        float[] m = matrix.getArray();
-        float[] in = {Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color)};
-        int[] out = new int[4];
-        for (int row = 0; row < 4; row++) {
-            float sum = m[row * 5 + 4];
-            for (int column = 0; column < 4; column++) sum += m[row * 5 + column] * in[column];
-            out[row] = Math.max(0, Math.min(255, Math.round(sum)));
-        }
-        return Color.argb(out[3], out[0], out[1], out[2]);
+    private static final int[] PICKED = {android.R.attr.state_selected};
+
+    /** A filter button's tint the way Pinterest's default button toggle gives it at night: white when picked. */
+    private static ColorStateList toggleTint() {
+        return new ColorStateList(new int[][] {PICKED, new int[0]}, new int[] {Color.WHITE, REACTIONS});
+    }
+
+    /** One of the row's buttons, a rounded fill under a tint, added after the row was handed over. */
+    private static View filterButton(FrameLayout row, ColorStateList tint) {
+        View button = fill(row, View.NO_ID, solid());
+        button.setBackgroundTintList(tint);
+        return button;
     }
 
     @Test public void theEmptyBoardHeaderTurnsBlackOnceItsViewsAreInAndOffGivesTheGrayBack() {

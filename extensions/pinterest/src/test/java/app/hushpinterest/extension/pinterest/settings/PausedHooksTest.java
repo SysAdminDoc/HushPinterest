@@ -36,6 +36,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -459,7 +460,7 @@ public class PausedHooksTest {
         probes.put(Settings.BLACK_SAVE_SHEET, Collections.singletonList(() -> paintsSheetBlack("draggable_sheet")));
         probes.put(Settings.BLACK_SHEETS, Arrays.asList(() -> paintsSheetBlack("gestalt_sheet_footer"), () -> paintsSheetBlack("lego_modal_container")));
         probes.put(Settings.BLACK_BOARDS, Arrays.asList(PausedHooksTest::paintsBoardBarBlack,
-                PausedHooksTest::paintsBoardHeaderBlack, PausedHooksTest::layersProfileFilters));
+                PausedHooksTest::paintsBoardHeaderBlack, PausedHooksTest::tintsProfileFilters));
         probes.put(Settings.HIDE_CLOSEUP_BACK, Arrays.asList(() -> hidesCloseupButton(true), () -> keepsCloseupButtonHidden(true)));
         probes.put(Settings.HIDE_CLOSEUP_LENS, Arrays.asList(() -> hidesCloseupButton(false), () -> keepsCloseupButtonHidden(false)));
         probes.put(Settings.HIDE_CLOSEUP_SEARCH_LABEL, Collections.singletonList(() -> !CloseupButtons.searchLabel(true)));
@@ -760,11 +761,17 @@ public class PausedHooksTest {
         return fill.getColor() == Color.BLACK;
     }
 
-    /** A dark-mode row of profile filter buttons: true when it's drawn through the levels layer. */
-    private static boolean layersProfileFilters() {
-        View row = new View(dark());
+    /** A dark-mode row of profile filter buttons, one in Pinterest's gray: true when its tint turned black. */
+    private static boolean tintsProfileFilters() {
+        Context dark = dark();
+        FrameLayout row = new FrameLayout(dark);
+        View button = new View(dark);
+        button.setBackground(new GradientDrawable());
+        button.setBackgroundTintList(ColorStateList.valueOf(0xFF222226));
+        row.addView(button);
         AmoledBlack.profileFilters(row);
-        return row.getLayerType() == View.LAYER_TYPE_HARDWARE;
+        ColorStateList tint = button.getBackgroundTintList();
+        return tint != null && tint.getDefaultColor() == Color.BLACK;
     }
 
     /** A dark-mode See more card from a pin's menu, its gray shape under a ripple: true when it turned black. */

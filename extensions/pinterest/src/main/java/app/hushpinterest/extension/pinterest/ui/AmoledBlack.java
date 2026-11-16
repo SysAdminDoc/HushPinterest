@@ -9,9 +9,6 @@ package app.hushpinterest.extension.pinterest.ui;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -93,8 +90,6 @@ public final class AmoledBlack {
     private static final Map<View, Piece> pieces = new WeakHashMap<>();
     /** The tint each board tool bar had before it turned black, null when it had none. */
     private static final Map<View, ColorStateList> cards = new WeakHashMap<>();
-    /** The layer type each profile filter row had before it was drawn through the levels layer. */
-    private static final Map<View, Integer> layers = new WeakHashMap<>();
     /**
      * The lightest gray the profile's filter buttons turn black from. Their gray is #222226 at night
      * (14.44.0); each channel is stretched so this level lands on black and white stays white.
@@ -231,7 +226,7 @@ public final class AmoledBlack {
                 "lego_close_container_sticky");
     }
 
-    /** The views' fills and layers, which off, Pause or light mode give back, follow on their layout passes. */
+    /** The views' fills and tints, which off, Pause or light mode give back, follow on their layout passes. */
     private static final View.OnLayoutChangeListener REPAINT_PIECE =
             (view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                 try {
@@ -253,10 +248,11 @@ public final class AmoledBlack {
 
     /**
      * Called with each of the filter buttons on a profile (the sort button, Group, Private and the
-     * rest) right after it becomes a Compose view (14.44.0, #39). Compose draws them with no fill on
-     * a view to change, so each is drawn through a layer that maps Pinterest's dark grays to black
-     * and keeps white white. Their labels and icons keep their look, and the clear space around
-     * them stays clear.
+     * rest) right after it becomes a Compose view (14.44.0, #39). Compose puts Pinterest's button
+     * toggles in later, each a rounded fill under a tint, so each button's tint is what changes:
+     * Pinterest's dark grays go black and a picked button's white stays white. A row on show
+     * checks its buttons before each frame, since Pinterest tints a button again when it's picked.
+     * Their labels and icons keep their look.
      */
     public static void profileFilters(View row) {
         handedOver(row, Piece.FILTERS, "profile filters");
@@ -279,7 +275,10 @@ public final class AmoledBlack {
     private static void handedOver(View view, Piece piece, String what) {
         try {
             if (view == null) return;
-            if (pieces.put(view, piece) == null) view.addOnLayoutChangeListener(REPAINT_PIECE);
+            if (pieces.put(view, piece) == null) {
+                view.addOnLayoutChangeListener(REPAINT_PIECE);
+                if (piece == Piece.FILTERS) FilterKeeper.watch(view);
+            }
             paintPiece(view, piece, UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BOARDS) && night(view));
         } catch (Throwable failure) {
             HookStatus.threw(FamilyNames.AMOLED_BLACK, what, failure);
@@ -292,7 +291,7 @@ public final class AmoledBlack {
                 paintCard(view, black);
                 break;
             case FILTERS:
-                levels(view, black);
+                tintButtons(view, black);
                 break;
             default:
                 if (headerImage < 0) headerImage = id(view, "board_header_image");
@@ -317,28 +316,114 @@ public final class AmoledBlack {
         card.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK));
     }
 
-    /** The row drawn through the levels layer, or back on the layer type it had. */
-    private static void levels(View row, boolean black) {
+    /**
+     * Every button in the row that has a fill under a tint takes Pinterest's tint through the
+     * levels curve, or gets Pinterest's own tint back. The row's labels and icons stay as they are.
+     */
+    private static void tintButtons(View view, boolean black) {
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int index = 0; index < group.getChildCount(); index++) tintButtons(group.getChildAt(index), black);
+        }
+        ColorStateList tint = view.getBackgroundTintList();
+        if (tint == null || view.getBackground() == null) return;
         if (!black) {
-            Integer before = layers.remove(row);
-            if (before != null) row.setLayerType(before, null);
+            if (tint instanceof LeveledTint) view.setBackgroundTintList(((LeveledTint) tint).original);
             return;
         }
-        if (layers.containsKey(row)) return;
-        layers.put(row, row.getLayerType());
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(levelsMatrix()));
-        row.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
+        if (tint instanceof LeveledTint) return;
+        view.setBackgroundTintList(new LeveledTint(tint));
+        Logger.printDebug(() -> "Profile filter " + view.getClass().getSimpleName() + " tinted black");
     }
 
-    /** Each color channel stretched so DARKEST_KEPT and below land on black and white stays white. Alpha stays. */
-    static ColorMatrix levelsMatrix() {
-        float scale = 255f / (255 - DARKEST_KEPT), offset = -DARKEST_KEPT * scale;
-        return new ColorMatrix(new float[] {
-                scale, 0, 0, 0, offset,
-                0, scale, 0, 0, offset,
-                0, 0, scale, 0, offset,
-                0, 0, 0, 1, 0});
+    /** [color] with each channel stretched so DARKEST_KEPT and below land on black and white stays white. Alpha stays. */
+    static int leveled(int color) {
+        return Color.argb(Color.alpha(color), level(Color.red(color)), level(Color.green(color)), level(Color.blue(color)));
+    }
+
+    private static int level(int channel) {
+        return Math.max(0, Math.min(255, Math.round((channel - DARKEST_KEPT) * 255f / (255 - DARKEST_KEPT))));
+    }
+
+    /**
+     * Pinterest's tint with each color through the levels curve, state by state: its dark grays
+     * black, a picked button's white still white. Off, Pause or light mode give back [original].
+     */
+    static final class LeveledTint extends ColorStateList {
+        final ColorStateList original;
+
+        LeveledTint(ColorStateList original) {
+            super(new int[][] {new int[0]}, new int[] {leveled(original.getDefaultColor())});
+            this.original = original;
+        }
+
+        @Override public int getColorForState(int[] stateSet, int defaultColor) {
+            return leveled(original.getColorForState(stateSet, defaultColor));
+        }
+
+        @Override public int getDefaultColor() {
+            return leveled(original.getDefaultColor());
+        }
+
+        @Override public boolean isStateful() {
+            return original.isStateful();
+        }
+
+        @Override public boolean isOpaque() {
+            return original.isOpaque();
+        }
+
+        @Override public int getChangingConfigurations() {
+            return original.getChangingConfigurations();
+        }
+
+        @Override public ColorStateList withAlpha(int alpha) {
+            return new LeveledTint(original.withAlpha(alpha));
+        }
+    }
+
+    /**
+     * Before each frame while a profile filter row is on show, its buttons take the tint the switch
+     * wants. Pinterest tints a button again when it's picked, with no layout pass to catch it.
+     */
+    private static final class FilterKeeper implements View.OnAttachStateChangeListener, ViewTreeObserver.OnPreDrawListener {
+        private final WeakReference<View> row;
+        private ViewTreeObserver observer;
+
+        private FilterKeeper(View row) {
+            this.row = new WeakReference<>(row);
+        }
+
+        static void watch(View row) {
+            FilterKeeper keeper = new FilterKeeper(row);
+            row.addOnAttachStateChangeListener(keeper);
+            if (row.isAttachedToWindow()) keeper.onViewAttachedToWindow(row);
+        }
+
+        @Override public void onViewAttachedToWindow(View view) {
+            stop();
+            observer = view.getViewTreeObserver();
+            observer.addOnPreDrawListener(this);
+        }
+
+        @Override public void onViewDetachedFromWindow(View view) {
+            stop();
+        }
+
+        private void stop() {
+            if (observer != null && observer.isAlive()) observer.removeOnPreDrawListener(this);
+            observer = null;
+        }
+
+        @Override public boolean onPreDraw() {
+            try {
+                View view = row.get();
+                if (view != null) tintButtons(view, Utils.settingsReady() && Settings.BLACK_BOARDS.get() && night(view));
+            } catch (Throwable failure) {
+                HookStatus.threw(FamilyNames.AMOLED_BLACK, "profile filters frame", failure);
+            }
+            return true;
+        }
     }
 
     /** Off or Pause gives a card its gray back while the menu is still open, on the card's next layout pass. */
