@@ -227,6 +227,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_quiet_email_reminder", FALSE);
     public static final BooleanSetting HIDE_SURVEY_PROMPTS =
             new BooleanSetting("hushpinterest_hide_survey_prompts", FALSE);
+    public static final BooleanSetting HIDE_POPUP_BANNERS =
+            new BooleanSetting("hushpinterest_hide_popup_banners", FALSE);
     public static final BooleanSetting HIDE_SAVE_TOASTS =
             new BooleanSetting("hushpinterest_hide_save_toasts", FALSE);
     public static final BooleanSetting ORIGINAL_IMAGES =

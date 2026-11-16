@@ -216,6 +216,26 @@ public class PausedHooksTest {
     /** The id Pinterest's resources give the title row's chevron, which the test app doesn't have. */
     private static final int TITLE_CHEVRON_ID = 0x7f0b1234;
 
+    /** A pop-up banner whose X, the one id its resources know, closes it the way Pinterest's dismissal does. */
+    private static boolean closesPopupBanner() {
+        Context app = RuntimeEnvironment.getApplication();
+        Resources base = app.getResources();
+        Resources named = new Resources(base.getAssets(), base.getDisplayMetrics(), base.getConfiguration()) {
+            @Override public int getIdentifier(String name, String type, String owner) {
+                return "bannerOverlay_dismiss_icon_button".equals(name) && "id".equals(type) ? TITLE_CHEVRON_ID : 0;
+            }
+        };
+        FrameLayout banner = new FrameLayout(app) {
+            @Override public Resources getResources() { return named; }
+        };
+        View dismiss = new View(app);
+        dismiss.setId(TITLE_CHEVRON_ID);
+        dismiss.setOnClickListener(clicked -> banner.setVisibility(View.GONE));
+        banner.addView(dismiss);
+        UiHooks.popupBanner(banner);
+        return banner.getVisibility() != View.VISIBLE;
+    }
+
     /** A closeup title module taking a pin with a date: true when a line was added under its row. */
     private static boolean addsPostedDate() {
         // Pinterest's resources know the title row's chevron by name; the test app's don't.
@@ -497,6 +517,7 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_INBOX_UPDATES, Collections.singletonList(UiHooks::hideInboxUpdates));
         probes.put(Settings.QUIET_EMAIL_REMINDER, Collections.singletonList(UiHooks::quietEmailReminder));
         probes.put(Settings.HIDE_SURVEY_PROMPTS, Arrays.asList(UiHooks::hideSurveyPrompts, UiHooks::hideSponsoredPolls));
+        probes.put(Settings.HIDE_POPUP_BANNERS, Collections.singletonList(PausedHooksTest::closesPopupBanner));
         probes.put(Settings.HIDE_SAVE_TOASTS, Arrays.asList(PausedHooksTest::dropsSaveToast, UiHooksForTests::quietsSavedToast));
         probes.put(Settings.ORIGINAL_IMAGES, Arrays.asList(UiHooks::originalImages, () -> {
             Set<String> sizes = new HashSet<>();

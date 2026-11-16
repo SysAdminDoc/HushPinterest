@@ -79,7 +79,7 @@ public class UiHooksTest {
             Settings.HIDE_PIN_MENU_COLLAGE, Settings.HIDE_PIN_MENU_VISUAL_SEARCH, Settings.HIDE_PIN_MENU_PIN_BOOST,
             Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_COMMENT_PREVIEWS,
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
-            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
+            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
             Settings.DISABLE_UPDATE_NAG
     }; }
@@ -193,6 +193,64 @@ public class UiHooksTest {
         Settings.HIDE_SURVEY_PROMPTS.save(false);
         assertFalse(UiHooks.hideSurveyPrompts());
         assertFalse(UiHooks.hideSponsoredPolls());
+    }
+
+    @Test public void aPopUpBannerIsClosedThroughItsOwnXOnlyWhileTheSwitchIsOnAndCounted() {
+        int[] taps = {0};
+        android.widget.FrameLayout banner = popupBanner(true, taps);
+        UiHooks.popupBanner(banner);
+        assertEquals("off by default, nobody taps the X", 0, taps[0]);
+        assertEquals(View.VISIBLE, banner.getVisibility());
+        Settings.HIDE_POPUP_BANNERS.save(true);
+        UiHooks.popupBanner(banner);
+        assertEquals("on, the X is tapped once", 1, taps[0]);
+        assertEquals("Pinterest's own dismissal hid it", View.GONE, banner.getVisibility());
+        UiHooks.popupBanner(banner);
+        assertEquals("a banner already closed isn't tapped again", 1, taps[0]);
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("pop-up banner dismissed"));
+        android.widget.FrameLayout next = popupBanner(true, taps);
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        UiHooks.popupBanner(next);
+        assertEquals("paused, the banner stays", View.VISIBLE, next.getVisibility());
+        assertEquals(1, taps[0]);
+        assertTrue(Settings.HIDE_POPUP_BANNERS.savedValue());
+        PauseForTests.resume();
+        UiHooks.popupBanner(null);
+    }
+
+    @Test public void aPopUpBannerWhoseXDoesNothingIsHiddenInstead() {
+        Settings.HIDE_POPUP_BANNERS.save(true);
+        android.widget.FrameLayout banner = popupBanner(false, new int[1]);
+        UiHooks.popupBanner(banner);
+        assertEquals(View.GONE, banner.getVisibility());
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("pop-up banner hidden without its X"));
+    }
+
+    /**
+     * A banner like the one Pinterest's education container shows: its resources know the X's id,
+     * and with [listening] the X closes the banner the way Pinterest's dismissal does, counted in [taps].
+     */
+    private static android.widget.FrameLayout popupBanner(boolean listening, int[] taps) {
+        Context base = RuntimeEnvironment.getApplication();
+        Resources original = base.getResources();
+        Resources resources = new Resources(base.getAssets(), original.getDisplayMetrics(), original.getConfiguration()) {
+            @Override public int getIdentifier(String name, String type, String owner) {
+                return UiHooks.BANNER_DISMISS.equals(name) && "id".equals(type) ? 7 : 0;
+            }
+        };
+        android.widget.FrameLayout banner = new android.widget.FrameLayout(base) {
+            @Override public Resources getResources() { return resources; }
+        };
+        View dismiss = new View(base);
+        dismiss.setId(7);
+        if (listening) dismiss.setOnClickListener(clicked -> {
+            taps[0]++;
+            banner.setVisibility(View.GONE);
+        });
+        banner.addView(dismiss);
+        return banner;
     }
 
     @Test public void saveToastsDropOnlyTheNamedModelsWhileTheSwitchIsOn() {

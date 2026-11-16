@@ -4,6 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* New `Hide pop-up banners` patch with its own switch under Interface. Pinterest sometimes slides a banner up over Home, like "Shop recommended merchants". With the switch on, HushPinterest closes it through the banner's own X as soon as Pinterest shows it, so Pinterest counts it as dismissed and that banner doesn't come back. A banner that's already open when you turn the switch on stays until you close it. The switch starts off, and with it off or HushPinterest paused, Pinterest shows its banners as before.
 * The patches are now built on Morphe patcher 2.4.0, so you'll need Morphe Manager 2.6.0 or newer to apply them.
 * New `Black Save to sheet` switch under Interface, part of AMOLED black. In dark mode the sheet that lists your boards when you save a pin turns pure black, part way up and all the way up, along with the strip under it. The red Create new board button keeps its color. It starts off. (#31)
 * New `Hide suggested boards` patch with its own switch under Interface. It takes the board Pinterest suggests under your own boards out of the Save to sheet. Your boards and Profile stay. It starts off. (#32)

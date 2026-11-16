@@ -93,6 +93,33 @@ public final class UiHooks {
         return true;
     }
 
+    /** The close button on Pinterest's pop-up banner, a resource name it keeps. */
+    static final String BANNER_DISMISS = "bannerOverlay_dismiss_icon_button";
+
+    /**
+     * Pinterest has finished putting up a pop-up banner over the feed, such as "Shop recommended
+     * merchants", the education container's banner it hands over before anything is drawn. With
+     * Hide pop-up banners on, the banner's own X is clicked, so Pinterest closes it and marks it
+     * dismissed the way it does when you tap that. A banner whose X has no listener is hidden
+     * instead. Null, already hidden, off or paused, the banner is left as it is. Never throws.
+     */
+    public static void popupBanner(View banner) {
+        if (!enabled(FamilyNames.HIDE_POPUP_BANNERS, Settings.HIDE_POPUP_BANNERS)) return;
+        if (banner == null || banner.getVisibility() != View.VISIBLE) return;
+        try {
+            int id = banner.getResources().getIdentifier(BANNER_DISMISS, "id", banner.getContext().getPackageName());
+            View dismiss = id == 0 ? null : banner.findViewById(id);
+            if (dismiss != null && dismiss.performClick()) {
+                HookStatus.counted(FamilyNames.HIDE_POPUP_BANNERS, "pop-up banner dismissed");
+                return;
+            }
+            banner.setVisibility(View.GONE);
+            HookStatus.counted(FamilyNames.HIDE_POPUP_BANNERS, "pop-up banner hidden without its X");
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.HIDE_POPUP_BANNERS, "pop-up banner", failure);
+        }
+    }
+
     /** The toast class a test stands in for the save toasts patching names. */
     static volatile Class<?> saveToastForTests;
 

@@ -514,6 +514,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_inbox_updates": return L10n.t("Hide Inbox updates");
             case "hushpinterest_quiet_email_reminder": return L10n.t("Quiet email reminders");
             case "hushpinterest_hide_survey_prompts": return L10n.t("Hide survey prompts");
+            case "hushpinterest_hide_popup_banners": return L10n.t("Hide pop-up banners");
             case "hushpinterest_hide_save_toasts": return L10n.t("Hide save toasts");
             case "hushpinterest_original_images": return L10n.t("Original-quality images");
             case "hushpinterest_show_posted_date": return L10n.t("Show posted date");

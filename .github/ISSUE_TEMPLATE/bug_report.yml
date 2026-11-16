@@ -89,6 +89,7 @@ body:
         - Hide header buttons
         - Hide Inbox updates
         - Hide navigation buttons
+        - Hide pop-up banners
         - Hide save toasts
         - Hide search history
         - Hide shopping and product pins

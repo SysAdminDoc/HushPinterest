@@ -277,7 +277,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
@@ -2360,6 +2360,8 @@ public class DexDiff {
         static final String TOAST_CONTAINER = "Lcom/pinterest/gestalt/toast/PinterestToastContainer;";
         static final String TOAST_VIEW = "Lcom/pinterest/gestalt/toast/BaseGestaltToast;";
         static final String HOME_FEED_FRAGMENT = "Lcom/pinterest/feature/home/mainfeed/HomeFeedFragment;";
+        static final String EDUCATION_CONTAINER = "Lcom/pinterest/education/view/EducationNewContainerView;";
+        static final String BANNER_OVERLAY = "Lcom/pinterest/gestalt/bannerOverlay/GestaltBannerOverlay;";
         static final long HOME_AWAY_MS = 300_000L;
         static final Set<String> SAVE_TOAST_STRINGS = Set.of("saved_to", "saved_onto_board_bold", "pinned", "pinned_multiple", "pinned_multiple_to_board",
                 "multi_board_save_saved_to_profile", "saved_onto_board", "saved_to_board_section", "saved_multiple_to_board_section", "pin_saved");
@@ -6300,6 +6302,49 @@ public class DexDiff {
         }
 
         /**
+         * Hide pop-up banners: the education container's one static show method, the one that wires the
+         * banner's four click listeners, loads the container from its first parameter, reads the banner
+         * field and hands it to the hook right in front of its only return, which nothing else reaches.
+         */
+        void popupBanners(Contract c) {
+            String hook = c.strings.get(0);
+            ClassDef container = clean.classes.get(EDUCATION_CONTAINER);
+            if (container == null) { capability(c.callee, false); return; }
+            List<Field> fields = new ArrayList<>();
+            for (Field f : container.getFields()) if (f.getType().equals(BANNER_OVERLAY)) fields.add(f);
+            List<Method> shows = new ArrayList<>();
+            for (Method m : container.getMethods()) if (AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getImplementation() != null
+                    && m.getReturnType().equals("V") && !m.getParameterTypes().isEmpty()
+                    && m.getParameterTypes().get(0).toString().equals(EDUCATION_CONTAINER)
+                    && instructions(m).stream().anyMatch(i -> reference(i) instanceof MethodReference r && r.getDefiningClass().equals(BANNER_OVERLAY)
+                    && r.getReturnType().equals("V") && r.getParameterTypes().size() == 4
+                    && r.getParameterTypes().stream().allMatch(p -> p.toString().equals("Landroid/view/View$OnClickListener;")))) shows.add(m);
+            if (fields.size() != 1 || shows.size() != 1) { capability(c.callee, false); return; }
+            String banner = EDUCATION_CONTAINER + "->" + fields.get(0).getName() + ":" + BANNER_OVERLAY;
+            Method m = actual(shows.get(0));
+            List<Integer> sites = calls(m, hook, 1);
+            boolean handed = false;
+            if (m != null && sites.size() == 1) {
+                List<Instruction> body = instructions(m);
+                int at = sites.get(0);
+                int view = at >= 2 ? firstRegister(body.get(at - 2)) : -1;
+                handed = at >= 2 && at + 1 < body.size()
+                        && body.get(at - 2).getOpcode() == Opcode.MOVE_OBJECT_FROM16
+                        && ((TwoRegisterInstruction) body.get(at - 2)).getRegisterB() == parameter(m, 0)
+                        && body.get(at - 1).getOpcode() == Opcode.IGET_OBJECT && firstRegister(body.get(at - 1)) == view
+                        && ((TwoRegisterInstruction) body.get(at - 1)).getRegisterB() == view
+                        && String.valueOf(reference(body.get(at - 1))).equals(banner)
+                        && arguments(body.get(at)).equals(List.of(view))
+                        && body.get(at + 1).getOpcode() == Opcode.RETURN_VOID
+                        && body.stream().filter(i -> i.getOpcode() == Opcode.RETURN_VOID).count() == 1
+                        && onlyFrom(m, at + 1, at) && onlyFrom(m, at, at - 1) && onlyFrom(m, at - 1, at - 2);
+                if (!handed) fail(hook + " doesn't take the banner " + m + " shows, from its first parameter, right in front of its only return");
+                else remove(m, at - 2, at + 1);
+            }
+            capability(c.callee, handed);
+        }
+
+        /**
          * Expand board list (#33): the Save to sheet's height, the one class it builds whose toString
          * starts with the height's state text, asks the hook for its percentage right in front of the
          * getter's only return, and the answer goes back where the percentage was.
@@ -7827,6 +7872,7 @@ public class DexDiff {
                     case "boardListHeight": boardListHeight(c); break;
                     case "boardMenu": boardMenu(c); break;
                     case "surveyPrompts": surveyPrompts(c); break;
+                    case "popupBanners": popupBanners(c); break;
                     case "pinInvites": pinInvites(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);

@@ -223,6 +223,7 @@ Hide comment previews	Ocultar vistas previas de comentarios
 Hide topic suggestions	Ocultar sugerencias de temas
 Quiet email reminders	Ocultar recordatorios de correo
 Hide survey prompts	Ocultar invitaciones a encuestas
+Hide pop-up banners	Ocultar banners emergentes
 Disable update nag	Ocultar aviso de actualización
 Download pin	Descargar pin
 Share pin	Compartir pin
@@ -346,6 +347,7 @@ Hide comments is on and already hides the whole comments section, previews inclu
 Hides the "Ideas you might love" row of topic bubbles under pins the next time Pinterest shows it. Comments and related pins stay.	Oculta la fila «Ideas que te pueden gustar» con burbujas de temas bajo los Pins la próxima vez que Pinterest la muestre. Los comentarios y los Pins relacionados se quedan.
 Dismisses the optional reminder to confirm your email. A reminder that's already open stays. Account checks and sign-in still work as usual.	Descarta el aviso opcional para confirmar tu correo. Un aviso que ya está abierto se queda. Las comprobaciones de la cuenta y el inicio de sesión funcionan como siempre.
 Turns down Pinterest's "Got a minute?" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.	Rechaza la invitación a la encuesta «¿Tienes un minuto?» de Pinterest antes de que aparezca, como lo hace «Quizás más tarde», para que esa encuesta no vuelva. Las encuestas patrocinadas por anunciantes tampoco aparecen. Una invitación que ya está abierta se queda.
+Closes the banners Pinterest pops up over your feed, such as "Shop recommended merchants", the way their X does, so that one doesn't come back. A banner that's already open stays.	Cierra los banners que Pinterest muestra sobre tu feed, como «Compra en comercios recomendados», como lo hace su X, para que ese banner no vuelva. Un banner que ya está abierto se queda.
 Hide save toasts	Ocultar avisos al guardar
 Saving a pin no longer shows the "Saved to" message or a suggestion to follow its creator. The pin is still saved.	Al guardar un Pin ya no aparece el mensaje «Guardado en» ni una sugerencia para seguir a quien lo creó. El Pin se guarda igual.
 Original-quality images	Imágenes en calidad original

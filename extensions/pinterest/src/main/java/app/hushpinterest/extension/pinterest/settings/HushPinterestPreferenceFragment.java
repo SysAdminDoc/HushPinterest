@@ -626,6 +626,9 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Turns down Pinterest's \"Got a minute?\" survey invite before it pops up, the way Maybe later "
                         + "does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An "
                         + "invite that's already open stays."), SettingsIcons.BELL);
+            patchToggle(ui, context, build, PatchFamily.HIDE_POPUP_BANNERS, Settings.HIDE_POPUP_BANNERS,
+                    L10n.t("Hide pop-up banners"),
+                    L10n.t("Closes the banners Pinterest pops up over your feed, such as \"Shop recommended merchants\", the way their X does, so that one doesn't come back. A banner that's already open stays."), SettingsIcons.BELL);
             patchToggle(ui, context, build, PatchFamily.HIDE_SAVE_TOASTS, Settings.HIDE_SAVE_TOASTS,
                     L10n.t("Hide save toasts"),
                     L10n.t("Saving a pin no longer shows the \"Saved to\" message or a suggestion to follow its creator. The pin is still saved."), SettingsIcons.BELL);

@@ -644,19 +644,19 @@ public class SettingsNavigationTest {
         assertTrue(String.valueOf(cards.getItem(1)).startsWith("Privacy\n"));
         assertTrue(String.valueOf(cards.getItem(2)).startsWith("Back to defaults\n"));
         try {
-            // Hide ads starts on, so Quiet turns on the other six.
+            // Hide ads starts on, so Quiet turns on the other seven.
             choices.getListView().performItemClick(null, 0, 0);
             ShadowLooper.idleMainLooper();
             for (app.hushpinterest.extension.shared.settings.BooleanSetting setting : QuickSetupKeys.QUIET) {
                 assertTrue(setting.key, setting.savedValue());
             }
-            assertEquals("Changed 6 settings", ShadowToast.getTextOfLatestToast());
+            assertEquals("Changed 7 settings", ShadowToast.getTextOfLatestToast());
             // No screenshot share menu waits for a restart, so the row is up under the status card.
             assertEquals(SettingsNavigation.RESTART, ((Preference) list().getItemAtPosition(1)).getKey());
 
             assertEquals(0, page.applyQuickSetup(QuickSetupKeys.quiet()));
             assertEquals("Changed 0 settings", ShadowToast.getTextOfLatestToast());
-            assertEquals(6, page.applyQuickSetup(QuickSetupKeys.defaults()));
+            assertEquals(7, page.applyQuickSetup(QuickSetupKeys.defaults()));
             for (app.hushpinterest.extension.shared.settings.BooleanSetting setting : QuickSetupKeys.DEFAULTS) {
                 assertEquals(setting.key, setting.defaultValue, setting.savedValue());
             }
@@ -671,8 +671,8 @@ public class SettingsNavigationTest {
     /** What a Quick setups choice says it changed is what the rows, the settings and the store hold, reopened too. */
     @Test public void aQuickSetupThatLandsAgreesWithTheRowsTheSettingsAndTheStore() {
         try {
-            assertEquals(6, page.applyQuickSetup(QuickSetupKeys.quiet()));
-            assertEquals("Changed 6 settings", ShadowToast.getTextOfLatestToast());
+            assertEquals(7, page.applyQuickSetup(QuickSetupKeys.quiet()));
+            assertEquals("Changed 7 settings", ShadowToast.getTextOfLatestToast());
             for (BooleanSetting setting : QuickSetupKeys.QUIET) assertHolds(setting, true);
             recreate();
             for (BooleanSetting setting : QuickSetupKeys.QUIET) assertHolds(setting, true);
@@ -695,9 +695,9 @@ public class SettingsNavigationTest {
         BooleanSetting refused = Settings.HIDE_TOPIC_SUGGESTIONS;
         try {
             try (AutoCloseable ignored = unreadableOnce(refused.key)) {
-                assertEquals(5, page.applyQuickSetup(QuickSetupKeys.quiet()));
+                assertEquals(6, page.applyQuickSetup(QuickSetupKeys.quiet()));
             }
-            assertEquals("5 changed. 1 setting is still on its saved value.", ShadowToast.getTextOfLatestToast());
+            assertEquals("6 changed. 1 setting is still on its saved value.", ShadowToast.getTextOfLatestToast());
             assertEquals("the switch showed a toast of its own as well", 1, ShadowToast.shownToastCount());
             for (BooleanSetting setting : QuickSetupKeys.QUIET) assertHolds(setting, setting != refused);
             recreate();
@@ -721,8 +721,8 @@ public class SettingsNavigationTest {
         BooleanSetting lost = Settings.HIDE_SAVE_TOASTS;
         try {
             dropWritesTo(lost.key);
-            assertEquals(5, page.applyQuickSetup(QuickSetupKeys.quiet()));
-            assertEquals("5 changed. 1 setting didn't. Reopen settings and try again.", ShadowToast.getTextOfLatestToast());
+            assertEquals(6, page.applyQuickSetup(QuickSetupKeys.quiet()));
+            assertEquals("6 changed. 1 setting didn't. Reopen settings and try again.", ShadowToast.getTextOfLatestToast());
             assertEquals(1, ShadowToast.shownToastCount());
             // A change the listener had heard of and recovered would have its row back on the saved value.
             assertTrue("the control: the row doesn't show the value that was lost",
@@ -743,15 +743,15 @@ public class SettingsNavigationTest {
      */
     @Test public void aChangeTheListenerRecoveredIsCountedWhenItsValueLanded() {
         try {
-            assertEquals(6, page.applyQuickSetup(QuickSetupKeys.quiet()));
+            assertEquals(7, page.applyQuickSetup(QuickSetupKeys.quiet()));
             ShadowToast.reset();
             // Going back to a default has the setting clear its stored value, and the first of those writes is lost.
             try (FailingStore store = FailingStore.install(FailingStore.Fault.LOST)) {
-                assertEquals(6, page.applyQuickSetup(QuickSetupKeys.defaults()));
+                assertEquals(7, page.applyQuickSetup(QuickSetupKeys.defaults()));
                 // The lost write is the setting's own, and only the listener's recovery catches its failure.
                 assertTrue("the control: no write met the fault", store.editors.get() > 0);
             }
-            assertEquals("Changed 6 settings", ShadowToast.getTextOfLatestToast());
+            assertEquals("Changed 7 settings", ShadowToast.getTextOfLatestToast());
             assertEquals("the recovered switch showed a toast of its own as well", 1, ShadowToast.shownToastCount());
             for (BooleanSetting setting : QuickSetupKeys.QUIET) assertHolds(setting, setting.defaultValue);
             recreate();
@@ -772,9 +772,9 @@ public class SettingsNavigationTest {
         BooleanSetting second = Settings.HIDE_SAVE_TOASTS;
         try {
             try (AutoCloseable ignored = unreadableOnce(first.key, second.key)) {
-                assertEquals(4, page.applyQuickSetup(QuickSetupKeys.quiet()));
+                assertEquals(5, page.applyQuickSetup(QuickSetupKeys.quiet()));
             }
-            assertEquals("4 changed. 2 settings are still on their saved values.", ShadowToast.getTextOfLatestToast());
+            assertEquals("5 changed. 2 settings are still on their saved values.", ShadowToast.getTextOfLatestToast());
             assertEquals("each switch that failed showed a toast of its own", 1, ShadowToast.shownToastCount());
             for (BooleanSetting setting : QuickSetupKeys.QUIET) assertHolds(setting, setting != first && setting != second);
 
@@ -1284,6 +1284,8 @@ public class SettingsNavigationTest {
         summaryContains(Settings.QUIET_EMAIL_REMINDER.key, "optional reminder to confirm your email", "already open stays", "sign-in still work as usual");
         summaryContains(Settings.HIDE_SURVEY_PROMPTS.key, "\"Got a minute?\" survey invite", "the way Maybe later does",
                 "sponsored polls don't pop up", "already open stays");
+        summaryContains(Settings.HIDE_POPUP_BANNERS.key, "banners Pinterest pops up over your feed",
+                "\"Shop recommended merchants\"", "the way their X does", "already open stays");
     }
 
     @Test public void aliasesKeepAccentMatchingGroupingAndTheSpokenResultCount() {

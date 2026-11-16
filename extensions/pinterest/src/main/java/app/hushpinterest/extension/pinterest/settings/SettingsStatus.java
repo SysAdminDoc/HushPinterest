@@ -123,6 +123,8 @@ public final class SettingsStatus {
     public static boolean emailReminder() { return false; }
     public static boolean hideSurveyPrompts() { return false; }
     public static boolean surveyPrompts() { return false; }
+    public static boolean hidePopupBanners() { return false; }
+    public static boolean popupBanners() { return false; }
     public static boolean hideSaveToasts() { return false; }
     public static boolean saveToasts() { return false; }
     public static boolean originalImages() { return false; }
