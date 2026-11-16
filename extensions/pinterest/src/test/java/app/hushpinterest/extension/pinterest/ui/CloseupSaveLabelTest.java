@@ -9,6 +9,7 @@ package app.hushpinterest.extension.pinterest.ui;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.GraphicsMode;
 
@@ -116,6 +118,27 @@ public class CloseupSaveLabelTest {
         assertEquals("Pinterest's text size", SIZE, row.save.getTextSize(), 0f);
         assertTrue("less padding: " + row.save.getPaddingLeft(), row.save.getPaddingLeft() < PAD);
         assertTrue(String.join("\n", HookStatus.report()).contains("save label on one line"));
+    }
+
+    /**
+     * The label is pulled onto one line in the middle of a layout, where the row can't measure the
+     * button again. By the next frame the button is one line tall too, not a two-line box around it.
+     */
+    @Test public void theFrameAfterTheButtonIsOneLineTall() {
+        Row roomy = new Row(View.generateViewId());
+        roomy.look();
+        roomy.room((int) Math.ceil(roomy.label) + 2 * PAD + 20);
+        int oneLine = roomy.save.getHeight();
+
+        Row row = new Row(CloseupButtons.saveId);
+        row.look();
+        int room = (int) row.label + 2 * PAD - 12;
+        row.room(room);
+        assertTrue("Pinterest measured two lines first", row.save.getHeight() > oneLine);
+        Shadows.shadowOf(Looper.getMainLooper()).idle();
+        row.room(room);
+        assertEquals("one line", 1, row.lines());
+        assertEquals("one line tall", oneLine, row.save.getHeight());
     }
 
     @Test public void farTooShortTheTextGetsSmallerButNoSmallerThanItsFloor() {

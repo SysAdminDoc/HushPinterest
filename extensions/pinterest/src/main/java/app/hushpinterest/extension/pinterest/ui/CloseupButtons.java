@@ -317,6 +317,11 @@ public final class CloseupButtons {
             button.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(button.getHeight(), View.MeasureSpec.EXACTLY));
             button.layout(button.getLeft(), button.getTop(), button.getRight(), button.getBottom());
+            // Those bounds still have the height two lines took, so once this pass is over the button
+            // asks for a layout of its own, which measures it at one line's height (#38).
+            Utils.runOnMainThread(() -> {
+                if (ONE_LINE.get(button) == fitted) button.requestLayout();
+            });
             HookStatus.counted(FamilyNames.HIDE_CLOSEUP_BUTTONS, "save label on one line");
         } catch (RuntimeException failure) {
             HookStatus.threw(FamilyNames.HIDE_CLOSEUP_BUTTONS, "save label", failure);
