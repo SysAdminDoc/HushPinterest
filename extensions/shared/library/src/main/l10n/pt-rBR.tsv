@@ -722,3 +722,5 @@ See more like this? bubble	Balão "Ver mais conteúdo como este Pin?"
 # context: a Notifications switch from the Hide Inbox updates patch. It leaves the Updates section (Pinterest's activity and pin suggestions) out of the Inbox screen, and messages stay. "Updates" and "Inbox" are the names Pinterest gives them, so use the app's own translations.
 Hide Inbox updates	Ocultar Atualizações da caixa de entrada
 Leaves the Updates section out of your Inbox, and Pinterest doesn't load it. Your messages stay. The change shows the next time you open the Inbox.	Deixa a seção Atualizações fora da sua caixa de entrada, e o Pinterest não a carrega. Suas mensagens continuam. A mudança aparece na próxima vez que você abrir a caixa de entrada.
+saved pins in search	pins salvos na busca
+saved pins in More to explore	pins salvos em "Mais para explorar"

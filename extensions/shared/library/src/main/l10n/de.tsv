@@ -725,3 +725,5 @@ See more like this? bubble	Blase „Mehr davon sehen?“
 # context: a Notifications switch from the Hide Inbox updates patch. It leaves the Updates section (Pinterest's activity and pin suggestions) out of the Inbox screen, and messages stay. "Updates" and "Inbox" are the names Pinterest gives them, so use the app's own translations.
 Hide Inbox updates	Aktualisierungen im Posteingang ausblenden
 Leaves the Updates section out of your Inbox, and Pinterest doesn't load it. Your messages stay. The change shows the next time you open the Inbox.	Lässt den Bereich „Aktualisierungen“ in deinem Posteingang weg, und Pinterest lädt ihn nicht. Deine Nachrichten bleiben. Die Änderung zeigt sich, wenn du den Posteingang das nächste Mal öffnest.
+saved pins in search	gemerkte Pins in der Suche
+saved pins in More to explore	gemerkte Pins bei „Weitere entdecken“

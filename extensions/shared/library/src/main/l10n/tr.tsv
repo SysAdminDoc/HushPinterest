@@ -725,3 +725,5 @@ See more like this? bubble	"Bunun gibi daha fazla Pin görmek ister misiniz?" ba
 # context: a Notifications switch from the Hide Inbox updates patch. It leaves the Updates section (Pinterest's activity and pin suggestions) out of the Inbox screen, and messages stay. "Updates" and "Inbox" are the names Pinterest gives them, so use the app's own translations.
 Hide Inbox updates	Gelen Kutusu güncellemelerini gizle
 Leaves the Updates section out of your Inbox, and Pinterest doesn't load it. Your messages stay. The change shows the next time you open the Inbox.	Gelen Kutusu'ndaki Güncellemeler bölümünü dışarıda bırakır ve Pinterest onu yüklemez. Mesajların yerinde kalır. Değişiklik Gelen Kutusu'nu bir sonraki açışında görünür.
+saved pins in search	aramadaki kayıtlı pinler
+saved pins in More to explore	"Daha fazlasını keşfet" bölümündeki kayıtlı pinler

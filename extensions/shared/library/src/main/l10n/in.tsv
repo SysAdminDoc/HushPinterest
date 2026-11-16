@@ -725,3 +725,5 @@ See more like this? bubble	Gelembung "Lihat lainnya seperti ini?"
 # context: a Notifications switch from the Hide Inbox updates patch. It leaves the Updates section (Pinterest's activity and pin suggestions) out of the Inbox screen, and messages stay. "Updates" and "Inbox" are the names Pinterest gives them, so use the app's own translations.
 Hide Inbox updates	Sembunyikan Pembaruan di Kotak Masuk
 Leaves the Updates section out of your Inbox, and Pinterest doesn't load it. Your messages stay. The change shows the next time you open the Inbox.	Menghilangkan bagian Pembaruan dari Kotak Masuk Anda, dan Pinterest tidak memuatnya. Pesan Anda tetap ada. Perubahan terlihat saat Anda membuka Kotak Masuk berikutnya.
+saved pins in search	pin tersimpan di pencarian
+saved pins in More to explore	pin tersimpan di "Lainnya untuk dijelajahi"

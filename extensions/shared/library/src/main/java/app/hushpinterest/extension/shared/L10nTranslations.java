@@ -47,7 +47,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildDe() {
-        Map<String, String> table = new HashMap<>(1286);
+        Map<String, String> table = new HashMap<>(1290);
         fillDe0(table);
         fillDe1(table);
         fillDe2(table);
@@ -1375,6 +1375,10 @@ public final class L10nTranslations {
                 "beworbene Pins in Listen");
         table.put("promoted pins in paged results",
                 "beworbene Pins in seitenweisen Ergebnissen");
+        table.put("saved pins in More to explore",
+                "gemerkte Pins bei \u201eWeitere entdecken\u201c");
+        table.put("saved pins in search",
+                "gemerkte Pins in der Suche");
         table.put("sponsor credits on boards",
                 "Sponsorenhinweise auf Pinnw\u00e4nden");
         table.put("text ads",
@@ -1382,7 +1386,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildEs() {
-        Map<String, String> table = new HashMap<>(1286);
+        Map<String, String> table = new HashMap<>(1290);
         fillEs0(table);
         fillEs1(table);
         fillEs2(table);
@@ -2710,6 +2714,10 @@ public final class L10nTranslations {
                 "pines promocionados en las listas");
         table.put("promoted pins in paged results",
                 "pines promocionados en los resultados por p\u00e1ginas");
+        table.put("saved pins in More to explore",
+                "pines guardados en \u00abM\u00e1s que explorar\u00bb");
+        table.put("saved pins in search",
+                "pines guardados en la b\u00fasqueda");
         table.put("sponsor credits on boards",
                 "cr\u00e9ditos de patrocinio en los tableros");
         table.put("text ads",
@@ -2717,7 +2725,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildIn() {
-        Map<String, String> table = new HashMap<>(1286);
+        Map<String, String> table = new HashMap<>(1290);
         fillIn0(table);
         fillIn1(table);
         fillIn2(table);
@@ -4045,6 +4053,10 @@ public final class L10nTranslations {
                 "pin promosi di daftar");
         table.put("promoted pins in paged results",
                 "pin promosi di hasil per halaman");
+        table.put("saved pins in More to explore",
+                "pin tersimpan di \"Lainnya untuk dijelajahi\"");
+        table.put("saved pins in search",
+                "pin tersimpan di pencarian");
         table.put("sponsor credits on boards",
                 "keterangan sponsor di papan");
         table.put("text ads",
@@ -4052,7 +4064,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildPt_rBR() {
-        Map<String, String> table = new HashMap<>(1286);
+        Map<String, String> table = new HashMap<>(1290);
         fillPt_rBR0(table);
         fillPt_rBR1(table);
         fillPt_rBR2(table);
@@ -5380,6 +5392,10 @@ public final class L10nTranslations {
                 "pins promovidos nas listas");
         table.put("promoted pins in paged results",
                 "pins promovidos nos resultados paginados");
+        table.put("saved pins in More to explore",
+                "pins salvos em \"Mais para explorar\"");
+        table.put("saved pins in search",
+                "pins salvos na busca");
         table.put("sponsor credits on boards",
                 "cr\u00e9ditos de patroc\u00ednio nas pastas");
         table.put("text ads",
@@ -5387,7 +5403,7 @@ public final class L10nTranslations {
     }
 
     private static Map<String, String> buildTr() {
-        Map<String, String> table = new HashMap<>(1286);
+        Map<String, String> table = new HashMap<>(1290);
         fillTr0(table);
         fillTr1(table);
         fillTr2(table);
@@ -6715,6 +6731,10 @@ public final class L10nTranslations {
                 "listelerdeki reklaml\u0131 pinler");
         table.put("promoted pins in paged results",
                 "sayfal\u0131 sonu\u00e7lardaki reklaml\u0131 pinler");
+        table.put("saved pins in More to explore",
+                "\"Daha fazlas\u0131n\u0131 ke\u015ffet\" b\u00f6l\u00fcm\u00fcndeki kay\u0131tl\u0131 pinler");
+        table.put("saved pins in search",
+                "aramadaki kay\u0131tl\u0131 pinler");
         table.put("sponsor credits on boards",
                 "panolardaki sponsor bilgileri");
         table.put("text ads",
