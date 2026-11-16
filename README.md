@@ -78,7 +78,7 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 39 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 41 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
@@ -99,10 +99,12 @@ There are 39 patches. Where a patch has a switch, its description names the sett
 | `Hide Assistant` | Removes Pinterest's AI Assistant from search, boards and pins, so you don't get its buttons or its suggestion row. Regular search keeps working. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Hide closeup buttons` | Lets you hide the buttons on a pin you open, each with its own switch. That covers the back arrow and the visual search (lens) button that float over the picture, the like, comment, share and more buttons under it, the Remix button and the Visit site button. Another switch keeps the lens but drops its glow and the Search image label Pinterest puts on it for your first pins each day. Two more rows draw the red Save button smaller or paint it a color you pick. Your phone's back gesture still leaves the pin, and Search image in the pin menu still works. They all start off. Turn them on in HushPinterest settings > Interface. |
 | `Hide comments` | Collapses the comments and comment previews under pins. It doesn't change who can comment on your pins. Good for a quieter pin page. Hide comment previews, a separate switch, hides only the previews and comment photos, so the comment box and the way into all comments stay. Another switch hides the suggested replies next to the comment box. All three start off. Turn them on in HushPinterest settings > Interface. |
+| `Hide creator name on pins` | Hides the creator's name and badge under a pin you open and keeps their picture, which still opens their profile. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Hide header buttons` | Hides the small icon buttons at the end of the top bar. Back buttons, text buttons and account controls stay. Good for a cleaner top bar. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Hide Inbox updates` | Leaves the Updates section out of your Inbox, so it doesn't load. The pin ideas Pinterest puts there go, and so do the activity updates in that section. Your messages stay. Starts off. Turn it on in HushPinterest settings > Notifications. |
 | `Hide navigation buttons` | Lets you hide the Create, Notifications and Search buttons in the bottom bar, each with its own switch. The Create and Notifications switches also cover those buttons at the top of Home. Home and Profile stay. Starts off. Turn them on in HushPinterest settings > Interface. |
 | `Hide pop-up banners` | Closes pop-up banners such as "Shop recommended merchants" the way their X does, so Pinterest records that you dismissed them. Starts off. Turn it on in HushPinterest settings > Interface. |
+| `Hide related pins` | Leaves the grid of related pins out from under a pin you open, so it doesn't load. The pin, its comments and its buttons stay. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Hide save toasts` | Stops the pop-up Pinterest shows after you save a pin, such as the Saved to your board message or a suggestion to follow the creator. The pin is still saved. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Hide search history` | Hides your recent searches on the search screen of this phone. It doesn't delete your account's search history. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Hide shopping and product pins` | Hides shoppable pins, shopping stories and featured boards. Good if you want to browse ideas, not products. Starts off. Turn it on in HushPinterest settings > Feed. |

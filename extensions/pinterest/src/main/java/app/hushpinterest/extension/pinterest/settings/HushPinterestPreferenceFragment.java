@@ -583,6 +583,14 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                         SettingsIcons.TOOLS));
                 ui.addPreference(mark(new SaveButtonColorPreference(context), SettingsIcons.DARK_MODE));
             }
+            patchToggle(ui, context, build, PatchFamily.HIDE_CREATOR_NAME, Settings.HIDE_CREATOR_NAME,
+                    L10n.t("Hide creator name on pins"),
+                    L10n.t("Hides the creator's name and badge under a pin you open. Their picture stays and still "
+                        + "opens their profile. The change shows on the next pin you open."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS,
+                    L10n.t("Hide related pins"),
+                    L10n.t("Leaves the grid of more pins out from under a pin you open, so it doesn't load. "
+                        + "The change shows on the next pin you open."), SettingsIcons.BLOCK);
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),
                     L10n.t("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's "

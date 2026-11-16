@@ -4,6 +4,8 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* New `Hide related pins` patch with its own switch under Interface. It leaves the grid of more pins out from under a pin you open, so Pinterest never loads it. The pin, its comments and its buttons stay. It starts off, and the change shows on the next pin you open. (#41)
+* New `Hide creator name on pins` patch with its own switch under Interface. Under a pin you open, the creator's name and badge go away while their picture stays, and tapping the picture still opens their profile. It starts off. (#41)
 * New `Hide pop-up banners` patch with its own switch under Interface. Pinterest sometimes slides a banner up over Home, like "Shop recommended merchants". With the switch on, HushPinterest closes it through the banner's own X as soon as Pinterest shows it, so Pinterest counts it as dismissed and that banner doesn't come back. A banner that's already open when you turn the switch on stays until you close it. The switch starts off, and with it off or HushPinterest paused, Pinterest shows its banners as before.
 * The patches are now built on Morphe patcher 2.4.0, so you'll need Morphe Manager 2.6.0 or newer to apply them.
 * New `Black Save to sheet` switch under Interface, part of AMOLED black. In dark mode the sheet that lists your boards when you save a pin turns pure black, part way up and all the way up, along with the strip under it. The red Create new board button keeps its color. It starts off. (#31)

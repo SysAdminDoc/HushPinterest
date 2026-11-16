@@ -236,6 +236,18 @@ public class PausedHooksTest {
         return banner.getVisibility() != View.VISIBLE;
     }
 
+    /** A creator row with an avatar and a name: true when the name was hidden. */
+    private static boolean hidesCreatorName() {
+        Context app = RuntimeEnvironment.getApplication();
+        LinearLayout row = new LinearLayout(app);
+        View avatar = new View(app);
+        TextView name = new TextView(app);
+        row.addView(avatar);
+        row.addView(name);
+        UiHooks.creatorName(avatar);
+        return name.getVisibility() != View.VISIBLE;
+    }
+
     /** A closeup title module taking a pin with a date: true when a line was added under its row. */
     private static boolean addsPostedDate() {
         // Pinterest's resources know the title row's chevron by name; the test app's don't.
@@ -518,6 +530,8 @@ public class PausedHooksTest {
         probes.put(Settings.QUIET_EMAIL_REMINDER, Collections.singletonList(UiHooks::quietEmailReminder));
         probes.put(Settings.HIDE_SURVEY_PROMPTS, Arrays.asList(UiHooks::hideSurveyPrompts, UiHooks::hideSponsoredPolls));
         probes.put(Settings.HIDE_POPUP_BANNERS, Collections.singletonList(PausedHooksTest::closesPopupBanner));
+        probes.put(Settings.HIDE_RELATED_PINS, Collections.singletonList(UiHooks::hideRelatedPins));
+        probes.put(Settings.HIDE_CREATOR_NAME, Collections.singletonList(PausedHooksTest::hidesCreatorName));
         probes.put(Settings.HIDE_SAVE_TOASTS, Arrays.asList(PausedHooksTest::dropsSaveToast, UiHooksForTests::quietsSavedToast));
         probes.put(Settings.ORIGINAL_IMAGES, Arrays.asList(UiHooks::originalImages, () -> {
             Set<String> sizes = new HashSet<>();

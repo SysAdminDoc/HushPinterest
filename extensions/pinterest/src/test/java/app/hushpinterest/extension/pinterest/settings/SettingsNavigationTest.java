@@ -1286,6 +1286,9 @@ public class SettingsNavigationTest {
                 "sponsored polls don't pop up", "already open stays");
         summaryContains(Settings.HIDE_POPUP_BANNERS.key, "banners Pinterest pops up over your feed",
                 "\"Shop recommended merchants\"", "the way their X does", "already open stays");
+        summaryContains(Settings.HIDE_RELATED_PINS.key, "grid of more pins", "doesn't load", "next pin you open");
+        summaryContains(Settings.HIDE_CREATOR_NAME.key, "creator's name and badge", "picture stays",
+                "still opens their profile", "next pin you open");
     }
 
     @Test public void aliasesKeepAccentMatchingGroupingAndTheSpokenResultCount() {

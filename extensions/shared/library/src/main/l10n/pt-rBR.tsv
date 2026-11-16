@@ -221,6 +221,8 @@ Hide topic suggestions	Ocultar sugestões de temas
 Quiet email reminders	Ocultar lembretes de e-mail
 Hide survey prompts	Ocultar convites de pesquisa
 Hide pop-up banners	Ocultar banners pop-up
+Hide related pins	Ocultar pins relacionados
+Hide creator name on pins	Ocultar nome do criador nos pins
 Disable update nag	Ocultar aviso de atualização
 Download pin	Baixar Pin
 Share pin	Compartilhar Pin
@@ -345,6 +347,8 @@ Hides the "Ideas you might love" row of topic bubbles under pins the next time P
 Dismisses the optional reminder to confirm your email. A reminder that's already open stays. Account checks and sign-in still work as usual.	Dispensa o lembrete opcional para confirmar seu e-mail. Um lembrete já aberto continua. As verificações da conta e o login funcionam como de costume.
 Turns down Pinterest's "Got a minute?" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.	Recusa o convite de pesquisa "Tem um minuto?" do Pinterest antes que ele apareça, como faz o "Talvez mais tarde", para que essa pesquisa não volte. Enquetes patrocinadas por anunciantes também não aparecem. Um convite que já está aberto continua.
 Closes the banners Pinterest pops up over your feed, such as "Shop recommended merchants", the way their X does, so that one doesn't come back. A banner that's already open stays.	Fecha os banners que o Pinterest mostra sobre o seu feed, como "Compre em lojas recomendadas", como faz o X deles, para que esse banner não volte. Um banner que já está aberto continua.
+Leaves the grid of more pins out from under a pin you open, so it doesn't load. The change shows on the next pin you open.	Tira a grade de mais pins de baixo de um pin que você abre, então ela não carrega. A mudança aparece no próximo pin que você abrir.
+Hides the creator's name and badge under a pin you open. Their picture stays and still opens their profile. The change shows on the next pin you open.	Oculta o nome e o selo do criador embaixo de um pin que você abre. A foto continua e ainda abre o perfil. A mudança aparece no próximo pin que você abrir.
 Hide save toasts	Ocultar avisos ao salvar
 Saving a pin no longer shows the "Saved to" message or a suggestion to follow its creator. The pin is still saved.	Salvar um Pin não mostra mais a mensagem "Salvo em" nem a sugestão de seguir quem o criou. O Pin continua salvo.
 Original-quality images	Imagens em qualidade original

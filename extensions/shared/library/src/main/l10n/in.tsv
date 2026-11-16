@@ -224,6 +224,8 @@ Hide topic suggestions	Sembunyikan saran topik
 Quiet email reminders	Sembunyikan pengingat email
 Hide survey prompts	Sembunyikan ajakan survei
 Hide pop-up banners	Sembunyikan banner pop-up
+Hide related pins	Sembunyikan pin terkait
+Hide creator name on pins	Sembunyikan nama kreator di pin
 Disable update nag	Sembunyikan pemberitahuan pembaruan
 Download pin	Unduh Pin
 Share pin	Bagikan Pin
@@ -348,6 +350,8 @@ Hides the "Ideas you might love" row of topic bubbles under pins the next time P
 Dismisses the optional reminder to confirm your email. A reminder that's already open stays. Account checks and sign-in still work as usual.	Menutup pengingat opsional untuk mengonfirmasi email Anda. Pengingat yang sudah terbuka tetap ada. Pemeriksaan akun dan masuk tetap berjalan seperti biasa.
 Turns down Pinterest's "Got a minute?" survey invite before it pops up, the way Maybe later does, so that survey doesn't come back. Advertiser-sponsored polls don't pop up either. An invite that's already open stays.	Menolak undangan survei "Punya waktu sebentar?" dari Pinterest sebelum muncul, seperti tombol "Mungkin nanti", agar survei itu tidak muncul lagi. Polling bersponsor dari pengiklan juga tidak muncul. Undangan yang sudah terbuka tetap ada.
 Closes the banners Pinterest pops up over your feed, such as "Shop recommended merchants", the way their X does, so that one doesn't come back. A banner that's already open stays.	Menutup banner yang dimunculkan Pinterest di atas feed kamu, seperti "Belanja di penjual yang direkomendasikan", seperti tombol X-nya, agar banner itu tidak muncul lagi. Banner yang sudah terbuka tetap ada.
+Leaves the grid of more pins out from under a pin you open, so it doesn't load. The change shows on the next pin you open.	Menghilangkan kisi pin lainnya di bawah pin yang Anda buka, sehingga tidak dimuat. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Hides the creator's name and badge under a pin you open. Their picture stays and still opens their profile. The change shows on the next pin you open.	Menyembunyikan nama dan lencana kreator di bawah pin yang Anda buka. Fotonya tetap ada dan masih membuka profilnya. Perubahan terlihat pada pin berikutnya yang Anda buka.
 Hide save toasts	Sembunyikan notifikasi simpan
 Saving a pin no longer shows the "Saved to" message or a suggestion to follow its creator. The pin is still saved.	Menyimpan Pin tidak lagi memunculkan pesan "Disimpan ke" atau saran untuk mengikuti pembuatnya. Pin tetap tersimpan.
 Original-quality images	Gambar kualitas asli

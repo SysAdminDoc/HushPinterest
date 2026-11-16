@@ -8,6 +8,7 @@ package app.hushpinterest.extension.pinterest.ui;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
@@ -117,6 +118,53 @@ public final class UiHooks {
             HookStatus.counted(FamilyNames.HIDE_POPUP_BANNERS, "pop-up banner hidden without its X");
         } catch (RuntimeException failure) {
             HookStatus.threw(FamilyNames.HIDE_POPUP_BANNERS, "pop-up banner", failure);
+        }
+    }
+
+    /**
+     * A pin page is about to add its related pins grid, or the refined list that stands in for it.
+     * True leaves that list out of the page, so it never loads. Off or paused, the grid shows as it
+     * always did.
+     */
+    public static boolean hideRelatedPins() {
+        if (!enabled(FamilyNames.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS)) return false;
+        HookStatus.counted(FamilyNames.HIDE_RELATED_PINS, "related pins left out");
+        return true;
+    }
+
+    /**
+     * A pin page is about to wait for its related pins grid to load, showing gray placeholder tiles
+     * until it does. With Hide related pins on, the grid was never added and would never load, so
+     * true tells the page there's nothing to wait for. Off or paused, the page waits as usual.
+     * Never throws.
+     */
+    public static boolean relatedPinsLoading() {
+        if (!enabled(FamilyNames.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS)) return false;
+        HookStatus.counted(FamilyNames.HIDE_RELATED_PINS, "related pins loading skipped");
+        return true;
+    }
+
+    /**
+     * A pin's creator row has been drawn, handed over by its avatar. With Hide creator name on pins
+     * on, everything next to the avatar in its row goes: the name and its badges. The row keeps its
+     * own click, so the avatar still opens the profile. Null, off or paused, the row stays as it is.
+     * Never throws.
+     */
+    public static void creatorName(View avatar) {
+        if (!enabled(FamilyNames.HIDE_CREATOR_NAME, Settings.HIDE_CREATOR_NAME)) return;
+        if (avatar == null || !(avatar.getParent() instanceof ViewGroup)) return;
+        try {
+            ViewGroup row = (ViewGroup) avatar.getParent();
+            boolean hid = false;
+            for (int i = 0; i < row.getChildCount(); i++) {
+                View child = row.getChildAt(i);
+                if (child == avatar || child.getVisibility() == View.GONE) continue;
+                child.setVisibility(View.GONE);
+                hid = true;
+            }
+            if (hid) HookStatus.counted(FamilyNames.HIDE_CREATOR_NAME, "creator name hidden");
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.HIDE_CREATOR_NAME, "creator row", failure);
         }
     }
 

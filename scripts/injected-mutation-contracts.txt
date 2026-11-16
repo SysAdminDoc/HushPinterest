@@ -63,6 +63,8 @@ family|hideInboxUpdates|Hide Inbox updates|inboxUpdates
 family|quietEmailReminder|Quiet email reminders|emailReminder
 family|hideSurveyPrompts|Hide survey prompts|surveyPrompts
 family|hidePopupBanners|Hide pop-up banners|popupBanners
+family|hideRelatedPins|Hide related pins|relatedPins
+family|hideCreatorName|Hide creator name on pins|creatorName
 family|hideSaveToasts|Hide save toasts|saveToasts
 family|originalImages|Original-quality images|imageChooser,closeupImage
 family|showPostedDate|Show posted date|postedDate
@@ -122,6 +124,8 @@ mutation|recentSearchHeading|recentSearchHeading|Lapp/hushpinterest/extension/pi
 mutation|emailReminder|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->quietEmailReminder()Z|email
 mutation|surveyPrompts|surveyPrompts|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideSurveyPrompts()Z|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideSponsoredPolls()Z
 mutation|popupBanners|popupBanners|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->popupBanner(Landroid/view/View;)V
+mutation|relatedPins|relatedPins|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideRelatedPins()Z|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->relatedPinsLoading()Z|PinCloseupLoadingIndicatorManager must have moduleList set before onPresenterBound()
+mutation|creatorName|creatorName|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->creatorName(Landroid/view/View;)V
 mutation|saveToasts|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideSaveToast(Ljava/lang/Object;)Z|saveToast|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->androidToast(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;|androidToast|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->androidToast(Landroid/content/Context;II)Landroid/widget/Toast;|androidToast
 mutation|imageChooser|imageOrder|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->originalImages()Z
 mutation|closeupImage|closeupImage|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->imageSizes(Ljava/util/Set;)V|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->closeupImage(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;

@@ -79,7 +79,7 @@ public class UiHooksTest {
             Settings.HIDE_PIN_MENU_COLLAGE, Settings.HIDE_PIN_MENU_VISUAL_SEARCH, Settings.HIDE_PIN_MENU_PIN_BOOST,
             Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_COMMENT_PREVIEWS,
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
-            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
+            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
             Settings.DISABLE_UPDATE_NAG
     }; }
@@ -217,6 +217,68 @@ public class UiHooksTest {
         assertTrue(Settings.HIDE_POPUP_BANNERS.savedValue());
         PauseForTests.resume();
         UiHooks.popupBanner(null);
+    }
+
+    @Test public void relatedPinsAreLeftOutOnlyWhileTheSwitchIsOnAndCounted() {
+        assertFalse("off by default, the grid is added", UiHooks.hideRelatedPins());
+        Settings.HIDE_RELATED_PINS.save(true);
+        assertTrue(UiHooks.hideRelatedPins());
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("related pins left out"));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertFalse("paused, the grid is added", UiHooks.hideRelatedPins());
+        PauseForTests.resume();
+    }
+
+    @Test public void theRelatedPinsLoadingWaitEndsOnlyWhileTheGridIsLeftOut() {
+        assertFalse("off by default, the page waits for the grid", UiHooks.relatedPinsLoading());
+        Settings.HIDE_RELATED_PINS.save(true);
+        assertTrue(UiHooks.relatedPinsLoading());
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("related pins loading skipped"));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertFalse("paused, the grid is added and loads", UiHooks.relatedPinsLoading());
+        PauseForTests.resume();
+    }
+
+    @Test public void theCreatorNameGoesAndTheAvatarAndItsRowStayOnlyWhileTheSwitchIsOn() {
+        Context app = RuntimeEnvironment.getApplication();
+        LinearLayout outer = new LinearLayout(app);
+        LinearLayout row = new LinearLayout(app);
+        View avatar = new View(app);
+        TextView name = new TextView(app);
+        View badge = new View(app);
+        TextView below = new TextView(app);
+        row.addView(avatar);
+        row.addView(name);
+        row.addView(badge);
+        outer.addView(row);
+        outer.addView(below);
+        int[] opened = {0};
+        row.setOnClickListener(clicked -> opened[0]++);
+
+        UiHooks.creatorName(avatar);
+        assertEquals("off by default, the name stays", View.VISIBLE, name.getVisibility());
+
+        Settings.HIDE_CREATOR_NAME.save(true);
+        UiHooks.creatorName(avatar);
+        assertEquals(View.VISIBLE, avatar.getVisibility());
+        assertEquals(View.GONE, name.getVisibility());
+        assertEquals(View.GONE, badge.getVisibility());
+        assertEquals("only the avatar's own row changes", View.VISIBLE, below.getVisibility());
+        assertEquals(View.VISIBLE, row.getVisibility());
+        assertTrue("the row still opens the profile", row.performClick());
+        assertEquals(1, opened[0]);
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("creator name hidden"));
+
+        name.setVisibility(View.VISIBLE);
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        UiHooks.creatorName(avatar);
+        assertEquals("paused, the name stays", View.VISIBLE, name.getVisibility());
+        PauseForTests.resume();
+        UiHooks.creatorName(null);
+        UiHooks.creatorName(new View(app));
     }
 
     @Test public void aPopUpBannerWhoseXDoesNothingIsHiddenInstead() {

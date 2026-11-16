@@ -676,6 +676,42 @@
       "options": []
     },
     {
+      "name": "Hide creator name on pins",
+      "description": "Hides the creator's name and badge under a pin you open and keeps their picture, which still opens their profile. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.44.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.44.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14448030
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide header buttons",
       "description": "Hides the small icon buttons at the end of the top bar. Back buttons, text buttons and account controls stay. Good for a cleaner top bar. Starts off. Turn it on in HushPinterest settings > Interface.",
       "category": "Navigation",
@@ -751,6 +787,42 @@
       "name": "Hide pop-up banners",
       "description": "Closes pop-up banners such as \"Shop recommended merchants\" the way their X does, so Pinterest records that you dismissed them. Starts off. Turn it on in HushPinterest settings > Interface.",
       "category": "Feed",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.44.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.44.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14448030
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide related pins",
+      "description": "Leaves the grid of related pins out from under a pin you open, so it doesn't load. The pin, its comments and its buttons stay. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
       "use": true,
       "dependencies": [
         "BytecodePatch",
