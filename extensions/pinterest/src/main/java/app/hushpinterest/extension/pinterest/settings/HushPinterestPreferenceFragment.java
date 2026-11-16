@@ -333,6 +333,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             patchToggle(feed, context, build, PatchFamily.KEEP_HOME_FEED, Settings.KEEP_HOME_FEED,
                     L10n.t("Keep Home feed"), L10n.t("Home keeps the pins you were looking at when you come back to "
                         + "Pinterest or to the Home tab. Pull down on Home to load new pins."), SettingsIcons.BLOCK);
+            // Its own hook, on Home's Back handler: no row where that wasn't found.
+            if (build.contains(PatchFamily.KEEP_HOME_FEED) && PatchFamily.Capability.HOME_BACK.installed()) {
+                feed.addPreference(mark(toggle(context, Settings.BACK_LEAVES_HOME, L10n.t("Back leaves Home right away"),
+                        L10n.t("When you've scrolled down Home, Back leaves Pinterest instead of jumping to the top "
+                            + "and loading new pins first.")), SettingsIcons.BLOCK));
+            }
         }
 
         if (!Collections.disjoint(build, PatchFamily.PRIVACY_PAGE)) {

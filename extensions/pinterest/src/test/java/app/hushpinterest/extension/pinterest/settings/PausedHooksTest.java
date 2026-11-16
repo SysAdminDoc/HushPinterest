@@ -358,6 +358,8 @@ public class PausedHooksTest {
         }, () -> UiHooks.feedbackFlyout(Boolean.TRUE) != Boolean.TRUE));
         probes.put(Settings.KEEP_HOME_FEED, Arrays.asList(() -> HomeFeed.holdResumeRefresh(10 * 60 * 1000L),
                 () -> HomeFeed.holdHomeRefresh(null, 1)));
+        // Back on a scrolled-down Home goes on out instead of jumping to the top.
+        probes.put(Settings.BACK_LEAVES_HOME, Arrays.asList(HomeFeed::leave));
         probes.put(Settings.DISABLE_ANALYTICS, Arrays.asList(Analytics::blockUpload,
                 () -> Analytics.blockTask(Task.TAG_APPSFLYER_INIT), PausedHooksTest::quietsSdkConnection));
         probes.put(Settings.STRIP_LINK_TRACKING, Arrays.asList(

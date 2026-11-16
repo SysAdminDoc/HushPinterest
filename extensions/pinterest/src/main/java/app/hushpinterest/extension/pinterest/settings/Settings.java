@@ -94,6 +94,12 @@ public class Settings extends BaseSettings {
     /** Home keeps its pins when you come back to it. Pull-to-refresh still loads new ones. Off to start. */
     public static final BooleanSetting KEEP_HOME_FEED =
             new BooleanSetting("hushpinterest_keep_home_feed", FALSE);
+    /**
+     * Back on a Home scrolled down leaves the way it does at the top, instead of jumping to the top
+     * and loading new pins first (#36). Keep Home feed's patch, its own switch. Off to start.
+     */
+    public static final BooleanSetting BACK_LEAVES_HOME =
+            new BooleanSetting("hushpinterest_back_leaves_home", FALSE);
     /** Its row asks for a restart after turning it off, so a change brings up the restart row. */
     public static final BooleanSetting DISABLE_ANALYTICS =
             new BooleanSetting("hushpinterest_disable_analytics", TRUE, true);

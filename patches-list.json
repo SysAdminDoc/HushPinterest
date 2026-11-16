@@ -1001,7 +1001,7 @@
     },
     {
       "name": "Keep Home feed",
-      "description": "Keeps your Home feed where you left it when you come back to Pinterest or to the Home tab, instead of loading new pins on its own. Pull down to refresh whenever you want new pins. Starts off. Turn it on in HushPinterest settings > Feed.",
+      "description": "Keeps your Home feed where you left it when you come back to Pinterest or to the Home tab, instead of loading new pins on its own. Pull down to refresh whenever you want new pins. A second switch lets Back leave Pinterest from a scrolled-down Home without jumping to the top first. Both start off. Turn them on in HushPinterest settings > Feed.",
       "category": "Feed",
       "use": true,
       "dependencies": [

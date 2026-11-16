@@ -52,6 +52,7 @@ public final class SettingsStatus {
     public static boolean feedbackFlyout() { return false; }
     public static boolean keepHomeFeed() { return false; }
     public static boolean homeFeed() { return false; }
+    public static boolean homeBack() { return false; }
     public static boolean disableAnalytics() { return false; }
     public static boolean analyticsTasks() { return false; }
     public static boolean analyticsUploads() { return false; }

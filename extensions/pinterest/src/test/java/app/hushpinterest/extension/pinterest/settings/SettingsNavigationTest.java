@@ -1274,6 +1274,8 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_INBOX_UPDATES.key, "Updates section out of your Inbox", "Pinterest doesn't load it", "Your messages stay");
         summaryContains(Settings.HIDE_HOME_SUGGESTIONS.key, "\"More ideas for your board\"", "\"See more like this?\" bubble off pins", "next time Home loads");
         summaryContains(Settings.HIDE_SAVED_PINS.key, "out of your home feed", "Your boards still show them");
+        summaryContains(Settings.BACK_LEAVES_HOME.key, "scrolled down Home", "Back leaves Pinterest",
+                "instead of jumping to the top");
         summaryContains(Settings.HIDE_SAVED_PINS_ELSEWHERE.key, "out of search results", "More to explore pins under a pin you open",
                 "Your boards still show them");
         summaryContains(Settings.QUIET_EMAIL_REMINDER.key, "optional reminder to confirm your email", "already open stays", "sign-in still work as usual");
