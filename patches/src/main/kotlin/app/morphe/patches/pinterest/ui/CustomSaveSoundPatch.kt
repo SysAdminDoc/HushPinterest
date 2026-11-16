@@ -45,8 +45,9 @@ internal data class SaveChime(val method: Method, val index: Int)
 @Suppress("unused")
 val customSaveSoundPatch = bytecodePatch(
     name = PATCH,
-    description = "Plays a sound file you pick in place of the chime Pinterest plays when you save a pin. " +
-        "Starts off. Turn it on and pick the sound in HushPinterest settings > Interface.",
+    description = "Plays a sound file you pick on your phone when you save a pin, in place of Pinterest's chime. " +
+        "Pinterest's other sounds stay. Starts off. Pick the sound with Pick a save sound in HushPinterest " +
+        "settings > Interface, which turns the switch on for you.",
 ) {
     category("Theme")
     dependsOn(settingsPatch, pinterestExtensionPatch)

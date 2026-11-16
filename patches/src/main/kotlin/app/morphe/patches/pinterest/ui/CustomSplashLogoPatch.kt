@@ -273,9 +273,9 @@ private val splashLogoResourcesPatch = resourcePatch {
 @Suppress("unused")
 val customSplashLogoPatch = bytecodePatch(
     name = PATCH,
-    description = "Shows a logo you pick when patching instead of Pinterest's on the screen you see while " +
-        "Pinterest starts, on Android 13 and newer. With no picture picked it's HushPinterest's logo. Starts " +
-        "off. Turn it on in HushPinterest settings > Interface.",
+    description = "Shows a logo you pick on the screen you see while Pinterest starts, in place of Pinterest's, " +
+        "on Android 13 and newer. Pick the picture in the patch's Logo option when you patch. Leave it empty " +
+        "for HushPinterest's logo. Starts off. Turn it on in HushPinterest settings > Interface.",
 ) {
     category("Theme")
     dependsOn(settingsPatch, pinterestExtensionPatch, splashLogoResourcesPatch)

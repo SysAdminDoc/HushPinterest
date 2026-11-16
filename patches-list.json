@@ -98,7 +98,7 @@
     },
     {
       "name": "Custom save sound",
-      "description": "Plays a sound file you pick in place of the chime Pinterest plays when you save a pin. Starts off. Turn it on and pick the sound in HushPinterest settings > Interface.",
+      "description": "Plays a sound file you pick on your phone when you save a pin, in place of Pinterest's chime. Pinterest's other sounds stay. Starts off. Pick the sound with Pick a save sound in HushPinterest settings > Interface, which turns the switch on for you.",
       "category": "Theme",
       "use": true,
       "dependencies": [
@@ -134,7 +134,7 @@
     },
     {
       "name": "Custom splash logo",
-      "description": "Shows a logo you pick when patching instead of Pinterest's on the screen you see while Pinterest starts, on Android 13 and newer. With no picture picked it's HushPinterest's logo. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "description": "Shows a logo you pick on the screen you see while Pinterest starts, in place of Pinterest's, on Android 13 and newer. Pick the picture in the patch's Logo option when you patch. Leave it empty for HushPinterest's logo. Starts off. Turn it on in HushPinterest settings > Interface.",
       "category": "Theme",
       "use": true,
       "dependencies": [
