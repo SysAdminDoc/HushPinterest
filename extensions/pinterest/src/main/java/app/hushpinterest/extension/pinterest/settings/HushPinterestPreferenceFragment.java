@@ -306,7 +306,16 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             // Its own hooks, on Home's request and pages: no row where they didn't go in.
             if (build.contains(PatchFamily.FILTER_FEED) && PatchFamily.Capability.FEED_SAVED_PINS.installed()) {
                 feed.addPreference(mark(toggle(context, Settings.HIDE_SAVED_PINS, L10n.t("Hide pins you've already saved"),
-                        L10n.t("Takes pins you've saved out of your home feed. Your boards and search still show them.")),
+                        L10n.t("Takes pins you've saved out of your home feed. Your boards still show them.")),
+                        SettingsIcons.BLOCK));
+            }
+            // Its own hooks, on the search and More to explore requests and lists: no row where neither went in.
+            if (build.contains(PatchFamily.FILTER_FEED) && (PatchFamily.Capability.FEED_SAVED_SEARCH.installed()
+                    || PatchFamily.Capability.FEED_SAVED_RELATED.installed())) {
+                feed.addPreference(mark(toggle(context, Settings.HIDE_SAVED_PINS_ELSEWHERE,
+                        L10n.t("Hide saved pins in search and More to explore"),
+                        L10n.t("Takes pins you've saved out of search results and the More to explore pins under a pin "
+                            + "you open. Your boards still show them.")),
                         SettingsIcons.BLOCK));
             }
             // Its own hooks, on the list hook and the pin's feedback bubble: no row where neither went in.

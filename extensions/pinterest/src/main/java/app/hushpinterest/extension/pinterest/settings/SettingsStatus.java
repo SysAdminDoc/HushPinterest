@@ -46,6 +46,8 @@ public final class SettingsStatus {
     public static boolean feedVideoPins() { return false; }
     public static boolean feedMutedWords() { return false; }
     public static boolean feedSavedPins() { return false; }
+    public static boolean feedSavedSearch() { return false; }
+    public static boolean feedSavedRelated() { return false; }
     public static boolean feedHomeSuggestions() { return false; }
     public static boolean feedbackFlyout() { return false; }
     public static boolean keepHomeFeed() { return false; }

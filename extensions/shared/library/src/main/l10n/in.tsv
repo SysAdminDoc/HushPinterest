@@ -709,9 +709,12 @@ Save and download	Simpan dan unduh
 # context: an Interface switch that removes Pinterest's AI Assistant from the search page, boards and pins; "Assistant" is that feature's name
 Hide Assistant	Sembunyikan Asisten
 Takes Pinterest's AI Assistant out of search, boards and pins. Search works as usual. The change shows the next time the screen updates.	Menghapus Asisten AI Pinterest dari pencarian, papan, dan pin. Pencarian tetap berfungsi seperti biasa. Perubahan terlihat saat layar diperbarui berikutnya.
-# context: a Feed switch from the Filter feed patch. It takes pins the person has already saved to a board out of their home feed only; boards and search still show them. The title is also the name of that part of the patch in the build report.
+# context: a Feed switch from the Filter feed patch. It takes pins the person has already saved to a board out of their home feed only; boards still show them, and the switch under it covers search. The title is also the name of that part of the patch in the build report.
 Hide pins you've already saved	Sembunyikan pin yang sudah disimpan
-Takes pins you've saved out of your home feed. Your boards and search still show them.	Menghapus pin yang sudah Anda simpan dari beranda. Papan dan pencarian Anda tetap menampilkannya.
+Takes pins you've saved out of your home feed. Your boards still show them.	Menghapus pin yang sudah Anda simpan dari beranda. Papan Anda tetap menampilkannya.
+# context: a Feed switch from the Filter feed patch, under Hide pins you've already saved. It takes pins the person has already saved out of search results and out of the "More to explore" pins Pinterest shows under a pin they open. "More to explore" is Pinterest's own name for that section, so use the app's translation of it. The title is also the name of that part of the patch in the build report.
+Hide saved pins in search and More to explore	Sembunyikan pin tersimpan di pencarian dan "Lainnya untuk dijelajahi"
+Takes pins you've saved out of search results and the More to explore pins under a pin you open. Your boards still show them.	Menghapus pin yang sudah Anda simpan dari hasil pencarian dan dari "Lainnya untuk dijelajahi" di bawah pin yang Anda buka. Papan Anda tetap menampilkannya.
 # context: toast when Download pin can't save a streamed video on the current network
 Your download settings block this network. Try again on Wi-Fi.	Setelan unduhan Anda memblokir jaringan ini. Coba lagi melalui Wi-Fi.
 # context: a Feed switch from the Filter feed patch, under Hide pins you've already saved. It takes Pinterest's own suggestion rows off the Home feed ("More ideas for your board" and "Inspired by your interests") and the "See more like this?" bubble Pinterest shows on a pin. The title is also the name of that part of the patch in the build report.

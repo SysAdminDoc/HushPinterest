@@ -145,6 +145,7 @@ public class PausedHooksTest {
         @Json("grid_title") String gridTitle;
         @Json("is_video") Boolean video;
         @Json("created_at") Date createdAt;
+        @Json("is_owned_by_viewer") Boolean owned;
     }
 
     /** 14.44.0's "More ideas for your board" card: a board's name and header over its images. */
@@ -335,6 +336,21 @@ public class PausedHooksTest {
         // Home's request asks whether each pin is saved, which is what its pages are judged by.
         probes.put(Settings.HIDE_SAVED_PINS, Collections.singletonList(
                 () -> !"pin.{id}".equals(SavedPins.homeFields("pin.{id}"))));
+        // Search's and More to explore's requests ask the same, a saved pin leaves a search page, and More
+        // to explore's filter is told to drop one.
+        probes.put(Settings.HIDE_SAVED_PINS_ELSEWHERE, Arrays.asList(
+                () -> !"pin.{id}".equals(SavedPins.elsewhereFields("pin.{id}")),
+                () -> {
+                    ProbePin mine = new ProbePin();
+                    mine.owned = true;
+                    List<Object> page = Arrays.asList(mine, new ProbePin());
+                    return SavedPins.searchPage(page) != page;
+                },
+                () -> {
+                    ProbePin mine = new ProbePin();
+                    mine.owned = true;
+                    return SavedPins.dropRelated(mine);
+                }));
         // Home's board ideas card leaves the page, and a pin's "See more like this?" bubble is turned down.
         probes.put(Settings.HIDE_HOME_SUGGESTIONS, Arrays.asList(() -> {
             List<Object> page = new ArrayList<>(Arrays.asList(new ProbeBoardIdeas(), new ProbePin()));

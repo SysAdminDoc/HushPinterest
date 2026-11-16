@@ -73,6 +73,12 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting HIDE_SAVED_PINS =
             new BooleanSetting("hushpinterest_hide_saved_pins", FALSE);
     /**
+     * Pins you've saved or own leave search results and the More to explore pins under a pin, on Filter
+     * feed's switch (#34). Those requests only ask for the field that says so while this is on. Off to start.
+     */
+    public static final BooleanSetting HIDE_SAVED_PINS_ELSEWHERE =
+            new BooleanSetting("hushpinterest_hide_saved_pins_elsewhere", FALSE);
+    /**
      * Pinterest's own suggestion rows leave Home, on Filter feed's switch: the "More ideas for your
      * board" card, the "Inspired by your interests" row, and the "See more like this?" bubble on a
      * pin. Off to start.

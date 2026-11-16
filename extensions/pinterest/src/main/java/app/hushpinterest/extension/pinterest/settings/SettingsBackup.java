@@ -89,7 +89,8 @@ public final class SettingsBackup {
     static final List<BooleanSetting> ALLOWLIST = Collections.unmodifiableList(Arrays.asList(
             Settings.HIDE_ADS,
             Settings.HIDE_AI_PINS, Settings.HIDE_AI_SELF_DESCRIBED,
-            Settings.HIDE_SHOPPING, Settings.HIDE_VIDEO_PINS, Settings.HIDE_SAVED_PINS, Settings.HIDE_HOME_SUGGESTIONS,
+            Settings.HIDE_SHOPPING, Settings.HIDE_VIDEO_PINS, Settings.HIDE_SAVED_PINS, Settings.HIDE_SAVED_PINS_ELSEWHERE,
+            Settings.HIDE_HOME_SUGGESTIONS,
             Settings.KEEP_HOME_FEED,
             Settings.DISABLE_ANALYTICS, Settings.STRIP_LINK_TRACKING, Settings.PLAIN_PIN_LINKS,
             Settings.HIDE_ADVERTISING_ID, Settings.DOWNLOAD_PINS, Settings.SAVE_IN_PINTEREST_FOLDER,
