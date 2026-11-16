@@ -244,7 +244,7 @@ public class SettingsBackupTest {
         assertEquals(Arrays.asList(Settings.HIDE_ADS, Settings.HIDE_AI_PINS, Settings.HIDE_AI_SELF_DESCRIBED,
                         Settings.HIDE_SHOPPING, Settings.HIDE_VIDEO_PINS, Settings.HIDE_SAVED_PINS, Settings.HIDE_SAVED_PINS_ELSEWHERE, Settings.HIDE_HOME_SUGGESTIONS, Settings.KEEP_HOME_FEED, Settings.BACK_LEAVES_HOME, Settings.DISABLE_ANALYTICS, Settings.STRIP_LINK_TRACKING, Settings.PLAIN_PIN_LINKS,
                         Settings.HIDE_ADVERTISING_ID, Settings.DOWNLOAD_PINS, Settings.SAVE_IN_PINTEREST_FOLDER,
-                        Settings.DOWNLOAD_UNMETERED_ONLY, Settings.DOWNLOAD_NO_ROAMING, Settings.COPY_IMAGE, Settings.SHARE_IMAGE, Settings.SAVE_DOWNLOADED_PINS, Settings.DOWNLOAD_SAVED_PINS, Settings.DOWNLOAD_BOARD, Settings.LONG_PRESS_DOWNLOAD,
+                        Settings.DOWNLOAD_UNMETERED_ONLY, Settings.DOWNLOAD_NO_ROAMING, Settings.COPY_IMAGE, Settings.SHARE_IMAGE, Settings.SAVE_DOWNLOADED_PINS, Settings.DOWNLOAD_SAVED_PINS, Settings.DOWNLOAD_BOARD, Settings.LONG_PRESS_DOWNLOAD, Settings.LONG_PRESS_VIEW,
                         Settings.LONG_PRESS_HIDE_SAVE, Settings.LONG_PRESS_HIDE_SEND, Settings.LONG_PRESS_HIDE_SEARCH,
                         Settings.LONG_PRESS_HIDE_SEND_APP, Settings.EXTERNAL_BROWSER, Settings.SYSTEM_SHARE,
                         Settings.HIDE_SCREENSHOT_SHARE, Settings.HIDE_ASSISTANT, Settings.HIDE_SEARCH_HISTORY,

@@ -30,6 +30,26 @@ public final class LongPressDownloadForTests {
         return menu.items.size() != 2;
     }
 
+    /** True when a long-pressed picture's menu got the View button. Nothing is tapped, so nothing is fetched. */
+    public static boolean addsViewButton() {
+        int label = LongPressDownloadTest.NativeMenu.label;
+        LongPressDownloadTest.NativeMenu.label = android.R.string.ok;
+        try {
+            LongPressDownloadTest.Menu menu = new LongPressDownloadTest.Menu(RuntimeEnvironment.getApplication());
+            List<Object> buttons = new ArrayList<>();
+            buttons.add(new LongPressDownloadTest.Button(menu.getContext()));
+            menu.layout(buttons);
+            menu.show(new LongPressDownloadTest.Event(Map.of("id", "123456", "images",
+                    Map.of("orig", Map.of("url", "https://i.pinimg.com/originals/123456.jpg")))));
+            for (Object item : menu.items) {
+                if (LongPressDownload.VIEW_TAG.equals(((android.view.View) item).getTag())) return true;
+            }
+            return false;
+        } finally {
+            LongPressDownloadTest.NativeMenu.label = label;
+        }
+    }
+
     /** True when a long-pressed pin's menu of Save, Send, Search image and Send with an app lost the one of [kind]. */
     public static boolean hidesButton(int kind) {
         LongPressDownloadTest.Menu menu = new LongPressDownloadTest.Menu(RuntimeEnvironment.getApplication());

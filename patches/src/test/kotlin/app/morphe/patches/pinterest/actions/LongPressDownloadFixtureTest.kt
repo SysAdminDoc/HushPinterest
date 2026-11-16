@@ -103,6 +103,14 @@ class LongPressDownloadFixtureTest {
             assertTrue(build.name, "${found.strings}->download:I" in item)
             assertTrue(build.name, item.any { it.startsWith("${found.factory.definingClass}->${found.factory.name}(") })
             assertTrue(build.name, item.any { it.startsWith("${found.styler.definingClass}->${found.styler.name}(") })
+            // View (#37) is the same button with Pinterest's full-screen icon and a label the
+            // extension looks up, since the strings class the menu reads has no View.
+            assertFlag(context, "longPressView", 1)
+            val view = stub("viewItem")
+            assertTrue(build.name, "${found.icon}->MAXIMIZE:${found.icon}" in view)
+            assertTrue(build.name, view.any { it.startsWith("${found.factory.definingClass}->${found.factory.name}(") })
+            assertTrue(build.name, view.any { it.startsWith("${found.styler.definingClass}->${found.styler.name}(") })
+            assertTrue(build.name, view.none { it.startsWith("${found.strings}->") })
             // The button's id field and the three ids it's compared with, pinned by hand on 14.44.0
             // so a search that drifts to another int field fails here.
             if (build.name.startsWith("pinterest-14.44.0-")) {
@@ -136,7 +144,7 @@ class LongPressDownloadFixtureTest {
                 references(kinds))
             println("${build.name}: button ids ${ids.owner}, id field $idField")
             // Every member a stub names is declared where it says, so none of them fails to link at run time.
-            for (name in LONG_PRESS_STUBS + COMPOSE_STUBS) {
+            for (name in LONG_PRESS_STUBS + COMPOSE_STUBS + VIEW_STUBS) {
                 for (target in extension.methods.single { it.name == name }.implementation!!.instructions.mapNotNull {
                     (it as? ReferenceInstruction)?.reference
                 }) {
@@ -237,6 +245,7 @@ class LongPressDownloadFixtureTest {
             assertEquals(build.name, listOf(found.face.type), stub("composeOptionType"))
             assertTrue(build.name, "${menu.icon}->DOWNLOAD:${menu.icon}" in stub("composeIconAndLabel"))
             assertTrue(build.name, "${menu.strings}->download:I" in stub("composeIconAndLabel"))
+            assertTrue(build.name, "${menu.icon}->MAXIMIZE:${menu.icon}" in stub("composeViewIconAndLabel"))
             val kinds = found.kinds.type
             assertEquals(build.name, listOf(kinds, "$kinds->REPIN:$kinds", "$kinds->SEND:$kinds", "$kinds->VISUAL_SEARCH:$kinds"), stub("composeKind"))
             println("${build.name}: newer menu ${found.face.type} ${found.kinds.type} list ${found.dispatcher.definingClass}->${found.dispatcher.name}@${found.listAt} " +
@@ -286,6 +295,39 @@ class LongPressDownloadFixtureTest {
         assertFlag(context, "longPressMenu", 1)
         assertFlag(context, "longPressChoices", 0)
         assertEquals(before, kinds())
+    }
+
+    @Test
+    fun `an icon set without MAXIMIZE leaves View out and still adds Download`() {
+        val original = read(Fixtures.declaredBuilds().first())
+        val icon = PatchContexts.of(ExtensionDex.classes() + original).longPressMenu().icon
+        val classes = original.map { owner ->
+            if (owner.type != icon) owner
+            else ImmutableClassDef(owner.type, owner.accessFlags, owner.superclass, owner.interfaces, owner.sourceFile, owner.annotations,
+                owner.fields.filterNot { it.name == "MAXIMIZE" }, owner.methods)
+        }
+        val context = PatchContexts.of(ExtensionDex.classes() + classes)
+        fun view() = VIEW_STUBS.map { name ->
+            render(context.mutableClassDefBy(LONG_PRESS).methods.single { it.name == name }.implementation!!.instructions.toList())
+        }
+        val before = view()
+        longPressDownloadPatch.execute(context)
+        assertFlag(context, "longPressMenu", 1)
+        assertFlag(context, "longPressDownload", 1)
+        assertFlag(context, "longPressView", 0)
+        assertEquals(before, view())
+    }
+
+    @Test
+    fun `a missing View stub or status stub refuses before any edit`() {
+        refuses(message = "missing extension stub viewItem", extension = { classes ->
+            classes.map { owner -> if (owner.type != LONG_PRESS) owner else owner.withMethods(owner.methods.filterNot { it.name == "viewItem" }) }
+        }) { it }
+        refuses(extension = { classes ->
+            classes.map { owner ->
+                if (owner.type != SETTINGS_STATUS) owner else owner.withMethods(owner.methods.filterNot { it.name == "longPressView" })
+            }
+        }) { it }
     }
 
     @Test

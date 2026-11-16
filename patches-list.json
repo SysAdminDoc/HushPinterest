@@ -1037,7 +1037,7 @@
     },
     {
       "name": "Long-press download",
-      "description": "Adds a Download button to the menu you get when you long-press a pin in a grid, the round one and the newer list, so you can save a pin without opening it. Needs Download pins on too. Three more switches take Pinterest's Save, Send or Search image button out of that menu. All start off. Turn them on in HushPinterest settings > Pin actions.",
+      "description": "Adds a Download button to the menu you get when you long-press a pin in a grid, the round one and the newer list, so you can save a pin without opening it. Needs Download pins on too. Four more switches take Pinterest's Save, Send, Search image or Send with an app button out of that menu, and another adds View, which shows the pin's picture full screen. All start off. Turn them on in HushPinterest settings > Pin actions.",
       "category": "Downloads",
       "use": true,
       "dependencies": [

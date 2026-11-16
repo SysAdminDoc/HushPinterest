@@ -673,8 +673,33 @@ public class HushPinterestPreferenceFragmentTest {
                 assertNotNull(row);
                 assertEquals(titles[n], String.valueOf(row.getTitle()));
                 assertFalse(titles[n] + " starts off", row.isChecked());
-                assertEquals(indexOfKey(rows, Settings.LONG_PRESS_DOWNLOAD.key) + 1 + n, indexOfKey(rows, longPressHides()[n].key));
+                assertEquals(indexOfKey(rows, Settings.LONG_PRESS_DOWNLOAD.key) + 2 + n, indexOfKey(rows, longPressHides()[n].key));
             }
+        }
+    }
+
+    /** Long-press view (#37) sits right under Long-press download, starts off, and shows only where its hook went in. */
+    @Test
+    public void longPressViewShowsUnderLongPressDownloadOnlyWhereItsHookWentIn() {
+        PatchFamily.inBuildForTests = EnumSet.allOf(PatchFamily.class);
+        Set<PatchFamily.Capability> withoutIt = EnumSet.allOf(PatchFamily.Capability.class);
+        withoutIt.remove(PatchFamily.Capability.LONG_PRESS_VIEW);
+        PatchFamily.capabilitiesForTests = withoutIt;
+        try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+            HushPinterestPreferenceFragment page = pageOf(controller);
+            assertNull(page.findPreference(Settings.LONG_PRESS_VIEW.key));
+            assertNotNull(page.findPreference(Settings.LONG_PRESS_HIDE_SAVE.key));
+        }
+        PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
+        try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+            HushPinterestPreferenceFragment page = pageOf(controller);
+            List<Preference> rows = new ArrayList<>();
+            collect(page.getPreferenceScreen(), rows);
+            SwitchPreference row = (SwitchPreference) page.findPreference(Settings.LONG_PRESS_VIEW.key);
+            assertNotNull(row);
+            assertEquals("Long-press view", String.valueOf(row.getTitle()));
+            assertFalse("Long-press view starts off", row.isChecked());
+            assertEquals(indexOfKey(rows, Settings.LONG_PRESS_DOWNLOAD.key) + 1, indexOfKey(rows, Settings.LONG_PRESS_VIEW.key));
         }
     }
 
@@ -707,12 +732,19 @@ public class HushPinterestPreferenceFragmentTest {
             ShadowLooper.idleMainLooper();
             assertNull("turning one off leaves its button", ShadowToast.getTextOfLatestToast());
 
+            Settings.LONG_PRESS_VIEW.save(true);
+            assertTrue(flip.onPreferenceChange(search, true));
+            ShadowLooper.idleMainLooper();
+            assertNull("View is still in the menu", ShadowToast.getTextOfLatestToast());
+
+            Settings.LONG_PRESS_VIEW.save(false);
             assertTrue(flip.onPreferenceChange(search, true));
             ShadowLooper.idleMainLooper();
             assertEquals("With nothing left in it, the menu keeps Pinterest's buttons.", ShadowToast.getTextOfLatestToast());
         } finally {
             for (BooleanSetting hide : longPressHides()) hide.resetToDefault();
             Settings.LONG_PRESS_DOWNLOAD.resetToDefault();
+            Settings.LONG_PRESS_VIEW.resetToDefault();
         }
     }
 

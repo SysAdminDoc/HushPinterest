@@ -46,7 +46,7 @@ family|gmsCoreSupport|GmsCore support|signInFailure
 family|changePackageName|Change package name|
 family|downloadPins|Download pins|pinDownloads,copyImage,shareImage,saveAndDownload
 family|downloadBoard|Download board|boardMenu,boardPins
-family|longPressDownload|Long-press download|longPressMenu,longPressChoices
+family|longPressDownload|Long-press download|longPressMenu,longPressChoices,longPressView
 family|externalBrowser|Open links in your browser|visitLinks
 family|systemShare|System share sheet|pinShare
 family|hideScreenshotShare|No screenshot share menu|screenshotShare

@@ -442,6 +442,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Long-press download"), L10n.t("Adds Download to a grid pin's long-press menu. Slide onto it "
                         + "and release. Needs Download pins on."),
                     SettingsIcons.DOWNLOADS);
+            // View has its own capability: a build without Pinterest's full-screen icon has no row for it.
+            if (build.contains(PatchFamily.LONG_PRESS_DOWNLOAD) && PatchFamily.Capability.LONG_PRESS_VIEW.installed()) {
+                actions.addPreference(mark(toggle(context, Settings.LONG_PRESS_VIEW, L10n.t("Long-press view"),
+                        L10n.t("Adds View to a grid pin's long-press menu. It shows the picture full screen without "
+                            + "opening the pin. Pinch or double-tap to zoom.")), SettingsIcons.SEARCH));
+            }
             // Their own hook: a build where the buttons' ids weren't found has no rows for them, and
             // Long-press download still works.
             if (build.contains(PatchFamily.LONG_PRESS_DOWNLOAD) && PatchFamily.Capability.LONG_PRESS_CHOICES.installed()) {
@@ -1393,13 +1399,13 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
 
     /**
      * A switch for one of Pinterest's long-press buttons. Turning on the last of the three while
-     * Long-press download is off would leave a menu with nothing in it, which keeps Pinterest's
-     * whole menu instead, so a toast says so then.
+     * Long-press download and Long-press view are off would leave a menu with nothing in it, which
+     * keeps Pinterest's whole menu instead, so a toast says so then.
      */
     static SwitchPreference longPressChoice(Context context, BooleanSetting setting, String title, String summary) {
         SwitchPreference row = toggle(context, setting, title, summary);
         row.setOnPreferenceChangeListener((changed, value) -> {
-            if (Boolean.TRUE.equals(value) && !Settings.LONG_PRESS_DOWNLOAD.savedValue()) {
+            if (Boolean.TRUE.equals(value) && !Settings.LONG_PRESS_DOWNLOAD.savedValue() && !Settings.LONG_PRESS_VIEW.savedValue()) {
                 boolean rest = true;
                 for (BooleanSetting other : new BooleanSetting[]{Settings.LONG_PRESS_HIDE_SAVE, Settings.LONG_PRESS_HIDE_SEND,
                         Settings.LONG_PRESS_HIDE_SEARCH}) {

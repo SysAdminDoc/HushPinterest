@@ -142,6 +142,9 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_download_board", FALSE);
     public static final BooleanSetting LONG_PRESS_DOWNLOAD =
             new BooleanSetting("hushpinterest_long_press_download", FALSE);
+    /** View in the long-press menu (#37): the pin's picture full screen, without opening the pin. */
+    public static final BooleanSetting LONG_PRESS_VIEW =
+            new BooleanSetting("hushpinterest_long_press_view", FALSE);
     /** Pinterest's own long-press buttons, each taken out of the menu by its switch. All start off. */
     public static final BooleanSetting LONG_PRESS_HIDE_SAVE =
             new BooleanSetting("hushpinterest_long_press_hide_save", FALSE);

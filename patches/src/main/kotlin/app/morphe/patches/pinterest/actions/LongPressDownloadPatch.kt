@@ -63,6 +63,12 @@ internal const val MENU_LABEL = "contextmenu_share"
 internal val LONG_PRESS_STUBS = listOf("eventPin", "menuModel", "modelId", "menuItems", "layoutItems", "springsReattached", "downloadItem",
     "buttonKind")
 
+/** Long-press View's two (#37): the round menu's button and the newer list's icon and label. */
+internal val VIEW_STUBS = listOf("viewItem", "composeViewIconAndLabel")
+
+/** Pinterest's full-screen icon, the one View's button wears. */
+internal const val VIEW_ICON = "MAXIMIZE"
+
 /**
  * The ids Pinterest's builders give the Save, Send and Search image buttons, all in one ids class.
  * The menu's hover test reads the Search image one, and the closeup variant of Search image has
@@ -358,9 +364,10 @@ private fun Instruction.namedRegistersOf(): List<Int> = when (this) {
 val longPressDownloadPatch = bytecodePatch(
     name = PATCH,
     description = "Adds a Download button to the menu you get when you long-press a pin in a grid, the round one " +
-        "and the newer list, so you can save a pin without opening it. Needs Download pins on too. Three more " +
-        "switches take Pinterest's Save, Send or Search image button out of that menu. All start off. " +
-        "Turn them on in HushPinterest settings > Pin actions.",
+        "and the newer list, so you can save a pin without opening it. Needs Download pins on too. Four more " +
+        "switches take Pinterest's Save, Send, Search image or Send with an app button out of that menu, and " +
+        "another adds View, " +
+        "which shows the pin's picture full screen. All start off. Turn them on in HushPinterest settings > Pin actions.",
 ) {
     category("Downloads")
     dependsOn(settingsPatch, pinterestExtensionPatch, downloadPinsPatch)
@@ -370,12 +377,13 @@ val longPressDownloadPatch = bytecodePatch(
         requireStatusMethod("longPressDownload")
         requireStatusMethod("longPressMenu")
         requireStatusMethod("longPressChoices")
+        requireStatusMethod("longPressView")
         val found = longPressMenu()
         // Accounts in android_longpress_menu_v2 get a Compose list instead of the round menu, and
         // the round menu's show method never runs for them (#16, #18), so both have to be found.
         val compose = longPressCompose(found)
         val extension = mutableClassDefBy(LONG_PRESS)
-        for (name in LONG_PRESS_STUBS + COMPOSE_STUBS + listOf("show", "composeItems", "composeClick")) {
+        for (name in LONG_PRESS_STUBS + COMPOSE_STUBS + VIEW_STUBS + listOf("show", "composeItems", "composeClick")) {
             if (extension.methods.count { it.name == name && AccessFlags.STATIC.isSet(it.accessFlags) } != 1) {
                 throw PatchException("$PATCH: missing extension stub $name")
             }
@@ -490,8 +498,30 @@ val longPressDownloadPatch = bytecodePatch(
         // The menu and its event, both untouched at the method's first instruction.
         show.addInstructions(0, "invoke-static/range { p0 .. p1 }, $LONG_PRESS_HOOK")
         applyLongPressCompose(found, compose)
+        // View wears Pinterest's full-screen icon. A build whose icon set has none gets no View, and
+        // its stubs keep answering null, so the extension leaves View out of both menus.
+        val viewIcon = classDefByOrNull(found.icon)?.fields?.any {
+            it.name == VIEW_ICON && it.type == found.icon && AccessFlags.STATIC.isSet(it.accessFlags) &&
+                AccessFlags.PUBLIC.isSet(it.accessFlags)
+        } == true
+        if (viewIcon) {
+            // The same button as Download with the full-screen icon, and the label the extension
+            // looked up: Pinterest's own "View" string, which isn't in the strings class Download's is.
+            writeStub(LONG_PRESS, "viewItem", 6, """
+                new-instance v0, ${found.buttonModel.type}
+                sget-object v1, ${found.icon}->$VIEW_ICON:${found.icon}
+                const/4 v3, 0x0
+                invoke-direct { v0, v1, p1, p1, v3 }, ${found.buttonModel.type}-><init>(${found.icon}II$FUNCTION0)V
+                invoke-static { p0, v0 }, ${found.factory.definingClass}->${found.factory.name}(Landroid/content/Context;${found.buttonModel.type})$CONTEXT_MENU_ITEM
+                move-result-object v0
+                invoke-static { v0 }, ${found.styler.definingClass}->${found.styler.name}($CONTEXT_MENU_ITEM)V
+                return-object v0
+            """)
+            applyLongPressComposeView(found)
+        }
         enableCapability("longPressMenu")
         if (ids != null) enableCapability("longPressChoices")
+        if (viewIcon) enableCapability("longPressView")
         enableStatus("longPressDownload")
     }
 }
