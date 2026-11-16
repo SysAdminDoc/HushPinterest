@@ -71,6 +71,7 @@ body:
       options:
         - AMOLED black
         - Change package name
+        - Custom save sound
         - Disable analytics
         - Disable update nag
         - Download board

@@ -226,6 +226,20 @@ Hide survey prompts	Sembunyikan ajakan survei
 Hide pop-up banners	Sembunyikan banner pop-up
 Hide related pins	Sembunyikan pin terkait
 Hide creator name on pins	Sembunyikan nama kreator di pin
+Custom save sound	Suara simpan sendiri
+Plays the sound you pick below when you save a pin, instead of Pinterest's. With no sound picked, Pinterest's plays.	Memutar suara yang kamu pilih di bawah saat kamu menyimpan pin, bukan suara Pinterest. Jika belum ada suara yang dipilih, suara Pinterest yang diputar.
+Pick a save sound	Pilih suara simpan
+Pick a sound file for Custom save sound to play when you save a pin.	Pilih file suara yang akan diputar Suara simpan sendiri saat kamu menyimpan pin.
+A sound is picked, but Custom save sound is off, so Pinterest's sound plays.	Suara sudah dipilih, tetapi Suara simpan sendiri nonaktif, jadi suara Pinterest yang diputar.
+%s is picked, but Custom save sound is off, so Pinterest's sound plays.	%s sudah dipilih, tetapi Suara simpan sendiri nonaktif, jadi suara Pinterest yang diputar.
+Saving a pin plays the sound you picked. Tap to pick another sound or use Pinterest's again.	Menyimpan pin memutar suara yang kamu pilih. Ketuk untuk memilih suara lain atau kembali ke suara Pinterest.
+Saving a pin plays %s. Tap to pick another sound or use Pinterest's again.	Menyimpan pin memutar %s. Ketuk untuk memilih suara lain atau kembali ke suara Pinterest.
+Pick another sound	Pilih suara lain
+Use Pinterest's sound again	Gunakan suara Pinterest lagi
+That app won't let Pinterest keep the sound. Pick one saved on the phone.	Aplikasi itu tidak mengizinkan Pinterest menyimpan suaranya. Pilih yang tersimpan di ponsel.
+Saving a pin will play the sound you picked.	Menyimpan pin akan memutar suara yang kamu pilih.
+Saving a pin will play %s.	Menyimpan pin akan memutar %s.
+Saving a pin will play Pinterest's sound again.	Menyimpan pin akan memutar suara Pinterest lagi.
 Disable update nag	Sembunyikan pemberitahuan pembaruan
 Download pin	Unduh Pin
 Share pin	Bagikan Pin

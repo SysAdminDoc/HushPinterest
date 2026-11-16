@@ -121,6 +121,7 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.HIDE_POPUP_BANNERS, "Hide pop-up banners");
         ROW_TITLES.put(PatchFamily.HIDE_RELATED_PINS, "Hide related pins");
         ROW_TITLES.put(PatchFamily.HIDE_CREATOR_NAME, "Hide creator name on pins");
+        ROW_TITLES.put(PatchFamily.CUSTOM_SAVE_SOUND, "Custom save sound");
         ROW_TITLES.put(PatchFamily.HIDE_SAVE_TOASTS, "Hide save toasts");
         ROW_TITLES.put(PatchFamily.ORIGINAL_IMAGES, "Original-quality images");
         ROW_TITLES.put(PatchFamily.SHOW_POSTED_DATE, "Show posted date");

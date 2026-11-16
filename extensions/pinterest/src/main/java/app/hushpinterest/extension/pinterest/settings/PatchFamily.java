@@ -104,6 +104,7 @@ public enum PatchFamily {
     HIDE_POPUP_BANNERS(FamilyNames.HIDE_POPUP_BANNERS, "hidePopupBanners", null, Settings.HIDE_POPUP_BANNERS),
     HIDE_RELATED_PINS(FamilyNames.HIDE_RELATED_PINS, "hideRelatedPins", null, Settings.HIDE_RELATED_PINS),
     HIDE_CREATOR_NAME(FamilyNames.HIDE_CREATOR_NAME, "hideCreatorName", null, Settings.HIDE_CREATOR_NAME),
+    CUSTOM_SAVE_SOUND(FamilyNames.CUSTOM_SAVE_SOUND, "customSaveSound", null, Settings.CUSTOM_SAVE_SOUND),
     HIDE_SAVE_TOASTS(FamilyNames.HIDE_SAVE_TOASTS, "hideSaveToasts", null, Settings.HIDE_SAVE_TOASTS),
     ORIGINAL_IMAGES(FamilyNames.ORIGINAL_IMAGES, "originalImages", null, Settings.ORIGINAL_IMAGES),
     SHOW_POSTED_DATE(FamilyNames.SHOW_POSTED_DATE, "showPostedDate", null, Settings.SHOW_POSTED_DATE),
@@ -164,7 +165,7 @@ public enum PatchFamily {
             LONG_PRESS_DOWNLOAD, SYSTEM_SHARE));
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
             HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
-            HIDE_CREATOR_NAME, HIDE_RELATED_PINS,
+            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
             HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST));
 
@@ -233,6 +234,7 @@ public enum PatchFamily {
         POPUP_BANNERS(HIDE_POPUP_BANNERS, "popupBanners", "Hide pop-up banners"),
         RELATED_PINS(HIDE_RELATED_PINS, "relatedPins", "Hide related pins"),
         CREATOR_NAME(HIDE_CREATOR_NAME, "creatorName", "Hide creator name on pins"),
+        SAVE_SOUND(CUSTOM_SAVE_SOUND, "saveSound", "Custom save sound"),
         SAVE_TOASTS(HIDE_SAVE_TOASTS, "saveToasts", "Hide save toasts"),
         IMAGE_CHOOSER(ORIGINAL_IMAGES, "imageChooser", "collage images"),
         CLOSEUP_IMAGE(ORIGINAL_IMAGES, "closeupImage", "pin closeups"),

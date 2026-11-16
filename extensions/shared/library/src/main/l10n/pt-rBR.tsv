@@ -223,6 +223,20 @@ Hide survey prompts	Ocultar convites de pesquisa
 Hide pop-up banners	Ocultar banners pop-up
 Hide related pins	Ocultar pins relacionados
 Hide creator name on pins	Ocultar nome do criador nos pins
+Custom save sound	Som próprio ao salvar
+Plays the sound you pick below when you save a pin, instead of Pinterest's. With no sound picked, Pinterest's plays.	Toca o som que você escolher abaixo quando salva um pin, em vez do som do Pinterest. Sem um som escolhido, toca o do Pinterest.
+Pick a save sound	Escolher um som ao salvar
+Pick a sound file for Custom save sound to play when you save a pin.	Escolha um arquivo de som para o Som próprio ao salvar tocar quando você salva um pin.
+A sound is picked, but Custom save sound is off, so Pinterest's sound plays.	Há um som escolhido, mas Som próprio ao salvar está desativado, então toca o som do Pinterest.
+%s is picked, but Custom save sound is off, so Pinterest's sound plays.	%s está escolhido, mas Som próprio ao salvar está desativado, então toca o som do Pinterest.
+Saving a pin plays the sound you picked. Tap to pick another sound or use Pinterest's again.	Salvar um pin toca o som que você escolheu. Toque para escolher outro som ou voltar ao do Pinterest.
+Saving a pin plays %s. Tap to pick another sound or use Pinterest's again.	Salvar um pin toca %s. Toque para escolher outro som ou voltar ao do Pinterest.
+Pick another sound	Escolher outro som
+Use Pinterest's sound again	Voltar a usar o som do Pinterest
+That app won't let Pinterest keep the sound. Pick one saved on the phone.	Esse app não deixa o Pinterest manter o som. Escolha um salvo no celular.
+Saving a pin will play the sound you picked.	Salvar um pin vai tocar o som que você escolheu.
+Saving a pin will play %s.	Salvar um pin vai tocar %s.
+Saving a pin will play Pinterest's sound again.	Salvar um pin vai tocar o som do Pinterest de novo.
 Disable update nag	Ocultar aviso de atualização
 Download pin	Baixar Pin
 Share pin	Compartilhar Pin

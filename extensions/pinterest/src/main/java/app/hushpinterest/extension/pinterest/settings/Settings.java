@@ -233,6 +233,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_related_pins", FALSE);
     public static final BooleanSetting HIDE_CREATOR_NAME =
             new BooleanSetting("hushpinterest_hide_creator_name", FALSE);
+    public static final BooleanSetting CUSTOM_SAVE_SOUND =
+            new BooleanSetting("hushpinterest_custom_save_sound", FALSE);
     public static final BooleanSetting HIDE_SAVE_TOASTS =
             new BooleanSetting("hushpinterest_hide_save_toasts", FALSE);
     public static final BooleanSetting ORIGINAL_IMAGES =

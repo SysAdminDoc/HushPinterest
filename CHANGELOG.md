@@ -4,6 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* New `Custom save sound` patch with its own switch under Interface. Pick a sound file with Pick a save sound and it plays when you save a pin, instead of Pinterest's chime. Picking one turns the switch on, and the row can take you back to Pinterest's sound any time. If the file goes missing, Pinterest's chime plays. (#41)
 * New `Hide related pins` patch with its own switch under Interface. It leaves the grid of more pins out from under a pin you open, so Pinterest never loads it. The pin, its comments and its buttons stay. It starts off, and the change shows on the next pin you open. (#41)
 * New `Hide creator name on pins` patch with its own switch under Interface. Under a pin you open, the creator's name and badge go away while their picture stays, and tapping the picture still opens their profile. It starts off. (#41)
 * New `Hide pop-up banners` patch with its own switch under Interface. Pinterest sometimes slides a banner up over Home, like "Shop recommended merchants". With the switch on, HushPinterest closes it through the banner's own X as soon as Pinterest shows it, so Pinterest counts it as dismissed and that banner doesn't come back. A banner that's already open when you turn the switch on stays until you close it. The switch starts off, and with it off or HushPinterest paused, Pinterest shows its banners as before.

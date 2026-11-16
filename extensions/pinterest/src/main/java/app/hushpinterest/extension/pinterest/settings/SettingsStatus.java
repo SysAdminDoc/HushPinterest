@@ -129,6 +129,8 @@ public final class SettingsStatus {
     public static boolean relatedPins() { return false; }
     public static boolean hideCreatorName() { return false; }
     public static boolean creatorName() { return false; }
+    public static boolean customSaveSound() { return false; }
+    public static boolean saveSound() { return false; }
     public static boolean hideSaveToasts() { return false; }
     public static boolean saveToasts() { return false; }
     public static boolean originalImages() { return false; }

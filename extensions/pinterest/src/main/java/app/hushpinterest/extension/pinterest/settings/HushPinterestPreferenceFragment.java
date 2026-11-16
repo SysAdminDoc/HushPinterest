@@ -238,7 +238,8 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (!DownloadFolderPreference.onResult(this, requestCode, resultCode, data)) {
+        if (!DownloadFolderPreference.onResult(this, requestCode, resultCode, data)
+                && !SaveSoundPreference.onResult(this, requestCode, resultCode, data)) {
             SettingsBackupPreference.onResult(this, requestCode, resultCode, data);
         }
     }
@@ -591,6 +592,13 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide related pins"),
                     L10n.t("Leaves the grid of more pins out from under a pin you open, so it doesn't load. "
                         + "The change shows on the next pin you open."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.CUSTOM_SAVE_SOUND, Settings.CUSTOM_SAVE_SOUND,
+                    L10n.t("Custom save sound"),
+                    L10n.t("Plays the sound you pick below when you save a pin, instead of Pinterest's. With no sound "
+                        + "picked, Pinterest's plays."), SettingsIcons.BELL);
+            if (build.contains(PatchFamily.CUSTOM_SAVE_SOUND)) {
+                ui.addPreference(mark(new SaveSoundPreference(this, context), SettingsIcons.BELL));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),
                     L10n.t("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's "

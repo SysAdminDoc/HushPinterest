@@ -226,6 +226,20 @@ Hide survey prompts	Anket davetlerini gizle
 Hide pop-up banners	Açılır bannerları gizle
 Hide related pins	İlgili pinleri gizle
 Hide creator name on pins	Pinlerde içerik üreticisinin adını gizle
+Custom save sound	Özel kaydetme sesi
+Plays the sound you pick below when you save a pin, instead of Pinterest's. With no sound picked, Pinterest's plays.	Bir pini kaydettiğinde Pinterest'in sesi yerine aşağıda seçtiğin sesi çalar. Ses seçilmemişse Pinterest'in sesi çalar.
+Pick a save sound	Kaydetme sesi seç
+Pick a sound file for Custom save sound to play when you save a pin.	Özel kaydetme sesinin bir pini kaydettiğinde çalacağı ses dosyasını seç.
+A sound is picked, but Custom save sound is off, so Pinterest's sound plays.	Bir ses seçili ama Özel kaydetme sesi kapalı, bu yüzden Pinterest'in sesi çalar.
+%s is picked, but Custom save sound is off, so Pinterest's sound plays.	%s seçili ama Özel kaydetme sesi kapalı, bu yüzden Pinterest'in sesi çalar.
+Saving a pin plays the sound you picked. Tap to pick another sound or use Pinterest's again.	Bir pini kaydetmek seçtiğin sesi çalar. Başka bir ses seçmek ya da Pinterest'in sesine dönmek için dokun.
+Saving a pin plays %s. Tap to pick another sound or use Pinterest's again.	Bir pini kaydetmek %s sesini çalar. Başka bir ses seçmek ya da Pinterest'in sesine dönmek için dokun.
+Pick another sound	Başka ses seç
+Use Pinterest's sound again	Yeniden Pinterest'in sesini kullan
+That app won't let Pinterest keep the sound. Pick one saved on the phone.	Bu uygulama Pinterest'in sesi saklamasına izin vermiyor. Telefonda kayıtlı bir ses seç.
+Saving a pin will play the sound you picked.	Bir pini kaydetmek artık seçtiğin sesi çalacak.
+Saving a pin will play %s.	Bir pini kaydetmek artık %s sesini çalacak.
+Saving a pin will play Pinterest's sound again.	Bir pini kaydetmek yeniden Pinterest'in sesini çalacak.
 Disable update nag	Güncelleme uyarısını kapat
 Download pin	Pini indir
 Share pin	Pini paylaş

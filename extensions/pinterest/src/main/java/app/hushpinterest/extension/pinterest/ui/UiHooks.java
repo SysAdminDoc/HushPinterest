@@ -7,9 +7,13 @@
 package app.hushpinterest.extension.pinterest.ui;
 
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -166,6 +170,36 @@ public final class UiHooks {
         } catch (RuntimeException failure) {
             HookStatus.threw(FamilyNames.HIDE_CREATOR_NAME, "creator row", failure);
         }
+    }
+
+    /**
+     * Pinterest is making the player for the chime it plays when a pin is saved, and {@code sound}
+     * is that chime. With Custom save sound on and a file picked, the player plays the file instead.
+     * Off, paused, with nothing picked, or with a file that no longer opens, Pinterest gets the
+     * player for its own chime, made the way it makes it.
+     */
+    public static MediaPlayer saveSound(Context context, int sound) {
+        MediaPlayer picked = pickedSaveSound(context);
+        return picked != null ? picked : MediaPlayer.create(context, sound);
+    }
+
+    /** A player for the picked sound while Custom save sound is on, or null for Pinterest's own. */
+    @Nullable
+    static MediaPlayer pickedSaveSound(Context context) {
+        if (context == null || !enabled(FamilyNames.CUSTOM_SAVE_SOUND, Settings.CUSTOM_SAVE_SOUND)) return null;
+        Uri picked = SaveSound.picked();
+        if (picked == null) return null;
+        try {
+            MediaPlayer player = MediaPlayer.create(context, picked);
+            if (player != null) {
+                HookStatus.counted(FamilyNames.CUSTOM_SAVE_SOUND, "picked sound played");
+                return player;
+            }
+            HookStatus.counted(FamilyNames.CUSTOM_SAVE_SOUND, "picked sound didn't open, Pinterest's played");
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.CUSTOM_SAVE_SOUND, "picked sound", failure);
+        }
+        return null;
     }
 
     /** The toast class a test stands in for the save toasts patching names. */

@@ -1289,6 +1289,8 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_RELATED_PINS.key, "grid of more pins", "doesn't load", "next pin you open");
         summaryContains(Settings.HIDE_CREATOR_NAME.key, "creator's name and badge", "picture stays",
                 "still opens their profile", "next pin you open");
+        summaryContains(Settings.CUSTOM_SAVE_SOUND.key, "sound you pick below", "when you save a pin",
+                "With no sound picked, Pinterest's plays");
     }
 
     @Test public void aliasesKeepAccentMatchingGroupingAndTheSpokenResultCount() {

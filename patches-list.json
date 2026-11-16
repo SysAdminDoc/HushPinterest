@@ -97,6 +97,42 @@
       ]
     },
     {
+      "name": "Custom save sound",
+      "description": "Plays a sound file you pick in place of the chime Pinterest plays when you save a pin. Starts off. Turn it on and pick the sound in HushPinterest settings > Interface.",
+      "category": "Theme",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.44.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.44.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14448030
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Disable analytics",
       "description": "Stops Pinterest from sending usage reports, crash reports and ad-tracking data to outside companies, and turns off Google's analytics inside the app. Good if you'd rather share less. On by default. Turn it off in HushPinterest settings > Privacy.",
       "category": "Privacy",

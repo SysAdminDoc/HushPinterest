@@ -277,7 +277,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("saveSound", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
@@ -2370,6 +2370,7 @@ public class DexDiff {
         static final Set<String> SAVE_TOAST_STRINGS = Set.of("saved_to", "saved_onto_board_bold", "pinned", "pinned_multiple", "pinned_multiple_to_board",
                 "multi_board_save_saved_to_profile", "saved_onto_board", "saved_to_board_section", "saved_multiple_to_board_section", "pin_saved");
         static final String TOAST_MAKE = "Landroid/widget/Toast;->makeText";
+        static final String MEDIA_PLAYER_CREATE = "Landroid/media/MediaPlayer;->create(Landroid/content/Context;I)Landroid/media/MediaPlayer;";
         static final Set<String> TOAST_SHAPES = Set.of("(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;",
                 "(Landroid/content/Context;II)Landroid/widget/Toast;");
         final FeatureIndex clean;
@@ -6565,6 +6566,51 @@ public class DexDiff {
         }
 
         /**
+         * Custom save sound (#41): every MediaPlayer.create on a raw resource whose id the instruction
+         * right before it reads from the save chime's R field goes to the hook, on the same registers
+         * and in the same spot, so the move-result after it still takes the player. Every other sound
+         * stays Pinterest's call, and the hook falls back to that call when its switch is off.
+         */
+        void saveSound(Contract c) {
+            String hook = c.strings.get(0);
+            int total = 0;
+            for (ClassDef cd : clean.classes.values()) for (Method method : cd.getMethods()) {
+                if (method.getImplementation() == null) continue;
+                List<Instruction> was = instructions(method);
+                List<Integer> raw = callSites(was, MEDIA_PLAYER_CREATE);
+                List<Integer> chimes = new ArrayList<>();
+                for (int at : raw) if (makesSaveChime(was, at)) chimes.add(at);
+                if (chimes.isEmpty()) continue;
+                total += chimes.size();
+                Method m = actual(method);
+                List<Integer> hooked = calls(m, hook, chimes.size());
+                if (m == null) continue;
+                List<Instruction> body = instructions(m);
+                if (callSites(body, MEDIA_PLAYER_CREATE).size() != raw.size() - chimes.size())
+                    fail(hook + " left the save chime's player, or took another sound's, in " + m);
+                for (int n = 0; n < Math.min(hooked.size(), chimes.size()); n++) {
+                    Instruction old = was.get(chimes.get(n));
+                    if (!arguments(body.get(hooked.get(n))).equals(arguments(old))) fail(hook + " changed its argument registers in " + m);
+                    edits.computeIfAbsent(m.toString(), k -> new FeatureEdits()).replacements.put(hooked.get(n), old);
+                }
+            }
+            if (total > 0) {
+                Method stand = actual(hook);
+                if (stand != null) fallback(stand, MEDIA_PLAYER_CREATE);
+            }
+            capability(c.callee, total > 0);
+        }
+
+        /** True when the call at [at] makes a player on two registers from the save chime's R field read just before it. */
+        static boolean makesSaveChime(List<Instruction> body, int at) {
+            if (at < 1 || body.get(at).getOpcode() != Opcode.INVOKE_STATIC || arguments(body.get(at)).size() != 2) return false;
+            Instruction read = body.get(at - 1);
+            return read.getOpcode() == Opcode.SGET && reference(read) instanceof FieldReference f
+                    && f.getName().equals("success_2") && f.getType().equals("I")
+                    && firstRegister(read) == arguments(body.get(at)).get(1);
+        }
+
+        /**
          * Expand board list (#33): the Save to sheet's height, the one class it builds whose toString
          * starts with the height's state text, asks the hook for its percentage right in front of the
          * getter's only return, and the answer goes back where the percentage was.
@@ -8095,6 +8141,7 @@ public class DexDiff {
                     case "popupBanners": popupBanners(c); break;
                     case "relatedPins": relatedPins(c); break;
                     case "creatorName": creatorName(c); break;
+                    case "saveSound": saveSound(c); break;
                     case "pinInvites": pinInvites(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);

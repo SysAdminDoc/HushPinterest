@@ -226,6 +226,20 @@ Hide survey prompts	Umfrage-Einladungen ausblenden
 Hide pop-up banners	Pop-up-Banner ausblenden
 Hide related pins	Ähnliche Pins ausblenden
 Hide creator name on pins	Namen der Ersteller auf Pins ausblenden
+Custom save sound	Eigener Merken-Ton
+Plays the sound you pick below when you save a pin, instead of Pinterest's. With no sound picked, Pinterest's plays.	Spielt beim Merken eines Pins den Ton ab, den du unten auswählst, statt dem von Pinterest. Ohne ausgewählten Ton spielt der von Pinterest.
+Pick a save sound	Merken-Ton auswählen
+Pick a sound file for Custom save sound to play when you save a pin.	Wähle eine Audiodatei, die Eigener Merken-Ton beim Merken eines Pins abspielt.
+A sound is picked, but Custom save sound is off, so Pinterest's sound plays.	Ein Ton ist ausgewählt, aber Eigener Merken-Ton ist aus, also spielt der Ton von Pinterest.
+%s is picked, but Custom save sound is off, so Pinterest's sound plays.	%s ist ausgewählt, aber Eigener Merken-Ton ist aus, also spielt der Ton von Pinterest.
+Saving a pin plays the sound you picked. Tap to pick another sound or use Pinterest's again.	Beim Merken eines Pins spielt der ausgewählte Ton. Tippe, um einen anderen Ton zu wählen oder wieder den von Pinterest zu nutzen.
+Saving a pin plays %s. Tap to pick another sound or use Pinterest's again.	Beim Merken eines Pins spielt %s. Tippe, um einen anderen Ton zu wählen oder wieder den von Pinterest zu nutzen.
+Pick another sound	Anderen Ton wählen
+Use Pinterest's sound again	Wieder den Ton von Pinterest nutzen
+That app won't let Pinterest keep the sound. Pick one saved on the phone.	Diese App lässt Pinterest den Ton nicht behalten. Wähle einen, der auf dem Handy gespeichert ist.
+Saving a pin will play the sound you picked.	Beim Merken eines Pins spielt jetzt der ausgewählte Ton.
+Saving a pin will play %s.	Beim Merken eines Pins spielt jetzt %s.
+Saving a pin will play Pinterest's sound again.	Beim Merken eines Pins spielt wieder der Ton von Pinterest.
 Disable update nag	Update-Aufforderung ausblenden
 Download pin	Pin herunterladen
 Share pin	Pin teilen

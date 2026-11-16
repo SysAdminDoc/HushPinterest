@@ -8,19 +8,24 @@ package app.hushpinterest.extension.pinterest.ui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
 import android.view.View;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -47,7 +52,9 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowMediaPlayer;
 import org.robolectric.shadows.ShadowToast;
+import org.robolectric.shadows.util.DataSource;
 
 import app.hushpinterest.extension.pinterest.settings.Settings;
 import app.hushpinterest.extension.shared.SettingsContextRule;
@@ -79,7 +86,7 @@ public class UiHooksTest {
             Settings.HIDE_PIN_MENU_COLLAGE, Settings.HIDE_PIN_MENU_VISUAL_SEARCH, Settings.HIDE_PIN_MENU_PIN_BOOST,
             Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_COMMENT_PREVIEWS,
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
-            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
+            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.CUSTOM_SAVE_SOUND, Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
             Settings.DISABLE_UPDATE_NAG
     }; }
@@ -87,6 +94,8 @@ public class UiHooksTest {
     @After public void restore() {
         PauseForTests.resume();
         for (BooleanSetting setting : switches()) setting.resetToDefault();
+        SaveSound.PICKED.resetToDefault();
+        SaveSound.NAME.resetToDefault();
         HookStatus.clear();
     }
 
@@ -239,6 +248,38 @@ public class UiHooksTest {
         PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
         assertFalse("paused, the grid is added and loads", UiHooks.relatedPinsLoading());
         PauseForTests.resume();
+    }
+
+    @Test public void aPickedSaveSoundPlaysOnlyWhileTheSwitchIsOnAndTheFileOpens() {
+        Context app = RuntimeEnvironment.getApplication();
+        Uri sound = Uri.parse("content://com.android.providers.media.documents/document/audio%3A41");
+        DataSource file = DataSource.toDataSource(app, sound);
+        ShadowMediaPlayer.addMediaInfo(file, new ShadowMediaPlayer.MediaInfo(800, 0));
+        SaveSound.PICKED.save(sound.toString());
+        assertNull("off by default, Pinterest's chime plays", UiHooks.pickedSaveSound(app));
+
+        Settings.CUSTOM_SAVE_SOUND.save(true);
+        MediaPlayer player = UiHooks.saveSound(app, 0x7f130001);
+        assertNotNull(player);
+        assertEquals("the picked file plays in place of the chime", file, shadowOf(player).getDataSource());
+        player.release();
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("picked sound played"));
+
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertNull("paused, Pinterest's chime plays", UiHooks.pickedSaveSound(app));
+        PauseForTests.resume();
+        assertNull("no context, nothing to open the file with", UiHooks.pickedSaveSound(null));
+
+        SaveSound.PICKED.save("");
+        assertNull("nothing picked, Pinterest's chime plays", UiHooks.pickedSaveSound(app));
+
+        Uri gone = Uri.parse("content://com.android.providers.media.documents/document/audio%3A42");
+        ShadowMediaPlayer.addException(DataSource.toDataSource(app, gone), new IOException("deleted"));
+        SaveSound.PICKED.save(gone.toString());
+        assertNull("a file that won't open leaves Pinterest's chime", UiHooks.pickedSaveSound(app));
+        report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("picked sound didn't open, Pinterest's played"));
     }
 
     @Test public void theCreatorNameGoesAndTheAvatarAndItsRowStayOnlyWhileTheSwitchIsOn() {
