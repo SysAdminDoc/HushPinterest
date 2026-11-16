@@ -492,6 +492,8 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_black_comments": return L10n.t("Black comments");
             case "hushpinterest_black_pin_menu": return L10n.t("Black pin menu");
             case "hushpinterest_black_save_sheet": return L10n.t("Black Save to sheet");
+            case "hushpinterest_black_sheets": return L10n.t("Black menus and sheets");
+            case "hushpinterest_black_boards": return L10n.t("Black board and profile buttons");
             case "hushpinterest_hide_closeup_back": return L10n.t("Hide back arrow on pins");
             case "hushpinterest_hide_closeup_lens": return L10n.t("Hide lens button on pins");
             case "hushpinterest_hide_closeup_search_label": return L10n.t("Hide Search image label on pins");

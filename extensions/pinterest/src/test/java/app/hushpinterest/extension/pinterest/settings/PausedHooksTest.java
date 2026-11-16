@@ -27,6 +27,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -456,6 +457,9 @@ public class PausedHooksTest {
         probes.put(Settings.BLACK_COMMENTS, Collections.singletonList(() -> paintsSheetBlack("comment_bottom_bar")));
         probes.put(Settings.BLACK_PIN_MENU, Arrays.asList(() -> paintsSheetBlack("modal_container"), PausedHooksTest::paintsMenuCardBlack));
         probes.put(Settings.BLACK_SAVE_SHEET, Collections.singletonList(() -> paintsSheetBlack("draggable_sheet")));
+        probes.put(Settings.BLACK_SHEETS, Arrays.asList(() -> paintsSheetBlack("gestalt_sheet_footer"), () -> paintsSheetBlack("lego_modal_container")));
+        probes.put(Settings.BLACK_BOARDS, Arrays.asList(PausedHooksTest::paintsBoardBarBlack,
+                PausedHooksTest::paintsBoardHeaderBlack, PausedHooksTest::layersProfileFilters));
         probes.put(Settings.HIDE_CLOSEUP_BACK, Arrays.asList(() -> hidesCloseupButton(true), () -> keepsCloseupButtonHidden(true)));
         probes.put(Settings.HIDE_CLOSEUP_LENS, Arrays.asList(() -> hidesCloseupButton(false), () -> keepsCloseupButtonHidden(false)));
         probes.put(Settings.HIDE_CLOSEUP_SEARCH_LABEL, Collections.singletonList(() -> !CloseupButtons.searchLabel(true)));
@@ -711,10 +715,56 @@ public class PausedHooksTest {
         sheet.addView(holder);
         if ("comment_bottom_bar".equals(named)) AmoledBlack.comments(sheet);
         else if (save) AmoledBlack.saveSheet(sheet);
+        else if ("gestalt_sheet_footer".equals(named)) AmoledBlack.gestaltSheet(sheet);
+        else if ("lego_modal_container".equals(named)) AmoledBlack.legoModal(sheet);
         else AmoledBlack.pinMenu(sheet);
         // Painting a transition mutates it, which rebuilds its layers, so the gray is read back from the view.
         GradientDrawable painted = save ? (GradientDrawable) ((LayerDrawable) holder.getBackground()).getDrawable(0) : fill;
         return painted.getColor().getDefaultColor() == Color.BLACK;
+    }
+
+    private static Context dark() {
+        Context context = RuntimeEnvironment.getApplication();
+        Configuration night = new Configuration(context.getResources().getConfiguration());
+        night.uiMode = Configuration.UI_MODE_NIGHT_YES | (night.uiMode & ~Configuration.UI_MODE_NIGHT_MASK);
+        return context.createConfigurationContext(night);
+    }
+
+    /** A dark-mode bar over a board, a card in its gray: true when its tint turned black. */
+    private static boolean paintsBoardBarBlack() {
+        View bar = new View(dark());
+        GradientDrawable fill = new GradientDrawable();
+        fill.setColor(0xFF33332E);
+        bar.setBackground(fill);
+        AmoledBlack.boardToolBar(bar);
+        ColorStateList tint = bar.getBackgroundTintList();
+        return tint != null && tint.getDefaultColor() == Color.BLACK;
+    }
+
+    /** A dark-mode board header with no image picked, its view in the secondary gray: true when it turned black. */
+    private static boolean paintsBoardHeaderBlack() {
+        Context dark = dark();
+        Resources original = dark.getResources();
+        Resources resources = new Resources(dark.getAssets(), original.getDisplayMetrics(), original.getConfiguration()) {
+            @Override public int getIdentifier(String name, String type, String owner) { return name.startsWith("board_header_image") ? 1 : 0; }
+        };
+        LinearLayout header = new LinearLayout(dark) {
+            @Override public Resources getResources() { return resources; }
+        };
+        View image = new View(dark);
+        image.setId(1);
+        ColorDrawable fill = new ColorDrawable(0xFF333339);
+        image.setBackground(fill);
+        header.addView(image);
+        AmoledBlack.boardHeader(header);
+        return fill.getColor() == Color.BLACK;
+    }
+
+    /** A dark-mode row of profile filter buttons: true when it's drawn through the levels layer. */
+    private static boolean layersProfileFilters() {
+        View row = new View(dark());
+        AmoledBlack.profileFilters(row);
+        return row.getLayerType() == View.LAYER_TYPE_HARDWARE;
     }
 
     /** A dark-mode See more card from a pin's menu, its gray shape under a ripple: true when it turned black. */

@@ -748,7 +748,11 @@ public class HushPinterestPreferenceFragmentTest {
         }
     }
 
-    /** Black comments, Black pin menu and Black Save to sheet each have their own hook, so each row shows only where its hook went in, under Black bottom bar. */
+    /**
+     * Black comments, Black pin menu, Black Save to sheet, Black menus and sheets and Black board and
+     * profile buttons each have their own hook, so each row shows only where its hook went in, under
+     * Black bottom bar.
+     */
     @Test
     public void theBlackSheetRowsShowOnlyWhereTheirHooksWentIn() {
         PatchFamily.inBuildForTests = EnumSet.allOf(PatchFamily.class);
@@ -756,12 +760,16 @@ public class HushPinterestPreferenceFragmentTest {
         barOnly.remove(PatchFamily.Capability.BLACK_COMMENTS);
         barOnly.remove(PatchFamily.Capability.BLACK_PIN_MENU);
         barOnly.remove(PatchFamily.Capability.BLACK_SAVE_SHEET);
+        barOnly.remove(PatchFamily.Capability.BLACK_SHEETS);
+        barOnly.remove(PatchFamily.Capability.BLACK_BOARDS);
         PatchFamily.capabilitiesForTests = barOnly;
         try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
             HushPinterestPreferenceFragment page = pageOf(controller);
             assertNull(page.findPreference(Settings.BLACK_COMMENTS.key));
             assertNull(page.findPreference(Settings.BLACK_PIN_MENU.key));
             assertNull(page.findPreference(Settings.BLACK_SAVE_SHEET.key));
+            assertNull(page.findPreference(Settings.BLACK_SHEETS.key));
+            assertNull(page.findPreference(Settings.BLACK_BOARDS.key));
             assertNotNull(page.findPreference(Settings.BLACK_BOTTOM_BAR.key));
         }
         PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
@@ -782,6 +790,14 @@ public class HushPinterestPreferenceFragmentTest {
             assertEquals("Black Save to sheet", String.valueOf(save.getTitle()));
             assertFalse("Black Save to sheet starts off", save.isChecked());
             assertEquals(bar + 3, indexOfKey(rows, Settings.BLACK_SAVE_SHEET.key));
+            SwitchPreference sheets = (SwitchPreference) page.findPreference(Settings.BLACK_SHEETS.key);
+            SwitchPreference boards = (SwitchPreference) page.findPreference(Settings.BLACK_BOARDS.key);
+            assertEquals("Black menus and sheets", String.valueOf(sheets.getTitle()));
+            assertEquals("Black board and profile buttons", String.valueOf(boards.getTitle()));
+            assertFalse("Black menus and sheets starts off", sheets.isChecked());
+            assertFalse("Black board and profile buttons starts off", boards.isChecked());
+            assertEquals(bar + 4, indexOfKey(rows, Settings.BLACK_SHEETS.key));
+            assertEquals(bar + 5, indexOfKey(rows, Settings.BLACK_BOARDS.key));
         }
     }
 
@@ -824,6 +840,8 @@ public class HushPinterestPreferenceFragmentTest {
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_COMMENTS.key));
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_PIN_MENU.key));
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_SAVE_SHEET.key));
+        assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_SHEETS.key));
+        assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_BOARDS.key));
     }
 
     /** The black surfaces, each with the switch that's its own. */
@@ -833,6 +851,8 @@ public class HushPinterestPreferenceFragmentTest {
         rows.put(PatchFamily.Capability.BLACK_COMMENTS, Settings.BLACK_COMMENTS);
         rows.put(PatchFamily.Capability.BLACK_PIN_MENU, Settings.BLACK_PIN_MENU);
         rows.put(PatchFamily.Capability.BLACK_SAVE_SHEET, Settings.BLACK_SAVE_SHEET);
+        rows.put(PatchFamily.Capability.BLACK_SHEETS, Settings.BLACK_SHEETS);
+        rows.put(PatchFamily.Capability.BLACK_BOARDS, Settings.BLACK_BOARDS);
         return rows;
     }
 

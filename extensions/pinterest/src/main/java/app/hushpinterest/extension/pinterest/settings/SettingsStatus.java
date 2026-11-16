@@ -100,6 +100,8 @@ public final class SettingsStatus {
     public static boolean blackComments() { return false; }
     public static boolean blackPinMenu() { return false; }
     public static boolean blackSaveSheet() { return false; }
+    public static boolean blackSheets() { return false; }
+    public static boolean blackBoards() { return false; }
     public static boolean hideCloseupButtons() { return false; }
     public static boolean closeupButtons() { return false; }
     public static boolean closeupSearchLabel() { return false; }

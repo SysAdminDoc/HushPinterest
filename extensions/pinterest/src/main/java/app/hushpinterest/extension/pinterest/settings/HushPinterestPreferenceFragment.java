@@ -497,7 +497,8 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hides the small icon buttons at the end of the top bar. Back, text buttons and account "
                         + "controls stay. The change shows the next time the bar updates."), SettingsIcons.BLOCK);
             // Each surface has its own hook and its own switch, so a build where Pinterest's bottom bar, comments,
-            // pin menu or Save to sheet wasn't found has no row for it, and the rows it does have keep their own words.
+            // pin menu, Save to sheet, other sheets or board and profile buttons weren't found has no row for them,
+            // and the rows it does have keep their own words.
             if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BOTTOM_BAR.installed()) {
                 ui.addPreference(mark(toggle(context, Settings.BLACK_BOTTOM_BAR, L10n.t("Black bottom bar"),
                         L10n.t("In dark mode, paints the bottom bar pure black to match the page, which also saves a "
@@ -518,6 +519,20 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                 ui.addPreference(mark(toggle(context, Settings.BLACK_SAVE_SHEET, L10n.t("Black Save to sheet"),
                         L10n.t("In dark mode, paints the sheet that lists your boards when you save a pin pure black. "
                             + "Light mode stays as it is. The change shows the next time you save a pin.")),
+                        SettingsIcons.DARK_MODE));
+            }
+            if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BLACK_SHEETS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.BLACK_SHEETS, L10n.t("Black menus and sheets"),
+                        L10n.t("In dark mode, paints the other menus and sheets that slide up pure black, such as Create and "
+                            + "a board's sort and options menus. Light mode stays as it is. The change shows the next time "
+                            + "you open one.")),
+                        SettingsIcons.DARK_MODE));
+            }
+            if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BLACK_BOARDS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.BLACK_BOARDS, L10n.t("Black board and profile buttons"),
+                        L10n.t("In dark mode, paints the gray bar that floats over a board and the filter buttons on your "
+                            + "profile pure black, along with the empty cover on Edit board. Light mode stays as it is. The "
+                            + "change shows the next time you open a board or your profile.")),
                         SettingsIcons.DARK_MODE));
             }
             patchToggle(ui, context, build, PatchFamily.HIDE_CLOSEUP_BUTTONS, Settings.HIDE_CLOSEUP_BACK,

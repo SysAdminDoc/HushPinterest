@@ -9,6 +9,9 @@ package app.hushpinterest.extension.pinterest.ui;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -20,6 +23,8 @@ import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -54,6 +59,16 @@ import app.hushpinterest.extension.shared.settings.BooleanSetting;
  * while something black still wants them, their next frame turns them back. The comments screen
  * fills the window and leaves the band under the status bar to the window's own dark gray, so a
  * black screen also covers that band in black, drawn over the screen itself and gone with it.
+ *
+ * <p>The other sheets and menus that slide up carry the gray too, behind a switch of their own
+ * (14.44.0, #39): Pinterest's Gestalt sheets (Create, a board's Board view and sort sheets, Add
+ * collaborators) as each is set up, and its older lego menus (a board's Options, a profile's sort
+ * menu) as each is built. A sheet with a switch of its own keeps it, so the Save to sheet, also a
+ * Gestalt sheet, follows Black Save to sheet. Their buttons and Create's tiles keep their gray. A
+ * last switch takes the gray bar that floats over a board, the filter buttons on a profile and the
+ * empty header card on Edit board. The bar is a card whose tint changes. The filter buttons are
+ * drawn by Compose with no fill on a view, so they're drawn through a layer that maps Pinterest's
+ * dark grays to black and keeps white white.
  */
 public final class AmoledBlack {
     private AmoledBlack() {}
@@ -74,6 +89,17 @@ public final class AmoledBlack {
     private static final int SEARCHES = 8;
     /** The sheets handed over so far. Each one repaints after its layout passes. */
     private static final Map<View, Sheet> sheets = new WeakHashMap<>();
+    /** The board and profile pieces handed over so far, each repainted after its layout passes. */
+    private static final Map<View, Piece> pieces = new WeakHashMap<>();
+    /** The tint each board tool bar had before it turned black, null when it had none. */
+    private static final Map<View, ColorStateList> cards = new WeakHashMap<>();
+    /** The layer type each profile filter row had before it was drawn through the levels layer. */
+    private static final Map<View, Integer> layers = new WeakHashMap<>();
+    /**
+     * The lightest gray the profile's filter buttons turn black from. Their gray is #222226 at night
+     * (14.44.0); each channel is stretched so this level lands on black and white stays white.
+     */
+    static final int DARKEST_KEPT = 64;
 
     // Pinterest's ids, read by name the first time: -1 before that, 0 when this build has none.
     static int tabRoot = -1;
@@ -134,7 +160,7 @@ public final class AmoledBlack {
             (sheet, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                 try {
                     Sheet known = sheets.get(sheet);
-                    if (known != null) paintSheet(sheet, known, Utils.settingsReady() && known.setting.get() && night(sheet));
+                    if (known != null) paintSheet(sheet, known, Utils.settingsReady() && switchOf(sheet, known).get() && night(sheet));
                 } catch (Throwable failure) {
                     HookStatus.threw(FamilyNames.AMOLED_BLACK, "sheet layout", failure);
                 }
@@ -151,7 +177,7 @@ public final class AmoledBlack {
      * so each one is painted on the screen's layout passes.
      */
     public static void comments(View sheet) {
-        built(sheet, Settings.BLACK_COMMENTS, true, "comment_starters", "comments",
+        built(sheet, Settings.BLACK_COMMENTS, false, false, true, "comment_starters", "comments",
                 "comments_feed", "comment_bottom_bar", "floating_comment_view", "comment_reaction_header",
                 "community_insight_comment_header");
     }
@@ -161,7 +187,7 @@ public final class AmoledBlack {
      * header and the scrolling list under it carry the gray.
      */
     public static void pinMenu(View sheet) {
-        built(sheet, Settings.BLACK_PIN_MENU, false, null, "pin menu", "modal_header", "modal_container");
+        built(sheet, Settings.BLACK_PIN_MENU, false, false, false, null, "pin menu", "modal_header", "modal_container");
     }
 
     /**
@@ -173,9 +199,146 @@ public final class AmoledBlack {
      * Galaxy S25, 14.44.0), set as a plain color when the footer is built.
      */
     public static void saveSheet(View sheet) {
-        built(sheet, Settings.BLACK_SAVE_SHEET, false, null, "Save to sheet", "draggable_sheet",
+        built(sheet, Settings.BLACK_SAVE_SHEET, false, false, false, null, "Save to sheet", "draggable_sheet",
                 "gestalt_sheet_header", "gestalt_sheet_container", "sheet_overlay_container", "sheet_scroll_view",
                 "sheet_scroll_inner_layout", "footer_container");
+    }
+
+    /**
+     * Called with each of Pinterest's Gestalt sheets as it's set up, the whole sheet already built:
+     * Create, a board's Board view and sort sheets, Add collaborators and the others that slide up
+     * (14.44.0, #39). The sheet is a rounded card in the gray, and the footer holding its buttons
+     * carries it too (#222226 on a Galaxy S22). The buttons and Create's tiles keep their own gray.
+     * The Save to sheet and the comments sheet hand themselves over first, and a sheet handed over by
+     * its own switch, or one inside or around it, keeps that switch.
+     */
+    public static void gestaltSheet(View sheet) {
+        built(sheet, Settings.BLACK_SHEETS, true, false, false, null, "sheet", "draggable_sheet", "gestalt_sheet_header",
+                "gestalt_sheet_container", "sheet_overlay_container", "sheet_scroll_view", "sheet_scroll_inner_layout",
+                "gestalt_sheet_footer", "footer_container");
+    }
+
+    /**
+     * Called with each of Pinterest's lego menus right after it becomes a menu: a board's Options,
+     * the sort menus on a profile and the others built the older way (14.44.0, #39). The menu is
+     * itself a rounded card in the gray, around a scrolling list and the row that holds Close. Its
+     * own fills arrive later in the build, so they turn black on its layout passes. The Close button
+     * keeps its gray.
+     */
+    public static void legoModal(View menu) {
+        built(menu, Settings.BLACK_SHEETS, true, true, false, null, "menu", "modal_header", "modal_container",
+                "lego_modal_scroll_view", "lego_modal_container", "lego_modal_content_container", "lego_close_container",
+                "lego_close_container_sticky");
+    }
+
+    /** The views' fills and layers, which off, Pause or light mode give back, follow on their layout passes. */
+    private static final View.OnLayoutChangeListener REPAINT_PIECE =
+            (view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                try {
+                    Piece piece = pieces.get(view);
+                    if (piece != null) paintPiece(view, piece, Utils.settingsReady() && Settings.BLACK_BOARDS.get() && night(view));
+                } catch (Throwable failure) {
+                    HookStatus.threw(FamilyNames.AMOLED_BLACK, "board and profile buttons layout", failure);
+                }
+            };
+
+    /**
+     * Called with the bar that floats over a board (Organize, Add and the others) right after it
+     * becomes a card (14.44.0, #39). A card's rounded fill takes the color of a tint over it, so the
+     * tint is what changes, and off, Pause or light mode give back the tint it had, none included.
+     */
+    public static void boardToolBar(View bar) {
+        handedOver(bar, Piece.TOOL_BAR, "board tool bar");
+    }
+
+    /**
+     * Called with each of the filter buttons on a profile (the sort button, Group, Private and the
+     * rest) right after it becomes a Compose view (14.44.0, #39). Compose draws them with no fill on
+     * a view to change, so each is drawn through a layer that maps Pinterest's dark grays to black
+     * and keeps white white. Their labels and icons keep their look, and the clear space around
+     * them stays clear.
+     */
+    public static void profileFilters(View row) {
+        handedOver(row, Piece.FILTERS, "profile filters");
+    }
+
+    /**
+     * Called with a board's header image right after it becomes a layout, before its views are in.
+     * With no image picked, Edit board shows the header as an empty card in Pinterest's secondary
+     * gray (#333339 at night, 14.44.0, #39), the plain color behind the image and behind its blurred
+     * copy. Both turn black on the header's layout passes. A picked image draws over that color, and
+     * the wash Pinterest lays over a picked image stays.
+     */
+    public static void boardHeader(View header) {
+        handedOver(header, Piece.HEADER, "board header");
+    }
+
+    /** What a board or profile piece is, which says how it's painted. */
+    private enum Piece { TOOL_BAR, FILTERS, HEADER }
+
+    private static void handedOver(View view, Piece piece, String what) {
+        try {
+            if (view == null) return;
+            if (pieces.put(view, piece) == null) view.addOnLayoutChangeListener(REPAINT_PIECE);
+            paintPiece(view, piece, UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BOARDS) && night(view));
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, what, failure);
+        }
+    }
+
+    private static void paintPiece(View view, Piece piece, boolean black) {
+        switch (piece) {
+            case TOOL_BAR:
+                paintCard(view, black);
+                break;
+            case FILTERS:
+                levels(view, black);
+                break;
+            default:
+                if (headerImage < 0) headerImage = id(view, "board_header_image");
+                if (headerBlur < 0) headerBlur = id(view, "board_header_image_blur");
+                if (headerImage != 0) paint(view.findViewById(headerImage), black);
+                if (headerBlur != 0) paint(view.findViewById(headerBlur), black);
+        }
+    }
+
+    /** board_header_image's and board_header_image_blur's ids, read once, 0 for a build without one. */
+    static int headerImage = -1, headerBlur = -1;
+
+    /** A tint Pinterest set since the bar turned black is the one off gives back. */
+    private static void paintCard(View card, boolean black) {
+        if (!black) {
+            if (cards.containsKey(card)) card.setBackgroundTintList(cards.remove(card));
+            return;
+        }
+        ColorStateList tint = card.getBackgroundTintList();
+        if (card.getBackground() == null || tint != null && isBlack(tint)) return;
+        cards.put(card, tint);
+        card.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK));
+    }
+
+    /** The row drawn through the levels layer, or back on the layer type it had. */
+    private static void levels(View row, boolean black) {
+        if (!black) {
+            Integer before = layers.remove(row);
+            if (before != null) row.setLayerType(before, null);
+            return;
+        }
+        if (layers.containsKey(row)) return;
+        layers.put(row, row.getLayerType());
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(levelsMatrix()));
+        row.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
+    }
+
+    /** Each color channel stretched so DARKEST_KEPT and below land on black and white stays white. Alpha stays. */
+    static ColorMatrix levelsMatrix() {
+        float scale = 255f / (255 - DARKEST_KEPT), offset = -DARKEST_KEPT * scale;
+        return new ColorMatrix(new float[] {
+                scale, 0, 0, 0, offset,
+                0, scale, 0, 0, offset,
+                0, 0, scale, 0, offset,
+                0, 0, 0, 1, 0});
     }
 
     /** Off or Pause gives a card its gray back while the menu is still open, on the card's next layout pass. */
@@ -207,27 +370,65 @@ public final class AmoledBlack {
     /**
      * Pinterest's ids are read by name each time a sheet is built, which is once per time it opens.
      * [chips] names a row whose every child is painted, see-through grays included, or is null.
+     * A [generic] sheet is any sheet or menu, and one with a switch of its own, the same view or
+     * one inside or around it, keeps that switch: the generic one follows it, whichever was handed
+     * over first. An [own] sheet carries the gray on its own fill as well.
      */
-    private static void built(View sheet, BooleanSetting setting, boolean topBand, String chips, String what, String... fills) {
+    private static void built(View sheet, BooleanSetting setting, boolean generic, boolean own, boolean topBand,
+                              String chips, String what, String... fills) {
         try {
             if (sheet == null) return;
+            Sheet before = sheets.get(sheet);
+            if (generic && before != null && !before.generic) return;
             int[] ids = new int[fills.length];
             for (int index = 0; index < fills.length; index++) ids[index] = id(sheet, fills[index]);
-            Sheet known = new Sheet(setting, topBand, ids, chips == null ? 0 : id(sheet, chips));
-            Sheet before = sheets.put(sheet, known);
+            Sheet known = new Sheet(setting, generic, own, topBand, ids, chips == null ? 0 : id(sheet, chips));
+            sheets.put(sheet, known);
             if (before == null) {
                 sheet.addOnLayoutChangeListener(REPAINT_SHEET);
                 sheet.addOnAttachStateChangeListener(LEAVING);
             } else {
                 known.band = before.band;
+                if (before.generic && !generic) paintSheet(sheet, before, false);
             }
-            paintSheet(sheet, known, UiHooks.enabled(FamilyNames.AMOLED_BLACK, setting) && night(sheet));
+            boolean black = UiHooks.enabled(FamilyNames.AMOLED_BLACK, switchOf(sheet, known)) && night(sheet);
+            paintSheet(sheet, known, black);
+            if (generic) return;
+            List<View> around = new ArrayList<>();
+            for (Map.Entry<View, Sheet> open : sheets.entrySet()) {
+                View other = open.getKey();
+                if (other != null && other != sheet && open.getValue().generic && related(other, sheet)) around.add(other);
+            }
+            for (View other : around) paintSheet(other, sheets.get(other), black);
         } catch (Throwable failure) {
             HookStatus.threw(FamilyNames.AMOLED_BLACK, what, failure);
         }
     }
 
+    /** The switch a sheet follows: its own, or for a generic sheet, that of a sheet with one inside or around it. */
+    private static BooleanSetting switchOf(View sheet, Sheet known) {
+        if (!known.generic) return known.setting;
+        for (Map.Entry<View, Sheet> open : sheets.entrySet()) {
+            View other = open.getKey();
+            if (other != null && other != sheet && !open.getValue().generic && related(other, sheet)) return open.getValue().setting;
+        }
+        return known.setting;
+    }
+
+    /** Whether one view holds the other. */
+    private static boolean related(View one, View other) {
+        return holds(one, other) || holds(other, one);
+    }
+
+    private static boolean holds(View outer, View inner) {
+        for (ViewParent parent = inner.getParent(); parent instanceof View; parent = parent.getParent()) {
+            if (parent == outer) return true;
+        }
+        return false;
+    }
+
     private static void paintSheet(View sheet, Sheet known, boolean black) {
+        if (known.own) paintFill(sheet, black, false);
         for (int id : known.fills) {
             View fill = id == 0 ? null : sheet.findViewById(id);
             if (fill != null) paintFill(fill, black, false);
@@ -367,7 +568,7 @@ public final class AmoledBlack {
         for (Map.Entry<View, Sheet> open : sheets.entrySet()) {
             View sheet = open.getKey();
             if (sheet == null || sheet == except || sheet.getRootView() != root || !visible(sheet)) continue;
-            if (Utils.settingsReady() && open.getValue().setting.get() && night(sheet)) return true;
+            if (Utils.settingsReady() && switchOf(sheet, open.getValue()).get() && night(sheet)) return true;
         }
         return false;
     }
@@ -413,6 +614,10 @@ public final class AmoledBlack {
     /** The switch that paints a sheet and the ids of the views that carry its gray, 0 for one this build has none of. */
     private static final class Sheet {
         final BooleanSetting setting;
+        /** Whether it's any sheet or menu, which follows a sheet with a switch of its own inside or around it. */
+        final boolean generic;
+        /** Whether the sheet's own fill carries the gray too. */
+        final boolean own;
         /** Whether the band under the status bar turns black with the sheet. */
         final boolean topBand;
         final int[] fills;
@@ -423,8 +628,10 @@ public final class AmoledBlack {
         /** The black band over the sheet's top padding while it's drawn, null otherwise. */
         ColorDrawable band;
 
-        Sheet(BooleanSetting setting, boolean topBand, int[] fills, int chips) {
+        Sheet(BooleanSetting setting, boolean generic, boolean own, boolean topBand, int[] fills, int chips) {
             this.setting = setting;
+            this.generic = generic;
+            this.own = own;
             this.topBand = topBand;
             this.fills = fills;
             this.chips = chips;

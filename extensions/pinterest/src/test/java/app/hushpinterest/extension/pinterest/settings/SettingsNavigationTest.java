@@ -1246,6 +1246,8 @@ public class SettingsNavigationTest {
         summaryContains(Settings.BLACK_COMMENTS.key, "In dark mode", "comments sheet and its reply bar pure black", "Light mode stays", "next time you open comments");
         summaryContains(Settings.BLACK_PIN_MENU.key, "In dark mode", "a pin's menu pure black", "Light mode stays", "next time you open the menu");
         summaryContains(Settings.BLACK_SAVE_SHEET.key, "In dark mode", "lists your boards when you save a pin pure black", "Light mode stays", "next time you save a pin");
+        summaryContains(Settings.BLACK_SHEETS.key, "In dark mode", "menus and sheets that slide up pure black", "Light mode stays", "next time you open one");
+        summaryContains(Settings.BLACK_BOARDS.key, "In dark mode", "floats over a board", "Light mode stays", "next time you open a board or your profile");
         summaryContains(Settings.HIDE_CLOSEUP_BACK.key, "back arrow that floats over a pin", "back gesture or button", "next pin you open");
         summaryContains(Settings.HIDE_CLOSEUP_LENS.key, "visual search button", "Search image in the pin menu still works", "next pin you open");
         summaryContains(Settings.HIDE_CLOSEUP_SEARCH_LABEL.key, "Search image label", "first pins each day", "Tapping the lens still searches", "next pin you open");
@@ -1326,6 +1328,8 @@ public class SettingsNavigationTest {
         assertTrue(contains(Settings.BLACK_COMMENTS.key));
         assertTrue(contains(Settings.BLACK_PIN_MENU.key));
         assertTrue(contains(Settings.BLACK_SAVE_SHEET.key));
+        assertTrue(contains(Settings.BLACK_SHEETS.key));
+        assertTrue(contains(Settings.BLACK_BOARDS.key));
         assertFalse(contains(Settings.BLACK_BOTTOM_BAR.key));
     }
 

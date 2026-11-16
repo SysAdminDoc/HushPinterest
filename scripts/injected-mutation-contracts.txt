@@ -54,7 +54,7 @@ family|hideAssistant|Hide Assistant|assistantEntries
 family|hideSearchHistory|Hide search history|searchHistory,recentSearchRows,recentSearchHeading
 family|hideNavigationButtons|Hide navigation buttons|navigationButtons
 family|hideHeaderButtons|Hide header buttons|headerButtons
-family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet
+family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards
 family|hideCloseupButtons|Hide closeup buttons|closeupButtons,closeupSearchLabel,closeupActionBar,closeupRemix,closeupVisitSite,closeupSaveButton
 family|hidePinMenuItems|Filter pin menu|pinMenuItems
 family|hideComments|Hide comments|comments,suggestedReplies,commentPreviews
@@ -104,6 +104,8 @@ mutation|closeupVisitSite|closeupVisitSite|Lapp/hushpinterest/extension/pinteres
 mutation|closeupSaveButton|closeupSaveButton|Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->saveButton(Landroid/view/View;)V
 mutation|postedDate|postedDate|Lapp/hushpinterest/extension/pinterest/ui/PostedDate;->show(Landroid/view/View;Ljava/lang/Object;)V
 mutation|blackSaveSheet|saveSheet|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->saveSheet(Landroid/view/View;)V
+mutation|blackSheets|blackSheets|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->gestaltSheet(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->legoModal(Landroid/view/View;)V
+mutation|blackBoards|blackBoards|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->boardToolBar(Landroid/view/View;)V|Lcom/pinterest/feature/board/detail/floatingtoolbar/FloatingToolbarView;|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->profileFilters(Landroid/view/View;)V|Lcom/pinterest/feature/profile/pills/view/PillView;|Lcom/pinterest/feature/profile/filters/FilterBarView;|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->boardHeader(Landroid/view/View;)V|Lcom/pinterest/feature/board/headerimage/BoardHeaderImageView;
 mutation|suggestedBoards|suggestedBoard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->suggestedBoard(Ljava/util/Collection;Ljava/lang/Object;)V
 mutation|boardListHeight|boardListHeight|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->saveSheetHeight(I)I
 mutation|pinMenuItems|menu|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuItem(Landroid/view/View;Ljava/lang/String;)V|overflow_menu_add_to_collage,overflow_menu_remix_collage,contextmenu_visual_search_image,overflow_menu_pin_boost

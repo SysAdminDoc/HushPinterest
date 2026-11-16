@@ -281,6 +281,7 @@ public class DexDiff {
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
+            Map.entry("blackSheets", 2), Map.entry("blackBoards", 7),
             Map.entry("longPressChoices", 1), Map.entry("ownAuthorities", 1));
 
     /**
@@ -6060,6 +6061,141 @@ public class DexDiff {
             capability(c.callee, placed);
         }
 
+        static final String GESTALT_SHEET_HEADER = "gestalt_sheet_header", GESTALT_SHEET_COORDINATOR = "draggable_sheet_coordinator",
+                LEGO_MODAL_CONTAINER = "lego_modal_container", LEGO_CLOSE_STICKY = "lego_close_container_sticky";
+
+        /** The clean methods outside the extension that read both ids. */
+        List<Method> readingBoth(String one, String other) {
+            List<Method> found = new ArrayList<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN)) continue;
+                for (Method m : cd.getMethods()) {
+                    List<Instruction> body = instructions(m);
+                    if (body.stream().anyMatch(i -> readsId(i, one)) && body.stream().anyMatch(i -> readsId(i, other))) found.add(m);
+                }
+            }
+            return found;
+        }
+
+        boolean viewType(String type) {
+            return type.startsWith("Landroid/view/") || type.startsWith("Landroid/widget/") || frameworkView(type);
+        }
+
+        /**
+         * Black menus and sheets (#39). The one method reading both a Gestalt sheet's header id and its
+         * coordinator's, an instance method taking just a view, hands that view over first, a range
+         * call on its first parameter. The one constructor reading both a lego menu's list id and its
+         * Close row's has its class's views handed over the way handedOverBuilt checks. Either one
+         * turns the switch on.
+         */
+        void blackSheets(Contract c) {
+            String sheetHook = c.strings.get(0), menuHook = c.strings.get(1);
+            boolean placed = false;
+            List<Method> setups = readingBoth(GESTALT_SHEET_HEADER, GESTALT_SHEET_COORDINATOR);
+            Method setup = setups.isEmpty() ? null : unique(setups, "Gestalt sheet setup");
+            if (setup != null && !AccessFlags.STATIC.isSet(setup.getAccessFlags()) && setup.getParameterTypes().size() == 1
+                    && viewType(setup.getParameterTypes().get(0).toString())) {
+                Method m = actual(setup);
+                List<Integer> sites = calls(m, sheetHook, 1);
+                if (m != null && sites.size() == 1) {
+                    Instruction first = instructions(m).get(0);
+                    placed = sites.get(0) == 0 && first.getOpcode() == Opcode.INVOKE_STATIC_RANGE && arguments(first).equals(List.of(parameter(m, 0)));
+                    if (!placed) fail(sheetHook + " isn't the first call, on the sheet's view, in " + m);
+                    else remove(m, 0, 1);
+                }
+            }
+            List<Method> menus = readingBoth(LEGO_MODAL_CONTAINER, LEGO_CLOSE_STICKY);
+            Method menu = menus.isEmpty() ? null : unique(menus, "lego menu builder");
+            if (menu != null && menu.getName().equals("<init>")) placed |= handedOverBuilt(List.of(menu.getDefiningClass()), menuHook);
+            capability(c.callee, placed);
+        }
+
+        /**
+         * Black board and profile buttons (#39): the bar over a board, a profile's two kinds of filter
+         * buttons and a board's header image, each handed over the way handedOverBuilt checks. Any one
+         * of the three turns the switch on.
+         */
+        void blackBoards(Contract c) {
+            List<String> s = c.strings;
+            boolean placed = handedOverBuilt(List.of(s.get(1)), s.get(0));
+            placed |= handedOverBuilt(List.of(s.get(3), s.get(4)), s.get(2));
+            placed |= handedOverBuilt(List.of(s.get(6)), s.get(5));
+            capability(c.callee, placed);
+        }
+
+        /**
+         * Each constructor of [types] that calls the constructor of a class its type is built on hands
+         * the view over right after that call, on its this register, reached only from that call. One
+         * that calls another of its own class's first has no hook. When a type isn't a view, or none of
+         * its constructors calls one it's built on, nothing is handed over and the answer is false.
+         */
+        boolean handedOverBuilt(List<String> types, String hook) {
+            Map<Method, Integer> sites = new LinkedHashMap<>();
+            List<Method> delegating = new ArrayList<>();
+            for (String type : types) {
+                ClassDef owner = clean.classes.get(type);
+                if (owner == null || !frameworkView(type)) return false;
+                int before = sites.size();
+                for (Method m : owner.getMethods()) {
+                    if (!m.getName().equals("<init>") || m.getImplementation() == null) continue;
+                    int call = builtOnCall(m);
+                    if (call == -2) return false;
+                    if (call == -1) delegating.add(m);
+                    else sites.put(m, call);
+                }
+                if (sites.size() == before) return false;
+            }
+            for (Method old : delegating) calls(actual(old), hook, 0);
+            boolean placed = true;
+            for (Map.Entry<Method, Integer> site : sites.entrySet()) {
+                Method old = site.getKey(), m = actual(old);
+                List<Integer> found = calls(m, hook, 1);
+                if (m == null) { placed = false; continue; }
+                int call = site.getValue(), at = found.size() == 1 ? found.get(0) : -1;
+                boolean ok = at == call + 1 && builtOnCall(m) == call
+                        && String.valueOf(reference(instructions(m).get(call))).equals(String.valueOf(reference(instructions(old).get(call))))
+                        && arguments(instructions(m).get(at)).equals(List.of(parameter(m, -1))) && onlyFrom(m, at, call);
+                if (!ok) { fail(hook + " doesn't hand over the view right after the constructor it's built on in " + m); placed = false; }
+                else remove(m, at, at + 1);
+            }
+            return placed;
+        }
+
+        /**
+         * Where the constructor calls the constructor of a class it's built on, its parent's or one
+         * further up when R8 dropped the one between, on its this register before anything writes it.
+         * -1 when it calls another of its own class's first, -2 when it does neither.
+         */
+        int builtOnCall(Method m) {
+            if (m.getImplementation() == null) return -2;
+            int self = parameter(m, -1);
+            Set<String> ancestors = new HashSet<>();
+            ClassDef owner = clean.classes.get(m.getDefiningClass());
+            String up = owner == null ? null : owner.getSuperclass();
+            while (up != null && ancestors.add(up)) {
+                ClassDef parent = clean.classes.get(up);
+                up = parent == null ? null : parent.getSuperclass();
+            }
+            // A constructor passing its arguments on as a register range calls another of its own
+            // from a copy of this (14.44.0's PillView(Context): move-object v0, v6), so copies count.
+            Set<Integer> copies = new HashSet<>(Set.of(self));
+            List<Instruction> body = instructions(m);
+            for (int at = 0; at < body.size(); at++) {
+                Instruction i = body.get(at);
+                if ((i.getOpcode() == Opcode.INVOKE_DIRECT || i.getOpcode() == Opcode.INVOKE_DIRECT_RANGE) && reference(i) instanceof MethodReference r
+                        && r.getName().equals("<init>") && !callRegisters(i).isEmpty() && copies.contains(callRegisters(i).get(0))) {
+                    if (r.getDefiningClass().equals(m.getDefiningClass())) return -1;
+                    if (ancestors.contains(r.getDefiningClass()) && callRegisters(i).get(0) == self) return at;
+                }
+                if (writes(i, self)) return -2;
+                boolean fromThis = (i.getOpcode() == Opcode.MOVE_OBJECT || i.getOpcode() == Opcode.MOVE_OBJECT_FROM16 || i.getOpcode() == Opcode.MOVE_OBJECT_16)
+                        && copies.contains(((TwoRegisterInstruction) i).getRegisterB());
+                copies.removeIf(register -> writes(i, register));
+                if (fromThis) copies.add(((TwoRegisterInstruction) i).getRegisterA());
+            }
+            return -2;
+        }
+
         /**
          * Hide suggested boards (#32): the one add(Object) right after the suggested board's cell is
          * built, on a list and that cell with nothing reading its answer, becomes the hook on the same
@@ -7409,6 +7545,8 @@ public class DexDiff {
                     case "closeupSaveButton": closeupSaveButton(c); break;
                     case "postedDate": postedDate(c); break;
                     case "saveSheet": saveSheet(c); break;
+                    case "blackSheets": blackSheets(c); break;
+                    case "blackBoards": blackBoards(c); break;
                     case "suggestedBoard": suggestedBoard(c); break;
                     case "boardListHeight": boardListHeight(c); break;
                     case "boardMenu": boardMenu(c); break;
