@@ -137,6 +137,9 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_long_press_hide_send", FALSE);
     public static final BooleanSetting LONG_PRESS_HIDE_SEARCH =
             new BooleanSetting("hushpinterest_long_press_hide_search", FALSE);
+    /** The button that sends straight to WhatsApp or the app last shared with (#35). */
+    public static final BooleanSetting LONG_PRESS_HIDE_SEND_APP =
+            new BooleanSetting("hushpinterest_long_press_hide_send_app", FALSE);
     public static final BooleanSetting EXTERNAL_BROWSER =
             new BooleanSetting("hushpinterest_external_browser", FALSE);
     public static final BooleanSetting SYSTEM_SHARE =

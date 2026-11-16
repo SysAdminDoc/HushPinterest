@@ -475,6 +475,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_long_press_hide_save": return L10n.t("Hide Save in the long-press menu");
             case "hushpinterest_long_press_hide_send": return L10n.t("Hide Send in the long-press menu");
             case "hushpinterest_long_press_hide_search": return L10n.t("Hide Search image in the long-press menu");
+            case "hushpinterest_long_press_hide_send_app": return L10n.t("Hide Send with an app in the long-press menu");
             case "hushpinterest_external_browser": return L10n.t("Open links in your browser");
             case "hushpinterest_system_share": return L10n.t("System share sheet");
             case "hushpinterest_hide_screenshot_share": return L10n.t("No screenshot share menu");

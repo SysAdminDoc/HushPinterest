@@ -109,12 +109,29 @@ class LongPressDownloadFixtureTest {
                 assertEquals(build.name, "Lzo0/e;", ids!!.owner)
                 assertEquals(build.name, "j", ids.field)
                 assertTrue(build.name, ids.closeup)
+                assertTrue("${build.name}: Send with an app (#35)", ids.sendApp)
+            }
+            // The button that sends straight to an app writes its id into the field buttonKind reads,
+            // so that id is the one that names it.
+            if (ids!!.sendApp) {
+                fun FieldReference.isSendApp() = definingClass == ids.owner && name == SEND_APP_ID
+                fun FieldReference.isIdField() = definingClass == CONTEXT_MENU_ITEM && name == ids.field
+                val writers = FixtureDex.methodsWhere(build, { true }) { method ->
+                    val code = method.implementation?.instructions?.toList().orEmpty()
+                    code.indices.any { at ->
+                        at + 1 < code.size && code[at].opcode == Opcode.SGET && code[at + 1].opcode == Opcode.IPUT &&
+                            ((code[at] as ReferenceInstruction).reference as FieldReference).isSendApp() &&
+                            ((code[at + 1] as ReferenceInstruction).reference as FieldReference).isIdField()
+                    }
+                }
+                assertTrue("${build.name}: a builder gives a button the $SEND_APP_ID id", writers.isNotEmpty())
             }
             val kinds = extension.methods.single { it.name == "buttonKind" }
             val idField = "$CONTEXT_MENU_ITEM->${ids!!.field}:I"
             assertEquals(build.name, listOf(Opcode.INSTANCE_OF, Opcode.IF_EQZ, Opcode.CHECK_CAST, Opcode.IGET),
                 kinds.implementation!!.instructions.take(4).map { it.opcode })
-            val compared = listOf(SAVE_ID, SEND_ID, SEARCH_ID) + listOfNotNull(CLOSEUP_SEARCH_ID.takeIf { ids.closeup })
+            val compared = listOf(SAVE_ID, SEND_ID, SEARCH_ID) + listOfNotNull(CLOSEUP_SEARCH_ID.takeIf { ids.closeup }) +
+                listOfNotNull(SEND_APP_ID.takeIf { ids.sendApp })
             assertEquals(build.name, listOf(CONTEXT_MENU_ITEM, CONTEXT_MENU_ITEM, idField) + compared.map { "${ids.owner}->$it:I" },
                 references(kinds))
             println("${build.name}: button ids ${ids.owner}, id field $idField")

@@ -387,6 +387,7 @@ public class PausedHooksTest {
         probes.put(Settings.LONG_PRESS_HIDE_SAVE, Collections.singletonList(() -> LongPressDownloadForTests.hidesButton(LongPressDownloadForTests.SAVE)));
         probes.put(Settings.LONG_PRESS_HIDE_SEND, Collections.singletonList(() -> LongPressDownloadForTests.hidesButton(LongPressDownloadForTests.SEND)));
         probes.put(Settings.LONG_PRESS_HIDE_SEARCH, Collections.singletonList(() -> LongPressDownloadForTests.hidesButton(LongPressDownloadForTests.SEARCH)));
+        probes.put(Settings.LONG_PRESS_HIDE_SEND_APP, Collections.singletonList(() -> LongPressDownloadForTests.hidesButton(LongPressDownloadForTests.SEND_APP)));
         probes.put(Settings.EXTERNAL_BROWSER, Collections.singletonList(() -> withActivity(activity -> {
             ResolveInfo browser = new ResolveInfo();
             browser.activityInfo = new ActivityInfo();

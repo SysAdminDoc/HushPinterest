@@ -73,6 +73,9 @@ internal const val SEND_ID = "context_share"
 internal const val SEARCH_ID = "context_visual_search"
 internal const val CLOSEUP_SEARCH_ID = "context_closeup_visual_search"
 
+/** The id of the button that sends straight to WhatsApp or the app last shared with (#35), where a build has it. */
+internal const val SEND_APP_ID = "context_share_recent"
+
 private const val ARRAY_LIST = "Ljava/util/ArrayList;"
 private const val FUNCTION0 = "Lkotlin/jvm/functions/Function0;"
 
@@ -312,8 +315,9 @@ internal fun BytecodePatchContext.longPressMenu(): LongPressMenu {
  * @property owner the ids class the menu's hover test reads [SEARCH_ID] from
  * @property field the one int field of a button that hover test reads to compare with it
  * @property closeup whether the ids class has [CLOSEUP_SEARCH_ID] too
+ * @property sendApp whether the ids class has [SEND_APP_ID] too
  */
-internal class MenuButtonIds(val owner: String, val field: String, val closeup: Boolean)
+internal class MenuButtonIds(val owner: String, val field: String, val closeup: Boolean, val sendApp: Boolean)
 
 private fun Method.fieldReads(opcode: Opcode) = instructionList().filter { it.opcode == opcode }
     .map { (it as ReferenceInstruction).reference as FieldReference }
@@ -340,7 +344,7 @@ internal fun BytecodePatchContext.menuButtonIds(): MenuButtonIds? {
     fun has(name: String) = ids!!.fields.any { it.name == name && it.type == "I" && AccessFlags.PUBLIC.isSet(it.accessFlags) &&
         AccessFlags.STATIC.isSet(it.accessFlags) }
     if (!has(SAVE_ID) || !has(SEND_ID) || !has(SEARCH_ID)) return null
-    return MenuButtonIds(owner, field, has(CLOSEUP_SEARCH_ID))
+    return MenuButtonIds(owner, field, has(CLOSEUP_SEARCH_ID), has(SEND_APP_ID))
 }
 
 private fun Instruction.namedRegistersOf(): List<Int> = when (this) {
@@ -440,14 +444,18 @@ val longPressDownloadPatch = bytecodePatch(
             invoke-static { v0 }, ${found.styler.definingClass}->${found.styler.name}($CONTEXT_MENU_ITEM)V
             return-object v0
         """)
-        // Save, Send and Search image by the id each builder writes into the button, the one the
-        // hover test compares. Download and the buttons built without an id keep the -1 the
+        // Save, Send, Search image and Send with an app by the id each builder writes into the button,
+        // the one the hover test compares. Download and the buttons built without an id keep the -1 the
         // button starts with, so they answer 0 and stay.
         val ids = menuButtonIds()
         if (ids != null) {
             val closeup = if (!ids.closeup) "" else """
                 sget v1, ${ids.owner}->$CLOSEUP_SEARCH_ID:I
                 if-eq v0, v1, :search
+            """
+            val sendApp = if (!ids.sendApp) "" else """
+                sget v1, ${ids.owner}->$SEND_APP_ID:I
+                if-eq v0, v1, :sendApp
             """
             writeStub(LONG_PRESS, "buttonKind", 3, """
                 instance-of v0, p0, $CONTEXT_MENU_ITEM
@@ -461,6 +469,7 @@ val longPressDownloadPatch = bytecodePatch(
                 sget v1, ${ids.owner}->$SEARCH_ID:I
                 if-eq v0, v1, :search
                 $closeup
+                $sendApp
                 :other
                 const/4 v0, 0x0
                 return v0
@@ -472,6 +481,9 @@ val longPressDownloadPatch = bytecodePatch(
                 return v0
                 :search
                 const/4 v0, 0x3
+                return v0
+                :sendApp
+                const/4 v0, 0x4
                 return v0
             """)
         }

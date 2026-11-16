@@ -414,6 +414,8 @@ Hide Save in the long-press menu	Ocultar Salvar no menu de toque longo
 Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.	Tira o botão Salvar do Pinterest do menu ao manter um pin da grade pressionado. Salvar pelo próprio pin continua funcionando.
 Hide Send in the long-press menu	Ocultar Enviar no menu de toque longo
 Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.	Tira o botão Enviar do Pinterest do menu ao manter um pin da grade pressionado. Compartilhar pelo próprio pin continua funcionando.
+Hide Send with an app in the long-press menu	Ocultar Enviar com um app no menu de toque longo
+Takes the button that sends a pin straight to WhatsApp or the app you last shared with out of a grid pin's long-press menu. Send still lists every app.	Tira do menu ao manter um pin da grade pressionado o botão que envia o pin direto para o WhatsApp ou para o último app com que você compartilhou. Enviar continua mostrando todos os apps.
 Hide Search image in the long-press menu	Ocultar Pesquisar imagem no menu de toque longo
 Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.	Tira o botão Pesquisar imagem do Pinterest do menu ao manter um pin da grade pressionado. A lente de um pin que você abre continua pesquisando.
 With nothing left in it, the menu keeps Pinterest's buttons.	Sem outros botões, o menu mantém os do Pinterest.

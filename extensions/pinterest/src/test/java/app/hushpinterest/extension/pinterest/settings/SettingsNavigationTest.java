@@ -1265,6 +1265,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.DOWNLOAD_SAVED_PINS.key, "also downloads it", "from any screen", "Needs Download pins on");
         summaryContains(Settings.LONG_PRESS_HIDE_SAVE.key, "Pinterest's Save button", "long-press menu", "Saving from the pin itself still works");
         summaryContains(Settings.LONG_PRESS_HIDE_SEND.key, "Pinterest's Send button", "long-press menu", "Sharing from the pin itself still works");
+        summaryContains(Settings.LONG_PRESS_HIDE_SEND_APP.key, "straight to WhatsApp or the app you last shared with", "long-press menu", "Send still lists every app");
         summaryContains(Settings.LONG_PRESS_HIDE_SEARCH.key, "Pinterest's Search image button", "long-press menu", "The lens on a pin you open still searches");
         summaryContains(Settings.HIDE_COMMENTS.key, "comments and comment previews under pins", "next time the screen updates", "doesn't change who can comment");
         summaryContains(Settings.HIDE_SUGGESTED_REPLIES.key, "suggested replies next to the comment box", "write and post your own comment", "next time you open comments");

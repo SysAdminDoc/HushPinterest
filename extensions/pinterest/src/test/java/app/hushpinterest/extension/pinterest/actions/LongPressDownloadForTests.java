@@ -17,7 +17,8 @@ public final class LongPressDownloadForTests {
     private LongPressDownloadForTests() {}
 
     /** The buttons a hide switch takes out, as {@link #hidesButton} names them. */
-    public static final int SAVE = LongPressDownload.SAVE, SEND = LongPressDownload.SEND, SEARCH = LongPressDownload.SEARCH;
+    public static final int SAVE = LongPressDownload.SAVE, SEND = LongPressDownload.SEND, SEARCH = LongPressDownload.SEARCH,
+            SEND_APP = LongPressDownload.SEND_APP;
 
     /** True when a long-pressed pin's menu got the Download button. */
     public static boolean addsDownloadButton() {
@@ -29,11 +30,11 @@ public final class LongPressDownloadForTests {
         return menu.items.size() != 2;
     }
 
-    /** True when a long-pressed pin's menu of Save, Send and Search image lost the one of [kind]. */
+    /** True when a long-pressed pin's menu of Save, Send, Search image and Send with an app lost the one of [kind]. */
     public static boolean hidesButton(int kind) {
         LongPressDownloadTest.Menu menu = new LongPressDownloadTest.Menu(RuntimeEnvironment.getApplication());
         List<Object> buttons = new ArrayList<>();
-        for (int each : new int[]{SAVE, SEND, SEARCH}) buttons.add(new LongPressDownloadTest.Button(menu.getContext(), each));
+        for (int each : new int[]{SAVE, SEND, SEARCH, SEND_APP}) buttons.add(new LongPressDownloadTest.Button(menu.getContext(), each));
         menu.layout(buttons);
         Object button = buttons.get(kind - SAVE);
         menu.show(new LongPressDownloadTest.Event(Map.of("id", "123456")));

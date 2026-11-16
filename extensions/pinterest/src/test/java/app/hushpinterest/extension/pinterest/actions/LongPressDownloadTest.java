@@ -73,6 +73,7 @@ public class LongPressDownloadTest {
 
     @After public void reset() {
         for (BooleanSetting hide : hides()) hide.save(false);
+        Settings.LONG_PRESS_HIDE_SEND_APP.save(false);
         Settings.LONG_PRESS_DOWNLOAD.save(false);
         Settings.DOWNLOAD_PINS.save(false);
         PatchFamilyForTests.capabilities(null);
@@ -216,6 +217,35 @@ public class LongPressDownloadTest {
         menu.layout(List.of(save, other));
         menu.show(new Event(pin("7")));
         assertEquals(List.of(other), menu.items.subList(1, menu.items.size()));
+    }
+
+    /**
+     * The button that sends straight to WhatsApp or the app last shared with (#35) has a switch of its
+     * own: Hide Send leaves it, and its switch takes out only it.
+     */
+    @Test public void sendWithAnAppHasItsOwnSwitch() {
+        Settings.LONG_PRESS_DOWNLOAD.save(false);
+        Settings.LONG_PRESS_HIDE_SEND.save(true);
+        Button send = new Button(activity, LongPressDownload.SEND), app = new Button(activity, LongPressDownload.SEND_APP);
+        assertEquals(List.of(app), shown(send, app));
+
+        Settings.LONG_PRESS_HIDE_SEND.save(false);
+        Settings.LONG_PRESS_HIDE_SEND_APP.save(true);
+        send = new Button(activity, LongPressDownload.SEND);
+        app = new Button(activity, LongPressDownload.SEND_APP);
+        Button search = new Button(activity, LongPressDownload.SEARCH);
+        assertEquals(List.of(send, search), shown(send, app, search));
+        assertNull(app.getParent());
+    }
+
+    /** Pinterest's buttons a long-pressed pin's menu of [buttons] shows. */
+    private List<Object> shown(Button... buttons) {
+        Menu menu = new Menu(activity);
+        activity.setContentView(menu);
+        Shadows.shadowOf(Looper.getMainLooper()).idle();
+        menu.layout(List.of(buttons));
+        menu.show(new Event(pin("7")));
+        return new ArrayList<>(menu.items.subList(1, menu.items.size()));
     }
 
     /** Off, paused, or on a build whose button ids weren't found, the hide switches leave the menu alone. */

@@ -417,6 +417,8 @@ Hide Save in the long-press menu	Merken im Menü beim Gedrückthalten ausblenden
 Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.	Nimmt Pinterests Merken-Schaltfläche aus dem Menü beim Gedrückthalten eines Pins im Raster. Merken direkt am Pin funktioniert weiterhin.
 Hide Send in the long-press menu	Senden im Menü beim Gedrückthalten ausblenden
 Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.	Nimmt Pinterests Senden-Schaltfläche aus dem Menü beim Gedrückthalten eines Pins im Raster. Teilen direkt am Pin funktioniert weiterhin.
+Hide Send with an app in the long-press menu	Senden mit einer App im Menü beim Gedrückthalten ausblenden
+Takes the button that sends a pin straight to WhatsApp or the app you last shared with out of a grid pin's long-press menu. Send still lists every app.	Nimmt die Schaltfläche, die einen Pin direkt an WhatsApp oder die zuletzt zum Teilen genutzte App sendet, aus dem Menü beim Gedrückthalten eines Pins im Raster. Senden zeigt weiterhin alle Apps.
 Hide Search image in the long-press menu	Bild suchen im Menü beim Gedrückthalten ausblenden
 Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.	Nimmt Pinterests Schaltfläche „Bild suchen“ aus dem Menü beim Gedrückthalten eines Pins im Raster. Die Lens auf einem geöffneten Pin sucht weiterhin.
 With nothing left in it, the menu keeps Pinterest's buttons.	Ohne andere Schaltflächen behält das Menü die von Pinterest.

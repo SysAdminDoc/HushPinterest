@@ -436,6 +436,10 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                 actions.addPreference(mark(longPressChoice(context, Settings.LONG_PRESS_HIDE_SEND,
                         L10n.t("Hide Send in the long-press menu"), L10n.t("Takes Pinterest's Send button out of a grid "
                             + "pin's long-press menu. Sharing from the pin itself still works.")), SettingsIcons.BLOCK));
+                actions.addPreference(mark(longPressChoice(context, Settings.LONG_PRESS_HIDE_SEND_APP,
+                        L10n.t("Hide Send with an app in the long-press menu"), L10n.t("Takes the button that sends a pin "
+                            + "straight to WhatsApp or the app you last shared with out of a grid pin's long-press menu. "
+                            + "Send still lists every app.")), SettingsIcons.BLOCK));
                 actions.addPreference(mark(longPressChoice(context, Settings.LONG_PRESS_HIDE_SEARCH,
                         L10n.t("Hide Search image in the long-press menu"), L10n.t("Takes Pinterest's Search image button "
                             + "out of a grid pin's long-press menu. The lens on a pin you open still searches.")), SettingsIcons.BLOCK));

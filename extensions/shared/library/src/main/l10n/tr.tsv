@@ -417,6 +417,8 @@ Hide Save in the long-press menu	Uzun basma menüsünde Kaydet'i gizle
 Takes Pinterest's Save button out of a grid pin's long-press menu. Saving from the pin itself still works.	Pinterest'in Kaydet düğmesini ızgaradaki bir pine basılı tutunca açılan menüden çıkarır. Pinin kendisinden kaydetmek çalışmaya devam eder.
 Hide Send in the long-press menu	Uzun basma menüsünde Gönder'i gizle
 Takes Pinterest's Send button out of a grid pin's long-press menu. Sharing from the pin itself still works.	Pinterest'in Gönder düğmesini ızgaradaki bir pine basılı tutunca açılan menüden çıkarır. Pinin kendisinden paylaşmak çalışmaya devam eder.
+Hide Send with an app in the long-press menu	Uzun basma menüsünde uygulamayla Gönder'i gizle
+Takes the button that sends a pin straight to WhatsApp or the app you last shared with out of a grid pin's long-press menu. Send still lists every app.	Bir pini doğrudan WhatsApp'a veya en son paylaştığın uygulamaya gönderen düğmeyi ızgaradaki bir pine basılı tutunca açılan menüden çıkarır. Gönder tüm uygulamaları göstermeye devam eder.
 Hide Search image in the long-press menu	Uzun basma menüsünde Görüntü ara'yı gizle
 Takes Pinterest's Search image button out of a grid pin's long-press menu. The lens on a pin you open still searches.	Pinterest'in Görüntü ara düğmesini ızgaradaki bir pine basılı tutunca açılan menüden çıkarır. Açtığın bir pindeki mercek aramaya devam eder.
 With nothing left in it, the menu keeps Pinterest's buttons.	Başka düğme kalmayınca menü Pinterest'in düğmelerini korur.

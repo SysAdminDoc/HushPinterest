@@ -645,13 +645,15 @@ public class HushPinterestPreferenceFragmentTest {
 
     /** A method, not a field, so Settings loads after the rule has given it a context. */
     private static BooleanSetting[] longPressHides() {
-        return new BooleanSetting[] {Settings.LONG_PRESS_HIDE_SAVE, Settings.LONG_PRESS_HIDE_SEND, Settings.LONG_PRESS_HIDE_SEARCH};
+        return new BooleanSetting[] {Settings.LONG_PRESS_HIDE_SAVE, Settings.LONG_PRESS_HIDE_SEND, Settings.LONG_PRESS_HIDE_SEND_APP,
+                Settings.LONG_PRESS_HIDE_SEARCH};
     }
 
     /** The long-press hide switches sit right under Long-press download, start off, and show only where their hook went in. */
     @Test
     public void longPressHideSwitchesShowUnderLongPressDownloadOnlyWhereTheirHookWentIn() {
-        String[] titles = {"Hide Save in the long-press menu", "Hide Send in the long-press menu", "Hide Search image in the long-press menu"};
+        String[] titles = {"Hide Save in the long-press menu", "Hide Send in the long-press menu",
+                "Hide Send with an app in the long-press menu", "Hide Search image in the long-press menu"};
         PatchFamily.inBuildForTests = EnumSet.allOf(PatchFamily.class);
         Set<PatchFamily.Capability> withoutIt = EnumSet.allOf(PatchFamily.Capability.class);
         withoutIt.remove(PatchFamily.Capability.LONG_PRESS_CHOICES);

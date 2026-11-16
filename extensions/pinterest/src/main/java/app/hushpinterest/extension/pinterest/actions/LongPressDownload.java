@@ -57,7 +57,7 @@ public final class LongPressDownload {
     static final String ITEM_TAG = "hushpinterest_long_press_download";
 
     /** What {@link #buttonKind} answers: one of Pinterest's buttons the switches can hide, or anything else. */
-    static final int OTHER = 0, SAVE = 1, SEND = 2, SEARCH = 3;
+    static final int OTHER = 0, SAVE = 1, SEND = 2, SEARCH = 3, SEND_APP = 4;
 
     /** Rewritten to return the long-pressed model the show event carries when it's a pin, else null. */
     private static Object eventPin(Object event) { return null; }
@@ -90,8 +90,9 @@ public final class LongPressDownload {
 
     /**
      * Rewritten to read the id Pinterest's builder gave a menu button, the one the menu's hover test
-     * compares, and answer {@link #SAVE}, {@link #SEND} or {@link #SEARCH} for those three buttons.
-     * Everything else is {@link #OTHER}: Download, and the buttons Pinterest builds without an id.
+     * compares, and answer {@link #SAVE}, {@link #SEND}, {@link #SEARCH} or {@link #SEND_APP} (the button
+     * that sends straight to WhatsApp or the app last shared with) for those buttons. Everything else
+     * is {@link #OTHER}: Download, and the buttons Pinterest builds without an id.
      */
     private static int buttonKind(Object button) { return OTHER; }
 
@@ -119,7 +120,7 @@ public final class LongPressDownload {
         try {
             return Utils.settingsReady() && PatchFamily.Capability.LONG_PRESS_CHOICES.installed()
                     && (Settings.LONG_PRESS_HIDE_SAVE.get() || Settings.LONG_PRESS_HIDE_SEND.get()
-                        || Settings.LONG_PRESS_HIDE_SEARCH.get());
+                        || Settings.LONG_PRESS_HIDE_SEARCH.get() || Settings.LONG_PRESS_HIDE_SEND_APP.get());
         } catch (Throwable failure) {
             HookStatus.threw(FamilyNames.LONG_PRESS_DOWNLOAD, "hide switch read", failure);
             return false;
@@ -135,6 +136,7 @@ public final class LongPressDownload {
             case SAVE: return Settings.LONG_PRESS_HIDE_SAVE.get();
             case SEND: return Settings.LONG_PRESS_HIDE_SEND.get();
             case SEARCH: return Settings.LONG_PRESS_HIDE_SEARCH.get();
+            case SEND_APP: return Settings.LONG_PRESS_HIDE_SEND_APP.get();
             default: return false;
         }
     }
