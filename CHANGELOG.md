@@ -20,6 +20,7 @@ Every HushPinterest release, newest first.
 * New `Hide visual search thumbnails` patch with its own switch under Interface. The lens button on a pin's picture stays plain instead of showing a little stack of cropped pictures. It starts off. (#42)
 * New `Fold related pins` patch with its own switch under Interface. An arrow sits under a pin you open, and related pins don't load until you tap it. Tap again and they fold away. Your last choice carries over to other pins and restarts, and Hide related pins wins if both are on. It starts off. (#46)
 * Download pin now looks for an idea pin's video on its pages and in their video blocks, where Pinterest keeps it, before saying the pin has no MP4. (#45)
+* Hide ads now also takes sponsored boards out of the Explore featured boards row in Search. Boards Pinterest picks itself stay.
 * Hide Home suggestions now also matches two row types from a Debug report of a Home showing "Inspired by your interests" and "More ideas for your board". (#30)
 * Original-quality images now reaches the picture pages of idea pins. Each page picks its own picture from its own list, so the switch never got to them before. A picture too big for Android to draw stays at Pinterest's size. Pinterest sometimes lists an original under the wrong file type and its image server refuses it, which left a grey box. The app now tries the other types, then a large copy.
 * Report a problem now opens your browser even when GitHub's app is installed. The app took the link, showed its own template list and lost everything the form had filled in.
