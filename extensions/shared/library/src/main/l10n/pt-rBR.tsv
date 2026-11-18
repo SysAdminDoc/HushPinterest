@@ -776,3 +776,17 @@ Pick the rows to take out of a pin's menu.	Escolha as linhas que quer tirar do m
 Hidden from pin menus: %s. Tap to change.	Oculto nos menus de pin: %s. Toque para mudar.
 Picked: %s. Hide pin menu rows is off, so they still show.	Escolhidas: %s. Ocultar linhas do menu do pin está desligado, então elas ainda aparecem.
 Why you're seeing this pin	Por que você vê este pin
+Customize board tabs	Personalizar abas de pastas
+Board tab header	Cabeçalho das abas de pastas
+Hide See board on board tabs	Ocultar Ver pasta nas abas de pastas
+Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Tira o botão Ver pasta da imagem no topo de uma aba de pasta no Início. A mudança aparece na próxima vez que a aba for aberta.
+Hide More ideas for on board tabs	Ocultar Mais ideias para nas abas de pastas
+Takes More ideas for and any other small text off that picture, so only the board name is left. The change shows the next time the tab opens.	Tira Mais ideias para e qualquer outro texto pequeno dessa imagem, deixando só o nome da pasta. A mudança aparece na próxima vez que a aba for aberta.
+Board name position	Posição do nome da pasta
+%s. Moves the board name on the picture at the top of a board tab on Home. The change shows the next time the tab opens.	%s. Move o nome da pasta na imagem no topo de uma aba de pasta no Início. A mudança aparece na próxima vez que a aba for aberta.
+Where Pinterest puts it	Onde o Pinterest coloca
+Top left	Em cima à esquerda
+Top center	Em cima ao centro
+Middle	No meio
+Bottom center	Embaixo ao centro
+Bottom right	Embaixo à direita

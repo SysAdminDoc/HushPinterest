@@ -779,3 +779,17 @@ Pick the rows to take out of a pin's menu.	Pilih baris yang ingin dihapus dari m
 Hidden from pin menus: %s. Tap to change.	Disembunyikan dari menu pin: %s. Ketuk untuk mengubah.
 Picked: %s. Hide pin menu rows is off, so they still show.	Dipilih: %s. Sembunyikan baris menu pin nonaktif, jadi baris tetap muncul.
 Why you're seeing this pin	Alasan kamu melihat pin ini
+Customize board tabs	Sesuaikan tab papan
+Board tab header	Header tab papan
+Hide See board on board tabs	Sembunyikan Lihat papan di tab papan
+Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Menghapus tombol Lihat papan dari gambar di bagian atas tab papan di Beranda. Perubahan terlihat saat tab dibuka berikutnya.
+Hide More ideas for on board tabs	Sembunyikan Ide lainnya untuk di tab papan
+Takes More ideas for and any other small text off that picture, so only the board name is left. The change shows the next time the tab opens.	Menghapus Ide lainnya untuk dan teks kecil lain dari gambar itu, sehingga hanya nama papan yang tersisa. Perubahan terlihat saat tab dibuka berikutnya.
+Board name position	Posisi nama papan
+%s. Moves the board name on the picture at the top of a board tab on Home. The change shows the next time the tab opens.	%s. Memindahkan nama papan pada gambar di bagian atas tab papan di Beranda. Perubahan terlihat saat tab dibuka berikutnya.
+Where Pinterest puts it	Posisi bawaan Pinterest
+Top left	Kiri atas
+Top center	Tengah atas
+Middle	Tengah
+Bottom center	Tengah bawah
+Bottom right	Kanan bawah

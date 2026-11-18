@@ -779,3 +779,17 @@ Pick the rows to take out of a pin's menu.	Bir pinin menüsünden kaldırılacak
 Hidden from pin menus: %s. Tap to change.	Pin menülerinde gizli: %s. Değiştirmek için dokun.
 Picked: %s. Hide pin menu rows is off, so they still show.	Seçilenler: %s. Pin menüsü satırlarını gizle kapalı, bu yüzden hâlâ görünüyorlar.
 Why you're seeing this pin	Bu pini neden görüyorsun
+Customize board tabs	Pano sekmelerini özelleştir
+Board tab header	Pano sekmesi başlığı
+Hide See board on board tabs	Pano sekmelerinde Panoyu gör düğmesini gizle
+Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Ana sayfadaki pano sekmesinin üstündeki resimden Panoyu gör düğmesini kaldırır. Değişiklik sekme bir sonraki açılışında görünür.
+Hide More ideas for on board tabs	Pano sekmelerinde daha fazla fikir yazısını gizle
+Takes More ideas for and any other small text off that picture, so only the board name is left. The change shows the next time the tab opens.	Bu resimden daha fazla fikir yazısını ve diğer küçük yazıları kaldırır, yalnızca pano adı kalır. Değişiklik sekme bir sonraki açılışında görünür.
+Board name position	Pano adının konumu
+%s. Moves the board name on the picture at the top of a board tab on Home. The change shows the next time the tab opens.	%s. Ana sayfadaki pano sekmesinin üstündeki resimde pano adını taşır. Değişiklik sekme bir sonraki açılışında görünür.
+Where Pinterest puts it	Pinterest'in koyduğu yer
+Top left	Sol üst
+Top center	Üst orta
+Middle	Orta
+Bottom center	Alt orta
+Bottom right	Sağ alt

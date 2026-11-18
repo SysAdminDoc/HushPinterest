@@ -113,6 +113,7 @@ public final class SettingsBackup {
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES,
             Settings.QUIET_EMAIL_REMINDER, Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS,
             Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.CUSTOM_SAVE_SOUND, Settings.CUSTOM_SPLASH_LOGO,
+            Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE,
             Settings.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST, Settings.DISABLE_UPDATE_NAG,
             Settings.FIX_PUSH_NOTIFICATIONS));

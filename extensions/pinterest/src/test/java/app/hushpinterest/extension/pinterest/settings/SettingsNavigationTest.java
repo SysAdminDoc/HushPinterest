@@ -1299,6 +1299,8 @@ public class SettingsNavigationTest {
                 "With no sound picked, Pinterest's plays");
         summaryContains(Settings.CUSTOM_SPLASH_LOGO.key, "logo picked when patching", "Android 13 and newer",
                 "from the next start");
+        summaryContains(Settings.HIDE_BOARD_TAB_BUTTON.key, "See board button", "board tab on Home", "next time the tab opens");
+        summaryContains(Settings.HIDE_BOARD_TAB_SUBTITLE.key, "More ideas for", "only the board name", "next time the tab opens");
     }
 
     @Test public void aliasesKeepAccentMatchingGroupingAndTheSpokenResultCount() {

@@ -779,3 +779,17 @@ Pick the rows to take out of a pin's menu.	Elige las filas que quieres quitar de
 Hidden from pin menus: %s. Tap to change.	Oculto en los menús de pin: %s. Toca para cambiar.
 Picked: %s. Hide pin menu rows is off, so they still show.	Elegidas: %s. Ocultar filas del menú del pin está desactivado, así que siguen apareciendo.
 Why you're seeing this pin	Por qué ves este pin
+Customize board tabs	Personalizar pestañas de tableros
+Board tab header	Encabezado de las pestañas de tableros
+Hide See board on board tabs	Ocultar Ver tablero en las pestañas de tableros
+Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Quita el botón Ver tablero de la imagen superior de una pestaña de tablero en Inicio. El cambio se ve la próxima vez que se abra la pestaña.
+Hide More ideas for on board tabs	Ocultar Más ideas para en las pestañas de tableros
+Takes More ideas for and any other small text off that picture, so only the board name is left. The change shows the next time the tab opens.	Quita Más ideas para y cualquier otro texto pequeño de esa imagen, así solo queda el nombre del tablero. El cambio se ve la próxima vez que se abra la pestaña.
+Board name position	Posición del nombre del tablero
+%s. Moves the board name on the picture at the top of a board tab on Home. The change shows the next time the tab opens.	%s. Mueve el nombre del tablero en la imagen superior de una pestaña de tablero en Inicio. El cambio se ve la próxima vez que se abra la pestaña.
+Where Pinterest puts it	Donde lo pone Pinterest
+Top left	Arriba a la izquierda
+Top center	Arriba al centro
+Middle	En el centro
+Bottom center	Abajo al centro
+Bottom right	Abajo a la derecha

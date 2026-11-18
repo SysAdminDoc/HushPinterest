@@ -779,3 +779,17 @@ Pick the rows to take out of a pin's menu.	Wähle die Zeilen, die aus dem Menü 
 Hidden from pin menus: %s. Tap to change.	In Pin-Menüs ausgeblendet: %s. Tippe zum Ändern.
 Picked: %s. Hide pin menu rows is off, so they still show.	Gewählt: %s. Zeilen im Pin-Menü ausblenden ist aus, deshalb erscheinen sie noch.
 Why you're seeing this pin	Warum du diesen Pin siehst
+Customize board tabs	Pinnwand-Tabs anpassen
+Board tab header	Kopfbereich der Pinnwand-Tabs
+Hide See board on board tabs	Pinnwand ansehen auf Pinnwand-Tabs ausblenden
+Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Entfernt die Schaltfläche Pinnwand ansehen vom Bild oben auf einem Pinnwand-Tab der Startseite. Die Änderung zeigt sich, wenn der Tab das nächste Mal geöffnet wird.
+Hide More ideas for on board tabs	Mehr Ideen für auf Pinnwand-Tabs ausblenden
+Takes More ideas for and any other small text off that picture, so only the board name is left. The change shows the next time the tab opens.	Entfernt Mehr Ideen für und anderen kleinen Text von diesem Bild, sodass nur der Name der Pinnwand bleibt. Die Änderung zeigt sich, wenn der Tab das nächste Mal geöffnet wird.
+Board name position	Position des Pinnwand-Namens
+%s. Moves the board name on the picture at the top of a board tab on Home. The change shows the next time the tab opens.	%s. Verschiebt den Pinnwand-Namen auf dem Bild oben auf einem Pinnwand-Tab der Startseite. Die Änderung zeigt sich, wenn der Tab das nächste Mal geöffnet wird.
+Where Pinterest puts it	Wo Pinterest ihn platziert
+Top left	Oben links
+Top center	Oben mittig
+Middle	Mitte
+Bottom center	Unten mittig
+Bottom right	Unten rechts

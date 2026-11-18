@@ -567,6 +567,8 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_CREATOR_NAME, Collections.singletonList(PausedHooksTest::hidesCreatorName));
         probes.put(Settings.CUSTOM_SAVE_SOUND, Collections.singletonList(UiHooksForTests::playsPickedSaveSound));
         probes.put(Settings.CUSTOM_SPLASH_LOGO, Collections.singletonList(UiHooksForTests::nextStartShowsPickedLogo));
+        probes.put(Settings.HIDE_BOARD_TAB_BUTTON, Collections.singletonList(UiHooksForTests::foldsBoardTabButton));
+        probes.put(Settings.HIDE_BOARD_TAB_SUBTITLE, Collections.singletonList(UiHooksForTests::foldsBoardTabSubtitle));
         probes.put(Settings.HIDE_SAVE_TOASTS, Arrays.asList(PausedHooksTest::dropsSaveToast, UiHooksForTests::quietsSavedToast));
         probes.put(Settings.HIDE_DOWNLOAD_TOASTS, Arrays.asList(PausedHooksTest::dropsDownloadToast, UiHooks::quietDownloads));
         probes.put(Settings.ORIGINAL_IMAGES, Arrays.asList(UiHooks::originalImages, () -> {

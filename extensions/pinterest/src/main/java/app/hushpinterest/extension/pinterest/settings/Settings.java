@@ -252,6 +252,10 @@ public class Settings extends BaseSettings {
      */
     public static final BooleanSetting CUSTOM_SPLASH_LOGO =
             new BooleanSetting("hushpinterest_custom_splash_logo", FALSE, true);
+    public static final BooleanSetting HIDE_BOARD_TAB_BUTTON =
+            new BooleanSetting("hushpinterest_hide_board_tab_button", FALSE);
+    public static final BooleanSetting HIDE_BOARD_TAB_SUBTITLE =
+            new BooleanSetting("hushpinterest_hide_board_tab_subtitle", FALSE);
     public static final BooleanSetting HIDE_SAVE_TOASTS =
             new BooleanSetting("hushpinterest_hide_save_toasts", FALSE);
     public static final BooleanSetting HIDE_DOWNLOAD_TOASTS =

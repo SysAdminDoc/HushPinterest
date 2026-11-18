@@ -109,6 +109,7 @@ public enum PatchFamily {
     HIDE_CREATOR_NAME(FamilyNames.HIDE_CREATOR_NAME, "hideCreatorName", null, Settings.HIDE_CREATOR_NAME),
     CUSTOM_SAVE_SOUND(FamilyNames.CUSTOM_SAVE_SOUND, "customSaveSound", null, Settings.CUSTOM_SAVE_SOUND),
     CUSTOM_SPLASH_LOGO(FamilyNames.CUSTOM_SPLASH_LOGO, "customSplashLogo", null, Settings.CUSTOM_SPLASH_LOGO),
+    BOARD_TABS(FamilyNames.BOARD_TABS, "boardTabs", null, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE),
     HIDE_SAVE_TOASTS(FamilyNames.HIDE_SAVE_TOASTS, "hideSaveToasts", null, Settings.HIDE_SAVE_TOASTS,
             Settings.HIDE_DOWNLOAD_TOASTS),
     ORIGINAL_IMAGES(FamilyNames.ORIGINAL_IMAGES, "originalImages", null, Settings.ORIGINAL_IMAGES),
@@ -170,7 +171,7 @@ public enum PatchFamily {
             LONG_PRESS_DOWNLOAD, SYSTEM_SHARE));
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
             HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
-            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO,
+            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, BOARD_TABS,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
             HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST));
 
@@ -246,6 +247,7 @@ public enum PatchFamily {
         RELATED_PINS(HIDE_RELATED_PINS, "relatedPins", "Hide related pins"),
         CREATOR_NAME(HIDE_CREATOR_NAME, "creatorName", "Hide creator name on pins"),
         SAVE_SOUND(CUSTOM_SAVE_SOUND, "saveSound", "Custom save sound"),
+        BOARD_TAB_HEADER(BOARD_TABS, "boardTabHeader", "Board tab header"),
         SAVE_TOASTS(HIDE_SAVE_TOASTS, "saveToasts", "Hide save toasts"),
         DOWNLOAD_TOASTS(HIDE_SAVE_TOASTS, "downloadToasts", "Hide download toasts"),
         IMAGE_CHOOSER(ORIGINAL_IMAGES, "imageChooser", "collage images"),

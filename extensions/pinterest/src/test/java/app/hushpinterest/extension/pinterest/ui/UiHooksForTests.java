@@ -133,6 +133,35 @@ public final class UiHooksForTests {
         }
     }
 
+    private static FrameLayout boardTab(View... children) {
+        Context context = RuntimeEnvironment.getApplication();
+        FrameLayout tab = new FrameLayout(context);
+        FrameLayout header = new FrameLayout(context);
+        for (View child : children) header.addView(child);
+        tab.addView(header);
+        return tab;
+    }
+
+    /** Whether a board tab's header loses its See board button. */
+    public static boolean foldsBoardTabButton() {
+        android.widget.Button button = new android.widget.Button(RuntimeEnvironment.getApplication());
+        BoardTabs.bind(boardTab(button), null);
+        return button.getVisibility() == View.GONE;
+    }
+
+    /** Whether a board tab's header loses the text smaller than the board's name. */
+    public static boolean foldsBoardTabSubtitle() {
+        Context context = RuntimeEnvironment.getApplication();
+        android.widget.TextView name = new android.widget.TextView(context);
+        name.setText("Calm");
+        name.setTextSize(30);
+        android.widget.TextView subtitle = new android.widget.TextView(context);
+        subtitle.setText("More ideas for");
+        subtitle.setTextSize(12);
+        BoardTabs.bind(boardTab(name, subtitle), null);
+        return subtitle.getVisibility() == View.GONE;
+    }
+
     /** Names the class the save toast hook treats as Pinterest's downloaded toast. */
     public static void downloadToast(Class<?> type) {
         UiHooks.downloadToastForTests = type;

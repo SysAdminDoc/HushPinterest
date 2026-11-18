@@ -289,6 +289,7 @@ public class DexDiff {
             Map.entry("searchLanding", 1),
             Map.entry("searchKeyboard", 1),
             Map.entry("pinMenuRows", 2),
+            Map.entry("boardTabHeader", 1),
             Map.entry("ownAuthorities", 1));
 
     /**
@@ -3683,6 +3684,57 @@ public class DexDiff {
                 }
             }
             capability(c.callee, placed && canOverride(layout.getType(), "onMeasure", "(II)V"));
+        }
+
+        /** The one call in a method that passes the method's own argument to one of the header types. */
+        int boardTabCall(Method m, Set<String> headers) {
+            int at = -1;
+            List<Instruction> body = instructions(m);
+            for (int i = 0; i < body.size(); i++) {
+                if (body.get(i).getOpcode() != Opcode.INVOKE_VIRTUAL || !(reference(body.get(i)) instanceof MethodReference)) continue;
+                MethodReference called = (MethodReference) reference(body.get(i));
+                if (!headers.contains(called.getDefiningClass()) || !called.getReturnType().equals("V")
+                        || called.getParameterTypes().size() != 1
+                        || !called.getParameterTypes().get(0).toString().equals(m.getParameterTypes().get(0).toString())) continue;
+                if (at >= 0) return -1;
+                at = i;
+            }
+            return at;
+        }
+
+        Method boardTabBinding() {
+            List<Method> found = new ArrayList<>();
+            for (Method style : clean.holding("com.pinterest.STRUCTURED_FEED_LANDING_PAGE_HEADER_STYLE")) {
+                if (!style.getParameterTypes().isEmpty() || !style.getReturnType().equals("Z")) continue;
+                ClassDef owner = clean.classes.get(style.getDefiningClass());
+                Set<String> headers = new TreeSet<>();
+                for (Field field : owner.getInstanceFields()) {
+                    ClassDef type = clean.classes.get(field.getType());
+                    if (type != null && "Landroid/widget/LinearLayout;".equals(type.getSuperclass())) headers.add(field.getType());
+                }
+                for (Method m : owner.getMethods())
+                    if (m.getImplementation() != null && m.getReturnType().equals("V") && m.getParameterTypes().size() == 1
+                            && boardTabCall(m, headers) >= 0) found.add(m);
+            }
+            return unique(found, "board tab screen binding");
+        }
+
+        /** The screen hands over its header and itself right before binding the header. */
+        void boardTabHeader(Contract c) {
+            String hook = c.strings.get(0);
+            Method m = actual(boardTabBinding());
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (m != null && sites.size() == 1) {
+                int at = sites.get(0);
+                List<Instruction> body = instructions(m);
+                Instruction next = at + 1 < body.size() ? body.get(at + 1) : null;
+                placed = next != null && next.getOpcode() == Opcode.INVOKE_VIRTUAL && !arguments(next).isEmpty()
+                        && arguments(body.get(at)).equals(List.of(arguments(next).get(0), parameter(m, -1)));
+                if (!placed) fail(hook + " isn't right before the header call, with the header and the screen, in " + m);
+                else remove(m, at, at + 1);
+            }
+            capability(c.callee, placed);
         }
 
         void refresh(Contract c) {
@@ -8395,6 +8447,7 @@ public class DexDiff {
                     case "searchLanding": searchLanding(c); break;
                     case "searchKeyboard": searchKeyboard(c); break;
                     case "pinMenuRows": pinMenuRows(c); break;
+                    case "boardTabHeader": boardTabHeader(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);
                 }

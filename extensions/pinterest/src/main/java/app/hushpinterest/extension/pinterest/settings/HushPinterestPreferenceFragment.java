@@ -625,6 +625,17 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Shows the logo picked when patching on the screen you see while Pinterest starts, "
                         + "instead of Pinterest's. Android 13 and newer. It shows from the next start."),
                     SettingsIcons.OPENING);
+            patchToggle(ui, context, build, PatchFamily.BOARD_TABS, Settings.HIDE_BOARD_TAB_BUTTON,
+                    L10n.t("Hide See board on board tabs"),
+                    L10n.t("Takes the See board button off the picture at the top of a board tab on Home. "
+                        + "The change shows the next time the tab opens."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.BOARD_TABS, Settings.HIDE_BOARD_TAB_SUBTITLE,
+                    L10n.t("Hide More ideas for on board tabs"),
+                    L10n.t("Takes More ideas for and any other small text off that picture, so only the board "
+                        + "name is left. The change shows the next time the tab opens."), SettingsIcons.BLOCK);
+            if (build.contains(PatchFamily.BOARD_TABS)) {
+                ui.addPreference(mark(new BoardTabPositionPreference(context), SettingsIcons.SETTINGS));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),
                     L10n.t("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's "
