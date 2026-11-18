@@ -164,6 +164,20 @@ public final class UiHooks {
     }
 
     /**
+     * Pinterest's video view asks to hold the screen on, which it does for as long as the video
+     * sits on the screen, playing or not. With Let the screen sleep on the view asks for nothing,
+     * so the phone's own screen timeout applies. Off or paused, Pinterest's value goes through.
+     */
+    public static void keepScreenOn(View view, boolean on) {
+        if (view == null) return;
+        if (on && enabled(FamilyNames.LET_SCREEN_SLEEP, Settings.LET_SCREEN_SLEEP)) {
+            HookStatus.counted(FamilyNames.LET_SCREEN_SLEEP, "screen hold skipped");
+            on = false;
+        }
+        view.setKeepScreenOn(on);
+    }
+
+    /**
      * A pin page read the pin's visual search crops for its lens button. With Hide visual search
      * thumbnails on it gets none, which is how a pin without crops reads, so the button stays the
      * plain lens. Never throws.

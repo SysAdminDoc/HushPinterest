@@ -1301,6 +1301,8 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_HIGHLIGHT_RING.key, "thick blue ring", "buttons such as Save");
         summaryContains(Settings.HIDE_VISUAL_SEARCH_THUMBNAILS.key, "lens button", "stack of cropped pictures", "next pin you open");
         summaryContains(Settings.FOLD_RELATED_PINS.key, "arrow under a pin", "don't load until you tap it", "last choice is kept", "Hide related pins wins");
+        summaryContains(Settings.LET_SCREEN_SLEEP.key, "keeps the screen on while a video is on it", "usual timeout",
+                "next pin you open");
         summaryContains(Settings.CUSTOM_SAVE_SOUND.key, "sound you pick below", "when you save a pin",
                 "With no sound picked, Pinterest's plays");
         summaryContains(Settings.CUSTOM_SPLASH_LOGO.key, "logo picked when patching", "Android 13 and newer",

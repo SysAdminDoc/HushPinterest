@@ -291,7 +291,7 @@ public class DexDiff {
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
             Map.entry("boardTabCovers", 1),
-            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("relatedPinsFold", 3), Map.entry("ownAuthorities", 1));
+            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("relatedPinsFold", 3), Map.entry("screenSleep", 1), Map.entry("ownAuthorities", 1));
 
     /**
      * A start-call, next-call, sole-call or once-call line: its method reference, the next-call's
@@ -2379,6 +2379,7 @@ public class DexDiff {
                 "multi_board_save_saved_to_profile", "saved_onto_board", "saved_to_board_section", "saved_multiple_to_board_section", "pin_saved");
         static final String TOAST_MAKE = "Landroid/widget/Toast;->makeText";
         static final String MEDIA_PLAYER_CREATE = "Landroid/media/MediaPlayer;->create(Landroid/content/Context;I)Landroid/media/MediaPlayer;";
+        static final String KEEP_SCREEN_ON = "Landroid/view/View;->setKeepScreenOn(Z)V";
         static final Set<String> TOAST_SHAPES = Set.of("(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;",
                 "(Landroid/content/Context;II)Landroid/widget/Toast;");
         final FeatureIndex clean;
@@ -6519,6 +6520,39 @@ public class DexDiff {
             capability(c.callee, closeupGatePlaced(c.strings.get(0)));
         }
 
+        /**
+         * Let the screen sleep (#47): every View.setKeepScreenOn call in Pinterest goes to the hook on
+         * the same registers and in the same spot. The hook makes Pinterest's call itself, with
+         * Pinterest's value whenever its switch is off.
+         */
+        void screenSleep(Contract c) {
+            String hook = c.strings.get(0);
+            int total = 0;
+            for (ClassDef cd : clean.classes.values()) for (Method method : cd.getMethods()) {
+                if (method.getImplementation() == null) continue;
+                List<Instruction> was = instructions(method);
+                List<Integer> holds = callSites(was, KEEP_SCREEN_ON);
+                if (holds.isEmpty()) continue;
+                total += holds.size();
+                Method m = actual(method);
+                List<Integer> hooked = calls(m, hook, holds.size());
+                if (m == null) continue;
+                List<Instruction> body = instructions(m);
+                if (!callSites(body, KEEP_SCREEN_ON).isEmpty()) fail(hook + " left a screen hold in " + m);
+                for (int n = 0; n < Math.min(hooked.size(), holds.size()); n++) {
+                    Instruction old = was.get(holds.get(n));
+                    if (!hooked.get(n).equals(holds.get(n))) fail(hook + " moved a screen hold in " + m);
+                    if (!arguments(body.get(hooked.get(n))).equals(arguments(old))) fail(hook + " changed its argument registers in " + m);
+                    edits.computeIfAbsent(m.toString(), k -> new FeatureEdits()).replacements.put(hooked.get(n), old);
+                }
+            }
+            if (total > 0) {
+                Method stand = actual(hook);
+                if (stand != null) fallback(stand, KEEP_SCREEN_ON);
+            }
+            capability(c.callee, total > 0);
+        }
+
         /** The ring's one method taking a size and a screen position asks the hook first and stops on yes. */
         void highlightRing(Contract c) {
             List<Method> places = new ArrayList<>();
@@ -8796,6 +8830,7 @@ public class DexDiff {
                     case "postedDate": postedDate(c); break;
                     case "closeupGate": closeupGate(c); break;
                     case "highlightRing": highlightRing(c); break;
+                    case "screenSleep": screenSleep(c); break;
                     case "visualSearchThumbnails": visualSearchThumbnails(c); break;
                     case "relatedPinsFold": relatedPinsFold(c); break;
                     case "saveSheet": saveSheet(c); break;
