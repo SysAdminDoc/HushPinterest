@@ -766,3 +766,5 @@ Hide download toasts	İndirme bildirimlerini gizle
 Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays.	Bir pini indirirken başladığını veya bittiğini söyleyen mesaj artık görünmez. Hatalar yine gösterilir ve Android'in kendi indirme bildirimi kalır.
 Black toasts	Siyah bildirimler
 In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	Karanlık modda, bir pini kaydettikten veya indirdikten sonra çıkan gibi Pinterest mesajlarını tam siyaha boyar. Açık mod olduğu gibi kalır. Değişiklik bir sonraki mesajda görünür.
+Hide Home tabs	Ana sayfa sekmelerini gizle
+Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Tümü ve pano adlarının bulunduğu sekme satırını Ana sayfanın üstünden kaldırır. Değişiklik Ana sayfa bir sonraki güncellenişinde görünür.

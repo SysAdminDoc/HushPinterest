@@ -99,6 +99,7 @@ public final class SettingsBackup {
             Settings.LONG_PRESS_HIDE_SEND_APP, Settings.EXTERNAL_BROWSER, Settings.SYSTEM_SHARE,
             Settings.HIDE_SCREENSHOT_SHARE, Settings.HIDE_ASSISTANT, Settings.HIDE_SEARCH_HISTORY,
             Settings.HIDE_NAV_CREATE, Settings.HIDE_NAV_NOTIFICATIONS, Settings.HIDE_NAV_SEARCH, Settings.HIDE_HEADER_BUTTONS,
+            Settings.HIDE_HOME_TABS,
             Settings.BLACK_BOTTOM_BAR, Settings.BLACK_COMMENTS, Settings.BLACK_PIN_MENU, Settings.BLACK_SAVE_SHEET,
             Settings.BLACK_SHEETS, Settings.BLACK_BOARDS, Settings.BLACK_TOASTS,
             Settings.HIDE_CLOSEUP_BACK, Settings.HIDE_CLOSEUP_LENS, Settings.HIDE_CLOSEUP_SEARCH_LABEL,

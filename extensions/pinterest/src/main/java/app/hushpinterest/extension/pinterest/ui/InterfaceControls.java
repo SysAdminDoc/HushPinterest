@@ -27,6 +27,10 @@ public final class InterfaceControls {
     private static final Map<View, Integer> hidden = new WeakHashMap<>();
     private static final Map<View, Boolean> greetingRows = new WeakHashMap<>();
 
+    private static final String HOME_TABS = "home_feed_view_pager_tab_layout";
+    private static final String HOME_TABS_LOADING = "home_feed_tabs_placeholder_loading_layout";
+    private static volatile int homeTabsId = View.NO_ID;
+
     /** Called after the host assigns a navigation view its ID. Home and Profile always remain. */
     public static void bindNavigation(View view, Object tab) {
         try {
@@ -133,6 +137,51 @@ public final class InterfaceControls {
             });
         } catch (Throwable failure) {
             HookStatus.threw(FamilyNames.HIDE_NAVIGATION_BUTTONS, "navigation layout", failure);
+        }
+    }
+
+    /**
+     * Called first in every TabLayout's onMeasure with the height it was offered. While Hide Home
+     * tabs is on, Home's row measures at no height, and the pager hanging off its bottom edge moves
+     * up. The row stays attached, so Pinterest's pager and tab code run as they always do. Anything
+     * beside the row, such as the tuner button, folds with it, and so does the shimmer Pinterest
+     * shows in its place while the tabs load. Pinterest hides that shimmer itself once they're in,
+     * so it's never put back.
+     */
+    public static int homeTabsHeight(View tabs, int widthSpec, int heightSpec) {
+        try {
+            if (tabs == null || !isHomeTabs(tabs)) return heightSpec;
+            boolean hide = UiHooks.enabled(FamilyNames.HIDE_NAVIGATION_BUTTONS, Settings.HIDE_HOME_TABS);
+            if (tabs.getParent() instanceof ViewGroup) {
+                ViewGroup row = (ViewGroup) tabs.getParent();
+                for (int index = 0; index < row.getChildCount(); index++) {
+                    View child = row.getChildAt(index);
+                    if (child != tabs) collapse(child, hide);
+                }
+                if (hide && row.getParent() instanceof ViewGroup) foldTabsLoading((ViewGroup) row.getParent());
+            }
+            return hide ? View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.EXACTLY) : heightSpec;
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.HIDE_NAVIGATION_BUTTONS, "home tabs", failure);
+            return heightSpec;
+        }
+    }
+
+    private static boolean isHomeTabs(View tabs) {
+        int id = tabs.getId();
+        if (id == View.NO_ID) return false;
+        if (id == homeTabsId) return true;
+        if (!HOME_TABS.equals(resourceName(tabs))) return false;
+        homeTabsId = id;
+        return true;
+    }
+
+    private static void foldTabsLoading(ViewGroup page) {
+        for (int index = 0; index < page.getChildCount(); index++) {
+            View child = page.getChildAt(index);
+            if (child.getVisibility() != View.GONE && HOME_TABS_LOADING.equals(resourceName(child))) {
+                child.setVisibility(View.GONE);
+            }
         }
     }
 

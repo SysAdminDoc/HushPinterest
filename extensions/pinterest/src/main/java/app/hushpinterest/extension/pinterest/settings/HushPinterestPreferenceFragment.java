@@ -493,6 +493,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             patchToggle(ui, context, build, PatchFamily.HIDE_NAVIGATION_BUTTONS, Settings.HIDE_NAV_SEARCH,
                     L10n.t("Hide Search button"), L10n.t("Hides Search in the bottom bar. The change shows the next "
                         + "time the bar updates."), SettingsIcons.BLOCK);
+            if (build.contains(PatchFamily.HIDE_NAVIGATION_BUTTONS) && PatchFamily.Capability.HOME_TABS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_HOME_TABS, L10n.t("Hide Home tabs"),
+                        L10n.t("Takes the row of tabs, All and your board names, off the top of Home. The change "
+                            + "shows the next time Home updates.")), SettingsIcons.BLOCK));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_HEADER_BUTTONS, Settings.HIDE_HEADER_BUTTONS,
                     L10n.t("Hide header buttons"),
                     L10n.t("Hides the small icon buttons at the end of the top bar. Back, text buttons and account "

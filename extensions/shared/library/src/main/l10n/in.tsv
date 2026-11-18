@@ -766,3 +766,5 @@ Hide download toasts	Sembunyikan notifikasi unduhan
 Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays.	Mengunduh pin tidak lagi menampilkan pesan bahwa unduhan dimulai atau selesai. Pesan kesalahan tetap muncul, dan notifikasi unduhan Android tetap ada.
 Black toasts	Notifikasi hitam
 In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	Dalam mode gelap, membuat pesan yang muncul dari Pinterest, seperti setelah menyimpan atau mengunduh pin, menjadi hitam pekat. Mode terang tetap seperti semula. Perubahan terlihat pada pesan berikutnya.
+Hide Home tabs	Sembunyikan tab Beranda
+Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Menghapus deretan tab, Semua dan nama papan Anda, dari bagian atas Beranda. Perubahan terlihat saat Beranda diperbarui berikutnya.

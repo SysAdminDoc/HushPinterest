@@ -285,6 +285,7 @@ public class DexDiff {
             Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1),
             Map.entry("downloadToasts", 1),
             Map.entry("blackToasts", 1),
+            Map.entry("homeTabs", 1),
             Map.entry("ownAuthorities", 1));
 
     /**
@@ -3597,6 +3598,25 @@ public class DexDiff {
                         && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at - 1))));
                 if (!placed) fail(hook + " doesn't take the toast the container just built in " + m);
                 else remove(m, at, at + 1);
+            }
+            capability(c.callee, placed);
+        }
+
+        /** Every TabLayout asks for its height first, handing over itself and both measure specs. */
+        void homeTabs(Contract c) {
+            String hook = c.strings.get(0);
+            Method stock = clean.methods.get("Lcom/google/android/material/tabs/TabLayout;->onMeasure(II)V");
+            if (stock == null) { fail("TabLayout has no onMeasure to take " + hook); capability(c.callee, false); return; }
+            Method m = actual(stock);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (m != null && sites.size() == 1) {
+                List<Instruction> body = instructions(m);
+                placed = sites.get(0) == 0 && body.get(0).getOpcode() == Opcode.INVOKE_STATIC_RANGE
+                        && arguments(body.get(0)).equals(List.of(parameter(m, -1), parameter(m, 0), parameter(m, 1)))
+                        && body.get(1).getOpcode() == Opcode.MOVE_RESULT && firstRegister(body.get(1)) == parameter(m, 1);
+                if (!placed) fail(hook + " doesn't replace the height spec first thing in " + m);
+                else remove(m, 0, 2);
             }
             capability(c.callee, placed);
         }
@@ -8307,6 +8327,7 @@ public class DexDiff {
                     case "pinInvites": pinInvites(c); break;
                     case "downloadToasts": downloadToasts(c); break;
                     case "blackToasts": blackToasts(c); break;
+                    case "homeTabs": homeTabs(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);
                 }

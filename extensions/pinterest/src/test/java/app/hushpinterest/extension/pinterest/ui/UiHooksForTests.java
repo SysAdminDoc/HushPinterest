@@ -7,6 +7,7 @@
 package app.hushpinterest.extension.pinterest.ui;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.view.View;
@@ -27,6 +28,35 @@ import org.robolectric.shadows.util.DataSource;
  */
 public final class UiHooksForTests {
     private UiHooksForTests() {}
+
+    private static Resources naming(Context context, String name) {
+        Resources original = context.getResources();
+        return new Resources(context.getAssets(), original.getDisplayMetrics(), original.getConfiguration()) {
+            @Override public String getResourceEntryName(int id) { return name; }
+        };
+    }
+
+    /** A view wearing the id Pinterest's layouts give it. */
+    public static View named(String name) {
+        Context context = RuntimeEnvironment.getApplication();
+        Resources resources = naming(context, name);
+        View view = new View(context) {
+            @Override public Resources getResources() { return resources; }
+        };
+        view.setId(View.generateViewId());
+        return view;
+    }
+
+    /** A frame wearing the id Pinterest's layouts give it. */
+    public static FrameLayout namedFrame(String name) {
+        Context context = RuntimeEnvironment.getApplication();
+        Resources resources = naming(context, name);
+        FrameLayout frame = new FrameLayout(context) {
+            @Override public Resources getResources() { return resources; }
+        };
+        frame.setId(View.generateViewId());
+        return frame;
+    }
 
     /** Names the class the save toast hook treats as Pinterest's downloaded toast. */
     public static void downloadToast(Class<?> type) {

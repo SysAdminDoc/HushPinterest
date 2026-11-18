@@ -507,6 +507,8 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_NAV_NOTIFICATIONS, Arrays.asList(() -> hidesNavigation(Tab.NOTIFICATIONS),
                 () -> hidesGreetingButton("home_feed_greeting_header_newshub_icon")));
         probes.put(Settings.HIDE_NAV_SEARCH, Collections.singletonList(() -> hidesNavigation(Tab.SEARCH)));
+        probes.put(Settings.HIDE_HOME_TABS, Collections.singletonList(() -> InterfaceControls.homeTabsHeight(
+                namedView("home_feed_view_pager_tab_layout"), MEASURE_SPEC, MEASURE_SPEC) != MEASURE_SPEC));
         probes.put(Settings.HIDE_HEADER_BUTTONS, Collections.singletonList(() -> {
             View header = namedView("end_container_icon_bt");
             InterfaceControls.headerButtons(header);

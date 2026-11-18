@@ -94,6 +94,7 @@ public final class SettingsStatus {
     public static boolean recentSearchHeading() { return false; }
     public static boolean hideNavigationButtons() { return false; }
     public static boolean navigationButtons() { return false; }
+    public static boolean homeTabs() { return false; }
     public static boolean hideHeaderButtons() { return false; }
     public static boolean headerButtons() { return false; }
     public static boolean amoledBlack() { return false; }

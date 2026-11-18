@@ -72,6 +72,7 @@ class UiFixtureTest {
         "amoledBlack" to "blackSheets", "amoledBlack" to "blackBoards", "amoledBlack" to "blackToasts",
         "hideSearchHistory" to "recentSearchRows", "hideSearchHistory" to "recentSearchHeading",
         "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
+        "hideNavigationButtons" to "homeTabs",
     )
 
     @Test fun `every interface family matches each supported vendor build without a warning`() {
@@ -378,6 +379,38 @@ class UiFixtureTest {
             assertTrue("${build.name}: the update hook runs before Play Core's update call ($guard, $prompt)",
                 guard >= 0 && prompt > guard)
         }
+    }
+
+    @Test fun `every TabLayout asks for its height before it measures, and nothing else in it changes`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val classes = read(build)
+            val stock = classes.single { it.type == TAB_LAYOUT }.methods.single { it.name == "onMeasure" }
+            val context = PatchContexts.of(ExtensionDex.classes() + classes)
+            hideNavigationButtonsPatch.execute(context)
+            assertFlag(context, "homeTabs", true)
+            val measure = context.mutable(stock).implementation!!
+            val hook = measure.instructions.first()
+            assertEquals(build.name, Opcode.INVOKE_STATIC_RANGE, hook.opcode)
+            assertEquals(build.name, HOME_TABS_HOOK, (hook as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: the view and both specs", measure.registerCount - 3, (hook as RegisterRangeInstruction).startRegister)
+            assertEquals(build.name, 3, hook.registerCount)
+            val answer = measure.instructions[1]
+            assertEquals(build.name, Opcode.MOVE_RESULT, answer.opcode)
+            assertEquals("${build.name}: the answer becomes the height spec", measure.registerCount - 1, (answer as OneRegisterInstruction).registerA)
+            assertEquals(build.name, stock.instructions().map { it.opcode }.filter { it != Opcode.NOP },
+                measure.instructions.drop(2).map { it.opcode }.filter { it != Opcode.NOP })
+        }
+    }
+
+    @Test fun `a build without TabLayout keeps the navigation switches and says Home's tabs stay`() {
+        val build = Fixtures.declaredBuilds().last()
+        val context = PatchContexts.of(ExtensionDex.classes() + read(build).filter { it.type != TAB_LAYOUT })
+        val warnings = PatchLogCapture.warnings { hideNavigationButtonsPatch.execute(context) }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertTrue(warnings.single(), warnings.single().contains("Hide Home tabs left out"))
+        assertFlag(context, "homeTabs", false)
+        assertFlag(context, "navigationButtons", true)
+        assertFlag(context, "hideNavigationButtons", true)
     }
 
     private fun asksForAssistant(method: Method) = method.returnType == "Z" && method.parameterTypes.isEmpty() &&
@@ -734,7 +767,7 @@ class UiFixtureTest {
             "unifiedCommentsModulePresenterFactory", "CommentsZone(isVisible=", INBOX_UPDATES_FEED)
         val required = (SEARCH_HISTORY_VIEWS + TYPEAHEAD_ROW + COMMENT_PREVIEW + COMMENTS_IMAGES + COMMENTS_QUICK_REPLIES + HEADER_BAR + BOTTOM_BAR +
             BLUR_VIEW + PIN_MENU + "Lcom/pinterest/activity/pin/view/modules/PinCloseupVideoModule;" +
-            BOARD_TOOL_BAR + PROFILE_PILL + PROFILE_FILTER_BAR + BOARD_HEADER_IMAGE + TOAST_CONTAINER).toSet()
+            BOARD_TOOL_BAR + PROFILE_PILL + PROFILE_FILTER_BAR + BOARD_HEADER_IMAGE + TOAST_CONTAINER + TAB_LAYOUT).toSet()
         val found = mutableMapOf<String, ClassDef>()
         // Every class with a section adder, kept below only when it holds the Updates feed.
         val adders = mutableListOf<ClassDef>()

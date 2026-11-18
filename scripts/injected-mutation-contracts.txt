@@ -52,7 +52,7 @@ family|systemShare|System share sheet|pinShare
 family|hideScreenshotShare|No screenshot share menu|screenshotShare
 family|hideAssistant|Hide Assistant|assistantEntries
 family|hideSearchHistory|Hide search history|searchHistory,recentSearchRows,recentSearchHeading
-family|hideNavigationButtons|Hide navigation buttons|navigationButtons
+family|hideNavigationButtons|Hide navigation buttons|navigationButtons,homeTabs
 family|hideHeaderButtons|Hide header buttons|headerButtons
 family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards,blackToasts
 family|hideCloseupButtons|Hide closeup buttons|closeupButtons,closeupSearchLabel,closeupActionBar,closeupRemix,closeupVisitSite,closeupSaveButton
@@ -143,6 +143,7 @@ mutation|feedbackFlyout|feedbackFlyout|Lapp/hushpinterest/extension/pinterest/ui
 mutation|firebaseCertificate|firebaseCertificate|Lapp/hushpinterest/extension/pinterest/notifications/PushNotifications;->certificateHeader(Ljava/net/URLConnection;Ljava/lang/String;)Ljava/lang/String;
 mutation|downloadToasts|downloadToasts|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->isDownloadToast(Ljava/lang/Object;)Z
 mutation|blackToasts|blackToasts|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->toast(Landroid/view/View;)V
+mutation|homeTabs|homeTabs|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->homeTabsHeight(Landroid/view/View;II)I
 # Change package name hands each load of a literal naming one of Pinterest's own providers to the
 # extension, which answers the running copy's authority.
 mutation|changePackageName|ownAuthorities|Lapp/hushpinterest/extension/pinterest/coexist/OwnAuthorities;->name(Ljava/lang/String;)Ljava/lang/String;

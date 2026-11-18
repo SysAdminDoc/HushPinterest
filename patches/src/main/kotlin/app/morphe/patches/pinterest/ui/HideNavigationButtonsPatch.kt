@@ -34,6 +34,9 @@ internal const val GREETING_NEWSHUB = "home_feed_greeting_header_newshub_icon"
 internal const val GREETING_CREATE = "home_feed_greeting_header_create_icon"
 internal const val GREETING_HEADER_HOOK = "$INTERFACE_CONTROLS->greetingHeader(Landroid/view/View;)V"
 
+internal const val TAB_LAYOUT = "Lcom/google/android/material/tabs/TabLayout;"
+internal const val HOME_TABS_HOOK = "$INTERFACE_CONTROLS->homeTabsHeight(Landroid/view/View;II)I"
+
 internal class GreetingHeader(val builder: MutableMethod, val row: Int, val hookAt: Int)
 
 /**
@@ -91,13 +94,31 @@ internal fun BytecodePatchContext.greetingHeader(): GreetingHeader {
     return GreetingHeader(builder, row, last + 1)
 }
 
+/**
+ * Every TabLayout asks the extension for its height first, and only Home's row gets a different
+ * answer. The library class is the one place to do it: Pinterest's subclass can't override the final
+ * onMeasure, and the row's container has no code of its own.
+ */
+private fun BytecodePatchContext.hideHomeTabs() {
+    val tabs = classDefByOrNull(TAB_LAYOUT) ?: throw PatchException("this build has no $TAB_LAYOUT")
+    val measure = mutableClassDefBy(tabs.type).methods.filter {
+        it.name == "onMeasure" && it.returnType == "V" && it.parameters() == listOf("I", "I")
+    }.one("TabLayout's onMeasure")
+    measure.addInstructions(0, """
+        invoke-static/range { p0 .. p2 }, $HOME_TABS_HOOK
+        move-result p2
+    """)
+    enableCapability("homeTabs")
+}
+
 /** Fold tabs visually without changing their indexes or the host's navigation models. */
 @Suppress("unused")
 val hideNavigationButtonsPatch = bytecodePatch(
     name = "Hide navigation buttons",
     description = "Lets you hide the Create, Notifications and Search buttons in the bottom bar, each with its own " +
         "switch. The Create and Notifications switches also cover those buttons at the top of Home. Home and " +
-        "Profile stay. Starts off. Turn them on in HushPinterest settings > Interface.",
+        "Profile stay. Another switch takes the row of tabs off the top of Home. Starts off. Turn them on in " +
+        "HushPinterest settings > Interface.",
 ) {
     category("Navigation")
     dependsOn(settingsPatch, pinterestExtensionPatch)
@@ -105,6 +126,7 @@ val hideNavigationButtonsPatch = bytecodePatch(
     execute {
         requireStatusMethod("hideNavigationButtons")
         requireStatusMethod("navigationButtons")
+        requireStatusMethod("homeTabs")
         val modelDescription = methodsWithString("BottomNavTabModel(type=").filter { it.name == "toString" }
             .one("Bottom navigation tab model")
         val model = classDefBy(modelDescription.definingClass)
@@ -172,6 +194,7 @@ val hideNavigationButtonsPatch = bytecodePatch(
         refreshOnMeasure(navigation, "refreshNavigation")
         greeting.builder.addInstructions(greeting.hookAt,
             "invoke-static/range { v${greeting.row} .. v${greeting.row} }, $GREETING_HEADER_HOOK")
+        optionalTarget("Hide navigation buttons", "Hide Home tabs") { hideHomeTabs() }
         enableCapability("navigationButtons")
         enableStatus("hideNavigationButtons")
     }

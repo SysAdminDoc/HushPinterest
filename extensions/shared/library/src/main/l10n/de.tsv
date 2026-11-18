@@ -766,3 +766,5 @@ Hide download toasts	Download-Hinweise ausblenden
 Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays.	Beim Herunterladen eines Pins erscheint keine Meldung mehr, dass es begonnen hat oder fertig ist. Fehler werden weiter angezeigt, und die Download-Benachrichtigung von Android bleibt.
 Black toasts	Schwarze Hinweise
 In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	Färbt im Dunkelmodus die Meldungen von Pinterest, etwa nach dem Merken oder Herunterladen eines Pins, tiefschwarz. Der helle Modus bleibt, wie er ist. Die Änderung zeigt sich bei der nächsten Meldung.
+Hide Home tabs	Startseiten-Tabs ausblenden
+Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Entfernt die Tab-Leiste mit Alle und deinen Pinnwandnamen oben auf der Startseite. Die Änderung zeigt sich, wenn sich die Startseite das nächste Mal aktualisiert.
