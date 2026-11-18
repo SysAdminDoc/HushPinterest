@@ -526,6 +526,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_custom_splash_logo": return L10n.t("Custom splash logo");
             case "hushpinterest_hide_board_tab_button": return L10n.t("Hide See board on board tabs");
             case "hushpinterest_hide_board_tab_subtitle": return L10n.t("Hide More ideas for on board tabs");
+            case "hushpinterest_board_tab_covers_on": return L10n.t("Choose board tab covers");
             case "hushpinterest_hide_save_toasts": return L10n.t("Hide save toasts");
             case "hushpinterest_hide_download_toasts": return L10n.t("Hide download toasts");
             case "hushpinterest_original_images": return L10n.t("Original-quality images");

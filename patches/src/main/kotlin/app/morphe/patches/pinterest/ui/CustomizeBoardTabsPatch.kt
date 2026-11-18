@@ -7,9 +7,12 @@
 package app.morphe.patches.pinterest.ui
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.pinterest.misc.extension.EXTENSION_PACKAGE
 import app.morphe.patches.pinterest.misc.extension.enableCapability
 import app.morphe.patches.pinterest.misc.extension.enableStatus
@@ -25,6 +28,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -34,6 +38,10 @@ internal const val BOARD_TAB_STYLE = "com.pinterest.STRUCTURED_FEED_LANDING_PAGE
 internal const val BOARD_TAB_HEADER_BASE = "Landroid/widget/LinearLayout;"
 internal const val BOARD_TABS = "$EXTENSION_PACKAGE/ui/BoardTabs;"
 internal const val BOARD_TAB_BIND_HOOK = "$BOARD_TABS->bind(Landroid/view/View;Ljava/lang/Object;)V"
+internal const val BOARD_TAB_COVER_BASE = "Landroidx/constraintlayout/widget/ConstraintLayout;"
+internal const val BOARD_TAB_IMAGE = "Lcom/pinterest/ui/imageview/GenericWebImageView;"
+internal const val BOARD_TAB_COVERS = "$EXTENSION_PACKAGE/ui/BoardTabCovers;"
+internal const val BOARD_TAB_COVER_HOOK = "$BOARD_TAB_COVERS->coverUrl(Landroid/view/View;Ljava/lang/String;)Ljava/lang/String;"
 private const val BUNDLE = "Landroid/os/Bundle;"
 
 /** The screen of a board tab, the method handing its header new data, and the header call in it. */
@@ -82,12 +90,63 @@ private fun BytecodePatchContext.writeScreenArguments(style: Method) {
     """)
 }
 
+/** A web image loading a String that the instruction right before has just read from a field. */
+private fun Method.loadsCoverAt(index: Int): Boolean {
+    val body = instructions()
+    val call = body[index]
+    val called = (call as? ReferenceInstruction)?.reference as? MethodReference ?: return false
+    if (index == 0 || call.opcode != Opcode.INVOKE_VIRTUAL || called.definingClass != BOARD_TAB_IMAGE ||
+        called.returnType != "V" || called.parameters() != listOf("Ljava/lang/String;")
+    ) return false
+    val read = body[index - 1]
+    val field = (read as? ReferenceInstruction)?.reference as? FieldReference ?: return false
+    return read.opcode == Opcode.IGET_OBJECT && field.type == "Ljava/lang/String;" &&
+        (read as OneRegisterInstruction).registerA == (call as FiveRegisterInstruction).registerD
+}
+
+/**
+ * The header's inner layout loads its picture in the method taking the same data as the header. A
+ * picture Pinterest leaves out still reaches its loader as before, and the hook can skip a real one.
+ */
+private fun BytecodePatchContext.installBoardTabCovers(target: BoardTabTarget) {
+    val inner = classDefBy(target.header).fields.map { it.type }
+        .filter { classDefByOrNull(it)?.superclass == BOARD_TAB_COVER_BASE }.distinct()
+        .one("$PATCH: the header's picture layout")
+    val parameters = target.bind.parameters()
+    val (method, index) = classDefBy(inner).methods.filter { it.returnType == "V" && it.parameters() == parameters }
+        .flatMap { candidate -> candidate.instructions().indices.filter { candidate.loadsCoverAt(it) }.map { candidate to it } }
+        .one("$PATCH: the picture load")
+    val instruction = method.instructions()[index]
+    val load = instruction as FiveRegisterInstruction
+    val image = load.registerC
+    val url = load.registerD
+    if (image > 15 || url > 15) throw PatchException("$PATCH: the picture load's registers are out of range")
+    writeStub(BOARD_TAB_COVERS, "loadCover", 2, """
+        check-cast p0, $BOARD_TAB_IMAGE
+        invoke-virtual { p0, p1 }, ${(instruction as ReferenceInstruction).reference}
+        return-void
+    """)
+    val patched = mutable(method)
+    patched.addInstructionsWithLabels(
+        index,
+        """
+            if-eqz v$url, :hush_cover_load
+            invoke-static { v$image, v$url }, $BOARD_TAB_COVER_HOOK
+            move-result-object v$url
+            if-eqz v$url, :hush_cover_done
+        """,
+        ExternalLabel("hush_cover_load", patched.getInstruction(index)),
+        ExternalLabel("hush_cover_done", patched.getInstruction(index + 1)),
+    )
+    enableCapability("boardTabCovers")
+}
+
 @Suppress("unused")
 val customizeBoardTabsPatch = bytecodePatch(
     name = PATCH,
-    description = "Tidies the picture at the top of board tabs on Home. You can hide the See board button and the " +
-        "More ideas for line, so only the board name is left, and move the name. Starts off. Turn them on in " +
-        "HushPinterest settings > Interface.",
+    description = "Tidies the top of board tabs on Home. You can hide the See board button and the More ideas for " +
+        "line and move the board name. You can also stop the picture changing by keeping it or by choosing a pin, " +
+        "a photo from your phone or plain black. Starts off. Turn them on in HushPinterest settings > Interface.",
 ) {
     category("Navigation")
     dependsOn(settingsPatch, pinterestExtensionPatch)
@@ -96,7 +155,9 @@ val customizeBoardTabsPatch = bytecodePatch(
     execute {
         requireStatusMethod("boardTabs")
         requireStatusMethod("boardTabHeader")
+        requireStatusMethod("boardTabCovers")
         requireStub(BOARD_TABS, "screenArguments")
+        requireStub(BOARD_TAB_COVERS, "loadCover")
         val target = boardTabTarget()
         val call = target.bind.instructions()[target.call] as FiveRegisterInstruction
         val self = target.bind.localRegisterCount()
@@ -105,6 +166,7 @@ val customizeBoardTabsPatch = bytecodePatch(
         writeScreenArguments(target.style)
         mutable(target.bind).addInstructions(target.call, "invoke-static { v${call.registerC}, v$self }, $BOARD_TAB_BIND_HOOK")
         enableCapability("boardTabHeader")
+        optionalTarget(PATCH, "Board tab covers") { installBoardTabCovers(target) }
         enableStatus("boardTabs")
     }
 }

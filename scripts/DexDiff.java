@@ -290,6 +290,7 @@ public class DexDiff {
             Map.entry("searchKeyboard", 1),
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
+            Map.entry("boardTabCovers", 1),
             Map.entry("ownAuthorities", 1));
 
     /**
@@ -3733,6 +3734,75 @@ public class DexDiff {
                         && arguments(body.get(at)).equals(List.of(arguments(next).get(0), parameter(m, -1)));
                 if (!placed) fail(hook + " isn't right before the header call, with the header and the screen, in " + m);
                 else remove(m, at, at + 1);
+            }
+            capability(c.callee, placed);
+        }
+
+        /** The one call in a method loading into a web image the String read just before it. */
+        int boardTabCoverLoad(Method m) {
+            int at = -1;
+            List<Instruction> body = instructions(m);
+            for (int i = 1; i < body.size(); i++) {
+                Instruction call = body.get(i);
+                if (call.getOpcode() != Opcode.INVOKE_VIRTUAL || !(reference(call) instanceof MethodReference)) continue;
+                MethodReference called = (MethodReference) reference(call);
+                if (!called.getDefiningClass().equals("Lcom/pinterest/ui/imageview/GenericWebImageView;")
+                        || !called.getReturnType().equals("V") || called.getParameterTypes().size() != 1
+                        || !called.getParameterTypes().get(0).toString().equals("Ljava/lang/String;")) continue;
+                Instruction read = body.get(i - 1);
+                if (read.getOpcode() != Opcode.IGET_OBJECT || !(reference(read) instanceof FieldReference)
+                        || !((FieldReference) reference(read)).getType().equals("Ljava/lang/String;")
+                        || arguments(call).size() != 2 || firstRegister(read) != arguments(call).get(1)) continue;
+                if (at >= 0) return -1;
+                at = i;
+            }
+            return at;
+        }
+
+        Method boardTabCoverBinding() {
+            Method binding = boardTabBinding();
+            String data = binding.getParameterTypes().get(0).toString();
+            Set<String> inner = new TreeSet<>();
+            for (Field header : clean.classes.get(binding.getDefiningClass()).getInstanceFields()) {
+                ClassDef outer = clean.classes.get(header.getType());
+                if (outer == null || !"Landroid/widget/LinearLayout;".equals(outer.getSuperclass())) continue;
+                for (Field part : outer.getInstanceFields()) {
+                    ClassDef type = clean.classes.get(part.getType());
+                    if (type != null && "Landroidx/constraintlayout/widget/ConstraintLayout;".equals(type.getSuperclass()))
+                        inner.add(part.getType());
+                }
+            }
+            List<Method> found = new ArrayList<>();
+            for (String type : inner) for (Method m : clean.classes.get(type).getMethods())
+                if (m.getImplementation() != null && m.getReturnType().equals("V") && m.getParameterTypes().size() == 1
+                        && m.getParameterTypes().get(0).toString().equals(data) && boardTabCoverLoad(m) >= 0) found.add(m);
+            return unique(found, "board tab cover binding");
+        }
+
+        boolean boardTabCoverSkip(List<Instruction> body, Layout layout, int at, int target, int register) {
+            Instruction branch = body.get(at);
+            return branch.getOpcode() == Opcode.IF_EQZ && firstRegister(branch) == register && branch instanceof OffsetInstruction
+                    && layout.addresses.get(at) + ((OffsetInstruction) branch).getCodeOffset() == layout.addresses.get(target);
+        }
+
+        /** A null picture goes straight to the load, and a null answer skips the load. */
+        void boardTabCovers(Contract c) {
+            String hook = c.strings.get(0);
+            Method m = actual(boardTabCoverBinding());
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (m != null && sites.size() == 1) {
+                int at = sites.get(0);
+                List<Instruction> body = instructions(m);
+                Layout layout = new Layout(m.getImplementation());
+                List<Integer> args = arguments(body.get(at));
+                placed = at > 0 && at + 4 < body.size() && args.size() == 2
+                        && boardTabCoverSkip(body, layout, at - 1, at + 3, args.get(1))
+                        && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT && firstRegister(body.get(at + 1)) == args.get(1)
+                        && boardTabCoverSkip(body, layout, at + 2, at + 4, args.get(1))
+                        && body.get(at + 3).getOpcode() == Opcode.INVOKE_VIRTUAL && arguments(body.get(at + 3)).equals(args);
+                if (!placed) fail(hook + " doesn't guard the picture load in " + m);
+                else remove(m, at - 1, at + 3);
             }
             capability(c.callee, placed);
         }
@@ -8448,6 +8518,7 @@ public class DexDiff {
                     case "searchKeyboard": searchKeyboard(c); break;
                     case "pinMenuRows": pinMenuRows(c); break;
                     case "boardTabHeader": boardTabHeader(c); break;
+                    case "boardTabCovers": boardTabCovers(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);
                 }

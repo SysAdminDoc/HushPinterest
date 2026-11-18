@@ -162,6 +162,19 @@ public final class UiHooksForTests {
         return subtitle.getVisibility() == View.GONE;
     }
 
+    /** Whether a board tab's header gives way to the black cover stored for its board. */
+    public static boolean coversBoardTab() {
+        android.widget.ImageView image = new android.widget.ImageView(RuntimeEnvironment.getApplication());
+        FrameLayout tab = boardTab(image);
+        BoardTabs.remember(tab, "probe");
+        BoardTabCovers.store("probe", BoardTabCovers.BLACK, null);
+        try {
+            return BoardTabCovers.coverUrl(image, "stock") == null;
+        } finally {
+            BoardTabCovers.COVERS.resetToDefault();
+        }
+    }
+
     /** Names the class the save toast hook treats as Pinterest's downloaded toast. */
     public static void downloadToast(Class<?> type) {
         UiHooks.downloadToastForTests = type;

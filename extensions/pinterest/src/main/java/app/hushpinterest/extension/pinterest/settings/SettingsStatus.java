@@ -140,6 +140,7 @@ public final class SettingsStatus {
     public static boolean customSplashLogo() { return false; }
     public static boolean boardTabs() { return false; }
     public static boolean boardTabHeader() { return false; }
+    public static boolean boardTabCovers() { return false; }
     public static boolean hideSaveToasts() { return false; }
     public static boolean saveToasts() { return false; }
     public static boolean downloadToasts() { return false; }

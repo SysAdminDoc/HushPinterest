@@ -67,7 +67,7 @@ family|hideRelatedPins|Hide related pins|relatedPins
 family|hideCreatorName|Hide creator name on pins|creatorName
 family|customSaveSound|Custom save sound|saveSound
 family|customSplashLogo|Custom splash logo|
-family|boardTabs|Customize board tabs|boardTabHeader
+family|boardTabs|Customize board tabs|boardTabHeader,boardTabCovers
 family|hideSaveToasts|Hide save toasts|saveToasts,downloadToasts
 family|originalImages|Original-quality images|imageChooser,closeupImage,pageImage
 family|showPostedDate|Show posted date|postedDate
@@ -149,6 +149,7 @@ mutation|searchLanding|searchLanding|Lapp/hushpinterest/extension/pinterest/ui/I
 mutation|searchKeyboard|searchKeyboard|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchTabPress(Landroid/view/View;Landroid/view/View;)I
 mutation|pinMenuRows|pinMenuRows|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuRows(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuSheet(Landroid/view/View;)V
 mutation|boardTabHeader|boardTabHeader|Lapp/hushpinterest/extension/pinterest/ui/BoardTabs;->bind(Landroid/view/View;Ljava/lang/Object;)V
+mutation|boardTabCovers|boardTabCovers|Lapp/hushpinterest/extension/pinterest/ui/BoardTabCovers;->coverUrl(Landroid/view/View;Ljava/lang/String;)Ljava/lang/String;
 # Change package name hands each load of a literal naming one of Pinterest's own providers to the
 # extension, which answers the running copy's authority.
 mutation|changePackageName|ownAuthorities|Lapp/hushpinterest/extension/pinterest/coexist/OwnAuthorities;->name(Ljava/lang/String;)Ljava/lang/String;

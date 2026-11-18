@@ -1301,6 +1301,7 @@ public class SettingsNavigationTest {
                 "from the next start");
         summaryContains(Settings.HIDE_BOARD_TAB_BUTTON.key, "See board button", "board tab on Home", "next time the tab opens");
         summaryContains(Settings.HIDE_BOARD_TAB_SUBTITLE.key, "More ideas for", "only the board name", "next time the tab opens");
+        summaryContains(Settings.BOARD_TAB_COVERS.key, "Long-press", "board tab on Home", "go black");
     }
 
     @Test public void aliasesKeepAccentMatchingGroupingAndTheSpokenResultCount() {

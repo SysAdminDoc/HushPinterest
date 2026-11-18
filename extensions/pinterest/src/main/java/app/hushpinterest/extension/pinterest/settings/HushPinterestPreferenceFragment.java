@@ -636,6 +636,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             if (build.contains(PatchFamily.BOARD_TABS)) {
                 ui.addPreference(mark(new BoardTabPositionPreference(context), SettingsIcons.SETTINGS));
             }
+            if (build.contains(PatchFamily.BOARD_TABS) && PatchFamily.Capability.BOARD_TAB_COVERS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.BOARD_TAB_COVERS, L10n.t("Choose board tab covers"),
+                        L10n.t("Long-press the picture at the top of a board tab on Home to keep it, use a pin "
+                            + "or a photo, or go black.")), SettingsIcons.SETTINGS));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE,
                     L10n.t("Hide collage menu items"),
                     L10n.t("Hides Add to collage and Remix collage in pin menus you open from now on. A menu that's "
