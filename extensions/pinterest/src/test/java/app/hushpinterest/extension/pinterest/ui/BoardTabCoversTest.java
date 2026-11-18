@@ -21,6 +21,7 @@ import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -63,12 +64,17 @@ public class BoardTabCoversTest {
 
     private FrameLayout header;
     private ImageView image;
+    private GradientDrawable fade;
 
     private void build(Context context) {
         FrameLayout tab = new FrameLayout(context);
         header = new FrameLayout(context);
         image = new ImageView(context);
+        ImageView overlay = new ImageView(context);
+        fade = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0, 0xFF111111});
+        overlay.setBackground(fade);
         header.addView(image);
+        header.addView(overlay);
         tab.addView(header);
         BoardTabs.remember(tab, BOARD);
     }
@@ -123,11 +129,15 @@ public class BoardTabCoversTest {
 
     private static final ColorFilter SHADE = new PorterDuffColorFilter(0x80333333, PorterDuff.Mode.SRC_ATOP);
 
+    private static void assertPaintsBlack(ColorFilter filter) {
+        assertTrue("a plain color filter paints it", filter instanceof PorterDuffColorFilter);
+        assertEquals(Color.BLACK, (int) ReflectionHelpers.<Integer>callInstanceMethod(filter, "getColor"));
+        assertEquals(PorterDuff.Mode.SRC_ATOP, ReflectionHelpers.callInstanceMethod(filter, "getMode"));
+    }
+
     private void assertShadeIsBlack() {
-        ColorFilter now = image.getColorFilter();
-        assertTrue("a plain color filter paints it", now instanceof PorterDuffColorFilter);
-        assertEquals(Color.BLACK, (int) ReflectionHelpers.<Integer>callInstanceMethod(now, "getColor"));
-        assertEquals(PorterDuff.Mode.SRC_ATOP, ReflectionHelpers.callInstanceMethod(now, "getMode"));
+        assertPaintsBlack(image.getColorFilter());
+        assertPaintsBlack(fade.getColorFilter());
     }
 
     private void goBlack() {
@@ -142,32 +152,48 @@ public class BoardTabCoversTest {
         assertShadeIsBlack();
     }
 
+    private void assertPinterestsLook() {
+        assertSame(SHADE, image.getColorFilter());
+        assertNull("the fade is Pinterest's again", fade.getColorFilter());
+    }
+
     @Test public void pinterestsPictureGetsItsShadeBack() {
         goBlack();
         BoardTabCovers.store(BOARD, null, null);
         assertEquals(STOCK, BoardTabCovers.coverUrl(image, STOCK));
-        assertSame(SHADE, image.getColorFilter());
+        assertPinterestsLook();
     }
 
     @Test public void aChosenPictureGetsTheShadeBack() {
         goBlack();
         BoardTabCovers.store(BOARD, BoardTabCovers.URL, PICKED);
         assertEquals(PICKED, BoardTabCovers.coverUrl(image, STOCK));
-        assertSame(SHADE, image.getColorFilter());
+        assertPinterestsLook();
     }
 
     @Test public void aPhotoGetsTheShadeBack() {
         goBlack();
         BoardTabCovers.store(BOARD, BoardTabCovers.FILE, "1234");
         assertNull(BoardTabCovers.coverUrl(image, STOCK));
-        assertSame(SHADE, image.getColorFilter());
+        assertPinterestsLook();
     }
 
     @Test public void turningTheSwitchOffBringsTheShadeBack() {
         goBlack();
         Settings.BOARD_TAB_COVERS.save(false);
         assertEquals(STOCK, BoardTabCovers.coverUrl(image, STOCK));
-        assertSame(SHADE, image.getColorFilter());
+        assertPinterestsLook();
+    }
+
+    @Test public void anOverlayShowingAPictureIsNotTheFade() {
+        ImageView badge = new ImageView(RuntimeEnvironment.getApplication());
+        GradientDrawable backdrop = new GradientDrawable();
+        badge.setBackground(backdrop);
+        badge.setImageDrawable(new ColorDrawable(Color.RED));
+        header.removeViewAt(1);
+        header.addView(badge);
+        goBlack();
+        assertNull(backdrop.getColorFilter());
     }
 
     @Test public void repeatedBindsStillRestoreTheOriginalShade() {

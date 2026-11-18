@@ -22,6 +22,8 @@ import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -116,9 +118,37 @@ public final class BoardTabCovers {
         if (!(image instanceof ImageView)) return;
         ImageView view = (ImageView) image;
         ColorFilter now = view.getColorFilter();
-        boolean black = now instanceof BlackShade;
-        if (wanted && !black) view.setColorFilter(new BlackShade(now));
-        else if (!wanted && black) view.setColorFilter(((BlackShade) now).pinterests);
+        ColorFilter next = shaded(now, wanted);
+        if (next != now) view.setColorFilter(next);
+        Drawable fade = fadeOver(view);
+        if (fade == null) return;
+        ColorFilter fadeNow = fade.getColorFilter();
+        ColorFilter fadeNext = shaded(fadeNow, wanted);
+        if (fadeNext != fadeNow) fade.setColorFilter(fadeNext);
+    }
+
+    @Nullable
+    private static ColorFilter shaded(@Nullable ColorFilter now, boolean black) {
+        boolean painted = now instanceof BlackShade;
+        if (black && !painted) return new BlackShade(now);
+        if (!black && painted) return ((BlackShade) now).pinterests;
+        return now;
+    }
+
+    /** The gradient over the picture, fading to the app's gray: an empty image view with it as background. */
+    @Nullable
+    private static Drawable fadeOver(ImageView image) {
+        ViewParent parent = image.getParent();
+        if (!(parent instanceof ViewGroup)) return null;
+        ViewGroup header = (ViewGroup) parent;
+        for (int index = 0; index < header.getChildCount(); index++) {
+            View child = header.getChildAt(index);
+            if (child != image && child instanceof ImageView && ((ImageView) child).getDrawable() == null
+                    && child.getBackground() instanceof GradientDrawable) {
+                return child.getBackground();
+            }
+        }
+        return null;
     }
 
     private static boolean covering() {
