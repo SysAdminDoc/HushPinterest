@@ -240,6 +240,7 @@ public enum PatchFamily {
         SAVE_TOASTS(HIDE_SAVE_TOASTS, "saveToasts", "Hide save toasts"),
         IMAGE_CHOOSER(ORIGINAL_IMAGES, "imageChooser", "collage images"),
         CLOSEUP_IMAGE(ORIGINAL_IMAGES, "closeupImage", "pin closeups"),
+        PAGE_IMAGE(ORIGINAL_IMAGES, "pageImage", "idea pin pages"),
         POSTED_DATE(SHOW_POSTED_DATE, "postedDate", "Show posted date"),
         SUGGESTED_BOARDS(HIDE_SUGGESTED_BOARDS, "suggestedBoards", "Hide suggested boards"),
         BOARD_LIST_HEIGHT(EXPAND_BOARD_LIST, "boardListHeight", "Expand board list"),

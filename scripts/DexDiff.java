@@ -276,7 +276,7 @@ public class DexDiff {
     private static final Map<String, Integer> MUTATION_COLUMNS = Map.ofEntries(
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7), Map.entry("closeupModule", 4),
-            Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
+            Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("pageImage", 1), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("saveSound", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
@@ -4787,6 +4787,56 @@ public class DexDiff {
         }
 
         /**
+         * Idea pin pages: the two static lookups that answer a page's picture address, each reading the
+         * page's image map by the size it was asked for. The hook sits right in front of every such read
+         * and may answer the method. When it has nothing, the read runs as before.
+         */
+        void pageImage(Contract c) {
+            String hook = c.strings.get(0);
+            Map<Method, List<Integer>> reads = new LinkedHashMap<>();
+            for (Method m : clean.holding("1200x")) {
+                List<? extends CharSequence> types = m.getParameterTypes();
+                if (m.getDefiningClass().startsWith(OWN) || !AccessFlags.STATIC.isSet(m.getAccessFlags()) || m.getImplementation() == null
+                        || !m.getReturnType().equals("Ljava/lang/String;") || types.size() != 3 || !types.get(0).toString().startsWith("L")
+                        || !types.get(1).toString().equals("Ljava/lang/String;") || !types.get(2).toString().equals("Ljava/lang/String;")) continue;
+                int size = parameter(m, 1);
+                List<Instruction> body = instructions(m);
+                List<Integer> sites = new ArrayList<>();
+                for (int at = 0; at < body.size() && !writes(body.get(at), size); at++) {
+                    Instruction i = body.get(at);
+                    if (i.getOpcode() == Opcode.INVOKE_INTERFACE && arguments(i).size() == 2 && arguments(i).get(1) == size
+                            && "Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;".equals(String.valueOf(reference(i)))) sites.add(at);
+                }
+                if (!sites.isEmpty()) reads.put(m, sites);
+            }
+            boolean found = reads.size() == 2;
+            if (!found) fail("found " + reads.size() + " idea pin page image lookups, expected 2");
+            for (Map.Entry<Method, List<Integer>> read : reads.entrySet()) {
+                Method m = actual(read.getKey());
+                List<Integer> wanted = read.getValue(), sites = calls(m, hook, wanted.size());
+                if (m == null || sites.size() != wanted.size()) { found = false; continue; }
+                List<Instruction> was = instructions(read.getKey()), body = instructions(m);
+                Layout code = new Layout(m.getImplementation());
+                // Later sites shift by the four instructions put in front of each earlier one.
+                for (int k = sites.size() - 1; k >= 0; k--) {
+                    int at = sites.get(k), get = wanted.get(k);
+                    boolean shaped = at == get + 4 * k && at > 0 && at + 4 < body.size()
+                            && arguments(body.get(at)).equals(arguments(was.get(get)))
+                            && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT
+                            && body.get(at + 2).getOpcode() == Opcode.IF_EQZ && body.get(at + 3).getOpcode() == Opcode.RETURN_OBJECT
+                            && firstRegister(body.get(at + 2)) == firstRegister(body.get(at + 1))
+                            && firstRegister(body.get(at + 3)) == firstRegister(body.get(at + 1))
+                            && body.get(at + 4).getOpcode() == Opcode.INVOKE_INTERFACE
+                            && code.addresses.get(at + 2) + ((OffsetInstruction) body.get(at + 2)).getCodeOffset() == code.addresses.get(at + 4)
+                            && onlyFrom(m, at, at - 1) && onlyFrom(m, at + 4, at + 2);
+                    if (!shaped) { fail(hook + " does not sit in front of the page image read in " + m); found = false; }
+                    else remove(m, at, at + 4);
+                }
+            }
+            capability(c.callee, found);
+        }
+
+        /**
          * The pin closeup's original image: the size set Pinterest requests with pins goes through the
          * sizes hook just before it's returned, and the closeup builder's large image goes through the
          * closeup hook, with the pin, right after the helper answers it. Both are found in the clean
@@ -8171,6 +8221,7 @@ public class DexDiff {
                     case "surveyPrompts": surveyPrompts(c); break;
                     case "popupBanners": popupBanners(c); break;
                     case "relatedPins": relatedPins(c); break;
+                    case "pageImage": pageImage(c); break;
                     case "creatorName": creatorName(c); break;
                     case "saveSound": saveSound(c); break;
                     case "pinInvites": pinInvites(c); break;

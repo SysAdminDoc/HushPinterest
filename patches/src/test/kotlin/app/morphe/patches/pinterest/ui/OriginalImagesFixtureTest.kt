@@ -14,6 +14,7 @@ import app.morphe.PatchContexts
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patches.pinterest.misc.extension.SETTINGS_STATUS
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -39,8 +40,8 @@ import org.junit.experimental.categories.Category
 @Category(FixtureTests::class)
 class OriginalImagesFixtureTest {
     /** The classes the patch reads in one build: the image model, the closeup builder's class and the size bucket. */
-    private class Build(val name: String, val model: ClassDef, val builder: ClassDef, val bucket: ClassDef) {
-        val classes get() = listOf(model, builder, bucket)
+    private class Build(val name: String, val model: ClassDef, val builder: ClassDef, val bucket: ClassDef, val pages: List<ClassDef>) {
+        val classes get() = listOf(model, builder, bucket) + pages
     }
 
     @Test
@@ -48,7 +49,7 @@ class OriginalImagesFixtureTest {
         for (build in Fixtures.declaredBuilds().map(::read)) {
             val context = PatchContexts.of(ExtensionDex.classes() + build.classes)
             originalImagesPatch.execute(context)
-            for (flag in listOf("originalImages", "imageChooser", "closeupImage")) {
+            for (flag in listOf("originalImages", "imageChooser", "closeupImage", "pageImage")) {
                 val first = context.mutableClassDefBy(SETTINGS_STATUS).methods.single { it.name == flag }.implementation!!.instructions.first()
                 assertEquals("${build.name}: $flag", 1, (first as NarrowLiteralInstruction).narrowLiteral)
             }
@@ -100,6 +101,69 @@ class OriginalImagesFixtureTest {
     }
 
     @Test
+    fun `each declared original APK offers an idea pin page its original ahead of every read by the asked size`() {
+        for (build in Fixtures.declaredBuilds().map(::read)) {
+            assertEquals("${build.name}: the two page image lookups", 2, build.pages.size)
+            val context = PatchContexts.of(ExtensionDex.classes() + build.classes)
+            originalImagesPatch.execute(context)
+            for (page in build.pages) {
+                val clean = page.methods.single { it.pageImageReads().isNotEmpty() }
+                val reads = clean.pageImageReads()
+                val was = clean.instructions()
+                val body = patched(context, clean)
+                assertEquals("${build.name}: ${clean.name}", was.size + 4 * reads.size, body.size)
+                reads.forEachIndexed { earlier, read ->
+                    val at = read + 4 * earlier
+                    val where = "${build.name}: ${clean.definingClass}@$read"
+                    assertEquals(where, "$UI_HOOKS->pageImage(Ljava/util/Map;Ljava/lang/String;)Ljava/lang/String;",
+                        (body[at] as ReferenceInstruction).reference.toString())
+                    assertEquals("$where: the page's images, then the asked size", registers(was[read]), registers(body[at]))
+                    assertEquals(where, listOf(Opcode.MOVE_RESULT_OBJECT, Opcode.IF_EQZ, Opcode.RETURN_OBJECT),
+                        body.subList(at + 1, at + 4).map { it.opcode })
+                    val answer = (body[at + 1] as OneRegisterInstruction).registerA
+                    assertEquals(where, listOf(answer, answer), body.subList(at + 2, at + 4).map { (it as OneRegisterInstruction).registerA })
+                    assertEquals("$where: with no original, Pinterest's own read runs", at + 4,
+                        (body[at + 2] as BuilderOffsetInstruction).target.location.index)
+                    assertEquals(where, registers(was[read]), registers(body[at + 4]))
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `a page image lookup gone or a missing page status stub refuses with the chooser untouched`() {
+        val build = read(Fixtures.declaredBuilds().last())
+        val extension = ExtensionDex.classes()
+        val others = listOf(build.model, build.builder, build.bucket)
+        val lookup: (Method) -> Boolean = { it.pageImageReads().isNotEmpty() }
+        // A size read only after the method replaced its parameter is no longer the size it was asked for.
+        val overwritten = replace(build.pages.first(), lookup) { instructions ->
+            val size = (instructions.first { it.opcode == Opcode.INVOKE_INTERFACE } as FiveRegisterInstruction).registerD
+            listOf(ImmutableInstruction11x(Opcode.MOVE_EXCEPTION, size)) + instructions
+        }
+        val cases = linkedMapOf(
+            "one lookup gone" to extension + others + build.pages.drop(1),
+            "both lookups gone" to extension + others,
+            "the size overwritten first" to extension + others + overwritten + build.pages.drop(1),
+            "missing page status stub" to build.classes + extension.map { owner -> if (owner.type != SETTINGS_STATUS) owner else
+                ImmutableClassDef(owner.type, owner.accessFlags, owner.superclass, owner.interfaces, owner.sourceFile,
+                    owner.annotations, owner.fields, owner.methods.filterNot { it.name == "pageImage" }) },
+        )
+        val large = build.model.methods.single { it.name == "toString" }.imageLabels().getValue(IMAGE_DESCRIPTION)
+        for ((reason, input) in cases) {
+            val context = PatchContexts.of(input)
+            assertThrows(reason, PatchException::class.java) { originalImagesPatch.execute(context) }
+            val status = context.mutableClassDefBy(SETTINGS_STATUS).methods.single { it.name == "originalImages" }
+            assertEquals("$reason left the family flag set", 0, (status.implementation!!.instructions.first() as NarrowLiteralInstruction).narrowLiteral)
+            val chooser = context.mutableClassDefBy(build.model.type).methods.single { method ->
+                method.parameterTypes.isEmpty() && method.returnType == large.type && method.name != "toString"
+            }
+            assertEquals("$reason changed the chooser", large.toString(),
+                (chooser.implementation!!.instructions.first() as ReferenceInstruction).reference.toString())
+        }
+    }
+
+    @Test
     fun `a missing model, a changed chooser or a missing status stub refuses before any change`() {
         val build = read(Fixtures.declaredBuilds().last())
         val model = build.model
@@ -114,7 +178,7 @@ class OriginalImagesFixtureTest {
             listOf(ImmutableInstruction10x(Opcode.NOP)) + it
         }
         val extension = ExtensionDex.classes()
-        val closeup = listOf(build.builder, build.bucket)
+        val closeup = listOf(build.builder, build.bucket) + build.pages
         val cases = linkedMapOf(
             "missing model" to extension + closeup,
             "renamed description" to extension + closeup + renamed,
@@ -157,11 +221,11 @@ class OriginalImagesFixtureTest {
         }
         val extension = ExtensionDex.classes()
         val cases = linkedMapOf(
-            "missing closeup builder" to extension + build.model + build.bucket,
-            "missing size set" to extension + build.model + build.builder + noSizeSet,
-            "size set with two exits" to extension + build.model + build.builder + twoExits,
-            "size set that isn't new each call" to extension + build.model + build.builder + notNew,
-            "large image made for another pin" to extension + build.model + otherPin + build.bucket,
+            "missing closeup builder" to extension + build.pages + build.model + build.bucket,
+            "missing size set" to extension + build.pages + build.model + build.builder + noSizeSet,
+            "size set with two exits" to extension + build.pages + build.model + build.builder + twoExits,
+            "size set that isn't new each call" to extension + build.pages + build.model + build.builder + notNew,
+            "large image made for another pin" to extension + build.pages + build.model + otherPin + build.bucket,
             "missing closeup status stub" to build.classes + extension.map { owner -> if (owner.type != SETTINGS_STATUS) owner else
                 ImmutableClassDef(owner.type, owner.accessFlags, owner.superclass, owner.interfaces, owner.sourceFile,
                     owner.annotations, owner.fields, owner.methods.filterNot { it.name == "closeupImage" }) },
@@ -204,8 +268,10 @@ class OriginalImagesFixtureTest {
     private fun read(build: File): Build {
         var model: ClassDef? = null
         val builders = mutableListOf<ClassDef>()
+        val pages = mutableListOf<ClassDef>()
         FixtureDex.forEach(build) { dex ->
             for (classDef in dex.classes) {
+                if (classDef.methods.any { it.pageImageReads().isNotEmpty() }) pages += ImmutableClassDef.of(classDef)
                 val described = classDef.methods.any { method -> method.name == "toString" && method.implementation?.instructions?.any {
                     ((it as? Instruction21c)?.reference as? StringReference)?.string == IMAGE_DESCRIPTION } == true }
                 if (described) {
@@ -218,6 +284,6 @@ class OriginalImagesFixtureTest {
         val builder = builders.singleOrNull() ?: error("${build.name}: ${builders.size} closeup builders")
         val bucket = builder.methods.firstNotNullOf { it.closeupHelper() }.second.parameterTypes[1].toString()
         return Build(build.name, checkNotNull(model) { "${build.name}: no image model" }, builder,
-            checkNotNull(FixtureDex.classes(build, setOf(bucket))[bucket]) { "${build.name}: no size bucket" })
+            checkNotNull(FixtureDex.classes(build, setOf(bucket))[bucket]) { "${build.name}: no size bucket" }, pages)
     }
 }

@@ -1060,6 +1060,48 @@ public class UiHooksTest {
         assertSame("orig comes first", orig, UiHooks.closeupImage(apex, large));
     }
 
+    @Test public void anIdeaPinPageGetsItsOriginalForLargeSizesOnlyWhileOn() {
+        String address = "https://i.pinimg.com/originals/aa/bb/cc/page.png";
+        Map<String, Object> images = new LinkedHashMap<>();
+        images.put("736x", new Image("https://i.pinimg.com/736x/aa/bb/cc/page.jpg", 736d, 736d));
+        images.put("orig", new Image(address, 1440d, 1440d));
+        assertNull("the switch starts off", UiHooks.pageImage(images, "736x"));
+
+        Settings.ORIGINAL_IMAGES.save(true);
+        assertEquals(address, UiHooks.pageImage(images, "736x"));
+        assertEquals(address, UiHooks.pageImage(images, "1200x"));
+        // Pinterest asks for these as the picture shown while the large one loads.
+        for (String small : Arrays.asList("236x", "474x", "564x")) assertNull(small, UiHooks.pageImage(images, small));
+        for (String odd : Arrays.asList("orig", "x", "736", "", null)) assertNull(odd, UiHooks.pageImage(images, odd));
+        assertNull("a page with no image list", UiHooks.pageImage(null, "736x"));
+
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertNull("paused", UiHooks.pageImage(images, "736x"));
+    }
+
+    @Test public void anIdeaPinPageKeepsPinterestsPictureUnlessItsOriginalCanBeShown() {
+        Settings.ORIGINAL_IMAGES.save(true);
+        Map<String, Object> unusable = new LinkedHashMap<>();
+        unusable.put("no original", null);
+        unusable.put("no height", new Image("https://i.pinimg.com/originals/aa/bb/cc/a.jpg", 2400d, null));
+        unusable.put("zero width", new Image("https://i.pinimg.com/originals/aa/bb/cc/a.jpg", 0d, 3600d));
+        unusable.put("past the texture limit", new Image("https://i.pinimg.com/originals/aa/bb/cc/a.jpg", 9000d, 900d));
+        unusable.put("too many pixels to draw", new Image("https://i.pinimg.com/originals/aa/bb/cc/a.jpg", 6000d, 6000d));
+        unusable.put("no address", new Image(null, 2400d, 3600d));
+        unusable.put("plain http", new Image("http://i.pinimg.com/originals/aa/bb/cc/a.jpg", 2400d, 3600d));
+        unusable.put("another host", new Image("https://pinimg.com.example.net/originals/a.jpg", 2400d, 3600d));
+        for (Map.Entry<String, Object> entry : unusable.entrySet()) {
+            Map<String, Object> images = new LinkedHashMap<>();
+            images.put("orig", entry.getValue());
+            assertNull(entry.getKey(), UiHooks.pageImage(images, "736x"));
+        }
+        Map<String, Object> images = new LinkedHashMap<>();
+        images.put("originals", new Image("https://i.pinimg.com/originals/aa/bb/cc/b.webp", 8192d, 900d));
+        assertEquals("an originals entry still counts", "https://i.pinimg.com/originals/aa/bb/cc/b.webp", UiHooks.pageImage(images, "736x"));
+        images.put("orig", new Image("https://i.pinimg.com/originals/aa/bb/cc/c.jpg", 1600d, 1200d));
+        assertEquals("orig comes first", "https://i.pinimg.com/originals/aa/bb/cc/c.jpg", UiHooks.pageImage(images, "736x"));
+    }
+
     @Test public void menuCensusDistinguishesConstructionTimeHiddenRowsFromFilterDecisions() {
         View row = new View(RuntimeEnvironment.getApplication());
         row.setVisibility(View.INVISIBLE);

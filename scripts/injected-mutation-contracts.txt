@@ -68,7 +68,7 @@ family|hideCreatorName|Hide creator name on pins|creatorName
 family|customSaveSound|Custom save sound|saveSound
 family|customSplashLogo|Custom splash logo|
 family|hideSaveToasts|Hide save toasts|saveToasts
-family|originalImages|Original-quality images|imageChooser,closeupImage
+family|originalImages|Original-quality images|imageChooser,closeupImage,pageImage
 family|showPostedDate|Show posted date|postedDate
 family|hideSuggestedBoards|Hide suggested boards|suggestedBoards
 family|expandBoardList|Expand board list|boardListHeight
@@ -133,6 +133,7 @@ mutation|saveSound|saveSound|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;-
 mutation|saveToasts|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideSaveToast(Ljava/lang/Object;)Z|saveToast|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->androidToast(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;|androidToast|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->androidToast(Landroid/content/Context;II)Landroid/widget/Toast;|androidToast
 mutation|imageChooser|imageOrder|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->originalImages()Z
 mutation|closeupImage|closeupImage|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->imageSizes(Ljava/util/Set;)V|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->closeupImage(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+mutation|pageImage|pageImage|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->pageImage(Ljava/util/Map;Ljava/lang/String;)Ljava/lang/String;
 mutation|updateNag|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->disableUpdateNag()Z|update
 mutation|signInFailure|signInFailure|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->requestFailed(Ljava/lang/Exception;)V|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->signsInThroughMicroG()Z|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->isGoogleIdOption(Ljava/lang/String;)Z
 mutation|saveAndDownload|saveAndDownload|Lapp/hushpinterest/extension/pinterest/actions/SaveAndDownload;->saving(Ljava/lang/Object;)V|Lapp/hushpinterest/extension/pinterest/actions/SaveAndDownload;->saver(Ljava/lang/Object;)V|Lcom/pinterest/feature/pin/closeup/presenter/OrganicPinCloseupPresenter;

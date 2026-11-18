@@ -394,6 +394,50 @@ public final class UiHooks {
     }
 
     /**
+     * Android refuses to draw a bitmap over 100 MB, about 25 million pixels, and a page's image view
+     * gives its loader no target size to shrink to.
+     */
+    private static final double MAX_PAGE_PIXELS = 24_000_000d;
+
+    /** The width from which a size is a page's picture, not a thumbnail or a placeholder. */
+    private static final int LARGE_PAGE_WIDTH = 736;
+
+    /**
+     * An idea pin page's original address, or null to keep what Pinterest picked. A page chooses its
+     * picture by size from its own image list, so the pin image [closeupImage] replaces never reaches
+     * it (14.45.0). Only large sizes change.
+     */
+    public static String pageImage(Map<?, ?> images, String size) {
+        if (images == null || !largeSize(size) || !originalImages()) return null;
+        try {
+            Object original = images.get(ORIGINAL);
+            if (original == null) original = images.get(ORIGINALS);
+            if (original == null) return null;
+            Map<String, Field> fields = ModelFields.of(original.getClass());
+            Object width = ModelFields.read(fields, original, "width");
+            Object height = ModelFields.read(fields, original, "height");
+            Object url = ModelFields.read(fields, original, "url");
+            if (!dimension(width) || !dimension(height) || !mediaAddress(url)
+                    || ((Number) width).doubleValue() * ((Number) height).doubleValue() > MAX_PAGE_PIXELS) return null;
+            HookStatus.counted(FamilyNames.ORIGINAL_IMAGES, "idea pin original shown");
+            return (String) url;
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.ORIGINAL_IMAGES, "page image", failure);
+            return null;
+        }
+    }
+
+    /** Whether a size key such as 1200x names a width of at least [LARGE_PAGE_WIDTH]. */
+    private static boolean largeSize(String size) {
+        if (size == null || !size.endsWith("x")) return false;
+        try {
+            return Integer.parseInt(size.substring(0, size.length() - 1)) >= LARGE_PAGE_WIDTH;
+        } catch (NumberFormatException notAWidth) {
+            return false;
+        }
+    }
+
+    /**
      * Pinterest's closeup reads both dimensions as doubles and reads a missing one as zero, which
      * would size the image wrong. It also steps down to a smaller size for an image past the
      * screen's texture limit, so an original wider or taller than 8192 keeps the large image.
