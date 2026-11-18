@@ -6576,23 +6576,23 @@ public class DexDiff {
         }
 
         /**
-         * True when [at] starts the creator row's padding: its outer layout and two padding sizes read
-         * from the same register, a zero, then setPaddingRelative(start, top, start, zero) on the layout.
+         * True when [at] starts the creator row's padding: its outer layout and top padding read from
+         * the same register, a zero, then setPaddingRelative on the layout with that top and the zero
+         * as its bottom. 14.45.0 works out the start and end sizes earlier.
          */
         static boolean padsCreatorRow(List<Instruction> body, int at) {
-            if (at < 0 || at + 4 >= body.size()) return false;
-            Instruction layout = body.get(at), start = body.get(at + 1), top = body.get(at + 2), zero = body.get(at + 3), pad = body.get(at + 4);
-            if (layout.getOpcode() != Opcode.IGET_OBJECT || start.getOpcode() != Opcode.IGET || top.getOpcode() != Opcode.IGET) return false;
-            if (!(reference(layout) instanceof FieldReference outer) || !(reference(start) instanceof FieldReference startSize)
-                    || !(reference(top) instanceof FieldReference topSize)) return false;
-            if (!outer.getDefiningClass().equals(CREATOR_ATTRIBUTION) || !startSize.getDefiningClass().equals(CREATOR_ATTRIBUTION)
-                    || !topSize.getDefiningClass().equals(CREATOR_ATTRIBUTION) || !outer.getType().equals("Landroid/widget/LinearLayout;")
-                    || !startSize.getType().equals("I") || !topSize.getType().equals("I")) return false;
-            int view = ((TwoRegisterInstruction) layout).getRegisterB();
-            if (((TwoRegisterInstruction) start).getRegisterB() != view || ((TwoRegisterInstruction) top).getRegisterB() != view) return false;
+            if (at < 0 || at + 3 >= body.size()) return false;
+            Instruction layout = body.get(at), top = body.get(at + 1), zero = body.get(at + 2), pad = body.get(at + 3);
+            if (layout.getOpcode() != Opcode.IGET_OBJECT || top.getOpcode() != Opcode.IGET) return false;
+            if (!(reference(layout) instanceof FieldReference outer) || !(reference(top) instanceof FieldReference topSize)) return false;
+            if (!outer.getDefiningClass().equals(CREATOR_ATTRIBUTION) || !topSize.getDefiningClass().equals(CREATOR_ATTRIBUTION)
+                    || !outer.getType().equals("Landroid/widget/LinearLayout;") || !topSize.getType().equals("I")) return false;
+            if (((TwoRegisterInstruction) layout).getRegisterB() != ((TwoRegisterInstruction) top).getRegisterB()) return false;
             if (zero.getOpcode() != Opcode.CONST_4 || ((NarrowLiteralInstruction) zero).getNarrowLiteral() != 0) return false;
-            return pad.getOpcode() == Opcode.INVOKE_VIRTUAL && String.valueOf(reference(pad)).equals("Landroid/view/View;->setPaddingRelative(IIII)V")
-                    && arguments(pad).equals(List.of(firstRegister(layout), firstRegister(start), firstRegister(top), firstRegister(start), firstRegister(zero)));
+            if (pad.getOpcode() != Opcode.INVOKE_VIRTUAL || !String.valueOf(reference(pad)).equals("Landroid/view/View;->setPaddingRelative(IIII)V")) return false;
+            List<Integer> padding = arguments(pad);
+            return padding.size() == 5 && padding.get(0) == firstRegister(layout) && padding.get(2) == firstRegister(top)
+                    && padding.get(4) == firstRegister(zero);
         }
 
         /**

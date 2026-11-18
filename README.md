@@ -174,6 +174,8 @@ Each release patches its own build only, so an older Pinterest is refused. SHA-2
 
 On Windows, compare yours with `Get-FileHash -Algorithm SHA256 .\pinterest.apk`. Other Pinterest versions aren't supported.
 
+The next release moves to Pinterest 14.45.0, version code 14458020, and it'll need Morphe Manager 2.6.0 or newer. APKMirror has that one as a plain APK for Android 10 or newer too. Stick with 14.44.0 until the release is out.
+
 ## Verify a release download
 
 Every release's `SHA256SUMS.txt` is signed with the HushPinterest release key. Its fingerprint is `FCE5 ECE3 182A 647B 3AF2  C5ED 2DC3 5E8D 5C00 E8A6`, and the public key is [keys/hushpinterest-release.asc](keys/hushpinterest-release.asc) in this repository and on [keys.openpgp.org](https://keys.openpgp.org/search?q=FCE5ECE3182A647B3AF2C5ED2DC35E8D5C00E8A6). Compare the fingerprint from both places before you trust it. A key downloaded beside the bundle doesn't prove anything on its own.
