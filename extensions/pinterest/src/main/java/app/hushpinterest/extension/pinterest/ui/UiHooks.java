@@ -149,6 +149,16 @@ public final class UiHooks {
     }
 
     /**
+     * Pinterest is about to place its pulsing blue ring over a button it wants to point out. True
+     * with Hide blue highlight ring on, which leaves the ring unplaced and invisible. Never throws.
+     */
+    public static boolean hideHighlightRing() {
+        if (!enabled(FamilyNames.HIDE_HIGHLIGHT_RING, Settings.HIDE_HIGHLIGHT_RING)) return false;
+        HookStatus.counted(FamilyNames.HIDE_HIGHLIGHT_RING, "highlight ring skipped");
+        return true;
+    }
+
+    /**
      * A pin's creator row has been drawn, handed over by its avatar. With Hide creator name on pins
      * on, everything next to the avatar in its row goes: the name and its badges. The row keeps its
      * own click, so the avatar still opens the profile. Null, off or paused, the row stays as it is.

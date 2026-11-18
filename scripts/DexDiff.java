@@ -291,7 +291,7 @@ public class DexDiff {
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
             Map.entry("boardTabCovers", 1),
-            Map.entry("closeupGate", 1), Map.entry("ownAuthorities", 1));
+            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("ownAuthorities", 1));
 
     /**
      * A start-call, next-call, sole-call or once-call line: its method reference, the next-call's
@@ -6421,6 +6421,17 @@ public class DexDiff {
             capability(c.callee, closeupGatePlaced(c.strings.get(0)));
         }
 
+        /** The ring's one method taking a size and a screen position asks the hook first and stops on yes. */
+        void highlightRing(Contract c) {
+            List<Method> places = new ArrayList<>();
+            ClassDef ring = clean.classes.get("Lcom/pinterest/education/view/EducationPulsarView;");
+            if (ring != null) for (Method m : ring.getMethods()) if (descriptor(m).equals("(II[I)V")
+                    && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getImplementation() != null) places.add(m);
+            Method m = actual(unique(places, "the highlight ring's placement"));
+            guard(m, c.strings.get(0), 0, List.of(), 0, false, false);
+            capability(c.callee, m != null);
+        }
+
         boolean buildsTitleRow(ClassDef owner) {
             for (Method init : owner.getMethods()) {
                 if (!init.getName().equals("<init>")) continue;
@@ -8542,6 +8553,7 @@ public class DexDiff {
                     case "closeupSaveButton": closeupSaveButton(c); break;
                     case "postedDate": postedDate(c); break;
                     case "closeupGate": closeupGate(c); break;
+                    case "highlightRing": highlightRing(c); break;
                     case "saveSheet": saveSheet(c); break;
                     case "blackSheets": blackSheets(c); break;
                     case "blackBoards": blackBoards(c); break;

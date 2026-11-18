@@ -623,6 +623,9 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Shows a picture's width and height under it when you open a pin, beside the posted date "
                         + "when that's on. It reads the largest copy Pinterest sends the app, which can be smaller "
                         + "than the original upload. Videos show nothing. The change shows on the next pin you open."), SettingsIcons.TOOLS);
+            patchToggle(ui, context, build, PatchFamily.HIDE_HIGHLIGHT_RING, Settings.HIDE_HIGHLIGHT_RING,
+                    L10n.t("Hide blue highlight ring"),
+                    L10n.t("Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature."), SettingsIcons.BLOCK);
             patchToggle(ui, context, build, PatchFamily.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS,
                     L10n.t("Hide related pins"),
                     L10n.t("Leaves the grid of more pins out from under a pin you open, so it doesn't load. "

@@ -89,7 +89,7 @@ public class UiHooksTest {
             Settings.HIDE_PIN_MENU_ROWS,
             Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_COMMENT_PREVIEWS,
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
-            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.CUSTOM_SAVE_SOUND, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE, Settings.BOARD_TAB_COVERS, Settings.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
+            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.HIDE_HIGHLIGHT_RING, Settings.CUSTOM_SAVE_SOUND, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE, Settings.BOARD_TAB_COVERS, Settings.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
             Settings.DISABLE_UPDATE_NAG, Settings.HIDE_SHOPPING
     }; }
@@ -239,6 +239,17 @@ public class UiHooksTest {
         assertTrue(report, report.contains("related pins left out"));
         PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
         assertFalse("paused, the grid is added", UiHooks.hideRelatedPins());
+        PauseForTests.resume();
+    }
+
+    @Test public void theHighlightRingStaysAwayOnlyWhileItsSwitchIsOn() {
+        assertFalse(UiHooks.hideHighlightRing());
+        Settings.HIDE_HIGHLIGHT_RING.save(true);
+        assertTrue(UiHooks.hideHighlightRing());
+        String report = String.join(" ", HookStatus.report());
+        assertTrue(report, report.contains("highlight ring skipped"));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertFalse(UiHooks.hideHighlightRing());
         PauseForTests.resume();
     }
 

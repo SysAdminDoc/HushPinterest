@@ -124,6 +124,7 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.HIDE_PIN_AUTHOR, "Hide pin author");
         ROW_TITLES.put(PatchFamily.HIDE_PIN_DESCRIPTION, "Hide pin title and description");
         ROW_TITLES.put(PatchFamily.SHOW_IMAGE_SIZE, "Show image size");
+        ROW_TITLES.put(PatchFamily.HIDE_HIGHLIGHT_RING, "Hide blue highlight ring");
         ROW_TITLES.put(PatchFamily.CUSTOM_SAVE_SOUND, "Custom save sound");
         ROW_TITLES.put(PatchFamily.CUSTOM_SPLASH_LOGO, "Custom splash logo");
         ROW_TITLES.put(PatchFamily.BOARD_TABS, "Hide See board on board tabs");
