@@ -5,6 +5,14 @@ Every HushPinterest release, newest first.
 ## Unreleased
 
 * The patches now target Pinterest 14.45.0, version code 14458020. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
+* New `Customize board tabs` patch with its switches under Interface, all off to start. On a board tab on Home, `Hide See board on board tabs` and `Hide More ideas for on board tabs` clear the picture at the top so only the board name is left, and `Board name position` moves the name to the top left, top center, middle, bottom center or bottom right. (#42)
+* `Choose board tab covers`, also part of Customize board tabs, stops that picture changing. Turn it on and long-press the picture to keep the one showing, use a pin, pick a photo from your phone or go plain black. Each board remembers its own choice, and Pinterest's choice puts it back. It starts off. (#42)
+* New `Hide download toasts` switch under Interface, part of Hide save toasts. Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays. It starts off. (#42)
+* New `Black toasts` switch under Interface, part of AMOLED black. In dark mode, Pinterest's pop-up messages, like the one after you save or download a pin, turn pure black. It starts off. (#42)
+* New `Second Search tap opens the keyboard` switch under Interface, part of Hide navigation buttons. On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard. It starts off. (#42)
+* New `Hide Home tabs` switch under Interface, part of Hide navigation buttons. It takes the row with All and your board names off the top of Home. It starts off. (#43)
+* New `Hide pin menu rows` switch under Interface, part of Filter pin menu. Pick pin menu rows lists the rows of a pin's menu, the ones HushPinterest adds included, and the ones you pick stay out of the menus you open from then on. It starts off. (#43)
+* New `Blank Search page` switch under Interface, part of Hide search history. The Search page shows only the search bar, with nothing under it, and searching works as usual. It starts off. (#44)
 * Download pin now looks for an idea pin's video on its pages and in their video blocks, where Pinterest keeps it, before saying the pin has no MP4. (#45)
 * Hide Home suggestions now also matches two row types from a Debug report of a Home showing "Inspired by your interests" and "More ideas for your board". (#30)
 * Original-quality images now reaches the picture pages of idea pins. Each page picks its own picture from its own list, so the switch never got to them before. A picture too big for Android to draw stays at Pinterest's size.

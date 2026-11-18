@@ -6,7 +6,7 @@
   "patches": [
     {
       "name": "AMOLED black",
-      "description": "Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED screens. The comments sheet, a pin's menu, the Save to sheet that lists your boards, the other menus and sheets, and the buttons over boards and profiles can go black too, each with its own switch. Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface.",
+      "description": "Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED screens. The comments sheet, a pin's menu, the Save to sheet that lists your boards, the other menus and sheets, the buttons over boards and profiles, and Pinterest's pop-up messages can go black too, each with its own switch. Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Theme",
       "use": true,
       "dependencies": [
@@ -178,6 +178,42 @@
           "values": null
         }
       ]
+    },
+    {
+      "name": "Customize board tabs",
+      "description": "Tidies the top of board tabs on Home. You can hide the See board button and the More ideas for line and move the board name. You can also stop the picture changing by keeping it or by choosing a pin, a photo from your phone or plain black. Starts off. Turn them on in HushPinterest settings > Interface.",
+      "category": "Navigation",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
     },
     {
       "name": "Disable analytics",
@@ -399,7 +435,7 @@
     },
     {
       "name": "Filter pin menu",
-      "description": "Lets you hide Add to collage, Remix collage, Search image and Promote pin in a pin's menu, each with its own switch. Download, share and copy link stay. Starts off. Turn them on in HushPinterest settings > Interface.",
+      "description": "Lets you hide Add to collage, Remix collage, Search image and Promote pin in a pin's menu, each with its own switch. Another switch takes out the rows you pick from a list, including the ones HushPinterest adds. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Interface",
       "use": true,
       "dependencies": [
@@ -832,7 +868,7 @@
     },
     {
       "name": "Hide navigation buttons",
-      "description": "Lets you hide the Create, Notifications and Search buttons in the bottom bar, each with its own switch. The Create and Notifications switches also cover those buttons at the top of Home. Home and Profile stay. Starts off. Turn them on in HushPinterest settings > Interface.",
+      "description": "Lets you hide the Create, Notifications and Search buttons in the bottom bar, each with its own switch. The Create and Notifications switches also cover those buttons at the top of Home. Home and Profile stay. Two more switches take the row of tabs off the top of Home and make a second press on Search open the keyboard. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Navigation",
       "use": true,
       "dependencies": [
@@ -940,7 +976,7 @@
     },
     {
       "name": "Hide save toasts",
-      "description": "Stops the pop-up Pinterest shows after you save a pin, such as the Saved to your board message or a suggestion to follow the creator. The pin is still saved. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "description": "Stops the pop-up Pinterest shows after you save a pin, such as the Saved to your board message or a suggestion to follow the creator. The pin is still saved. A second switch does the same for the messages after a download. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Interface",
       "use": true,
       "dependencies": [
@@ -976,7 +1012,7 @@
     },
     {
       "name": "Hide search history",
-      "description": "Hides your recent searches on the search screen of this phone. It doesn't delete your account's search history. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "description": "Hides your recent searches on the search screen of this phone. It doesn't delete your account's search history. A second switch leaves only the search bar on the Search page. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Interface",
       "use": true,
       "dependencies": [

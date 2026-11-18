@@ -73,6 +73,7 @@ body:
         - Change package name
         - Custom save sound
         - Custom splash logo
+        - Customize board tabs
         - Disable analytics
         - Disable update nag
         - Download board
