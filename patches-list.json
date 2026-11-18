@@ -506,6 +506,43 @@
       "options": []
     },
     {
+      "name": "Fold related pins",
+      "description": "Puts an arrow under a pin you open. Related pins stay folded and don't load until you tap it, and tapping again folds them. Your last choice is kept. Hide related pins wins when both are on. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "Hide related pins",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "GmsCore support",
       "description": "Lets Google sign-in and push notifications go through microG-RE instead of Google Play services. Pick it only if microG-RE is on your phone. Without microG-RE, Google sign-in and push notifications stop working in the patched app. It brings Spoof signature for Google sign-in along. It isn't selected by default. Works as soon as you patch it in, with no switch.",
       "category": "Privacy",
@@ -723,6 +760,42 @@
       "options": []
     },
     {
+      "name": "Hide blue highlight ring",
+      "description": "Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Hide closeup buttons",
       "description": "Lets you hide the buttons on a pin you open, each with its own switch. That covers the back arrow and the visual search (lens) button that float over the picture, the like, comment, share and more buttons under it, the Remix button and the Visit site button. Another switch keeps the lens but drops its glow and the Search image label Pinterest puts on it for your first pins each day. Two more rows draw the red Save button smaller or paint it a color you pick. Your phone's back gesture still leaves the pin, and Search image in the pin menu still works. They all start off. Turn them on in HushPinterest settings > Interface.",
       "category": "Interface",
@@ -870,6 +943,78 @@
       "name": "Hide navigation buttons",
       "description": "Lets you hide the Create, Notifications and Search buttons in the bottom bar, each with its own switch. The Create and Notifications switches also cover those buttons at the top of Home. Home and Profile stay. Two more switches take the row of tabs off the top of Home and make a second press on Search open the keyboard. Starts off. Turn them on in HushPinterest settings > Interface.",
       "category": "Navigation",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide pin author",
+      "description": "Removes the creator's whole row, picture and name included, from under a pin you open. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide pin title and description",
+      "description": "Removes the title and description under a pin you open. The likes and comments bar stays, and so do the posted date and image size when they're on. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
       "use": true,
       "dependencies": [
         "BytecodePatch",
@@ -1191,6 +1336,42 @@
       "options": []
     },
     {
+      "name": "Hide visual search thumbnails",
+      "description": "Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest puts on it. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "HushPinterest settings",
       "description": "Adds a HushPinterest page to Pinterest where you turn features on or off, pause HushPinterest, back up your settings and read the licenses. Open it from Pinterest's settings, or by long-pressing the Pinterest logo at the top of your home feed or Pinterest's app icon. Works as soon as you patch it in, with no switch.",
       "category": "Settings",
@@ -1453,6 +1634,42 @@
         "BytecodePatch",
         "HushPinterest settings",
         "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Show image size",
+      "description": "Shows a picture's width and height under it when you open a pin, beside the posted date when that's on. It reads the largest copy Pinterest sends the app, which can be smaller than the original upload. Videos show nothing. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
       ],
       "compatiblePackages": {
         "com.pinterest": [
