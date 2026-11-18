@@ -281,7 +281,7 @@ public class DexDiff {
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
-            Map.entry("blackSheets", 2), Map.entry("blackBoards", 7),
+            Map.entry("blackSheets", 3), Map.entry("blackBoards", 7),
             Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1),
             Map.entry("ownAuthorities", 1));
 
@@ -6205,7 +6205,8 @@ public class DexDiff {
         }
 
         static final String GESTALT_SHEET_HEADER = "gestalt_sheet_header", GESTALT_SHEET_COORDINATOR = "draggable_sheet_coordinator",
-                LEGO_MODAL_CONTAINER = "lego_modal_container", LEGO_CLOSE_STICKY = "lego_close_container_sticky";
+                LEGO_MODAL_CONTAINER = "lego_modal_container", LEGO_CLOSE_STICKY = "lego_close_container_sticky",
+                PIN_DETAILS_SHEET = "metadata_drawer_bottom_sheet", PIN_DETAILS_FOOTER = "metadata_drawer_footer";
 
         /** The clean methods outside the extension that read both ids. */
         List<Method> readingBoth(String one, String other) {
@@ -6228,11 +6229,12 @@ public class DexDiff {
          * Black menus and sheets (#39). The one method reading both a Gestalt sheet's header id and its
          * coordinator's, an instance method taking just a view, hands that view over first, a range
          * call on its first parameter. The one constructor reading both a lego menu's list id and its
-         * Close row's has its class's views handed over the way handedOverBuilt checks. Either one
-         * turns the switch on.
+         * Close row's has its class's views handed over the way handedOverBuilt checks. The onCreateView
+         * reading both ids of a pin's details drawer (#21) hands over the view it inherits, right after
+         * receiving it. Any one turns the switch on.
          */
         void blackSheets(Contract c) {
-            String sheetHook = c.strings.get(0), menuHook = c.strings.get(1);
+            String sheetHook = c.strings.get(0), menuHook = c.strings.get(1), drawerHook = c.strings.get(2);
             boolean placed = false;
             List<Method> setups = readingBoth(GESTALT_SHEET_HEADER, GESTALT_SHEET_COORDINATOR);
             Method setup = setups.isEmpty() ? null : unique(setups, "Gestalt sheet setup");
@@ -6250,6 +6252,25 @@ public class DexDiff {
             List<Method> menus = readingBoth(LEGO_MODAL_CONTAINER, LEGO_CLOSE_STICKY);
             Method menu = menus.isEmpty() ? null : unique(menus, "lego menu builder");
             if (menu != null && menu.getName().equals("<init>")) placed |= handedOverBuilt(List.of(menu.getDefiningClass()), menuHook);
+            List<Method> drawers = readingBoth(PIN_DETAILS_SHEET, PIN_DETAILS_FOOTER);
+            Method drawer = drawers.isEmpty() ? null : unique(drawers, "pin details drawer builder");
+            if (drawer != null && drawer.getName().equals("onCreateView")) {
+                Method m = actual(drawer);
+                List<Integer> sites = calls(m, drawerHook, 1);
+                if (m != null && sites.size() == 1) {
+                    List<Instruction> body = instructions(m);
+                    int at = sites.get(0);
+                    boolean handed = at >= 2 && body.get(at - 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT
+                            && (body.get(at - 2).getOpcode() == Opcode.INVOKE_SUPER || body.get(at - 2).getOpcode() == Opcode.INVOKE_SUPER_RANGE)
+                            && ((ReferenceInstruction) body.get(at - 2)).getReference().toString().contains("->onCreateView(")
+                            && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at - 1))));
+                    if (!handed) fail(drawerHook + " doesn't take the view " + m + " inherits, right after receiving it");
+                    else {
+                        remove(m, at, at + 1);
+                        placed = true;
+                    }
+                }
+            }
             capability(c.callee, placed);
         }
 
@@ -8200,6 +8221,7 @@ public class DexDiff {
                     case "ownAuthorities": ownAuthorities(c); break;
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;
+                    case "pageImage": pageImage(c); break;
                     case "topicSuggestions": topicSuggestions(c); break;
                     case "inboxUpdates": inboxUpdates(c); break;
                     case "feedbackFlyout": feedbackFlyout(c); break;
@@ -8221,7 +8243,6 @@ public class DexDiff {
                     case "surveyPrompts": surveyPrompts(c); break;
                     case "popupBanners": popupBanners(c); break;
                     case "relatedPins": relatedPins(c); break;
-                    case "pageImage": pageImage(c); break;
                     case "creatorName": creatorName(c); break;
                     case "saveSound": saveSound(c); break;
                     case "pinInvites": pinInvites(c); break;

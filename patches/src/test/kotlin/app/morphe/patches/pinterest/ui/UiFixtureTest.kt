@@ -354,6 +354,19 @@ class UiFixtureTest {
                 assertEquals("${build.name}: the $hook builder answers the same view right after", Opcode.RETURN_OBJECT to view,
                     built[answer + 1].opcode to (built[answer + 1] as OneRegisterInstruction).registerA)
             }
+            // A pin's details drawer is handed over as soon as its builder has the inflated layout.
+            val drawer = classes.flatMap { it.methods }.single { method ->
+                method.name == "onCreateView" && method.fields().any { it.name == PIN_DETAILS_SHEET }
+            }
+            val inflated = drawer.inflatedViewAt()
+            val drawerBody = context.mutable(drawer).instructions()
+            assertEquals("${build.name}: the drawer is handed over right after it's inflated", inflated + 1,
+                drawerBody.indexOfFirst { isCall(it, AMOLED_BLACK, "pinDetails") })
+            assertEquals("${build.name}: the drawer's builder gained its hook, nothing else", drawer.instructions().size + 1, drawerBody.size)
+            val drawerHandOver = drawerBody[inflated + 1] as RegisterRangeInstruction
+            assertEquals("${build.name}: pinDetails takes the inflated view and nothing else",
+                (drawer.instructions()[inflated] as OneRegisterInstruction).registerA to 1,
+                drawerHandOver.startRegister to drawerHandOver.registerCount)
             val original = classes.flatMap { it.methods }.single { "inAppUpdateManager" in it.strings() }
             val modified = context.mutable(original)
             assertEquals("the shared coroutine's other task must keep its dispatcher", original.instructions()[0].opcode,
@@ -736,7 +749,7 @@ class UiFixtureTest {
                     owner.methods.any { method -> method.strings().any { it in anchors } ||
                         method.fields().any { it.name in FILTERABLE_PIN_MENU_TITLES ||
                             it.name == "email_verification_reminder_title" || it.name == COMMENTS_SCREEN_ID ||
-                            it.name == PIN_MENU_CARD || it.name == GREETING_ROW ||
+                            it.name == PIN_MENU_CARD || it.name == PIN_DETAILS_SHEET || it.name == GREETING_ROW ||
                             it.name == GESTALT_SHEET_COORDINATOR || it.name == LEGO_CLOSE_STICKY } }
                 if (match) found[owner.type] = ImmutableClassDef.of(owner)
             }

@@ -53,6 +53,10 @@ internal const val MENU_HOOK = "$AMOLED_BLACK->legoModal(Landroid/view/View;)V"
 internal const val BOARD_TOOL_BAR_HOOK = "$AMOLED_BLACK->boardToolBar(Landroid/view/View;)V"
 internal const val PROFILE_FILTERS_HOOK = "$AMOLED_BLACK->profileFilters(Landroid/view/View;)V"
 internal const val BOARD_HEADER_HOOK = "$AMOLED_BLACK->boardHeader(Landroid/view/View;)V"
+internal const val PIN_DETAILS_HOOK = "$AMOLED_BLACK->pinDetails(Landroid/view/View;)V"
+
+/** The sheet of the drawer a pin's chevron slides up, looked up only where the drawer is built (14.45.0). */
+internal const val PIN_DETAILS_SHEET = "metadata_drawer_bottom_sheet"
 
 /** The ids only the method that sets up each of Pinterest's Gestalt sheets reads together (14.44.0). */
 internal const val GESTALT_SHEET_HEADER = "gestalt_sheet_header"
@@ -85,7 +89,8 @@ internal data class GlassWash(val draw: Method, val index: Int, val view: Int, v
  * and its cards go together, under one switch.
  *
  * The other sheets are handed over where Pinterest sets each Gestalt sheet up and where each of its
- * lego menus is built, under a switch of their own. The bar over a board, a profile's filter
+ * lego menus is built, under a switch of their own, and the drawer a pin's chevron slides up joins
+ * them as soon as its layout is inflated. The bar over a board, a profile's filter
  * buttons and a board's header image are each handed over from their constructors right after the
  * constructor of the class they're built on, under one more switch. Each of these is found apart too.
  */
@@ -111,7 +116,7 @@ val amoledBlackPatch = bytecodePatch(
         var sheets = false
         var boards = false
         val surfaces = listOf("bottom bar", "comments screen", "pin menu", "Save to sheet", "sheets", "menus",
-            "board tool bar", "profile filters", "board header")
+            "pin details", "board tool bar", "profile filters", "board header")
         handleTargets(PATCH, "surfaces", surfaces) { surface ->
             try {
                 when (surface) {
@@ -123,6 +128,14 @@ val amoledBlackPatch = bytecodePatch(
                     }
                     "menus" -> {
                         handOverBuilt(legoMenu(), MENU_HOOK)
+                        sheets = true
+                    }
+                    "pin details" -> {
+                        // The inherited onCreateView has inflated the whole drawer, which then answers from two places.
+                        val drawer = pinDetailsDrawer()
+                        val inflated = drawer.inflatedViewAt()
+                        val view = (drawer.instructions()[inflated] as OneRegisterInstruction).registerA
+                        mutable(drawer).addInstructions(inflated + 1, "invoke-static/range { v$view .. v$view }, $PIN_DETAILS_HOOK")
                         sheets = true
                     }
                     "board tool bar" -> {
@@ -335,6 +348,34 @@ internal fun BytecodePatchContext.commentsScreen(): Method {
         }
     }
     return builders.one("$PATCH: comments screen builder")
+}
+
+/** The onCreateView that builds the drawer a pin's chevron slides up. Nothing is changed here. */
+internal fun BytecodePatchContext.pinDetailsDrawer(): Method {
+    val builders = mutableListOf<Method>()
+    classDefForEach { owner ->
+        if (owner.type.startsWith(EXTENSION_ROOT)) return@classDefForEach
+        owner.methods.filterTo(builders) { method ->
+            method.name == "onCreateView" && method.implementation != null &&
+                method.fields().any { it.name == PIN_DETAILS_SHEET && it.type == "I" }
+        }
+    }
+    return builders.one("$PATCH: pin details drawer builder")
+}
+
+/** Where this onCreateView receives the view it inherits, the layout already inflated. Nothing is changed here. */
+internal fun Method.inflatedViewAt(): Int {
+    val body = instructions()
+    val inherited = body.indices.filter { index ->
+        val opcode = body[index].opcode
+        val target = (body[index] as? ReferenceInstruction)?.reference as? MethodReference
+        (opcode == Opcode.INVOKE_SUPER || opcode == Opcode.INVOKE_SUPER_RANGE) &&
+            target?.name == "onCreateView" && target.returnType == "Landroid/view/View;"
+    }.one("$PATCH: inherited onCreateView")
+    if (body.getOrNull(inherited + 1)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+        throw PatchException("$PATCH: the pin details drawer doesn't keep the view it inherits")
+    }
+    return inherited + 1
 }
 
 /** The method that builds a pin's menu and answers the sheet that holds it. Nothing is changed here. */
