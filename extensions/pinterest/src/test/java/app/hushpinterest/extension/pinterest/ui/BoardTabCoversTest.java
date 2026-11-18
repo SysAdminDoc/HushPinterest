@@ -10,12 +10,16 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -41,6 +45,7 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlertDialog;
 import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.util.ReflectionHelpers;
 
 import app.hushpinterest.extension.pinterest.settings.Settings;
 import app.hushpinterest.extension.shared.SettingsContextRule;
@@ -116,6 +121,81 @@ public class BoardTabCoversTest {
         assertBlack();
     }
 
+    private static final ColorFilter SHADE = new PorterDuffColorFilter(0x80333333, PorterDuff.Mode.SRC_ATOP);
+
+    private void assertShadeIsBlack() {
+        ColorFilter now = image.getColorFilter();
+        assertTrue("a plain color filter paints it", now instanceof PorterDuffColorFilter);
+        assertEquals(Color.BLACK, (int) ReflectionHelpers.<Integer>callInstanceMethod(now, "getColor"));
+        assertEquals(PorterDuff.Mode.SRC_ATOP, ReflectionHelpers.callInstanceMethod(now, "getMode"));
+    }
+
+    private void goBlack() {
+        image.setColorFilter(SHADE);
+        BoardTabCovers.store(BOARD, BoardTabCovers.BLACK, null);
+        assertNull(BoardTabCovers.coverUrl(image, STOCK));
+    }
+
+    @Test public void noImageIsBlackThroughPinterestsShade() {
+        goBlack();
+        assertBlack();
+        assertShadeIsBlack();
+    }
+
+    @Test public void pinterestsPictureGetsItsShadeBack() {
+        goBlack();
+        BoardTabCovers.store(BOARD, null, null);
+        assertEquals(STOCK, BoardTabCovers.coverUrl(image, STOCK));
+        assertSame(SHADE, image.getColorFilter());
+    }
+
+    @Test public void aChosenPictureGetsTheShadeBack() {
+        goBlack();
+        BoardTabCovers.store(BOARD, BoardTabCovers.URL, PICKED);
+        assertEquals(PICKED, BoardTabCovers.coverUrl(image, STOCK));
+        assertSame(SHADE, image.getColorFilter());
+    }
+
+    @Test public void aPhotoGetsTheShadeBack() {
+        goBlack();
+        BoardTabCovers.store(BOARD, BoardTabCovers.FILE, "1234");
+        assertNull(BoardTabCovers.coverUrl(image, STOCK));
+        assertSame(SHADE, image.getColorFilter());
+    }
+
+    @Test public void turningTheSwitchOffBringsTheShadeBack() {
+        goBlack();
+        Settings.BOARD_TAB_COVERS.save(false);
+        assertEquals(STOCK, BoardTabCovers.coverUrl(image, STOCK));
+        assertSame(SHADE, image.getColorFilter());
+    }
+
+    @Test public void repeatedBindsStillRestoreTheOriginalShade() {
+        goBlack();
+        assertNull(BoardTabCovers.coverUrl(image, STOCK));
+        assertNull(BoardTabCovers.coverUrl(image, STOCK));
+        assertShadeIsBlack();
+        BoardTabCovers.store(BOARD, null, null);
+        BoardTabCovers.coverUrl(image, STOCK);
+        assertSame(SHADE, image.getColorFilter());
+    }
+
+    @Test public void aShadePinterestDroppedStaysDropped() {
+        goBlack();
+        image.setColorFilter((ColorFilter) null);
+        assertNull(BoardTabCovers.coverUrl(image, STOCK));
+        assertShadeIsBlack();
+        BoardTabCovers.store(BOARD, null, null);
+        BoardTabCovers.coverUrl(image, STOCK);
+        assertNull(image.getColorFilter());
+    }
+
+    @Test public void withNoChoiceTheShadeIsLeftAlone() {
+        image.setColorFilter(SHADE);
+        assertEquals(STOCK, BoardTabCovers.coverUrl(image, STOCK));
+        assertSame(SHADE, image.getColorFilter());
+    }
+
     @Test public void aPhotoShowsBlackUntilItIsRead() {
         BoardTabCovers.store(BOARD, BoardTabCovers.FILE, "1234");
         assertNull(BoardTabCovers.coverUrl(image, STOCK));
@@ -183,12 +263,15 @@ public class BoardTabCoversTest {
 
     @Test public void aLongPressCanGoBlackAndBack() throws Exception {
         onActivity(() -> {
+            image.setColorFilter(SHADE);
             BoardTabCovers.coverUrl(image, STOCK);
             pick(longPress(), "No image");
             assertBlack();
+            assertShadeIsBlack();
             AlertDialog dialog = longPress();
             assertEquals(Arrays.asList("Image from phone", "No image", "Pinterest's choice"), rows(dialog));
             pick(dialog, "Pinterest's choice");
+            assertSame("the picture's shade is back at once", SHADE, image.getColorFilter());
             assertEquals(STOCK, BoardTabCovers.coverUrl(image, STOCK));
         });
     }

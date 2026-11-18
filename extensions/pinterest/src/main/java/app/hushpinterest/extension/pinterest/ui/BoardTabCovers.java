@@ -18,6 +18,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -95,6 +98,29 @@ public final class BoardTabCovers {
         }
     }
 
+    /**
+     * Pinterest shades the header picture with a color filter, which turns a black drawable gray. This
+     * filter paints it black instead and carries Pinterest's along, so the view itself remembers it and
+     * a rebind that drops the filter drops both.
+     */
+    private static final class BlackShade extends PorterDuffColorFilter {
+        @Nullable final ColorFilter pinterests;
+
+        BlackShade(@Nullable ColorFilter pinterests) {
+            super(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+            this.pinterests = pinterests;
+        }
+    }
+
+    private static void setBlackCover(View image, boolean wanted) {
+        if (!(image instanceof ImageView)) return;
+        ImageView view = (ImageView) image;
+        ColorFilter now = view.getColorFilter();
+        boolean black = now instanceof BlackShade;
+        if (wanted && !black) view.setColorFilter(new BlackShade(now));
+        else if (!wanted && black) view.setColorFilter(((BlackShade) now).pinterests);
+    }
+
     private static boolean covering() {
         return UiHooks.enabled(FamilyNames.BOARD_TABS, Settings.BOARD_TAB_COVERS);
     }
@@ -108,12 +134,17 @@ public final class BoardTabCovers {
         HookStatus.invoked(FamilyNames.BOARD_TABS);
         try {
             View tab = tabOf(image);
-            if (tab == null || !covering()) return url;
+            if (tab == null || !covering()) {
+                setBlackCover(image, false);
+                return url;
+            }
             String board = BoardTabs.boardOf(tab);
             STOCK.put(image, url);
             watch(image);
             Cover cover = cover(board);
-            return cover == null ? url : show(image, board, cover);
+            if (cover != null) return show(image, board, cover);
+            setBlackCover(image, false);
+            return url;
         } catch (Throwable failure) {
             HookStatus.threw(FamilyNames.BOARD_TABS, "board tab cover", failure);
             return url;
@@ -203,6 +234,7 @@ public final class BoardTabCovers {
 
     @Nullable
     private static String show(View image, String board, Cover cover) {
+        setBlackCover(image, BLACK.equals(cover.kind));
         if (URL.equals(cover.kind)) return cover.value;
         if (image instanceof ImageView) ((ImageView) image).setImageDrawable(new ColorDrawable(Color.BLACK));
         if (FILE.equals(cover.kind)) loadFile(image, board, cover.value);
@@ -211,6 +243,7 @@ public final class BoardTabCovers {
 
     private static void refresh(View image, String board) {
         Cover cover = cover(board);
+        if (cover == null) setBlackCover(image, false);
         String url = cover == null ? STOCK.get(image) : show(image, board, cover);
         if (url != null) loadCover(image, url);
     }
