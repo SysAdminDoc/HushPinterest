@@ -6353,8 +6353,9 @@ public class DexDiff {
         /**
          * The closeup title module taking its pin: the one clean instance updatePin(pin) of a closeup
          * module that checks the holistic metadata experiment, in a class whose constructor builds the
-         * title row (a view whose own constructor reads the chevron's id) and adds a view. Its first
-         * instruction is the hook, a range call on the module and the pin, the frame's last two registers.
+         * title row (a view whose own constructor reads the chevron's id) and adds a view. The hook
+         * opens the method, a range call on the module and the pin, the frame's last two registers, with
+         * only the other hook writing the same line allowed ahead of it.
          */
         void postedDate(Contract c) {
             String hook = c.strings.get(0);
@@ -6369,12 +6370,16 @@ public class DexDiff {
             List<Integer> sites = calls(m, hook, 1);
             boolean placed = false;
             if (m != null && sites.size() == 1) {
-                Instruction first = instructions(m).get(0);
+                List<Instruction> body = instructions(m);
                 int registers = m.getImplementation().getRegisterCount();
-                placed = sites.get(0) == 0 && first.getOpcode() == Opcode.INVOKE_STATIC_RANGE
-                        && arguments(first).equals(List.of(registers - 2, registers - 1));
-                if (!placed) fail(hook + " isn't the first call, on the module and its pin, in " + m);
-                else remove(m, 0, 1);
+                placed = true;
+                for (int at = 0; at <= sites.get(0); at++) {
+                    Instruction i = body.get(at);
+                    placed &= i.getOpcode() == Opcode.INVOKE_STATIC_RANGE && arguments(i).equals(List.of(registers - 2, registers - 1))
+                            && String.valueOf(reference(i)).startsWith(OWN + "pinterest/ui/PostedDate;->");
+                }
+                if (!placed) fail(hook + " isn't among the first calls, on the module and its pin, in " + m);
+                else remove(m, sites.get(0), sites.get(0) + 1);
             }
             capability(c.callee, placed);
         }

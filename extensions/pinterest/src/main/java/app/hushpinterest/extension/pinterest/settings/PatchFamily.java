@@ -109,6 +109,7 @@ public enum PatchFamily {
     HIDE_CREATOR_NAME(FamilyNames.HIDE_CREATOR_NAME, "hideCreatorName", null, Settings.HIDE_CREATOR_NAME),
     HIDE_PIN_AUTHOR(FamilyNames.HIDE_PIN_AUTHOR, "hidePinAuthor", null, Settings.HIDE_PIN_AUTHOR),
     HIDE_PIN_DESCRIPTION(FamilyNames.HIDE_PIN_DESCRIPTION, "hidePinDescription", null, Settings.HIDE_PIN_DESCRIPTION),
+    SHOW_IMAGE_SIZE(FamilyNames.SHOW_IMAGE_SIZE, "showImageSize", null, Settings.SHOW_IMAGE_SIZE),
     CUSTOM_SAVE_SOUND(FamilyNames.CUSTOM_SAVE_SOUND, "customSaveSound", null, Settings.CUSTOM_SAVE_SOUND),
     CUSTOM_SPLASH_LOGO(FamilyNames.CUSTOM_SPLASH_LOGO, "customSplashLogo", null, Settings.CUSTOM_SPLASH_LOGO),
     BOARD_TABS(FamilyNames.BOARD_TABS, "boardTabs", null, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE,
@@ -174,7 +175,7 @@ public enum PatchFamily {
             LONG_PRESS_DOWNLOAD, SYSTEM_SHARE));
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
             HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
-            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, HIDE_PIN_AUTHOR, HIDE_PIN_DESCRIPTION, BOARD_TABS,
+            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, HIDE_PIN_AUTHOR, HIDE_PIN_DESCRIPTION, SHOW_IMAGE_SIZE, BOARD_TABS,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
             HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST));
 
@@ -251,6 +252,7 @@ public enum PatchFamily {
         CREATOR_NAME(HIDE_CREATOR_NAME, "creatorName", "Hide creator name on pins"),
         PIN_AUTHOR(HIDE_PIN_AUTHOR, "pinAuthor", "Hide pin author"),
         PIN_DESCRIPTION(HIDE_PIN_DESCRIPTION, "pinDescription", "Hide pin title and description"),
+        IMAGE_SIZE(SHOW_IMAGE_SIZE, "imageSize", "Show image size"),
         SAVE_SOUND(CUSTOM_SAVE_SOUND, "saveSound", "Custom save sound"),
         BOARD_TAB_HEADER(BOARD_TABS, "boardTabHeader", "Board tab header"),
         BOARD_TAB_COVERS(BOARD_TABS, "boardTabCovers", "Board tab covers"),

@@ -1230,14 +1230,21 @@ public final class L10nTranslations {
                 "Shop the look unter Pins");
         table.put("Show AI content",
                 "KI-Inhalte anzeigen");
+        table.put("Show image size",
+                "Bildgr\u00f6\u00dfe anzeigen");
         table.put("Show posted date",
                 "Ver\u00f6ffentlichungsdatum anzeigen");
         table.put("Shown. Tap to hide it.",
                 "Werden angezeigt. Tippe, um sie auszublenden.");
+        table.put("Shows a picture's width and height under it when you open a pin, beside the posted date when that's on. It reads the largest copy Pinterest sends the app, which can be smaller than the original upload. Videos show nothing. The change shows on the next pin you open.",
+                "Zeigt beim \u00d6ffnen eines Pins Breite und H\u00f6he des Bildes darunter an, neben dem Ver\u00f6ffentlichungsdatum, wenn es eingeschaltet ist. Gelesen wird die gr\u00f6\u00dfte Kopie, die Pinterest an die App schickt, und die kann kleiner sein als das hochgeladene Original. Bei Videos erscheint nichts. Die \u00c4nderung zeigt sich beim n\u00e4chsten Pin, den du \u00f6ffnest.");
         table.put("Shows an empty ad ID with tracking limited, as if you deleted it in Android. Also stops Google's Block Store from keeping Pinterest's browser ID across reinstalls.",
                 "Zeigt eine leere Werbe-ID mit eingeschr\u00e4nktem Tracking, als h\u00e4ttest du sie in Android gel\u00f6scht. Verhindert auch, dass Googles Block Store Pinterests Browser-ID \u00fcber Neuinstallationen hinweg beh\u00e4lt.");
         table.put("Shows the day a pin was posted under its title. It shows on the next pin you open.",
                 "Zeigt unter dem Titel eines Pins, an welchem Tag er gepostet wurde. Das Datum erscheint beim n\u00e4chsten Pin, den du \u00f6ffnest.");
+    }
+
+    private static void fillDe9(Map<String, String> table) {
         table.put("Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.",
                 "Zeigt das beim Patchen gew\u00e4hlte Logo auf dem Bildschirm, den du beim Start von Pinterest siehst, statt dem von Pinterest. Ab Android 13. Es erscheint ab dem n\u00e4chsten Start.");
         table.put("Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.",
@@ -1369,6 +1376,9 @@ public final class L10nTranslations {
                 "Es gibt keine Diagnosedaten zum L\u00f6schen.");
         table.put("There's no diagnostic data to put back.",
                 "Es gibt keine Diagnosedaten zum Wiederherstellen.");
+    }
+
+    private static void fillDe10(Map<String, String> table) {
         table.put("There's no import to undo.",
                 "Es gibt keinen Import zum R\u00fcckg\u00e4ngigmachen.");
         table.put("These details come from the link and file information Pinterest gave the app. HushPinterest hasn't opened the file to check them.",
@@ -1502,6 +1512,9 @@ public final class L10nTranslations {
                 "Deine Auswahl ist gespeichert, aber dieser Build enth\u00e4lt den Patch daf\u00fcr nicht.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Deine Auswahl bleibt gespeichert. Tippe auf Fortsetzen und starte Pinterest dann neu.");
+    }
+
+    private static void fillDe11(Map<String, String> table) {
         table.put("Your download settings block this network. Try again on Wi-Fi.",
                 "Deine Download-Einstellungen sperren dieses Netzwerk. Versuch es im WLAN erneut.");
         table.put("Your muted words and Save button color will change.",
@@ -2741,14 +2754,21 @@ public final class L10nTranslations {
                 "Shop the look bajo los pines");
         table.put("Show AI content",
                 "Mostrar contenido de IA");
+        table.put("Show image size",
+                "Mostrar tama\u00f1o de la imagen");
         table.put("Show posted date",
                 "Mostrar fecha de publicaci\u00f3n");
         table.put("Shown. Tap to hide it.",
                 "Visible. Toca para ocultarla.");
+        table.put("Shows a picture's width and height under it when you open a pin, beside the posted date when that's on. It reads the largest copy Pinterest sends the app, which can be smaller than the original upload. Videos show nothing. The change shows on the next pin you open.",
+                "Muestra el ancho y el alto de la imagen debajo de ella al abrir un pin, junto a la fecha de publicaci\u00f3n si est\u00e1 activada. Lee la copia m\u00e1s grande que Pinterest env\u00eda a la app, que puede ser menor que el original subido. En los videos no aparece nada. El cambio se ve en el siguiente pin que abras.");
         table.put("Shows an empty ad ID with tracking limited, as if you deleted it in Android. Also stops Google's Block Store from keeping Pinterest's browser ID across reinstalls.",
                 "Muestra un ID publicitario vac\u00edo con seguimiento limitado, como si lo hubieras borrado en Android. Tambi\u00e9n impide que Block Store de Google conserve el ID de navegador de Pinterest tras reinstalar.");
         table.put("Shows the day a pin was posted under its title. It shows on the next pin you open.",
                 "Muestra bajo el t\u00edtulo de un pin el d\u00eda en que se public\u00f3. Aparece en el pr\u00f3ximo pin que abras.");
+    }
+
+    private static void fillEs9(Map<String, String> table) {
         table.put("Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.",
                 "Muestra el logo elegido al parchear en la pantalla que ves mientras Pinterest se inicia, en lugar del de Pinterest. Android 13 y posteriores. Se ve desde el pr\u00f3ximo inicio.");
         table.put("Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.",
@@ -2880,6 +2900,9 @@ public final class L10nTranslations {
                 "No hay datos de diagn\u00f3stico que borrar.");
         table.put("There's no diagnostic data to put back.",
                 "No hay datos de diagn\u00f3stico que restaurar.");
+    }
+
+    private static void fillEs10(Map<String, String> table) {
         table.put("There's no import to undo.",
                 "No hay ninguna importaci\u00f3n que deshacer.");
         table.put("These details come from the link and file information Pinterest gave the app. HushPinterest hasn't opened the file to check them.",
@@ -3013,6 +3036,9 @@ public final class L10nTranslations {
                 "Tu elecci\u00f3n est\u00e1 guardada, pero esta versi\u00f3n no incluye el parche para ella.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Tus preferencias est\u00e1n guardadas. Toca Reanudar y luego reinicia Pinterest.");
+    }
+
+    private static void fillEs11(Map<String, String> table) {
         table.put("Your download settings block this network. Try again on Wi-Fi.",
                 "Tu configuraci\u00f3n de descargas bloquea esta red. Int\u00e9ntalo de nuevo con Wi-Fi.");
         table.put("Your muted words and Save button color will change.",
@@ -4252,14 +4278,21 @@ public final class L10nTranslations {
                 "Shop the look di bawah pin");
         table.put("Show AI content",
                 "Tampilkan konten AI");
+        table.put("Show image size",
+                "Tampilkan ukuran gambar");
         table.put("Show posted date",
                 "Tampilkan tanggal posting");
         table.put("Shown. Tap to hide it.",
                 "Ditampilkan. Ketuk untuk menyembunyikannya.");
+        table.put("Shows a picture's width and height under it when you open a pin, beside the posted date when that's on. It reads the largest copy Pinterest sends the app, which can be smaller than the original upload. Videos show nothing. The change shows on the next pin you open.",
+                "Menampilkan lebar dan tinggi gambar di bawahnya saat Anda membuka pin, di samping tanggal posting jika diaktifkan. Ukuran dibaca dari salinan terbesar yang dikirim Pinterest ke aplikasi, yang bisa lebih kecil dari unggahan aslinya. Video tidak menampilkan apa pun. Perubahan terlihat pada pin berikutnya yang Anda buka.");
         table.put("Shows an empty ad ID with tracking limited, as if you deleted it in Android. Also stops Google's Block Store from keeping Pinterest's browser ID across reinstalls.",
                 "Menampilkan ID iklan kosong dengan pelacakan dibatasi, seolah dihapus di Android. Juga mencegah Block Store Google menyimpan ID browser Pinterest setelah pemasangan ulang.");
         table.put("Shows the day a pin was posted under its title. It shows on the next pin you open.",
                 "Menampilkan tanggal pin diposting di bawah judulnya. Tanggal muncul di pin berikutnya yang Anda buka.");
+    }
+
+    private static void fillIn9(Map<String, String> table) {
         table.put("Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.",
                 "Menampilkan logo yang dipilih saat menambal di layar yang kamu lihat saat Pinterest dimulai, bukan logo Pinterest. Android 13 dan yang lebih baru. Tampil mulai dari pembukaan berikutnya.");
         table.put("Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.",
@@ -4391,6 +4424,9 @@ public final class L10nTranslations {
                 "Tidak ada data diagnostik yang dapat dihapus.");
         table.put("There's no diagnostic data to put back.",
                 "Tidak ada data diagnostik yang dapat dikembalikan.");
+    }
+
+    private static void fillIn10(Map<String, String> table) {
         table.put("There's no import to undo.",
                 "Tidak ada impor untuk diurungkan.");
         table.put("These details come from the link and file information Pinterest gave the app. HushPinterest hasn't opened the file to check them.",
@@ -4524,6 +4560,9 @@ public final class L10nTranslations {
                 "Pilihan Anda tersimpan, tetapi build ini tidak menyertakan patch-nya.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Pilihan Anda tersimpan. Ketuk Lanjutkan, lalu mulai ulang Pinterest.");
+    }
+
+    private static void fillIn11(Map<String, String> table) {
         table.put("Your download settings block this network. Try again on Wi-Fi.",
                 "Setelan unduhan Anda memblokir jaringan ini. Coba lagi melalui Wi-Fi.");
         table.put("Your muted words and Save button color will change.",
@@ -5763,14 +5802,21 @@ public final class L10nTranslations {
                 "Shop the look abaixo dos pins");
         table.put("Show AI content",
                 "Mostrar conte\u00fado de IA");
+        table.put("Show image size",
+                "Mostrar tamanho da imagem");
         table.put("Show posted date",
                 "Mostrar data de publica\u00e7\u00e3o");
         table.put("Shown. Tap to hide it.",
                 "Vis\u00edveis. Toque para ocultar.");
+        table.put("Shows a picture's width and height under it when you open a pin, beside the posted date when that's on. It reads the largest copy Pinterest sends the app, which can be smaller than the original upload. Videos show nothing. The change shows on the next pin you open.",
+                "Mostra a largura e a altura da imagem abaixo dela ao abrir um pin, ao lado da data de publica\u00e7\u00e3o quando ela est\u00e1 ativada. O valor vem da maior c\u00f3pia que o Pinterest envia ao app, que pode ser menor que o original enviado. V\u00eddeos n\u00e3o mostram nada. A mudan\u00e7a aparece no pr\u00f3ximo pin que voc\u00ea abrir.");
         table.put("Shows an empty ad ID with tracking limited, as if you deleted it in Android. Also stops Google's Block Store from keeping Pinterest's browser ID across reinstalls.",
                 "Mostra um ID de publicidade vazio com rastreamento limitado, como se voc\u00ea o apagasse no Android. Tamb\u00e9m impede o Block Store do Google de manter o ID de navegador do Pinterest ap\u00f3s reinstalar.");
         table.put("Shows the day a pin was posted under its title. It shows on the next pin you open.",
                 "Mostra abaixo do t\u00edtulo de um pin o dia em que ele foi publicado. Aparece no pr\u00f3ximo pin que voc\u00ea abrir.");
+    }
+
+    private static void fillPt_rBR9(Map<String, String> table) {
         table.put("Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.",
                 "Mostra o logo escolhido ao aplicar o patch na tela que voc\u00ea v\u00ea enquanto o Pinterest abre, no lugar do logo do Pinterest. Android 13 ou mais recente. Aparece a partir da pr\u00f3xima abertura.");
         table.put("Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.",
@@ -5902,6 +5948,9 @@ public final class L10nTranslations {
                 "N\u00e3o h\u00e1 dados de diagn\u00f3stico para limpar.");
         table.put("There's no diagnostic data to put back.",
                 "N\u00e3o h\u00e1 dados de diagn\u00f3stico para restaurar.");
+    }
+
+    private static void fillPt_rBR10(Map<String, String> table) {
         table.put("There's no import to undo.",
                 "N\u00e3o h\u00e1 importa\u00e7\u00e3o para desfazer.");
         table.put("These details come from the link and file information Pinterest gave the app. HushPinterest hasn't opened the file to check them.",
@@ -6035,6 +6084,9 @@ public final class L10nTranslations {
                 "Sua escolha est\u00e1 salva, mas esta vers\u00e3o n\u00e3o inclui o patch para ela.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Suas escolhas est\u00e3o salvas. Toque em Retomar e depois reinicie o Pinterest.");
+    }
+
+    private static void fillPt_rBR11(Map<String, String> table) {
         table.put("Your download settings block this network. Try again on Wi-Fi.",
                 "Suas configura\u00e7\u00f5es de download bloqueiam esta rede. Tente de novo no Wi-Fi.");
         table.put("Your muted words and Save button color will change.",
@@ -7274,14 +7326,21 @@ public final class L10nTranslations {
                 "pinlerin alt\u0131ndaki Shop the look b\u00f6l\u00fcm\u00fc");
         table.put("Show AI content",
                 "Yapay zeka i\u00e7eri\u011fi g\u00f6ster");
+        table.put("Show image size",
+                "G\u00f6rsel boyutunu g\u00f6ster");
         table.put("Show posted date",
                 "Payla\u015f\u0131m tarihini g\u00f6ster");
         table.put("Shown. Tap to hide it.",
                 "G\u00f6steriliyor. Gizlemek i\u00e7in dokun.");
+        table.put("Shows a picture's width and height under it when you open a pin, beside the posted date when that's on. It reads the largest copy Pinterest sends the app, which can be smaller than the original upload. Videos show nothing. The change shows on the next pin you open.",
+                "Bir pin a\u00e7t\u0131\u011f\u0131nda g\u00f6rselin geni\u015fli\u011fini ve y\u00fcksekli\u011fini alt\u0131nda, a\u00e7\u0131ksa payla\u015f\u0131m tarihinin yan\u0131nda g\u00f6sterir. Pinterest'in uygulamaya g\u00f6nderdi\u011fi en b\u00fcy\u00fck kopyay\u0131 okur, bu kopya y\u00fcklenen orijinalden k\u00fc\u00e7\u00fck olabilir. Videolarda hi\u00e7bir \u015fey g\u00f6r\u00fcnmez. De\u011fi\u015fiklik a\u00e7t\u0131\u011f\u0131n bir sonraki pinde g\u00f6r\u00fcn\u00fcr.");
         table.put("Shows an empty ad ID with tracking limited, as if you deleted it in Android. Also stops Google's Block Store from keeping Pinterest's browser ID across reinstalls.",
                 "Android'de silmi\u015fsin gibi, takibi s\u0131n\u0131rl\u0131 bo\u015f bir reklam kimli\u011fi g\u00f6sterir. Google'\u0131n Block Store'unun Pinterest'in taray\u0131c\u0131 kimli\u011fini yeniden y\u00fcklemelerde saklamas\u0131n\u0131 da durdurur.");
         table.put("Shows the day a pin was posted under its title. It shows on the next pin you open.",
                 "Bir pinin payla\u015f\u0131ld\u0131\u011f\u0131 g\u00fcn\u00fc ba\u015fl\u0131\u011f\u0131n\u0131n alt\u0131nda g\u00f6sterir. A\u00e7t\u0131\u011f\u0131n bir sonraki pinde g\u00f6r\u00fcn\u00fcr.");
+    }
+
+    private static void fillTr9(Map<String, String> table) {
         table.put("Shows the logo picked when patching on the screen you see while Pinterest starts, instead of Pinterest's. Android 13 and newer. It shows from the next start.",
                 "Yamalama s\u0131ras\u0131nda se\u00e7ilen logoyu, Pinterest a\u00e7\u0131l\u0131rken g\u00f6rd\u00fc\u011f\u00fcn ekranda Pinterest'inkinin yerine g\u00f6sterir. Android 13 ve sonras\u0131. Bir sonraki a\u00e7\u0131l\u0131\u015ftan itibaren g\u00f6r\u00fcn\u00fcr.");
         table.put("Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.",
@@ -7413,6 +7472,9 @@ public final class L10nTranslations {
                 "Temizlenecek tan\u0131lama verisi yok.");
         table.put("There's no diagnostic data to put back.",
                 "Geri getirilecek tan\u0131lama verisi yok.");
+    }
+
+    private static void fillTr10(Map<String, String> table) {
         table.put("There's no import to undo.",
                 "Geri al\u0131nacak i\u00e7e aktarma yok.");
         table.put("These details come from the link and file information Pinterest gave the app. HushPinterest hasn't opened the file to check them.",
@@ -7546,6 +7608,9 @@ public final class L10nTranslations {
                 "Se\u00e7imin kaydedildi ama bu s\u00fcr\u00fcm onun yamas\u0131n\u0131 i\u00e7ermiyor.");
         table.put("Your choices are saved. Tap Resume, then restart Pinterest.",
                 "Tercihlerin kay\u0131tl\u0131. Devam et'e dokun, sonra Pinterest'\u0131 yeniden ba\u015flat.");
+    }
+
+    private static void fillTr11(Map<String, String> table) {
         table.put("Your download settings block this network. Try again on Wi-Fi.",
                 "\u0130ndirme ayarlar\u0131n bu a\u011f\u0131 engelliyor. Wi-Fi'da yeniden dene.");
         table.put("Your muted words and Save button color will change.",

@@ -67,6 +67,7 @@ family|hideRelatedPins|Hide related pins|relatedPins
 family|hideCreatorName|Hide creator name on pins|creatorName
 family|hidePinAuthor|Hide pin author|pinAuthor
 family|hidePinDescription|Hide pin title and description|pinDescription
+family|showImageSize|Show image size|imageSize
 family|customSaveSound|Custom save sound|saveSound
 family|customSplashLogo|Custom splash logo|
 family|boardTabs|Customize board tabs|boardTabHeader,boardTabCovers
@@ -134,6 +135,7 @@ mutation|relatedPins|relatedPins|Lapp/hushpinterest/extension/pinterest/ui/UiHoo
 mutation|creatorName|creatorName|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->creatorName(Landroid/view/View;)V
 mutation|pinAuthor|closeupGate|Lapp/hushpinterest/extension/pinterest/ui/PinPageSections;->author(Landroid/view/View;I)I
 mutation|pinDescription|closeupGate|Lapp/hushpinterest/extension/pinterest/ui/PinPageSections;->description(Landroid/view/View;I)I
+mutation|imageSize|postedDate|Lapp/hushpinterest/extension/pinterest/ui/PostedDate;->showSize(Landroid/view/View;Ljava/lang/Object;)V
 mutation|saveSound|saveSound|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->saveSound(Landroid/content/Context;I)Landroid/media/MediaPlayer;
 mutation|saveToasts|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideSaveToast(Ljava/lang/Object;)Z|saveToast|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->androidToast(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;|androidToast|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->androidToast(Landroid/content/Context;II)Landroid/widget/Toast;|androidToast
 mutation|imageChooser|imageOrder|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->originalImages()Z

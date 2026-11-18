@@ -271,8 +271,8 @@ public class PausedHooksTest {
         return name.getVisibility() != View.VISIBLE;
     }
 
-    /** A closeup title module taking a pin with a date: true when a line was added under its row. */
-    private static boolean addsPostedDate() {
+    /** A closeup title module holding its row, the way Pinterest builds it. */
+    private static LinearLayout titleModule() {
         // Pinterest's resources know the title row's chevron by name; the test app's don't.
         Context app = RuntimeEnvironment.getApplication();
         Resources base = app.getResources();
@@ -291,9 +291,30 @@ public class PausedHooksTest {
         chevron.setId(TITLE_CHEVRON_ID);
         row.addView(chevron);
         module.addView(row);
+        return module;
+    }
+
+    /** A closeup title module taking a pin with a date: true when a line was added under its row. */
+    private static boolean addsPostedDate() {
+        LinearLayout module = titleModule();
         ProbePin pin = new ProbePin();
         pin.createdAt = new Date(1_791_806_400_000L);
         PostedDate.show(module, pin);
+        return module.getChildCount() > 1;
+    }
+
+    /** A closeup title module taking a picture with a known size: true when a line was added. */
+    private static boolean addsImageSize() {
+        Map<String, Object> image = new LinkedHashMap<>();
+        image.put("url", "https://i.pinimg.com/736x/aa/bb/cc/aabbcc.jpg");
+        image.put("width", 736);
+        image.put("height", 1104);
+        Map<String, Object> pin = new LinkedHashMap<>();
+        pin.put("id", "123456789");
+        pin.put("images", Collections.singletonMap("736x", image));
+        pin.put("videos", null);
+        LinearLayout module = titleModule();
+        PostedDate.showSize(module, pin);
         return module.getChildCount() > 1;
     }
 
@@ -567,6 +588,7 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_CREATOR_NAME, Collections.singletonList(PausedHooksTest::hidesCreatorName));
         probes.put(Settings.HIDE_PIN_AUTHOR, Collections.singletonList(UiHooksForTests::hidesPinAuthor));
         probes.put(Settings.HIDE_PIN_DESCRIPTION, Collections.singletonList(UiHooksForTests::hidesPinDescription));
+        probes.put(Settings.SHOW_IMAGE_SIZE, Collections.singletonList(PausedHooksTest::addsImageSize));
         probes.put(Settings.CUSTOM_SAVE_SOUND, Collections.singletonList(UiHooksForTests::playsPickedSaveSound));
         probes.put(Settings.CUSTOM_SPLASH_LOGO, Collections.singletonList(UiHooksForTests::nextStartShowsPickedLogo));
         probes.put(Settings.HIDE_BOARD_TAB_BUTTON, Collections.singletonList(UiHooksForTests::foldsBoardTabButton));
