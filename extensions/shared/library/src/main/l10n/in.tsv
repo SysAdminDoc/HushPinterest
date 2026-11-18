@@ -373,6 +373,8 @@ Saving a pin no longer shows the "Saved to" message or a suggestion to follow it
 Original-quality images	Gambar kualitas asli
 collage images	gambar kolase
 pin closeups	tampilan dekat pin
+idea pin pages	halaman pin ide
+refused originals	gambar asli yang ditolak
 Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.	Menampilkan gambar asli, bukan ukuran besar, di tampilan dekat pin dan kolase, jika Pinterest punya. Memakai lebih banyak data. Pin yang sudah dimuat berubah saat dimuat lagi.
 Save media	Simpan media
 Recent searches autocomplete	Pelengkapan otomatis pencarian terbaru
@@ -779,7 +781,6 @@ Pick the rows to take out of a pin's menu.	Pilih baris yang ingin dihapus dari m
 Hidden from pin menus: %s. Tap to change.	Disembunyikan dari menu pin: %s. Ketuk untuk mengubah.
 Picked: %s. Hide pin menu rows is off, so they still show.	Dipilih: %s. Sembunyikan baris menu pin nonaktif, jadi baris tetap muncul.
 Why you're seeing this pin	Alasan kamu melihat pin ini
-Customize board tabs	Sesuaikan tab papan
 Board tab header	Header tab papan
 Hide See board on board tabs	Sembunyikan Lihat papan di tab papan
 Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Menghapus tombol Lihat papan dari gambar di bagian atas tab papan di Beranda. Perubahan terlihat saat tab dibuka berikutnya.

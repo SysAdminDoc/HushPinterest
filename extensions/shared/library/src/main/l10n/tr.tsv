@@ -373,6 +373,8 @@ Saving a pin no longer shows the "Saved to" message or a suggestion to follow it
 Original-quality images	Orijinal kalitede görseller
 collage images	kolaj görselleri
 pin closeups	Pin yakın görünümleri
+idea pin pages	fikir pini sayfaları
+refused originals	reddedilen orijinaller
 Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.	Pinterest'te varsa, pin yakın görünümlerinde ve kolajlarda büyük boyut yerine orijinal görseli gösterir. Daha çok veri kullanır. Zaten yüklenmiş pinler bir sonraki yüklenişte değişir.
 Save media	Medyayı kaydet
 Recent searches autocomplete	Son aramalarda otomatik tamamlama
@@ -779,7 +781,6 @@ Pick the rows to take out of a pin's menu.	Bir pinin menüsünden kaldırılacak
 Hidden from pin menus: %s. Tap to change.	Pin menülerinde gizli: %s. Değiştirmek için dokun.
 Picked: %s. Hide pin menu rows is off, so they still show.	Seçilenler: %s. Pin menüsü satırlarını gizle kapalı, bu yüzden hâlâ görünüyorlar.
 Why you're seeing this pin	Bu pini neden görüyorsun
-Customize board tabs	Pano sekmelerini özelleştir
 Board tab header	Pano sekmesi başlığı
 Hide See board on board tabs	Pano sekmelerinde Panoyu gör düğmesini gizle
 Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Ana sayfadaki pano sekmesinin üstündeki resimden Panoyu gör düğmesini kaldırır. Değişiklik sekme bir sonraki açılışında görünür.

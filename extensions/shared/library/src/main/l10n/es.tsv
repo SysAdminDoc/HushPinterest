@@ -373,6 +373,8 @@ Saving a pin no longer shows the "Saved to" message or a suggestion to follow it
 Original-quality images	Imágenes en calidad original
 collage images	imágenes de collages
 pin closeups	vistas ampliadas de pines
+idea pin pages	páginas de pines de ideas
+refused originals	originales rechazados
 Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.	Muestra la imagen original en lugar del tamaño grande en las vistas ampliadas de pines y en los collages, cuando Pinterest la tiene. Usa más datos. Los pines ya cargados cambian la próxima vez que se carguen.
 Save media	Guardar contenido multimedia
 Recent searches autocomplete	Autocompletado de búsquedas recientes
@@ -779,7 +781,6 @@ Pick the rows to take out of a pin's menu.	Elige las filas que quieres quitar de
 Hidden from pin menus: %s. Tap to change.	Oculto en los menús de pin: %s. Toca para cambiar.
 Picked: %s. Hide pin menu rows is off, so they still show.	Elegidas: %s. Ocultar filas del menú del pin está desactivado, así que siguen apareciendo.
 Why you're seeing this pin	Por qué ves este pin
-Customize board tabs	Personalizar pestañas de tableros
 Board tab header	Encabezado de las pestañas de tableros
 Hide See board on board tabs	Ocultar Ver tablero en las pestañas de tableros
 Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Quita el botón Ver tablero de la imagen superior de una pestaña de tablero en Inicio. El cambio se ve la próxima vez que se abra la pestaña.

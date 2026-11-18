@@ -373,6 +373,8 @@ Saving a pin no longer shows the "Saved to" message or a suggestion to follow it
 Original-quality images	Bilder in Originalqualität
 collage images	Collagenbilder
 pin closeups	Pin-Detailansichten
+idea pin pages	Seiten von Ideen-Pins
+refused originals	abgelehnte Originale
 Shows the original image instead of the large size in pin closeups and collages, when Pinterest has one. Uses more data. Pins already loaded change the next time they load.	Zeigt in Pin-Detailansichten und Collagen das Originalbild statt der großen Größe, wenn Pinterest eins hat. Braucht mehr Daten. Bereits geladene Pins ändern sich, wenn sie das nächste Mal laden.
 Save media	Medien speichern
 Recent searches autocomplete	Autovervollständigung der letzten Suchen
@@ -779,7 +781,6 @@ Pick the rows to take out of a pin's menu.	Wähle die Zeilen, die aus dem Menü 
 Hidden from pin menus: %s. Tap to change.	In Pin-Menüs ausgeblendet: %s. Tippe zum Ändern.
 Picked: %s. Hide pin menu rows is off, so they still show.	Gewählt: %s. Zeilen im Pin-Menü ausblenden ist aus, deshalb erscheinen sie noch.
 Why you're seeing this pin	Warum du diesen Pin siehst
-Customize board tabs	Pinnwand-Tabs anpassen
 Board tab header	Kopfbereich der Pinnwand-Tabs
 Hide See board on board tabs	Pinnwand ansehen auf Pinnwand-Tabs ausblenden
 Takes the See board button off the picture at the top of a board tab on Home. The change shows the next time the tab opens.	Entfernt die Schaltfläche Pinnwand ansehen vom Bild oben auf einem Pinnwand-Tab der Startseite. Die Änderung zeigt sich, wenn der Tab das nächste Mal geöffnet wird.
