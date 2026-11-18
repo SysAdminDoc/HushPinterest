@@ -139,13 +139,17 @@ public final class UiHooks {
 
     /**
      * A pin page is about to wait for its related pins grid to load, showing gray placeholder tiles
-     * until it does. With Hide related pins on, the grid was never added and would never load, so
-     * true tells the page there's nothing to wait for. Off or paused, the page waits as usual.
-     * Never throws.
+     * until it does. With Hide related pins on the grid was never added, and folded it won't load
+     * until the arrow is tapped, so either way true tells the page there's nothing to wait for.
+     * Otherwise, or paused, the page waits as usual. Never throws.
      */
     public static boolean relatedPinsLoading() {
-        if (!enabled(FamilyNames.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS)) return false;
-        HookStatus.counted(FamilyNames.HIDE_RELATED_PINS, "related pins loading skipped");
+        if (enabled(FamilyNames.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS)) {
+            HookStatus.counted(FamilyNames.HIDE_RELATED_PINS, "related pins loading skipped");
+            return true;
+        }
+        if (!RelatedPinsFold.folded()) return false;
+        HookStatus.counted(FamilyNames.FOLD_RELATED_PINS, "related pins wait skipped");
         return true;
     }
 

@@ -817,3 +817,7 @@ Hide blue highlight ring	Sembunyikan cincin sorotan biru
 Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature.	Menghentikan cincin biru tebal yang digambar Pinterest di atas tombol seperti Simpan untuk menunjukkan sebuah fitur.
 Hide visual search thumbnails	Sembunyikan gambar mini pencarian visual
 Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest puts on it. The change shows on the next pin you open.	Membuat tombol lensa pin tetap polos, tanpa tumpukan kecil gambar terpotong yang dipasang Pinterest di atasnya. Perubahan terlihat pada pin berikutnya yang Anda buka.
+Fold related pins	Lipat pin terkait
+Puts an arrow under a pin you open. Related pins stay folded and don't load until you tap it, and tapping again folds them. Your last choice is kept. Hide related pins wins when both are on. The change shows on the next pin you open.	Menambahkan panah di bawah pin yang Anda buka. Pin terkait tetap terlipat dan tidak dimuat sampai Anda mengetuknya, dan ketukan berikutnya melipatnya lagi. Pilihan terakhir Anda disimpan. Jika keduanya aktif, Sembunyikan pin terkait yang berlaku. Perubahan terlihat pada pin berikutnya yang Anda buka.
+# context: what a screen reader says for the arrow under a pin while its related pins are folded
+Show related pins	Tampilkan pin terkait

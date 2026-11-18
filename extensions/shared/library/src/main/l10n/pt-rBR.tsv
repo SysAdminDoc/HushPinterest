@@ -814,3 +814,7 @@ Hide blue highlight ring	Ocultar anel azul de destaque
 Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature.	Impede o anel azul grosso que o Pinterest desenha sobre botões como Salvar para apontar um recurso.
 Hide visual search thumbnails	Ocultar miniaturas da busca visual
 Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest puts on it. The change shows on the next pin you open.	Mantém simples o botão de lente do pin, sem a pequena pilha de imagens recortadas que o Pinterest coloca nele. A mudança aparece no próximo pin que você abrir.
+Fold related pins	Recolher pins relacionados
+Puts an arrow under a pin you open. Related pins stay folded and don't load until you tap it, and tapping again folds them. Your last choice is kept. Hide related pins wins when both are on. The change shows on the next pin you open.	Coloca uma seta abaixo do pin que você abre. Os pins relacionados ficam recolhidos e só carregam quando você toca nela, e tocar de novo os recolhe. Sua última escolha fica guardada. Com as duas opções ativadas, vale Ocultar pins relacionados. A mudança aparece no próximo pin que você abrir.
+# context: what a screen reader says for the arrow under a pin while its related pins are folded
+Show related pins	Mostrar pins relacionados

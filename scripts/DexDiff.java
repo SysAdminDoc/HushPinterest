@@ -291,7 +291,7 @@ public class DexDiff {
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
             Map.entry("boardTabCovers", 1),
-            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("ownAuthorities", 1));
+            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("relatedPinsFold", 3), Map.entry("ownAuthorities", 1));
 
     /**
      * A start-call, next-call, sole-call or once-call line: its method reference, the next-call's
@@ -6495,6 +6495,84 @@ public class DexDiff {
             capability(c.callee, placed);
         }
 
+        /** The related pins list's own answer to the question its loadData opens with, or null. */
+        Method relatedListGate(String list) {
+            Method load = null;
+            for (String type = list; type != null && load == null; ) {
+                ClassDef cd = clean.classes.get(type);
+                if (cd == null) break;
+                for (Method m : cd.getMethods()) if (m.getName().equals("loadData") && descriptor(m).equals("()V")
+                        && m.getImplementation() != null) load = m;
+                type = cd.getSuperclass();
+            }
+            if (load == null) { fail(list + " has no loadData"); return null; }
+            if (!(reference(instructions(load).get(0)) instanceof MethodReference ask) || !ask.getReturnType().equals("Z")
+                    || !ask.getParameterTypes().isEmpty()) { fail(load + " doesn't open by asking whether there's more"); return null; }
+            List<Method> gates = new ArrayList<>();
+            ClassDef owner = clean.classes.get(list);
+            if (owner != null) for (Method m : owner.getMethods()) if (m.getName().equals(ask.getName()) && descriptor(m).equals("()Z")
+                    && m.getImplementation() != null && !AccessFlags.STATIC.isSet(m.getAccessFlags())) gates.add(m);
+            return unique(gates, "the related pins list's answer");
+        }
+
+        /**
+         * Fold related pins (#46): the list only the pin page presenters build answers "nothing more to
+         * load" while folded, ahead of its own answer. Each presenter hands itself over first thing in
+         * addDataSources, and the closeup module's answer passes through the hook that places the arrow.
+         */
+        void relatedPinsFold(Contract c) {
+            String folded = c.strings.get(0), bind = c.strings.get(1);
+            List<Method> presenters = new ArrayList<>();
+            Set<String> lists = new HashSet<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN)) continue;
+                String list = null;
+                for (Method m : cd.getMethods()) if (m.getName().equals("getRelatedPinsPagedList") && m.getParameterTypes().isEmpty()
+                        && m.getImplementation() != null && !AccessFlags.SYNTHETIC.isSet(m.getAccessFlags())
+                        && !AccessFlags.BRIDGE.isSet(m.getAccessFlags())) list = m.getReturnType();
+                if (list == null) continue;
+                boolean adds = false;
+                for (Method m : cd.getMethods()) if (m.getName().equals("addDataSources") && m.getReturnType().equals("V")
+                        && m.getParameterTypes().size() == 1 && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getImplementation() != null) {
+                    presenters.add(m);
+                    adds = true;
+                }
+                if (adds) lists.add(list);
+            }
+            boolean placed = !presenters.isEmpty() && lists.size() == 1;
+            if (!placed) fail("the pin page presenters don't share one related pins list");
+            Method gate = placed ? actual(relatedListGate(lists.iterator().next())) : null;
+            List<Integer> sites = calls(gate, folded, 1);
+            if (gate == null || sites.size() != 1) placed = false;
+            else {
+                List<Instruction> body = instructions(gate);
+                Layout layout = new Layout(gate.getImplementation());
+                boolean right = sites.get(0) == 0 && body.size() > 5 && arguments(body.get(0)).isEmpty()
+                        && body.get(1).getOpcode() == Opcode.MOVE_RESULT && body.get(2).getOpcode() == Opcode.IF_EQZ
+                        && body.get(3).getOpcode() == Opcode.CONST_4 && body.get(4).getOpcode() == Opcode.RETURN
+                        && firstRegister(body.get(2)) == firstRegister(body.get(1))
+                        && firstRegister(body.get(3)) == firstRegister(body.get(1))
+                        && firstRegister(body.get(4)) == firstRegister(body.get(1))
+                        && ((WideLiteralInstruction) body.get(3)).getWideLiteral() == 0
+                        && layout.addresses.get(2) + ((OffsetInstruction) body.get(2)).getCodeOffset() == layout.addresses.get(5);
+                if (right) remove(gate, 0, 5);
+                else { fail(folded + " doesn't answer no ahead of the list's own answer in " + gate); placed = false; }
+            }
+            for (Method presenter : presenters) {
+                Method m = actual(presenter);
+                List<Integer> binds = calls(m, bind, 1);
+                if (m == null || binds.size() != 1) { placed = false; continue; }
+                if (binds.get(0) != 0 || !arguments(instructions(m).get(0)).equals(List.of(parameter(m, -1)))) {
+                    fail(bind + " isn't the first call, on the presenter, in " + m);
+                    placed = false;
+                    continue;
+                }
+                remove(m, 0, 1);
+            }
+            if (!closeupGatePlaced(c.strings.get(2))) placed = false;
+            capability(c.callee, placed);
+        }
+
         boolean buildsTitleRow(ClassDef owner) {
             for (Method init : owner.getMethods()) {
                 if (!init.getName().equals("<init>")) continue;
@@ -6861,9 +6939,11 @@ public class DexDiff {
                 List<Instruction> body = instructions(m);
                 Layout layout = new Layout(m.getImplementation());
                 FeatureFlow graph = new FeatureFlow(presenter);
+                // Fold related pins hands the presenter over first, ahead of everything here.
+                int lead = String.valueOf(reference(body.get(0))).startsWith(OWN + "pinterest/ui/RelatedPinsFold;->bind(") ? 1 : 0;
                 for (int n = 0; n < sites.size(); n++) {
                     int at = sites.get(n), add = adds.get(n);
-                    boolean skips = at == add + 3 * n && at + 4 < body.size() && arguments(body.get(at)).isEmpty()
+                    boolean skips = at == add + lead + 3 * n && at + 4 < body.size() && arguments(body.get(at)).isEmpty()
                             && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT && body.get(at + 2).getOpcode() == Opcode.IF_NEZ
                             && firstRegister(body.get(at + 1)) == firstRegister(body.get(at + 2))
                             && String.valueOf(reference(body.get(at + 3))).equals(String.valueOf(reference(was.get(add))))
@@ -8618,6 +8698,7 @@ public class DexDiff {
                     case "closeupGate": closeupGate(c); break;
                     case "highlightRing": highlightRing(c); break;
                     case "visualSearchThumbnails": visualSearchThumbnails(c); break;
+                    case "relatedPinsFold": relatedPinsFold(c); break;
                     case "saveSheet": saveSheet(c); break;
                     case "blackSheets": blackSheets(c); break;
                     case "blackBoards": blackBoards(c); break;

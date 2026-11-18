@@ -247,6 +247,11 @@ public final class UiHooksForTests {
         return PinPageSections.author(new CreatorModule(RuntimeEnvironment.getApplication()), 1) == 0;
     }
 
+    /** True when Fold related pins counts as on, whatever the arrow was last left at. */
+    public static boolean foldSwitchedOn() {
+        return RelatedPinsFold.switchedOn();
+    }
+
     public static void saveToast(Class<?> type) {
         UiHooks.saveToastForTests = type;
     }

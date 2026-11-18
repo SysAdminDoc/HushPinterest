@@ -12,6 +12,12 @@ import androidx.annotation.Nullable;
 public final class PinFacts {
     private PinFacts() {}
 
+    /** The pin's id when it is a real pin with media, or null. */
+    @Nullable
+    public static String id(@Nullable Object pin) {
+        return PinMedia.id(pin);
+    }
+
     /**
      * The width and height of the largest copy of a picture pin that Pinterest sent with it. Null
      * for a video, for something that isn't a pin, and for a pin that came without sizes.

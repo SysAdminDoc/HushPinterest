@@ -634,6 +634,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide related pins"),
                     L10n.t("Leaves the grid of more pins out from under a pin you open, so it doesn't load. "
                         + "The change shows on the next pin you open."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.FOLD_RELATED_PINS, Settings.FOLD_RELATED_PINS,
+                    L10n.t("Fold related pins"),
+                    L10n.t("Puts an arrow under a pin you open. Related pins stay folded and don't load until you tap "
+                        + "it, and tapping again folds them. Your last choice is kept. Hide related pins wins when "
+                        + "both are on. The change shows on the next pin you open."), SettingsIcons.TOOLS);
             patchToggle(ui, context, build, PatchFamily.CUSTOM_SAVE_SOUND, Settings.CUSTOM_SAVE_SOUND,
                     L10n.t("Custom save sound"),
                     L10n.t("Plays the sound you pick below when you save a pin, instead of Pinterest's. With no sound "

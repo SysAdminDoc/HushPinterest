@@ -817,3 +817,7 @@ Hide blue highlight ring	Mavi vurgu halkasını gizle
 Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature.	Pinterest'in bir özelliği göstermek için Kaydet gibi düğmelerin üzerine çizdiği kalın mavi halkayı durdurur.
 Hide visual search thumbnails	Görsel arama küçük resimlerini gizle
 Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest puts on it. The change shows on the next pin you open.	Pinin mercek düğmesini sade bırakır, Pinterest'in üstüne koyduğu küçük kırpılmış görsel yığını görünmez. Değişiklik açtığın bir sonraki pinde görünür.
+Fold related pins	İlgili pinleri daralt
+Puts an arrow under a pin you open. Related pins stay folded and don't load until you tap it, and tapping again folds them. Your last choice is kept. Hide related pins wins when both are on. The change shows on the next pin you open.	Açtığın pinin altına bir ok koyar. İlgili pinler daraltılmış kalır ve oka dokunana kadar yüklenmez, tekrar dokunmak onları yine daraltır. Son seçimin saklanır. İkisi de açıksa İlgili pinleri gizle geçerli olur. Değişiklik açtığın bir sonraki pinde görünür.
+# context: what a screen reader says for the arrow under a pin while its related pins are folded
+Show related pins	İlgili pinleri göster
