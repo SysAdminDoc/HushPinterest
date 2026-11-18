@@ -53,8 +53,15 @@ internal val SAVE_TOAST_STRINGS = setOf(
     "saved_multiple_to_board_section", "pin_saved",
 )
 
-/** The text of the toast Pinterest shows when a pin reaches the phone. */
+/** The text of the toast model that says a pin reached the phone. */
 internal const val DOWNLOAD_TOAST_STRING = "downloaded_to_camera_roll"
+
+/**
+ * The messages after a picture or video finishes downloading. Screens hand these to toast models
+ * that show other messages too, as ready-made words or as the text's id, so the extension looks
+ * each one up by name while the app runs and compares both.
+ */
+internal val DOWNLOAD_TEXT_NAMES = setOf("pin_image_download_success", "pin_video_download_success")
 
 /**
  * The ones a screen shows through a toast that says nothing about what it holds, a model handed a
@@ -182,13 +189,15 @@ val hideSaveToastsPatch = bytecodePatch(
             return-void
         """, ExternalLabel("hush_show_toast", method.getInstruction(0)))
         if (found == 5) enableCapability("saveToasts")
-        // The toast that says a pin reached the phone has its own switch, so losing it costs nothing else.
+        // The toasts that say a pin reached the phone have their own switch, so losing it costs
+        // nothing else. One kind has a model of its own. The other is told at the container by its
+        // words or text id, so all it needs is a screen that reads those texts.
         val downloads = downloadToastModels(model)
-        if (downloads.isEmpty()) {
-            patchLog.warning("$PATCH: no toast that says a pin was downloaded was found, so Hide download toasts stays out.")
-        } else {
-            writeStub(UI_HOOKS, "isDownloadToast", 2, instanceChecks(downloads))
+        if (downloads.isNotEmpty()) writeStub(UI_HOOKS, "isDownloadToast", 2, instanceChecks(downloads))
+        if (downloads.isNotEmpty() || downloadTextIsRead()) {
             enableCapability("downloadToasts")
+        } else {
+            patchLog.warning("$PATCH: no toast that says a pin was downloaded was found, so Hide download toasts stays out.")
         }
         enableStatus("hideSaveToasts")
     }
@@ -338,6 +347,22 @@ internal fun BytecodePatchContext.downloadToastModels(model: String): List<Strin
         if (owner.methods.any { method -> method.fields().any { it.type == "I" && it.name == DOWNLOAD_TOAST_STRING } }) found += owner.type
     }
     return found.sorted()
+}
+
+/** True when one of Pinterest's methods reads the text shown after a picture or video finishes downloading. */
+private fun BytecodePatchContext.downloadTextIsRead(): Boolean {
+    var read = false
+    classDefForEach { owner ->
+        if (read || owner.type.startsWith(EXTENSION_ROOT)) return@classDefForEach
+        read = owner.methods.any { method ->
+            method.implementation?.instructions?.any { instruction ->
+                instruction.opcode == Opcode.SGET && ((instruction as ReferenceInstruction).reference as FieldReference).let {
+                    it.type == "I" && it.name in DOWNLOAD_TEXT_NAMES
+                }
+            } == true
+        }
+    }
+    return read
 }
 
 /**

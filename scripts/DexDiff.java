@@ -3564,7 +3564,21 @@ public class DexDiff {
             return unique(targets, "toast container show method");
         }
 
-        /** The stub names exactly the concrete toast models that read the downloaded text. Pinterest's code doesn't change. */
+        /** True when a method of the clean app reads the text shown after a picture or video finishes downloading. */
+        boolean downloadTextRead() {
+            for (ClassDef owner : clean.classes.values()) for (Method m : owner.getMethods()) for (Instruction i : instructions(m)) {
+                if (i.getOpcode() != Opcode.SGET || !(reference(i) instanceof FieldReference)) continue;
+                FieldReference f = (FieldReference) reference(i);
+                if (f.getType().equals("I") && (f.getName().equals("pin_image_download_success") || f.getName().equals("pin_video_download_success"))) return true;
+            }
+            return false;
+        }
+
+        /**
+         * The stub names exactly the concrete toast models that read the camera roll text. The switch
+         * stands on those or on a screen reading a finished download's text, which the extension
+         * tells at the container. Pinterest's code doesn't change.
+         */
         void downloadToasts(Contract c) {
             Method show = toastShow();
             Set<String> expected = new TreeSet<>();
@@ -3585,7 +3599,7 @@ public class DexDiff {
                 }
             }
             if (actual(c.strings.get(0)) != null) instanceStub("isDownloadToast", expected, "download toast");
-            capability(c.callee, !expected.isEmpty());
+            capability(c.callee, !expected.isEmpty() || downloadTextRead());
         }
 
         /** The hook takes the toast right after the container's model built it, and nothing else moves. */

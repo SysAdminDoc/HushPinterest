@@ -260,11 +260,17 @@ public final class UiHooks {
         return enabled(FamilyNames.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS);
     }
 
+    /**
+     * A toast model that only ever says a pin reached the phone, or any toast holding the words or
+     * text id of "Image downloaded!" or "Video downloaded!". Those fields are read only with the
+     * switch on, so a toast costs nothing extra otherwise.
+     */
     private static boolean downloadToast(Object toast) {
         Class<?> forced = downloadToastForTests;
         if (forced != null) return forced.isInstance(toast);
         try {
-            return isDownloadToast(toast);
+            return isDownloadToast(toast) || Utils.settingsReady() && Settings.HIDE_DOWNLOAD_TOASTS.get()
+                    && DownloadToastTexts.holdsDownload(toast, Utils.getActivity(), Utils.getContext());
         } catch (Throwable failure) {
             HookStatus.threw(FamilyNames.HIDE_SAVE_TOASTS, "download toast model", failure);
             return false;
