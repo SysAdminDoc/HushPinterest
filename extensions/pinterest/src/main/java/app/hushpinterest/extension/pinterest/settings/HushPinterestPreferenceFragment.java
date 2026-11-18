@@ -626,6 +626,10 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             patchToggle(ui, context, build, PatchFamily.HIDE_HIGHLIGHT_RING, Settings.HIDE_HIGHLIGHT_RING,
                     L10n.t("Hide blue highlight ring"),
                     L10n.t("Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.HIDE_VISUAL_SEARCH_THUMBNAILS, Settings.HIDE_VISUAL_SEARCH_THUMBNAILS,
+                    L10n.t("Hide visual search thumbnails"),
+                    L10n.t("Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest "
+                        + "puts on it. The change shows on the next pin you open."), SettingsIcons.BLOCK);
             patchToggle(ui, context, build, PatchFamily.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS,
                     L10n.t("Hide related pins"),
                     L10n.t("Leaves the grid of more pins out from under a pin you open, so it doesn't load. "

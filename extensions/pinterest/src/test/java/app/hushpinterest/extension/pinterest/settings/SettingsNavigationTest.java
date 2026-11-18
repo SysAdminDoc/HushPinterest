@@ -1299,6 +1299,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_PIN_DESCRIPTION.key, "title and description", "likes and comments bar stays", "posted date and image size");
         summaryContains(Settings.SHOW_IMAGE_SIZE.key, "width and height", "largest copy", "Videos show nothing");
         summaryContains(Settings.HIDE_HIGHLIGHT_RING.key, "thick blue ring", "buttons such as Save");
+        summaryContains(Settings.HIDE_VISUAL_SEARCH_THUMBNAILS.key, "lens button", "stack of cropped pictures", "next pin you open");
         summaryContains(Settings.CUSTOM_SAVE_SOUND.key, "sound you pick below", "when you save a pin",
                 "With no sound picked, Pinterest's plays");
         summaryContains(Settings.CUSTOM_SPLASH_LOGO.key, "logo picked when patching", "Android 13 and newer",

@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
@@ -156,6 +157,17 @@ public final class UiHooks {
         if (!enabled(FamilyNames.HIDE_HIGHLIGHT_RING, Settings.HIDE_HIGHLIGHT_RING)) return false;
         HookStatus.counted(FamilyNames.HIDE_HIGHLIGHT_RING, "highlight ring skipped");
         return true;
+    }
+
+    /**
+     * A pin page read the pin's visual search crops for its lens button. With Hide visual search
+     * thumbnails on it gets none, which is how a pin without crops reads, so the button stays the
+     * plain lens. Never throws.
+     */
+    public static ArrayList<?> visualSearchThumbnails(ArrayList<?> found) {
+        if (found == null || !enabled(FamilyNames.HIDE_VISUAL_SEARCH_THUMBNAILS, Settings.HIDE_VISUAL_SEARCH_THUMBNAILS)) return found;
+        HookStatus.counted(FamilyNames.HIDE_VISUAL_SEARCH_THUMBNAILS, "visual search thumbnails hidden");
+        return null;
     }
 
     /**

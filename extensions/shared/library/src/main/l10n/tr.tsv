@@ -815,3 +815,5 @@ Shows a picture's width and height under it when you open a pin, beside the post
 Hide blue highlight ring	Mavi vurgu halkasını gizle
 # context: Pin page switch. Save is Pinterest's own Save button, under its label in this language.
 Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature.	Pinterest'in bir özelliği göstermek için Kaydet gibi düğmelerin üzerine çizdiği kalın mavi halkayı durdurur.
+Hide visual search thumbnails	Görsel arama küçük resimlerini gizle
+Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest puts on it. The change shows on the next pin you open.	Pinin mercek düğmesini sade bırakır, Pinterest'in üstüne koyduğu küçük kırpılmış görsel yığını görünmez. Değişiklik açtığın bir sonraki pinde görünür.

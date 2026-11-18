@@ -815,3 +815,5 @@ Shows a picture's width and height under it when you open a pin, beside the post
 Hide blue highlight ring	Ocultar anillo azul de aviso
 # context: Pin page switch. Save is Pinterest's own Save button, under its label in this language.
 Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature.	Evita el grueso anillo azul que Pinterest dibuja sobre botones como Guardar para señalar una función.
+Hide visual search thumbnails	Ocultar miniaturas de la búsqueda visual
+Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest puts on it. The change shows on the next pin you open.	Deja simple el botón de lente del pin, sin la pequeña pila de imágenes recortadas que Pinterest le pone. El cambio se ve en el siguiente pin que abras.

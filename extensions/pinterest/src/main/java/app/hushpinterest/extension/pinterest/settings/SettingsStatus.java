@@ -143,6 +143,8 @@ public final class SettingsStatus {
     public static boolean imageSize() { return false; }
     public static boolean hideHighlightRing() { return false; }
     public static boolean highlightRing() { return false; }
+    public static boolean hideVisualSearchThumbnails() { return false; }
+    public static boolean visualSearchThumbnails() { return false; }
     public static boolean customSaveSound() { return false; }
     public static boolean saveSound() { return false; }
     public static boolean customSplashLogo() { return false; }

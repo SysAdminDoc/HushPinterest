@@ -251,6 +251,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_show_image_size", FALSE);
     public static final BooleanSetting HIDE_HIGHLIGHT_RING =
             new BooleanSetting("hushpinterest_hide_highlight_ring", FALSE);
+    public static final BooleanSetting HIDE_VISUAL_SEARCH_THUMBNAILS =
+            new BooleanSetting("hushpinterest_hide_visual_search_thumbnails", FALSE);
     public static final BooleanSetting CUSTOM_SAVE_SOUND =
             new BooleanSetting("hushpinterest_custom_save_sound", FALSE);
     /**

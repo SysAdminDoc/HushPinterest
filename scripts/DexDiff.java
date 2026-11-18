@@ -291,7 +291,7 @@ public class DexDiff {
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
             Map.entry("boardTabCovers", 1),
-            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("ownAuthorities", 1));
+            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("ownAuthorities", 1));
 
     /**
      * A start-call, next-call, sole-call or once-call line: its method reference, the next-call's
@@ -6432,6 +6432,69 @@ public class DexDiff {
             capability(c.callee, m != null);
         }
 
+        /**
+         * The lens button is the one class building the one subclass of ImageStack. Each of the two pin
+         * pages hands it the pin and reads the pin's crops through one static call, and the hook takes
+         * every such result right where it lands and puts its answer back in the same register.
+         */
+        void visualSearchThumbnails(Contract c) {
+            String hook = c.strings.get(0);
+            List<ClassDef> stacks = new ArrayList<>();
+            for (ClassDef cd : clean.classes.values())
+                if ("Lcom/pinterest/design/components/images/ImageStack;".equals(cd.getSuperclass())) stacks.add(cd);
+            ClassDef stack = uniqueClass(stacks, "the lens button's stack");
+            ClassDef button = null;
+            if (stack != null) {
+                List<ClassDef> buttons = new ArrayList<>();
+                for (ClassDef cd : clean.classes.values()) {
+                    boolean builds = false;
+                    for (Method m : cd.getMethods()) {
+                        if (m.getImplementation() == null) continue;
+                        for (Instruction i : instructions(m)) if (i.getOpcode() == Opcode.NEW_INSTANCE
+                                && reference(i) instanceof TypeReference t && t.getType().equals(stack.getType())) builds = true;
+                    }
+                    if (builds) buttons.add(cd);
+                }
+                button = uniqueClass(buttons, "the lens button");
+            }
+            boolean placed = button != null;
+            int pages = 0;
+            if (button != null) for (ClassDef cd : clean.classes.values()) for (Method page : cd.getMethods()) {
+                if (!page.getReturnType().equals("V") || page.getParameterTypes().size() != 1 || page.getImplementation() == null
+                        || AccessFlags.STATIC.isSet(page.getAccessFlags())) continue;
+                String pin = page.getParameterTypes().get(0).toString();
+                List<Instruction> was = instructions(page);
+                boolean hands = false;
+                List<Integer> reads = new ArrayList<>();
+                for (int at = 0; at < was.size(); at++) {
+                    if (!(reference(was.get(at)) instanceof MethodReference r) || r.getParameterTypes().size() != 1
+                            || !r.getParameterTypes().get(0).toString().equals(pin)) continue;
+                    if (r.getDefiningClass().equals(button.getType()) && r.getReturnType().equals("V")) hands = true;
+                    if (isStaticInvoke(was.get(at).getOpcode()) && r.getReturnType().equals("Ljava/util/ArrayList;")
+                            && at + 1 < was.size() && was.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT) reads.add(at);
+                }
+                if (!hands || reads.isEmpty()) continue;
+                pages++;
+                Method m = actual(page);
+                List<Integer> sites = calls(m, hook, reads.size());
+                if (m == null || sites.size() != reads.size()) { placed = false; continue; }
+                List<Instruction> body = instructions(m);
+                for (int n = 0; n < sites.size(); n++) {
+                    int at = sites.get(n);
+                    boolean right = at == reads.get(n) + 2 + 2 * n && at + 1 < body.size()
+                            && body.get(at - 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT
+                            && body.get(at).getOpcode() == Opcode.INVOKE_STATIC_RANGE
+                            && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at - 1))))
+                            && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT
+                            && firstRegister(body.get(at + 1)) == firstRegister(body.get(at - 1));
+                    if (!right) { fail(hook + " doesn't take the crops where they land in " + m); placed = false; continue; }
+                    remove(m, at, at + 2);
+                }
+            }
+            if (button != null && pages != 2) { fail("the lens button is set up by " + pages + " pin pages, expected 2"); placed = false; }
+            capability(c.callee, placed);
+        }
+
         boolean buildsTitleRow(ClassDef owner) {
             for (Method init : owner.getMethods()) {
                 if (!init.getName().equals("<init>")) continue;
@@ -8554,6 +8617,7 @@ public class DexDiff {
                     case "postedDate": postedDate(c); break;
                     case "closeupGate": closeupGate(c); break;
                     case "highlightRing": highlightRing(c); break;
+                    case "visualSearchThumbnails": visualSearchThumbnails(c); break;
                     case "saveSheet": saveSheet(c); break;
                     case "blackSheets": blackSheets(c); break;
                     case "blackBoards": blackBoards(c); break;
