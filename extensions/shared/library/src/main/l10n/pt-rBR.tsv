@@ -769,3 +769,10 @@ Blank Search page	Página de pesquisa em branco
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Deixa só a barra de pesquisa na página Pesquisar, sem nada embaixo. A pesquisa funciona normalmente. A mudança aparece na próxima vez que a página for atualizada.
 Second Search tap opens the keyboard	Segundo toque em Pesquisar abre o teclado
 On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Na página Pesquisar, tocar de novo em Pesquisar na barra inferior coloca o cursor na barra de pesquisa e abre o teclado.
+Hide pin menu rows	Ocultar linhas do menu do pin
+Hides the rows you pick below from pin menus you open from now on. A menu that's already open won't change.	Oculta as linhas que você escolher abaixo nos menus de pin abertos a partir de agora. Um menu já aberto não muda.
+Pick pin menu rows	Escolher linhas do menu do pin
+Pick the rows to take out of a pin's menu.	Escolha as linhas que quer tirar do menu de um pin.
+Hidden from pin menus: %s. Tap to change.	Oculto nos menus de pin: %s. Toque para mudar.
+Picked: %s. Hide pin menu rows is off, so they still show.	Escolhidas: %s. Ocultar linhas do menu do pin está desligado, então elas ainda aparecem.
+Why you're seeing this pin	Por que você vê este pin

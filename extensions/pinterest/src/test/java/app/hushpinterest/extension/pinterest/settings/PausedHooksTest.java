@@ -545,6 +545,7 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_PIN_MENU_COLLAGE, Collections.singletonList(() -> hidesMenuItem("overflow_menu_add_to_collage")));
         probes.put(Settings.HIDE_PIN_MENU_VISUAL_SEARCH, Collections.singletonList(() -> hidesMenuItem("contextmenu_visual_search_image")));
         probes.put(Settings.HIDE_PIN_MENU_PIN_BOOST, Collections.singletonList(() -> hidesMenuItem("overflow_menu_pin_boost")));
+        probes.put(Settings.HIDE_PIN_MENU_ROWS, Collections.singletonList(UiHooksForTests::foldsPinMenuRow));
         probes.put(Settings.HIDE_COMMENTS, Arrays.asList(
                 () -> UiHooks.commentsVisibility(View.INVISIBLE) != View.INVISIBLE,
                 () -> UiHooks.commentsMeasureSpec(MEASURE_SPEC) != MEASURE_SPEC,

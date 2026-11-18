@@ -772,3 +772,10 @@ Blank Search page	Página de búsqueda en blanco
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Deja solo la barra de búsqueda en la página Buscar, sin nada debajo. La búsqueda funciona como siempre. El cambio se ve la próxima vez que se actualice la página.
 Second Search tap opens the keyboard	Segundo toque en Buscar abre el teclado
 On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	En la página Buscar, volver a pulsar Buscar en la barra inferior pone el cursor en la barra de búsqueda y abre el teclado.
+Hide pin menu rows	Ocultar filas del menú del pin
+Hides the rows you pick below from pin menus you open from now on. A menu that's already open won't change.	Oculta las filas que elijas abajo en los menús de pin que abras a partir de ahora. Un menú ya abierto no cambia.
+Pick pin menu rows	Elegir filas del menú del pin
+Pick the rows to take out of a pin's menu.	Elige las filas que quieres quitar del menú de un pin.
+Hidden from pin menus: %s. Tap to change.	Oculto en los menús de pin: %s. Toca para cambiar.
+Picked: %s. Hide pin menu rows is off, so they still show.	Elegidas: %s. Ocultar filas del menú del pin está desactivado, así que siguen apareciendo.
+Why you're seeing this pin	Por qué ves este pin

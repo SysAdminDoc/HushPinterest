@@ -1266,6 +1266,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_PIN_MENU_COLLAGE.key, "Add to collage and Remix collage", "pin menus you open from now on", "already open won't change");
         summaryContains(Settings.HIDE_PIN_MENU_VISUAL_SEARCH.key, "Search image", "pin menus you open from now on", "already open won't change");
         summaryContains(Settings.HIDE_PIN_MENU_PIN_BOOST.key, "Promote pin", "pin menus you open from now on", "already open won't change");
+        summaryContains(Settings.HIDE_PIN_MENU_ROWS.key, "rows you pick", "pin menus you open from now on", "already open won't change");
         summaryContains(Settings.COPY_IMAGE.key, "full-size picture on the clipboard", "Needs Download pins on", "Videos don't get the row");
         summaryContains(Settings.SHARE_IMAGE.key, "full-size picture itself, not a link", "Android's share menu", "Needs Download pins on", "Videos don't get the row");
         summaryContains(Settings.SAVE_DOWNLOADED_PINS.key, "also saves it to your profile", "Grid and board downloads", "Needs Download pins on");

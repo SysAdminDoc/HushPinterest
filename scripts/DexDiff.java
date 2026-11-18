@@ -288,6 +288,7 @@ public class DexDiff {
             Map.entry("homeTabs", 1),
             Map.entry("searchLanding", 1),
             Map.entry("searchKeyboard", 1),
+            Map.entry("pinMenuRows", 2),
             Map.entry("ownAuthorities", 1));
 
     /**
@@ -3653,6 +3654,35 @@ public class DexDiff {
             Method m = actual(stock);
             if (m != null) guard(m, c.strings.get(0), 0, List.of(parameter(m, -1), parameter(m, 0)), 0, false, false);
             capability(c.callee, m != null);
+        }
+
+        /** The menu folds picked rows as it measures, and the overflow sheet hands its view over first. */
+        void pinMenuRows(Contract c) {
+            ClassDef layout = menuLayout();
+            if (layout == null) { capability(c.callee, false); return; }
+            view(layout.getType(), null, null, c.strings.get(0));
+            boolean placed = true;
+            ClassDef location = clean.classes.get("Lcom/pinterest/feature/GridActionsLocation$PIN_OVERFLOW_MENU_MODAL_FRAGMENT;");
+            if (location != null) {
+                Set<String> named = new TreeSet<>();
+                for (Method init : location.getMethods()) if (init.getName().equals("<init>"))
+                    for (Instruction i : instructions(init)) if (i.getOpcode() == Opcode.CONST_CLASS) named.add(String.valueOf(reference(i)));
+                ClassDef fragment = named.size() == 1 ? clean.classes.get(named.iterator().next()) : null;
+                Method m = fragment == null ? null : actual(viewCreated(fragment));
+                placed = false;
+                if (m == null) fail("pin menu sheet has no onViewCreated to hook");
+                else {
+                    List<Integer> sites = calls(m, c.strings.get(1), 1);
+                    if (sites.size() == 1) {
+                        Instruction first = instructions(m).get(0);
+                        placed = sites.get(0) == 0 && first.getOpcode() == Opcode.INVOKE_STATIC_RANGE
+                                && arguments(first).equals(List.of(parameter(m, 0)));
+                        if (!placed) fail(c.strings.get(1) + " isn't the first call, on the sheet's view, in " + m);
+                        else remove(m, 0, 1);
+                    }
+                }
+            }
+            capability(c.callee, placed && canOverride(layout.getType(), "onMeasure", "(II)V"));
         }
 
         void refresh(Contract c) {
@@ -8364,6 +8394,7 @@ public class DexDiff {
                     case "homeTabs": homeTabs(c); break;
                     case "searchLanding": searchLanding(c); break;
                     case "searchKeyboard": searchKeyboard(c); break;
+                    case "pinMenuRows": pinMenuRows(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);
                 }

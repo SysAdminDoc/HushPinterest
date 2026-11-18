@@ -772,3 +772,10 @@ Blank Search page	Leere Suchseite
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Lässt auf der Suchseite nur die Suchleiste stehen, darunter bleibt alles leer. Die Suche funktioniert wie gewohnt. Die Änderung zeigt sich, wenn sich die Seite das nächste Mal aktualisiert.
 Second Search tap opens the keyboard	Zweites Tippen auf Suche öffnet die Tastatur
 On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Auf der Suchseite setzt ein erneutes Tippen auf Suche in der unteren Leiste den Cursor in die Suchleiste und öffnet die Tastatur.
+Hide pin menu rows	Zeilen im Pin-Menü ausblenden
+Hides the rows you pick below from pin menus you open from now on. A menu that's already open won't change.	Blendet die unten gewählten Zeilen in Pin-Menüs aus, die du ab jetzt öffnest. Ein bereits geöffnetes Menü ändert sich nicht.
+Pick pin menu rows	Zeilen im Pin-Menü wählen
+Pick the rows to take out of a pin's menu.	Wähle die Zeilen, die aus dem Menü eines Pins verschwinden sollen.
+Hidden from pin menus: %s. Tap to change.	In Pin-Menüs ausgeblendet: %s. Tippe zum Ändern.
+Picked: %s. Hide pin menu rows is off, so they still show.	Gewählt: %s. Zeilen im Pin-Menü ausblenden ist aus, deshalb erscheinen sie noch.
+Why you're seeing this pin	Warum du diesen Pin siehst

@@ -637,6 +637,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide Promote pin menu item"),
                     L10n.t("Hides Promote pin in pin menus you open from now on. A menu that's already open won't "
                         + "change."), SettingsIcons.BLOCK);
+            if (build.contains(PatchFamily.HIDE_PIN_MENU_ITEMS) && PatchFamily.Capability.PIN_MENU_ROWS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_PIN_MENU_ROWS, L10n.t("Hide pin menu rows"),
+                        L10n.t("Hides the rows you pick below from pin menus you open from now on. A menu that's "
+                            + "already open won't change.")), SettingsIcons.BLOCK));
+                ui.addPreference(mark(new PinMenuRowsPreference(this, context), SettingsIcons.BLOCK));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_COMMENTS, Settings.HIDE_COMMENTS,
                     L10n.t("Hide comments"),
                     L10n.t("Hides comments and comment previews under pins. It doesn't change who can comment. The "

@@ -116,6 +116,23 @@ public final class UiHooksForTests {
         }
     }
 
+    /** Whether a picked Hush row folds out of a pin's menu as the menu measures. */
+    public static boolean foldsPinMenuRow() {
+        Context context = RuntimeEnvironment.getApplication();
+        String before = PinMenuRows.PICKED.get();
+        PinMenuRows.PICKED.save("download_pin");
+        try {
+            LinearLayout menu = new LinearLayout(context);
+            LinearLayout row = new LinearLayout(context);
+            row.setContentDescription(app.hushpinterest.extension.shared.L10n.t("Download pin"));
+            menu.addView(row);
+            InterfaceControls.pinMenuRows(menu);
+            return row.getVisibility() == View.GONE;
+        } finally {
+            PinMenuRows.PICKED.save(before);
+        }
+    }
+
     /** Names the class the save toast hook treats as Pinterest's downloaded toast. */
     public static void downloadToast(Class<?> type) {
         UiHooks.downloadToastForTests = type;

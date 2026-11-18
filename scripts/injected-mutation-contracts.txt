@@ -56,7 +56,7 @@ family|hideNavigationButtons|Hide navigation buttons|navigationButtons,homeTabs,
 family|hideHeaderButtons|Hide header buttons|headerButtons
 family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards,blackToasts
 family|hideCloseupButtons|Hide closeup buttons|closeupButtons,closeupSearchLabel,closeupActionBar,closeupRemix,closeupVisitSite,closeupSaveButton
-family|hidePinMenuItems|Filter pin menu|pinMenuItems
+family|hidePinMenuItems|Filter pin menu|pinMenuItems,pinMenuRows
 family|hideComments|Hide comments|comments,suggestedReplies,commentPreviews
 family|hideTopicSuggestions|Hide topic suggestions|topicSuggestions
 family|hideInboxUpdates|Hide Inbox updates|inboxUpdates
@@ -146,6 +146,7 @@ mutation|blackToasts|blackToasts|Lapp/hushpinterest/extension/pinterest/ui/Amole
 mutation|homeTabs|homeTabs|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->homeTabsHeight(Landroid/view/View;II)I
 mutation|searchLanding|searchLanding|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchLanding(Landroid/view/View;)V
 mutation|searchKeyboard|searchKeyboard|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchTabPress(Landroid/view/View;Landroid/view/View;)I
+mutation|pinMenuRows|pinMenuRows|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuRows(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuSheet(Landroid/view/View;)V
 # Change package name hands each load of a literal naming one of Pinterest's own providers to the
 # extension, which answers the running copy's authority.
 mutation|changePackageName|ownAuthorities|Lapp/hushpinterest/extension/pinterest/coexist/OwnAuthorities;->name(Ljava/lang/String;)Ljava/lang/String;

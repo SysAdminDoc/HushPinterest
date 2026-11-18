@@ -772,3 +772,10 @@ Blank Search page	Boş Arama sayfası
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Ara sayfasında yalnızca arama çubuğunu bırakır, altında hiçbir şey kalmaz. Arama her zamanki gibi çalışır. Değişiklik sayfa bir sonraki güncellenişinde görünür.
 Second Search tap opens the keyboard	Ara'ya ikinci dokunuş klavyeyi açar
 On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Ara sayfasındayken alt çubuktaki Ara'ya yeniden basmak imleci arama çubuğuna getirir ve klavyeyi açar.
+Hide pin menu rows	Pin menüsü satırlarını gizle
+Hides the rows you pick below from pin menus you open from now on. A menu that's already open won't change.	Aşağıda seçtiğin satırları bundan sonra açtığın pin menülerinden gizler. Zaten açık olan menü değişmez.
+Pick pin menu rows	Pin menüsü satırlarını seç
+Pick the rows to take out of a pin's menu.	Bir pinin menüsünden kaldırılacak satırları seç.
+Hidden from pin menus: %s. Tap to change.	Pin menülerinde gizli: %s. Değiştirmek için dokun.
+Picked: %s. Hide pin menu rows is off, so they still show.	Seçilenler: %s. Pin menüsü satırlarını gizle kapalı, bu yüzden hâlâ görünüyorlar.
+Why you're seeing this pin	Bu pini neden görüyorsun

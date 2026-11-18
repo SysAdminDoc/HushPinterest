@@ -220,6 +220,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_pin_menu_visual_search", FALSE);
     public static final BooleanSetting HIDE_PIN_MENU_PIN_BOOST =
             new BooleanSetting("hushpinterest_hide_pin_menu_pin_boost", FALSE);
+    public static final BooleanSetting HIDE_PIN_MENU_ROWS =
+            new BooleanSetting("hushpinterest_hide_pin_menu_rows", FALSE);
     public static final BooleanSetting HIDE_COMMENTS =
             new BooleanSetting("hushpinterest_hide_comments", FALSE);
     public static final BooleanSetting HIDE_SUGGESTED_REPLIES =

@@ -772,3 +772,10 @@ Blank Search page	Halaman Cari kosong
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Hanya menyisakan bilah pencarian di halaman Cari, tanpa apa pun di bawahnya. Pencarian berfungsi seperti biasa. Perubahan terlihat saat halaman diperbarui berikutnya.
 Second Search tap opens the keyboard	Ketuk Cari kedua kali membuka keyboard
 On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Di halaman Cari, menekan Cari lagi di bilah bawah menempatkan kursor di bilah pencarian dan membuka keyboard.
+Hide pin menu rows	Sembunyikan baris menu pin
+Hides the rows you pick below from pin menus you open from now on. A menu that's already open won't change.	Menyembunyikan baris yang kamu pilih di bawah dari menu pin yang kamu buka mulai sekarang. Menu yang sudah terbuka tidak berubah.
+Pick pin menu rows	Pilih baris menu pin
+Pick the rows to take out of a pin's menu.	Pilih baris yang ingin dihapus dari menu pin.
+Hidden from pin menus: %s. Tap to change.	Disembunyikan dari menu pin: %s. Ketuk untuk mengubah.
+Picked: %s. Hide pin menu rows is off, so they still show.	Dipilih: %s. Sembunyikan baris menu pin nonaktif, jadi baris tetap muncul.
+Why you're seeing this pin	Alasan kamu melihat pin ini

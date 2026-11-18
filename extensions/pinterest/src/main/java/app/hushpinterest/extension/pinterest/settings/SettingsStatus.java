@@ -116,6 +116,7 @@ public final class SettingsStatus {
     public static boolean closeupSaveButton() { return false; }
     public static boolean hidePinMenuItems() { return false; }
     public static boolean pinMenuItems() { return false; }
+    public static boolean pinMenuRows() { return false; }
     public static boolean hideComments() { return false; }
     public static boolean comments() { return false; }
     public static boolean suggestedReplies() { return false; }

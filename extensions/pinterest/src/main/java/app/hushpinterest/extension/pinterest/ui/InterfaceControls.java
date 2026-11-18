@@ -38,6 +38,7 @@ public final class InterfaceControls {
     private static final String SEARCH_HEADER = "header_bar";
     private static final String SEARCH_BACK = "slp_back_button_container";
     private static final Map<View, Boolean> searchPages = new WeakHashMap<>();
+    private static final Map<View, Boolean> pinSheets = new WeakHashMap<>();
     private static final String SEARCH_LOCATION = "SEARCH_LANDING";
     private static final String SEARCH_BAR = "header_static_search_bar";
     static volatile Object searchLocationForTests;
@@ -231,6 +232,31 @@ public final class InterfaceControls {
         }
     }
 
+    /** The overflow sheet builds its rows after its view exists, and more can arrive as data loads. */
+    private static final class PinSheetWatch implements View.OnAttachStateChangeListener,
+            ViewTreeObserver.OnGlobalLayoutListener {
+        private final View sheet;
+        private ViewTreeObserver observer;
+
+        PinSheetWatch(View sheet) { this.sheet = sheet; }
+
+        @Override public void onViewAttachedToWindow(View view) {
+            if (observer != null) return;
+            observer = view.getViewTreeObserver();
+            observer.addOnGlobalLayoutListener(this);
+            pinMenuRows(sheet);
+        }
+
+        @Override public void onViewDetachedFromWindow(View view) {
+            if (observer != null && observer.isAlive()) observer.removeOnGlobalLayoutListener(this);
+            observer = null;
+        }
+
+        @Override public void onGlobalLayout() {
+            pinMenuRows(sheet);
+        }
+    }
+
     private static final class SearchPageWatch implements View.OnLayoutChangeListener,
             View.OnAttachStateChangeListener, ViewTreeObserver.OnWindowFocusChangeListener {
         private final View page;
@@ -392,6 +418,30 @@ public final class InterfaceControls {
         }
     }
 
+    /** First in the pin menu's onMeasure, so a picked row is gone before the menu takes its height. */
+    public static void pinMenuRows(View menu) {
+        try {
+            PinMenuRows.apply(menu, UiHooks.enabled(FamilyNames.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_ROWS));
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.HIDE_PIN_MENU_ITEMS, "pin menu rows", failure);
+        }
+    }
+
+    /** First in the overflow sheet's onViewCreated, with the sheet's view. Its rows come later. */
+    public static void pinMenuSheet(View sheet) {
+        try {
+            if (sheet == null || !UiHooks.enabled(FamilyNames.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_ROWS)) return;
+            synchronized (pinSheets) {
+                if (pinSheets.put(sheet, Boolean.TRUE) != null) return;
+            }
+            PinSheetWatch watch = new PinSheetWatch(sheet);
+            sheet.addOnAttachStateChangeListener(watch);
+            if (sheet.isAttachedToWindow()) watch.onViewAttachedToWindow(sheet);
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.HIDE_PIN_MENU_ITEMS, "pin menu sheet", failure);
+        }
+    }
+
     static boolean hidePinMenuItem(String resource) {
         if ("overflow_menu_add_to_collage".equals(resource) || "overflow_menu_remix_collage".equals(resource)) {
             return UiHooks.enabled(FamilyNames.HIDE_PIN_MENU_ITEMS, Settings.HIDE_PIN_MENU_COLLAGE);
@@ -421,7 +471,7 @@ public final class InterfaceControls {
         }
     }
 
-    private static String resourceName(View view) {
+    static String resourceName(View view) {
         if (view.getId() == View.NO_ID) return "";
         try { return view.getResources().getResourceEntryName(view.getId()); }
         catch (android.content.res.Resources.NotFoundException ignored) { return ""; }

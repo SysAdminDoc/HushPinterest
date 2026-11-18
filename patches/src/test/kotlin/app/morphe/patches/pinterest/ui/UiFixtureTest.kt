@@ -13,6 +13,7 @@ import app.morphe.Fixtures
 import app.morphe.PatchContexts
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patches.pinterest.actions.PIN_SHEET_LOCATION
 import app.morphe.patches.pinterest.misc.extension.PatchLogCapture
 import app.morphe.patches.pinterest.misc.extension.SETTINGS_STATUS
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -73,7 +74,7 @@ class UiFixtureTest {
         "hideSearchHistory" to "recentSearchRows", "hideSearchHistory" to "recentSearchHeading",
         "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
         "hideNavigationButtons" to "homeTabs", "hideSearchHistory" to "searchLanding",
-        "hideNavigationButtons" to "searchKeyboard",
+        "hideNavigationButtons" to "searchKeyboard", "hidePinMenuItems" to "pinMenuRows",
     )
 
     @Test fun `every interface family matches each supported vendor build without a warning`() {
@@ -484,6 +485,54 @@ class UiFixtureTest {
         assertTrue(warnings.single(), warnings.single().contains("Second Search tap left out"))
         assertFlag(context, "searchKeyboard", false)
         assertFlag(context, "navigationButtons", true)
+    }
+
+    /** The overflow sheet's location and the fragment it names, which the shared slice leaves out. */
+    private fun pinSheetClasses(build: File): List<ClassDef> {
+        val location = FixtureDex.classes(build, setOf(PIN_SHEET_LOCATION)).values.single()
+        val fragment = location.methods.filter { it.name == "<init>" }.flatMap { it.instructions() }
+            .filter { it.opcode == Opcode.CONST_CLASS }.map { (it as ReferenceInstruction).reference.toString() }
+            .distinct().single()
+        return listOf(location, FixtureDex.classes(build, setOf(fragment)).values.single())
+    }
+
+    @Test fun `the pin menu folds picked rows as it measures and the overflow sheet hands over its view first`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val sheet = pinSheetClasses(build)
+            val classes = (read(build) + sheet).associateBy { it.type }.values.toList()
+            val context = PatchContexts.of(ExtensionDex.classes() + classes)
+            val warnings = PatchLogCapture.warnings { hidePinMenuItemsPatch.execute(context) }
+            assertEquals(warnings.toString(), 0, warnings.size)
+            assertFlag(context, "pinMenuRows", true)
+            val menuType = context.classDefBy(PIN_MENU).fields.single { it.name == "modalView" }.type
+            val measure = context.mutableClassDefBy(menuType).methods.single { it.name == "onMeasure" }.implementation!!
+            val refresh = measure.instructions.first()
+            assertEquals(build.name, "$INTERFACE_CONTROLS->pinMenuRows(Landroid/view/View;)V",
+                (refresh as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: the menu itself", measure.registerCount - 3,
+                (refresh as RegisterRangeInstruction).startRegister)
+            val built = context.mutableClassDefBy(sheet.last().type).methods
+                .single { it.name == "onViewCreated" && it.parameterTypes.size == 2 }.implementation!!
+            val handOver = built.instructions.first()
+            assertEquals(build.name, PIN_MENU_SHEET_HOOK, (handOver as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: the sheet's view", built.registerCount - 2,
+                (handOver as RegisterRangeInstruction).startRegister)
+            assertEquals(build.name, 1, handOver.registerCount)
+        }
+    }
+
+    @Test fun `an overflow sheet it cannot read leaves the row picker out and keeps the other pin menu switches`() {
+        val build = Fixtures.declaredBuilds().last()
+        val sheet = pinSheetClasses(build)
+        val context = PatchContexts.of(ExtensionDex.classes() + (read(build) + sheet).associateBy { it.type }.values.toList())
+        context.mutableClassDefBy(sheet.last().type).methods.removeAll { it.name == "onViewCreated" }
+        val warnings = PatchLogCapture.warnings { hidePinMenuItemsPatch.execute(context) }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertTrue(warnings.single(), warnings.single().contains("Hide pin menu rows left out"))
+        assertFlag(context, "pinMenuRows", false)
+        assertFlag(context, "pinMenuItems", true)
+        val menuType = context.classDefBy(PIN_MENU).fields.single { it.name == "modalView" }.type
+        assertFalse("no half-installed hook", context.mutableClassDefBy(menuType).methods.any { it.name == "onMeasure" })
     }
 
     private fun asksForAssistant(method: Method) = method.returnType == "Z" && method.parameterTypes.isEmpty() &&
