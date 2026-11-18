@@ -28,6 +28,11 @@ import org.robolectric.shadows.util.DataSource;
 public final class UiHooksForTests {
     private UiHooksForTests() {}
 
+    /** Names the class the save toast hook treats as Pinterest's downloaded toast. */
+    public static void downloadToast(Class<?> type) {
+        UiHooks.downloadToastForTests = type;
+    }
+
     /** Like, comment, share and more, in the order the row under a pin's picture shows them. */
     public static final int LIKE = 0, COMMENTS = 1, SHARE = 2, MORE = 3;
 

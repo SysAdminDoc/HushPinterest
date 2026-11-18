@@ -494,6 +494,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_black_save_sheet": return L10n.t("Black Save to sheet");
             case "hushpinterest_black_sheets": return L10n.t("Black menus and sheets");
             case "hushpinterest_black_boards": return L10n.t("Black board and profile buttons");
+            case "hushpinterest_black_toasts": return L10n.t("Black toasts");
             case "hushpinterest_hide_closeup_back": return L10n.t("Hide back arrow on pins");
             case "hushpinterest_hide_closeup_lens": return L10n.t("Hide lens button on pins");
             case "hushpinterest_hide_closeup_search_label": return L10n.t("Hide Search image label on pins");
@@ -520,6 +521,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_custom_save_sound": return L10n.t("Custom save sound");
             case "hushpinterest_custom_splash_logo": return L10n.t("Custom splash logo");
             case "hushpinterest_hide_save_toasts": return L10n.t("Hide save toasts");
+            case "hushpinterest_hide_download_toasts": return L10n.t("Hide download toasts");
             case "hushpinterest_original_images": return L10n.t("Original-quality images");
             case "hushpinterest_show_posted_date": return L10n.t("Show posted date");
             case "hushpinterest_hide_suggested_boards": return L10n.t("Hide suggested boards");

@@ -204,6 +204,7 @@ public final class UiHooks {
 
     /** The toast class a test stands in for the save toasts patching names. */
     static volatile Class<?> saveToastForTests;
+    static volatile Class<?> downloadToastForTests;
 
     /** The toast class a test stands in for the ones patching names as showing a text they were handed. */
     static volatile Class<?> messageToastForTests;
@@ -212,14 +213,36 @@ public final class UiHooks {
     public static boolean hideSaveToast(Object toast) {
         boolean on = enabled(FamilyNames.HIDE_SAVE_TOASTS, Settings.HIDE_SAVE_TOASTS);
         boolean hide = on && saveToast(toast);
+        // Asked in this order so a toast that isn't a download never counts as a use of its switch.
+        boolean download = !hide && downloadToast(toast) && quietDownloads();
         // With Debug logging on, every toast that reaches the container is named with what became
         // of it. A save toast that still shows then either prints as shown, which names a model
         // patching didn't know, or prints nothing, which means Pinterest showed it some other way.
         Logger.printDebug(() -> "Toast " + (toast == null ? "null" : toast.getClass().getName())
-                + (hide ? " hidden" : on ? " shown" : " shown, switch off or paused"));
+                + (hide || download ? " hidden" : on ? " shown" : " shown, switch off or paused"));
+        if (download) {
+            HookStatus.counted(FamilyNames.HIDE_SAVE_TOASTS, "download toast hidden");
+            return true;
+        }
         if (!hide) return false;
         HookStatus.counted(FamilyNames.HIDE_SAVE_TOASTS, "save toast hidden");
         return true;
+    }
+
+    /** True while Hide download toasts is on, which also quiets Hush's own download messages. */
+    public static boolean quietDownloads() {
+        return enabled(FamilyNames.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS);
+    }
+
+    private static boolean downloadToast(Object toast) {
+        Class<?> forced = downloadToastForTests;
+        if (forced != null) return forced.isInstance(toast);
+        try {
+            return isDownloadToast(toast);
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.HIDE_SAVE_TOASTS, "download toast model", failure);
+            return false;
+        }
     }
 
     private static boolean saveToast(Object toast) {
@@ -249,6 +272,14 @@ public final class UiHooks {
      * object they hold builds, true when that object is one that builds a save confirmation.
      */
     public static boolean isSaveTextToast(Object toast) {
+        return false;
+    }
+
+    /**
+     * Answers false here. Patching writes instance checks for the toast models that say a pin was
+     * downloaded to the phone.
+     */
+    public static boolean isDownloadToast(Object toast) {
         return false;
     }
 

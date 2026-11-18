@@ -103,6 +103,7 @@ public final class SettingsStatus {
     public static boolean blackSaveSheet() { return false; }
     public static boolean blackSheets() { return false; }
     public static boolean blackBoards() { return false; }
+    public static boolean blackToasts() { return false; }
     public static boolean hideCloseupButtons() { return false; }
     public static boolean closeupButtons() { return false; }
     public static boolean closeupSearchLabel() { return false; }
@@ -135,6 +136,7 @@ public final class SettingsStatus {
     public static boolean customSplashLogo() { return false; }
     public static boolean hideSaveToasts() { return false; }
     public static boolean saveToasts() { return false; }
+    public static boolean downloadToasts() { return false; }
     public static boolean originalImages() { return false; }
     public static boolean imageChooser() { return false; }
     public static boolean closeupImage() { return false; }

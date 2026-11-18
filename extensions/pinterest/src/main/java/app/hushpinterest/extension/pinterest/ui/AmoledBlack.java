@@ -17,7 +17,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -711,6 +714,35 @@ public final class AmoledBlack {
             current = current.getParent() instanceof View ? (View) current.getParent() : null;
         }
         return true;
+    }
+
+    /**
+     * Called with each toast as Pinterest's container builds it, before it's shown. Every toast is
+     * a new view, so nothing has to go back when the switch goes off. In dark mode Pinterest's toast
+     * is white with dark words, so the words and icons turn white with it. A picture, an avatar and
+     * a button keep their own colors.
+     */
+    public static void toast(View toast) {
+        try {
+            if (toast == null || !UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_TOASTS) || !night(toast)) return;
+            paintToast(toast);
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, "toast", failure);
+        }
+    }
+
+    private static void paintToast(View view) {
+        String name = view.getClass().getName();
+        if (view instanceof Button || name.endsWith(".GestaltThumbnail") || name.endsWith(".GestaltAvatar")) return;
+        paintFill(view, true, true);
+        if (view instanceof TextView) {
+            ((TextView) view).setTextColor(Color.WHITE);
+        } else if (view instanceof ImageView && name.startsWith("com.pinterest.gestalt.icon")) {
+            ((ImageView) view).setImageTintList(ColorStateList.valueOf(Color.WHITE));
+        }
+        if (!(view instanceof ViewGroup)) return;
+        ViewGroup group = (ViewGroup) view;
+        for (int index = 0; index < group.getChildCount(); index++) paintToast(group.getChildAt(index));
     }
 
     /**

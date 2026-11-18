@@ -767,6 +767,7 @@ public class HushPinterestPreferenceFragmentTest {
         barOnly.remove(PatchFamily.Capability.BLACK_SAVE_SHEET);
         barOnly.remove(PatchFamily.Capability.BLACK_SHEETS);
         barOnly.remove(PatchFamily.Capability.BLACK_BOARDS);
+        barOnly.remove(PatchFamily.Capability.BLACK_TOASTS);
         PatchFamily.capabilitiesForTests = barOnly;
         try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
             HushPinterestPreferenceFragment page = pageOf(controller);
@@ -775,6 +776,7 @@ public class HushPinterestPreferenceFragmentTest {
             assertNull(page.findPreference(Settings.BLACK_SAVE_SHEET.key));
             assertNull(page.findPreference(Settings.BLACK_SHEETS.key));
             assertNull(page.findPreference(Settings.BLACK_BOARDS.key));
+            assertNull(page.findPreference(Settings.BLACK_TOASTS.key));
             assertNotNull(page.findPreference(Settings.BLACK_BOTTOM_BAR.key));
         }
         PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
@@ -803,6 +805,10 @@ public class HushPinterestPreferenceFragmentTest {
             assertFalse("Black board and profile buttons starts off", boards.isChecked());
             assertEquals(bar + 4, indexOfKey(rows, Settings.BLACK_SHEETS.key));
             assertEquals(bar + 5, indexOfKey(rows, Settings.BLACK_BOARDS.key));
+            SwitchPreference toasts = (SwitchPreference) page.findPreference(Settings.BLACK_TOASTS.key);
+            assertEquals("Black toasts", String.valueOf(toasts.getTitle()));
+            assertFalse("Black toasts starts off", toasts.isChecked());
+            assertEquals(bar + 6, indexOfKey(rows, Settings.BLACK_TOASTS.key));
         }
     }
 
@@ -847,6 +853,7 @@ public class HushPinterestPreferenceFragmentTest {
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_SAVE_SHEET.key));
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_SHEETS.key));
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_BOARDS.key));
+        assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_TOASTS.key));
     }
 
     /** The black surfaces, each with the switch that's its own. */
@@ -858,6 +865,7 @@ public class HushPinterestPreferenceFragmentTest {
         rows.put(PatchFamily.Capability.BLACK_SAVE_SHEET, Settings.BLACK_SAVE_SHEET);
         rows.put(PatchFamily.Capability.BLACK_SHEETS, Settings.BLACK_SHEETS);
         rows.put(PatchFamily.Capability.BLACK_BOARDS, Settings.BLACK_BOARDS);
+        rows.put(PatchFamily.Capability.BLACK_TOASTS, Settings.BLACK_TOASTS);
         return rows;
     }
 

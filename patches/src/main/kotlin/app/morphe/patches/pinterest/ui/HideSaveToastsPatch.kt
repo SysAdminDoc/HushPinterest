@@ -17,6 +17,7 @@ import app.morphe.patches.pinterest.misc.extension.enableStatus
 import app.morphe.patches.pinterest.misc.extension.freeLocalsAt
 import app.morphe.patches.pinterest.misc.extension.handleTargets
 import app.morphe.patches.pinterest.misc.extension.parameterRegisterNumber
+import app.morphe.patches.pinterest.misc.extension.patchLog
 import app.morphe.patches.pinterest.misc.extension.pinterestExtensionPatch
 import app.morphe.patches.pinterest.misc.extension.requireStatusMethod
 import app.morphe.patches.pinterest.misc.extension.requireStub
@@ -51,6 +52,9 @@ internal val SAVE_TOAST_STRINGS = setOf(
     "multi_board_save_saved_to_profile", "saved_onto_board", "saved_to_board_section",
     "saved_multiple_to_board_section", "pin_saved",
 )
+
+/** The text of the toast Pinterest shows when a pin reaches the phone. */
+internal const val DOWNLOAD_TOAST_STRING = "downloaded_to_camera_roll"
 
 /**
  * The ones a screen shows through a toast that says nothing about what it holds, a model handed a
@@ -102,8 +106,8 @@ internal data class AndroidToasts(val sites: List<AndroidToast>, val unsure: Int
 val hideSaveToastsPatch = bytecodePatch(
     name = PATCH,
     description = "Stops the pop-up Pinterest shows after you save a pin, such as the Saved to your board message " +
-        "or a suggestion to follow the creator. The pin is still saved. Starts off. Turn it on in " +
-        "HushPinterest settings > Interface.",
+        "or a suggestion to follow the creator. The pin is still saved. A second switch does the same for the " +
+        "messages after a download. Starts off. Turn them on in HushPinterest settings > Interface.",
 ) {
     category("Interface")
     dependsOn(settingsPatch, pinterestExtensionPatch)
@@ -112,6 +116,8 @@ val hideSaveToastsPatch = bytecodePatch(
     execute {
         requireStatusMethod("hideSaveToasts")
         requireStatusMethod("saveToasts")
+        requireStatusMethod("downloadToasts")
+        requireStub(UI_HOOKS, "isDownloadToast")
         requireStub(UI_HOOKS, "isSaveTextToast")
         requireStub(UI_HOOKS, "isMessageToast")
         requireAndroidToastStandIns()
@@ -176,6 +182,14 @@ val hideSaveToastsPatch = bytecodePatch(
             return-void
         """, ExternalLabel("hush_show_toast", method.getInstruction(0)))
         if (found == 5) enableCapability("saveToasts")
+        // The toast that says a pin reached the phone has its own switch, so losing it costs nothing else.
+        val downloads = downloadToastModels(model)
+        if (downloads.isEmpty()) {
+            patchLog.warning("$PATCH: no toast that says a pin was downloaded was found, so Hide download toasts stays out.")
+        } else {
+            writeStub(UI_HOOKS, "isDownloadToast", 2, instanceChecks(downloads))
+            enableCapability("downloadToasts")
+        }
         enableStatus("hideSaveToasts")
     }
 }
@@ -313,6 +327,17 @@ internal fun BytecodePatchContext.saveToastModels(model: String): Pair<List<Stri
         if (fields.any { it.name == FOLLOW_UPSELL && it.type == it.definingClass }) follow += owner.type
     }
     return saved.sorted() to follow.sorted()
+}
+
+/** Concrete toast models whose own methods read the text that says a pin was downloaded to the phone. */
+internal fun BytecodePatchContext.downloadToastModels(model: String): List<String> {
+    val found = mutableListOf<String>()
+    classDefForEach { owner ->
+        if (AccessFlags.ABSTRACT.isSet(owner.accessFlags) || AccessFlags.INTERFACE.isSet(owner.accessFlags) ||
+            owner.type == model || !extendsClass(owner.type, model)) return@classDefForEach
+        if (owner.methods.any { method -> method.fields().any { it.type == "I" && it.name == DOWNLOAD_TOAST_STRING } }) found += owner.type
+    }
+    return found.sorted()
 }
 
 /**

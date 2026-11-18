@@ -536,6 +536,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                             + "change shows the next time you open a board or your profile.")),
                         SettingsIcons.DARK_MODE));
             }
+            if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BLACK_TOASTS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.BLACK_TOASTS, L10n.t("Black toasts"),
+                        L10n.t("In dark mode, paints the messages Pinterest pops up, such as the one after you save or "
+                            + "download a pin, pure black. Light mode stays as it is. The change shows on the next message.")),
+                        SettingsIcons.DARK_MODE));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_CLOSEUP_BUTTONS, Settings.HIDE_CLOSEUP_BACK,
                     L10n.t("Hide back arrow on pins"),
                     L10n.t("Hides the back arrow that floats over a pin you open. Your phone's back gesture or button "
@@ -653,6 +659,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             patchToggle(ui, context, build, PatchFamily.HIDE_SAVE_TOASTS, Settings.HIDE_SAVE_TOASTS,
                     L10n.t("Hide save toasts"),
                     L10n.t("Saving a pin no longer shows the \"Saved to\" message or a suggestion to follow its creator. The pin is still saved."), SettingsIcons.BELL);
+            if (build.contains(PatchFamily.HIDE_SAVE_TOASTS) && PatchFamily.Capability.DOWNLOAD_TOASTS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_DOWNLOAD_TOASTS, L10n.t("Hide download toasts"),
+                        L10n.t("Downloading a pin no longer shows the message that it started or finished. Errors still "
+                            + "show, and Android's own download notification stays.")), SettingsIcons.BELL));
+            }
             patchToggle(ui, context, build, PatchFamily.ORIGINAL_IMAGES, Settings.ORIGINAL_IMAGES,
                     L10n.t("Original-quality images"),
                     L10n.t("Shows the original image instead of the large size in pin closeups and collages, when "

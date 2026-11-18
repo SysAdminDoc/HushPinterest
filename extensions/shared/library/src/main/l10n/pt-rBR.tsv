@@ -759,3 +759,7 @@ saved pins in More to explore	pins salvos em "Mais para explorar"
 Shop the look under pins	Shop the look abaixo dos pins
 Back leaves Home right away	Voltar sai do Início na hora
 When you've scrolled down Home, Back leaves Pinterest instead of jumping to the top and loading new pins first.	Quando você rolou o Início para baixo, Voltar sai do Pinterest em vez de pular para o topo e carregar pins novos primeiro.
+Hide download toasts	Ocultar avisos de download
+Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays.	Baixar um pin não mostra mais a mensagem de que começou ou terminou. Os erros continuam aparecendo, e a notificação de download do Android continua.
+Black toasts	Avisos em preto
+In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	No modo escuro, pinta de preto puro as mensagens que o Pinterest mostra, como a que aparece ao salvar ou baixar um pin. O modo claro continua igual. A mudança aparece na próxima mensagem.

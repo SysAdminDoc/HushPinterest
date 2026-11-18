@@ -54,7 +54,7 @@ family|hideAssistant|Hide Assistant|assistantEntries
 family|hideSearchHistory|Hide search history|searchHistory,recentSearchRows,recentSearchHeading
 family|hideNavigationButtons|Hide navigation buttons|navigationButtons
 family|hideHeaderButtons|Hide header buttons|headerButtons
-family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards
+family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards,blackToasts
 family|hideCloseupButtons|Hide closeup buttons|closeupButtons,closeupSearchLabel,closeupActionBar,closeupRemix,closeupVisitSite,closeupSaveButton
 family|hidePinMenuItems|Filter pin menu|pinMenuItems
 family|hideComments|Hide comments|comments,suggestedReplies,commentPreviews
@@ -67,7 +67,7 @@ family|hideRelatedPins|Hide related pins|relatedPins
 family|hideCreatorName|Hide creator name on pins|creatorName
 family|customSaveSound|Custom save sound|saveSound
 family|customSplashLogo|Custom splash logo|
-family|hideSaveToasts|Hide save toasts|saveToasts
+family|hideSaveToasts|Hide save toasts|saveToasts,downloadToasts
 family|originalImages|Original-quality images|imageChooser,closeupImage,pageImage
 family|showPostedDate|Show posted date|postedDate
 family|hideSuggestedBoards|Hide suggested boards|suggestedBoards
@@ -141,6 +141,8 @@ mutation|feedSavedPins|homePage|Lapp/hushpinterest/extension/pinterest/ads/Saved
 mutation|feedSavedSearch,feedSavedRelated|savedElsewhere|Lapp/hushpinterest/extension/pinterest/ads/SavedPins;->elsewhereFields(Ljava/lang/String;)Ljava/lang/String;|Lapp/hushpinterest/extension/pinterest/ads/SavedPins;->searchPage(Ljava/util/List;)Ljava/util/List;|Lapp/hushpinterest/extension/pinterest/ads/SavedPins;->dropRelated(Ljava/lang/Object;)Z
 mutation|feedbackFlyout|feedbackFlyout|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->feedbackFlyout(Ljava/lang/Boolean;)Ljava/lang/Boolean;|show_feedback_flyout
 mutation|firebaseCertificate|firebaseCertificate|Lapp/hushpinterest/extension/pinterest/notifications/PushNotifications;->certificateHeader(Ljava/net/URLConnection;Ljava/lang/String;)Ljava/lang/String;
+mutation|downloadToasts|downloadToasts|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->isDownloadToast(Ljava/lang/Object;)Z
+mutation|blackToasts|blackToasts|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->toast(Landroid/view/View;)V
 # Change package name hands each load of a literal naming one of Pinterest's own providers to the
 # extension, which answers the running copy's authority.
 mutation|changePackageName|ownAuthorities|Lapp/hushpinterest/extension/pinterest/coexist/OwnAuthorities;->name(Ljava/lang/String;)Ljava/lang/String;

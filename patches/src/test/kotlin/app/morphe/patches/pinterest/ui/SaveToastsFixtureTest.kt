@@ -71,7 +71,7 @@ class SaveToastsFixtureTest {
             val (classes, model, builders, screens) = read(build)
             val context = PatchContexts.of(ExtensionDex.classes() + classes + builders + screens)
             hideSaveToastsPatch.execute(context)
-            for (name in listOf("hideSaveToasts", "saveToasts")) assertEquals("${build.name}: $name", 1, flag(context, name))
+            for (name in listOf("hideSaveToasts", "saveToasts", "downloadToasts")) assertEquals("${build.name}: $name", 1, flag(context, name))
             val readers = { names: (FieldReference) -> Boolean -> classes.filter { owner -> owner.type != model &&
                 owner.methods.any { method -> method.implementation?.instructions?.any {
                     ((it as? ReferenceInstruction)?.reference as? FieldReference)?.let(names) == true } == true } }.map { it.type }.toSet() }
@@ -181,6 +181,25 @@ class SaveToastsFixtureTest {
                 assertEquals("${build.name}: Android toasts taken over", listOf("I") + List(10) { "Ljava/lang/CharSequence;" },
                     taken.map { it.parameters()[1] }.sorted())
             }
+        }
+    }
+
+    @Test
+    fun `the download toast is named by the text it reads, and a build without one keeps the rest`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val (classes, model, builders, screens) = read(build)
+            val downloads = classes.filter { owner -> owner.type != model && owner.methods.any { method ->
+                method.fields().any { it.type == "I" && it.name == DOWNLOAD_TOAST_STRING } } }.map { it.type }
+            assertEquals("${build.name}: one toast says a pin reached the phone", 1, downloads.size)
+            val context = PatchContexts.of(ExtensionDex.classes() + classes + builders + screens)
+            hideSaveToastsPatch.execute(context)
+            assertEquals(build.name, downloads, checked(context, "isDownloadToast"))
+
+            val without = PatchContexts.of(ExtensionDex.classes() + classes.filter { it.type !in downloads } + builders + screens)
+            hideSaveToastsPatch.execute(without)
+            assertEquals("${build.name}: nothing to hide, so no switch", 0, flag(without, "downloadToasts"))
+            assertEquals("${build.name}: the save toasts stay covered", 1, flag(without, "saveToasts"))
+            assertEquals(build.name, 1, flag(without, "hideSaveToasts"))
         }
     }
 

@@ -36,6 +36,7 @@ import app.hushpinterest.extension.pinterest.settings.FamilyNames;
 import app.hushpinterest.extension.pinterest.settings.HushDialogs;
 import app.hushpinterest.extension.pinterest.settings.PatchFamily;
 import app.hushpinterest.extension.pinterest.settings.Settings;
+import app.hushpinterest.extension.pinterest.ui.UiHooks;
 import app.hushpinterest.extension.shared.L10n;
 import app.hushpinterest.extension.shared.Utils;
 import app.hushpinterest.extension.shared.diagnostics.HookStatus;
@@ -559,7 +560,7 @@ public final class PinDownloads {
                         }
                         HookStatus.counted(FamilyNames.DOWNLOAD_PINS, "stream download started");
                         report(after, Result.QUEUED);
-                        if (after == null) Utils.showToastLong(startedMessage(true, folder));
+                        if (after == null) started(true, folder);
                         return;
                     }
                     long request = manager.enqueue(request(chosen, fileName(id, chosen), folder));
@@ -567,7 +568,7 @@ public final class PinDownloads {
                     boolean tracked = DownloadLedger.record(app, request, id, folder);
                     HookStatus.counted(FamilyNames.DOWNLOAD_PINS, "pin queued in Downloads");
                     report(after, tracked ? Result.QUEUED : Result.QUEUED_UNTRACKED);
-                    if (after == null) Utils.showToastLong(startedMessage(tracked, folder));
+                    if (after == null) started(tracked, folder);
                 } catch (Throwable failure) {
                     failed(QUEUE_FAILED, failure, after == null);
                     report(after, Result.FAILED);
@@ -623,6 +624,12 @@ public final class PinDownloads {
      * The toast after a download is queued. It names the folder the download goes to, since
      * Android's Downloads list shows only the Download folder.
      */
+    /** Says a download started. A switch can quiet that, but never the warning that history wasn't saved. */
+    static void started(boolean tracked, String folder) {
+        if (tracked && UiHooks.quietDownloads()) return;
+        Utils.showToastLong(startedMessage(tracked, folder));
+    }
+
     static String startedMessage(boolean tracked, String folder) {
         if (folder != null) {
             return tracked ? L10n.f("Download started. Check %s.", folder)

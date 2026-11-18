@@ -762,3 +762,7 @@ saved pins in More to explore	gemerkte Pins bei „Weitere entdecken“
 Shop the look under pins	Shop the look unter Pins
 Back leaves Home right away	Zurück verlässt den Startfeed sofort
 When you've scrolled down Home, Back leaves Pinterest instead of jumping to the top and loading new pins first.	Wenn du im Startfeed nach unten gescrollt hast, verlässt Zurück Pinterest, statt erst nach oben zu springen und neue Pins zu laden.
+Hide download toasts	Download-Hinweise ausblenden
+Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays.	Beim Herunterladen eines Pins erscheint keine Meldung mehr, dass es begonnen hat oder fertig ist. Fehler werden weiter angezeigt, und die Download-Benachrichtigung von Android bleibt.
+Black toasts	Schwarze Hinweise
+In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	Färbt im Dunkelmodus die Meldungen von Pinterest, etwa nach dem Merken oder Herunterladen eines Pins, tiefschwarz. Der helle Modus bleibt, wie er ist. Die Änderung zeigt sich bei der nächsten Meldung.

@@ -283,6 +283,8 @@ public class DexDiff {
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
             Map.entry("blackSheets", 3), Map.entry("blackBoards", 7),
             Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1),
+            Map.entry("downloadToasts", 1),
+            Map.entry("blackToasts", 1),
             Map.entry("ownAuthorities", 1));
 
     /**
@@ -3540,6 +3542,63 @@ public class DexDiff {
             List<Instruction> body = instructions(m);
             for (int at = 0; at < body.size(); at++) if (e == null || !e.removed.contains(at)) out.add(e == null ? body.get(at) : e.replacements.getOrDefault(at, body.get(at)));
             return out;
+        }
+
+        /** The container's method that has a toast model build its view, as the patches pick it. */
+        Method toastShow() {
+            List<Method> targets = new ArrayList<>();
+            ClassDef container = clean.classes.get(TOAST_CONTAINER);
+            if (container != null) for (Method m : container.getMethods()) {
+                if (AccessFlags.STATIC.isSet(m.getAccessFlags()) || !m.getReturnType().equals("V") || m.getParameterTypes().size() != 1) continue;
+                String model = m.getParameterTypes().get(0).toString();
+                if (instructions(m).stream().anyMatch(i -> reference(i) instanceof MethodReference
+                        && ((MethodReference) reference(i)).getDefiningClass().equals(model)
+                        && descriptor((MethodReference) reference(i)).equals("(" + TOAST_CONTAINER + ")" + TOAST_VIEW))) targets.add(m);
+            }
+            return unique(targets, "toast container show method");
+        }
+
+        /** The stub names exactly the concrete toast models that read the downloaded text. Pinterest's code doesn't change. */
+        void downloadToasts(Contract c) {
+            Method show = toastShow();
+            Set<String> expected = new TreeSet<>();
+            if (show != null) {
+                String model = show.getParameterTypes().get(0).toString();
+                for (ClassDef owner : clean.classes.values()) {
+                    if (AccessFlags.ABSTRACT.isSet(owner.getAccessFlags()) || AccessFlags.INTERFACE.isSet(owner.getAccessFlags())
+                            || owner.getType().equals(model)) continue;
+                    Set<String> seen = new HashSet<>();
+                    boolean toast = false;
+                    for (ClassDef cd = clean.classes.get(owner.getSuperclass()); cd != null && seen.add(cd.getType()); cd = clean.classes.get(cd.getSuperclass()))
+                        if (cd.getType().equals(model)) { toast = true; break; }
+                    if (!toast) continue;
+                    for (Method m : owner.getMethods()) for (Instruction i : instructions(m)) if (reference(i) instanceof FieldReference) {
+                        FieldReference f = (FieldReference) reference(i);
+                        if (f.getType().equals("I") && f.getName().equals("downloaded_to_camera_roll")) expected.add(owner.getType());
+                    }
+                }
+            }
+            if (actual(c.strings.get(0)) != null) instanceStub("isDownloadToast", expected, "download toast");
+            capability(c.callee, !expected.isEmpty());
+        }
+
+        /** The hook takes the toast right after the container's model built it, and nothing else moves. */
+        void blackToasts(Contract c) {
+            String hook = c.strings.get(0);
+            Method m = actual(toastShow());
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (m != null && sites.size() == 1) {
+                List<Instruction> body = instructions(m);
+                int at = sites.get(0);
+                placed = at >= 2 && reference(body.get(at - 2)) instanceof MethodReference
+                        && descriptor((MethodReference) reference(body.get(at - 2))).equals("(" + TOAST_CONTAINER + ")" + TOAST_VIEW)
+                        && isMoveResult(body.get(at - 1).getOpcode())
+                        && arguments(body.get(at)).equals(List.of(firstRegister(body.get(at - 1))));
+                if (!placed) fail(hook + " doesn't take the toast the container just built in " + m);
+                else remove(m, at, at + 1);
+            }
+            capability(c.callee, placed);
         }
 
         void refresh(Contract c) {
@@ -8246,6 +8305,8 @@ public class DexDiff {
                     case "creatorName": creatorName(c); break;
                     case "saveSound": saveSound(c); break;
                     case "pinInvites": pinInvites(c); break;
+                    case "downloadToasts": downloadToasts(c); break;
+                    case "blackToasts": blackToasts(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);
                 }

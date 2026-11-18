@@ -762,3 +762,7 @@ saved pins in More to explore	"Daha fazlasını keşfet" bölümündeki kayıtl�
 Shop the look under pins	pinlerin altındaki Shop the look bölümü
 Back leaves Home right away	Geri, Ana Sayfa'dan hemen çıkar
 When you've scrolled down Home, Back leaves Pinterest instead of jumping to the top and loading new pins first.	Ana Sayfa'da aşağı kaydırdığında Geri, önce en üste atlayıp yeni pinler yüklemek yerine Pinterest'ten çıkar.
+Hide download toasts	İndirme bildirimlerini gizle
+Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays.	Bir pini indirirken başladığını veya bittiğini söyleyen mesaj artık görünmez. Hatalar yine gösterilir ve Android'in kendi indirme bildirimi kalır.
+Black toasts	Siyah bildirimler
+In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	Karanlık modda, bir pini kaydettikten veya indirdikten sonra çıkan gibi Pinterest mesajlarını tam siyaha boyar. Açık mod olduğu gibi kalır. Değişiklik bir sonraki mesajda görünür.

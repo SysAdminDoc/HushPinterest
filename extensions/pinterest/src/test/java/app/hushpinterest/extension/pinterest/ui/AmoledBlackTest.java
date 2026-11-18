@@ -78,6 +78,7 @@ public class AmoledBlackTest {
         Settings.BLACK_SAVE_SHEET.resetToDefault();
         Settings.BLACK_SHEETS.resetToDefault();
         Settings.BLACK_BOARDS.resetToDefault();
+        Settings.BLACK_TOASTS.resetToDefault();
         HookStatus.clear();
         AmoledBlack.tabRoot = -1;
         AmoledBlack.searchText = -1;

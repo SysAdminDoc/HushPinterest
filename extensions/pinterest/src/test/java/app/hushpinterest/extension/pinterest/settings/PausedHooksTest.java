@@ -196,6 +196,29 @@ public class PausedHooksTest {
         return FeedFilter.filter(page).size() != page.size();
     }
 
+    /** A download toast reaching the container: true when the hook drops it. */
+    private static boolean dropsDownloadToast() {
+        UiHooksForTests.downloadToast(StringBuilder.class);
+        try {
+            return UiHooks.hideSaveToast(new StringBuilder());
+        } finally {
+            UiHooksForTests.downloadToast(null);
+        }
+    }
+
+    /** A dark-mode toast with its white fill, as the container hands it over: true when it turned black. */
+    private static boolean paintsToastBlack() {
+        Context context = RuntimeEnvironment.getApplication();
+        Configuration night = new Configuration(context.getResources().getConfiguration());
+        night.uiMode = Configuration.UI_MODE_NIGHT_YES | (night.uiMode & ~Configuration.UI_MODE_NIGHT_MASK);
+        LinearLayout toast = new LinearLayout(context.createConfigurationContext(night));
+        GradientDrawable fill = new GradientDrawable();
+        fill.setColor(Color.WHITE);
+        toast.setBackground(fill);
+        AmoledBlack.toast(toast);
+        return fill.getColor().getDefaultColor() == Color.BLACK;
+    }
+
     /** A save toast reaching the container: true when the hook drops it. */
     private static boolean dropsSaveToast() {
         UiHooksForTests.saveToast(StringBuilder.class);
@@ -496,6 +519,7 @@ public class PausedHooksTest {
         probes.put(Settings.BLACK_SHEETS, Arrays.asList(() -> paintsSheetBlack("gestalt_sheet_footer"), () -> paintsSheetBlack("lego_modal_container")));
         probes.put(Settings.BLACK_BOARDS, Arrays.asList(PausedHooksTest::paintsBoardBarBlack,
                 PausedHooksTest::paintsBoardHeaderBlack, PausedHooksTest::tintsProfileFilters));
+        probes.put(Settings.BLACK_TOASTS, Collections.singletonList(PausedHooksTest::paintsToastBlack));
         probes.put(Settings.HIDE_CLOSEUP_BACK, Arrays.asList(() -> hidesCloseupButton(true), () -> keepsCloseupButtonHidden(true)));
         probes.put(Settings.HIDE_CLOSEUP_LENS, Arrays.asList(() -> hidesCloseupButton(false), () -> keepsCloseupButtonHidden(false)));
         probes.put(Settings.HIDE_CLOSEUP_SEARCH_LABEL, Collections.singletonList(() -> !CloseupButtons.searchLabel(true)));
@@ -536,6 +560,7 @@ public class PausedHooksTest {
         probes.put(Settings.CUSTOM_SAVE_SOUND, Collections.singletonList(UiHooksForTests::playsPickedSaveSound));
         probes.put(Settings.CUSTOM_SPLASH_LOGO, Collections.singletonList(UiHooksForTests::nextStartShowsPickedLogo));
         probes.put(Settings.HIDE_SAVE_TOASTS, Arrays.asList(PausedHooksTest::dropsSaveToast, UiHooksForTests::quietsSavedToast));
+        probes.put(Settings.HIDE_DOWNLOAD_TOASTS, Arrays.asList(PausedHooksTest::dropsDownloadToast, UiHooks::quietDownloads));
         probes.put(Settings.ORIGINAL_IMAGES, Arrays.asList(UiHooks::originalImages, () -> {
             Set<String> sizes = new HashSet<>();
             UiHooks.imageSizes(sizes);

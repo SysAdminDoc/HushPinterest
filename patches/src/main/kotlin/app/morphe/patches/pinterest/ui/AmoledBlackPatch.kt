@@ -54,6 +54,7 @@ internal const val BOARD_TOOL_BAR_HOOK = "$AMOLED_BLACK->boardToolBar(Landroid/v
 internal const val PROFILE_FILTERS_HOOK = "$AMOLED_BLACK->profileFilters(Landroid/view/View;)V"
 internal const val BOARD_HEADER_HOOK = "$AMOLED_BLACK->boardHeader(Landroid/view/View;)V"
 internal const val PIN_DETAILS_HOOK = "$AMOLED_BLACK->pinDetails(Landroid/view/View;)V"
+internal const val TOAST_HOOK = "$AMOLED_BLACK->toast(Landroid/view/View;)V"
 
 /** The sheet of the drawer a pin's chevron slides up, looked up only where the drawer is built (14.45.0). */
 internal const val PIN_DETAILS_SHEET = "metadata_drawer_bottom_sheet"
@@ -99,7 +100,8 @@ val amoledBlackPatch = bytecodePatch(
     name = PATCH,
     description = "Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED " +
         "screens. The comments sheet, a pin's menu, the Save to sheet that lists your boards, the other menus " +
-        "and sheets, and the buttons over boards and profiles can go black too, each with its own switch. " +
+        "and sheets, the buttons over boards and profiles, and Pinterest's pop-up messages can go black too, " +
+        "each with its own switch. " +
         "Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface.",
 ) {
     category("Theme")
@@ -113,10 +115,11 @@ val amoledBlackPatch = bytecodePatch(
         requireStatusMethod("blackSaveSheet")
         requireStatusMethod("blackSheets")
         requireStatusMethod("blackBoards")
+        requireStatusMethod("blackToasts")
         var sheets = false
         var boards = false
         val surfaces = listOf("bottom bar", "comments screen", "pin menu", "Save to sheet", "sheets", "menus",
-            "pin details", "board tool bar", "profile filters", "board header")
+            "pin details", "board tool bar", "profile filters", "board header", "toasts")
         handleTargets(PATCH, "surfaces", surfaces) { surface ->
             try {
                 when (surface) {
@@ -149,6 +152,10 @@ val amoledBlackPatch = bytecodePatch(
                     "board header" -> {
                         handOverBuilt(listOf(BOARD_HEADER_IMAGE), BOARD_HEADER_HOOK)
                         boards = true
+                    }
+                    "toasts" -> {
+                        paintToasts()
+                        enableCapability("blackToasts")
                     }
                     "bottom bar" -> {
                         paintBottomBar()
@@ -293,6 +300,20 @@ private fun BytecodePatchContext.handOverBuilt(types: List<String>, hook: String
 }
 
 /** Everything is found and checked before the bar or the glass changes. */
+/** Hands each toast to the extension as soon as the container has had its model build it. */
+internal fun BytecodePatchContext.paintToasts() {
+    val show = mutable(toastShowMethod())
+    val body = show.instructions()
+    val built = body.indices.filter { index ->
+        val call = (body[index] as? ReferenceInstruction)?.reference as? MethodReference
+        call != null && call.returnType == TOAST_VIEW && call.parameters() == listOf(TOAST_CONTAINER)
+    }.one("$PATCH: toast builder call")
+    val result = body.getOrNull(built + 1)
+    if (result?.opcode != Opcode.MOVE_RESULT_OBJECT) throw PatchException("$PATCH: the toast container doesn't keep the toast it builds")
+    val toast = (result as OneRegisterInstruction).registerA
+    show.addInstructions(built + 2, "invoke-static/range { v$toast .. v$toast }, $TOAST_HOOK")
+}
+
 private fun BytecodePatchContext.paintBottomBar() {
     val wash = glassWash()
     if (classDefByOrNull(BOTTOM_BAR) == null) throw PatchException("$PATCH: Pinterest's bottom bar wasn't found")

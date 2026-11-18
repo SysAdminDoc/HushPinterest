@@ -186,6 +186,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_black_sheets", FALSE);
     public static final BooleanSetting BLACK_BOARDS =
             new BooleanSetting("hushpinterest_black_boards", FALSE);
+    public static final BooleanSetting BLACK_TOASTS =
+            new BooleanSetting("hushpinterest_black_toasts", FALSE);
     public static final BooleanSetting HIDE_CLOSEUP_BACK =
             new BooleanSetting("hushpinterest_hide_closeup_back", FALSE);
     public static final BooleanSetting HIDE_CLOSEUP_LENS =
@@ -244,6 +246,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_custom_splash_logo", FALSE, true);
     public static final BooleanSetting HIDE_SAVE_TOASTS =
             new BooleanSetting("hushpinterest_hide_save_toasts", FALSE);
+    public static final BooleanSetting HIDE_DOWNLOAD_TOASTS =
+            new BooleanSetting("hushpinterest_hide_download_toasts", FALSE);
     public static final BooleanSetting ORIGINAL_IMAGES =
             new BooleanSetting("hushpinterest_original_images", FALSE);
     public static final BooleanSetting SHOW_POSTED_DATE =

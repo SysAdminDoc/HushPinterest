@@ -100,7 +100,7 @@ public final class SettingsBackup {
             Settings.HIDE_SCREENSHOT_SHARE, Settings.HIDE_ASSISTANT, Settings.HIDE_SEARCH_HISTORY,
             Settings.HIDE_NAV_CREATE, Settings.HIDE_NAV_NOTIFICATIONS, Settings.HIDE_NAV_SEARCH, Settings.HIDE_HEADER_BUTTONS,
             Settings.BLACK_BOTTOM_BAR, Settings.BLACK_COMMENTS, Settings.BLACK_PIN_MENU, Settings.BLACK_SAVE_SHEET,
-            Settings.BLACK_SHEETS, Settings.BLACK_BOARDS,
+            Settings.BLACK_SHEETS, Settings.BLACK_BOARDS, Settings.BLACK_TOASTS,
             Settings.HIDE_CLOSEUP_BACK, Settings.HIDE_CLOSEUP_LENS, Settings.HIDE_CLOSEUP_SEARCH_LABEL,
             Settings.HIDE_CLOSEUP_LIKE, Settings.HIDE_CLOSEUP_COMMENTS, Settings.HIDE_CLOSEUP_SHARE,
             Settings.HIDE_CLOSEUP_MORE, Settings.HIDE_CLOSEUP_REMIX, Settings.HIDE_CLOSEUP_VISIT_SITE,
@@ -110,7 +110,7 @@ public final class SettingsBackup {
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES,
             Settings.QUIET_EMAIL_REMINDER, Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS,
             Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.CUSTOM_SAVE_SOUND, Settings.CUSTOM_SPLASH_LOGO,
-            Settings.HIDE_SAVE_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
+            Settings.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST, Settings.DISABLE_UPDATE_NAG,
             Settings.FIX_PUSH_NOTIFICATIONS));
 
