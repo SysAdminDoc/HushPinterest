@@ -72,7 +72,7 @@ class UiFixtureTest {
         "amoledBlack" to "blackSheets", "amoledBlack" to "blackBoards", "amoledBlack" to "blackToasts",
         "hideSearchHistory" to "recentSearchRows", "hideSearchHistory" to "recentSearchHeading",
         "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
-        "hideNavigationButtons" to "homeTabs",
+        "hideNavigationButtons" to "homeTabs", "hideSearchHistory" to "searchLanding",
     )
 
     @Test fun `every interface family matches each supported vendor build without a warning`() {
@@ -411,6 +411,41 @@ class UiFixtureTest {
         assertFlag(context, "homeTabs", false)
         assertFlag(context, "navigationButtons", true)
         assertFlag(context, "hideNavigationButtons", true)
+    }
+
+    private fun List<ClassDef>.searchPage() = single { owner ->
+        owner.methods.any { method -> method.fields().any { it.name == SEARCH_LANDING_ID } }
+    }
+
+    @Test fun `the Search page hands over its root view before anything else in onViewCreated`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val classes = read(build)
+            val stock = classes.searchPage().methods.single { it.name == "onViewCreated" }
+            val context = PatchContexts.of(ExtensionDex.classes() + classes)
+            hideSearchHistoryPatch.execute(context)
+            assertFlag(context, "searchLanding", true)
+            val created = context.mutable(stock).implementation!!
+            val hook = created.instructions.first()
+            assertEquals(build.name, Opcode.INVOKE_STATIC_RANGE, hook.opcode)
+            assertEquals(build.name, SEARCH_LANDING_HOOK, (hook as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: the root view", created.registerCount - 2, (hook as RegisterRangeInstruction).startRegister)
+            assertEquals(build.name, 1, hook.registerCount)
+            assertEquals(build.name, stock.instructions().map { it.opcode }.filter { it != Opcode.NOP },
+                created.instructions.drop(1).map { it.opcode }.filter { it != Opcode.NOP })
+        }
+    }
+
+    @Test fun `a build without the Search page keeps Hide search history and says the page stays`() {
+        val build = Fixtures.declaredBuilds().last()
+        val classes = read(build)
+        val page = classes.searchPage()
+        val context = PatchContexts.of(ExtensionDex.classes() + classes.filter { it.type != page.type })
+        val warnings = PatchLogCapture.warnings { hideSearchHistoryPatch.execute(context) }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertTrue(warnings.single(), warnings.single().contains("Blank Search page left out"))
+        assertFlag(context, "searchLanding", false)
+        assertFlag(context, "searchHistory", true)
+        assertFlag(context, "hideSearchHistory", true)
     }
 
     private fun asksForAssistant(method: Method) = method.returnType == "Z" && method.parameterTypes.isEmpty() &&
@@ -783,6 +818,7 @@ class UiFixtureTest {
                         method.fields().any { it.name in FILTERABLE_PIN_MENU_TITLES ||
                             it.name == "email_verification_reminder_title" || it.name == COMMENTS_SCREEN_ID ||
                             it.name == PIN_MENU_CARD || it.name == PIN_DETAILS_SHEET || it.name == GREETING_ROW ||
+                            it.name == SEARCH_LANDING_ID ||
                             it.name == GESTALT_SHEET_COORDINATOR || it.name == LEGO_CLOSE_STICKY } }
                 if (match) found[owner.type] = ImmutableClassDef.of(owner)
             }

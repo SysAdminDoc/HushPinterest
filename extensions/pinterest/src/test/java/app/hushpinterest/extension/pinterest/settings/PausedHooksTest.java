@@ -507,6 +507,7 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_NAV_NOTIFICATIONS, Arrays.asList(() -> hidesNavigation(Tab.NOTIFICATIONS),
                 () -> hidesGreetingButton("home_feed_greeting_header_newshub_icon")));
         probes.put(Settings.HIDE_NAV_SEARCH, Collections.singletonList(() -> hidesNavigation(Tab.SEARCH)));
+        probes.put(Settings.BLANK_SEARCH_PAGE, Collections.singletonList(PausedHooksTest::blanksSearchPage));
         probes.put(Settings.HIDE_HOME_TABS, Collections.singletonList(() -> InterfaceControls.homeTabsHeight(
                 namedView("home_feed_view_pager_tab_layout"), MEASURE_SPEC, MEASURE_SPEC) != MEASURE_SPEC));
         probes.put(Settings.HIDE_HEADER_BUTTONS, Collections.singletonList(() -> {
@@ -716,6 +717,14 @@ public class PausedHooksTest {
         } catch (java.io.IOException failure) {
             throw new AssertionError(failure);
         }
+    }
+
+    private static boolean blanksSearchPage() {
+        FrameLayout page = new FrameLayout(RuntimeEnvironment.getApplication());
+        View list = namedView("swipe_container");
+        page.addView(list);
+        InterfaceControls.searchLanding(page);
+        return list.getVisibility() != View.INVISIBLE;
     }
 
     private static boolean hidesNavigation(Tab tab) {

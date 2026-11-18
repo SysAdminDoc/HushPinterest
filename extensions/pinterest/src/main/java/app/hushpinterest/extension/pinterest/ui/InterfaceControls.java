@@ -31,6 +31,10 @@ public final class InterfaceControls {
     private static final String HOME_TABS_LOADING = "home_feed_tabs_placeholder_loading_layout";
     private static volatile int homeTabsId = View.NO_ID;
 
+    private static final String SEARCH_HEADER = "header_bar";
+    private static final String SEARCH_BACK = "slp_back_button_container";
+    private static final Map<View, Boolean> searchPages = new WeakHashMap<>();
+
     /** Called after the host assigns a navigation view its ID. Home and Profile always remain. */
     public static void bindNavigation(View view, Object tab) {
         try {
@@ -181,6 +185,77 @@ public final class InterfaceControls {
             View child = page.getChildAt(index);
             if (child.getVisibility() != View.GONE && HOME_TABS_LOADING.equals(resourceName(child))) {
                 child.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    /**
+     * Called with the Search page's root as Pinterest finishes creating it. Blank Search page folds
+     * every child of the root but the search bar's header and its back button, the list and the
+     * loading spinner included. Pinterest shows those again as the page loads, and each time that
+     * lays the root out, which folds them again. Coming back from another screen, Hush settings
+     * included, brings back window focus, which picks up a changed switch.
+     */
+    public static void searchLanding(View page) {
+        try {
+            if (page == null) return;
+            boolean first;
+            synchronized (searchPages) { first = searchPages.put(page, Boolean.TRUE) == null; }
+            if (first) {
+                SearchPageWatch watch = new SearchPageWatch(page);
+                page.addOnLayoutChangeListener(watch);
+                page.addOnAttachStateChangeListener(watch);
+                if (page.isAttachedToWindow()) watch.onViewAttachedToWindow(page);
+            }
+            refreshSearchLanding(page);
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.HIDE_SEARCH_HISTORY, "search page", failure);
+        }
+    }
+
+    private static void refreshSearchLanding(View page) {
+        if (!(page instanceof ViewGroup)) return;
+        boolean blank = UiHooks.enabled(FamilyNames.HIDE_SEARCH_HISTORY, Settings.BLANK_SEARCH_PAGE);
+        ViewGroup root = (ViewGroup) page;
+        for (int index = 0; index < root.getChildCount(); index++) {
+            View child = root.getChildAt(index);
+            String name = resourceName(child);
+            collapse(child, blank && !SEARCH_HEADER.equals(name) && !SEARCH_BACK.equals(name));
+        }
+    }
+
+    private static final class SearchPageWatch implements View.OnLayoutChangeListener,
+            View.OnAttachStateChangeListener, ViewTreeObserver.OnWindowFocusChangeListener {
+        private final View page;
+        private ViewTreeObserver observer;
+
+        SearchPageWatch(View page) { this.page = page; }
+
+        @Override public void onLayoutChange(View view, int left, int top, int right, int bottom,
+                                             int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            refresh();
+        }
+
+        @Override public void onViewAttachedToWindow(View view) {
+            if (observer != null) return;
+            observer = view.getViewTreeObserver();
+            observer.addOnWindowFocusChangeListener(this);
+        }
+
+        @Override public void onViewDetachedFromWindow(View view) {
+            if (observer != null && observer.isAlive()) observer.removeOnWindowFocusChangeListener(this);
+            observer = null;
+        }
+
+        @Override public void onWindowFocusChanged(boolean hasFocus) {
+            if (hasFocus) refresh();
+        }
+
+        private void refresh() {
+            try {
+                refreshSearchLanding(page);
+            } catch (Throwable failure) {
+                HookStatus.threw(FamilyNames.HIDE_SEARCH_HISTORY, "search page", failure);
             }
         }
     }

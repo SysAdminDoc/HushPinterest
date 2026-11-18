@@ -768,3 +768,5 @@ Black toasts	Avisos en negro
 In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	En modo oscuro, pinta de negro puro los mensajes que muestra Pinterest, como el que aparece al guardar o descargar un pin. El modo claro no cambia. El cambio se ve en el siguiente mensaje.
 Hide Home tabs	Ocultar pestañas de Inicio
 Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Quita la fila de pestañas, Todo y los nombres de tus tableros, de la parte superior de Inicio. El cambio se ve la próxima vez que se actualice Inicio.
+Blank Search page	Página de búsqueda en blanco
+Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Deja solo la barra de búsqueda en la página Buscar, sin nada debajo. La búsqueda funciona como siempre. El cambio se ve la próxima vez que se actualice la página.

@@ -768,3 +768,5 @@ Black toasts	Schwarze Hinweise
 In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	Färbt im Dunkelmodus die Meldungen von Pinterest, etwa nach dem Merken oder Herunterladen eines Pins, tiefschwarz. Der helle Modus bleibt, wie er ist. Die Änderung zeigt sich bei der nächsten Meldung.
 Hide Home tabs	Startseiten-Tabs ausblenden
 Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Entfernt die Tab-Leiste mit Alle und deinen Pinnwandnamen oben auf der Startseite. Die Änderung zeigt sich, wenn sich die Startseite das nächste Mal aktualisiert.
+Blank Search page	Leere Suchseite
+Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Lässt auf der Suchseite nur die Suchleiste stehen, darunter bleibt alles leer. Die Suche funktioniert wie gewohnt. Die Änderung zeigt sich, wenn sich die Seite das nächste Mal aktualisiert.

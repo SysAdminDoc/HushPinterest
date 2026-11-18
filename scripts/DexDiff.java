@@ -286,6 +286,7 @@ public class DexDiff {
             Map.entry("downloadToasts", 1),
             Map.entry("blackToasts", 1),
             Map.entry("homeTabs", 1),
+            Map.entry("searchLanding", 1),
             Map.entry("ownAuthorities", 1));
 
     /**
@@ -3617,6 +3618,28 @@ public class DexDiff {
                         && body.get(1).getOpcode() == Opcode.MOVE_RESULT && firstRegister(body.get(1)) == parameter(m, 1);
                 if (!placed) fail(hook + " doesn't replace the height spec first thing in " + m);
                 else remove(m, 0, 2);
+            }
+            capability(c.callee, placed);
+        }
+
+        /** The one fragment reading the landing list's id gets its root view before anything else runs. */
+        void searchLanding(Contract c) {
+            String hook = c.strings.get(0);
+            Set<String> pages = new TreeSet<>();
+            for (ClassDef owner : clean.classes.values()) for (Method m : owner.getMethods())
+                if (fieldNames(m).contains("search_landing_recycler_container")) pages.add(owner.getType());
+            Method stock = pages.size() != 1 ? null
+                    : clean.methods.get(pages.iterator().next() + "->onViewCreated(Landroid/view/View;Landroid/os/Bundle;)V");
+            if (stock == null) { fail("no single Search page onViewCreated, pages " + pages); capability(c.callee, false); return; }
+            Method m = actual(stock);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (m != null && sites.size() == 1) {
+                Instruction first = instructions(m).get(0);
+                placed = sites.get(0) == 0 && first.getOpcode() == Opcode.INVOKE_STATIC_RANGE
+                        && arguments(first).equals(List.of(parameter(m, 0)));
+                if (!placed) fail(hook + " isn't the first call, on the root view, in " + m);
+                else remove(m, 0, 1);
             }
             capability(c.callee, placed);
         }
@@ -8328,6 +8351,7 @@ public class DexDiff {
                     case "downloadToasts": downloadToasts(c); break;
                     case "blackToasts": blackToasts(c); break;
                     case "homeTabs": homeTabs(c); break;
+                    case "searchLanding": searchLanding(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);
                 }

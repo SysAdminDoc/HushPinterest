@@ -164,6 +164,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_screenshot_share", FALSE, true);
     public static final BooleanSetting HIDE_SEARCH_HISTORY =
             new BooleanSetting("hushpinterest_hide_search_history", FALSE);
+    public static final BooleanSetting BLANK_SEARCH_PAGE =
+            new BooleanSetting("hushpinterest_blank_search_page", FALSE);
     public static final BooleanSetting HIDE_NAV_CREATE =
             new BooleanSetting("hushpinterest_hide_nav_create", FALSE);
     public static final BooleanSetting HIDE_NAV_NOTIFICATIONS =

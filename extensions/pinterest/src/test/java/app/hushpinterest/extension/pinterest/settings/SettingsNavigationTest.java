@@ -1241,6 +1241,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_NAV_CREATE.key, "Create in the bottom bar", "at the top of Home", "next time they update");
         summaryContains(Settings.HIDE_NAV_NOTIFICATIONS.key, "Notifications in the bottom bar", "Inbox at the top of Home", "next time they update");
         summaryContains(Settings.HIDE_NAV_SEARCH.key, "Search in the bottom bar", "next time the bar updates");
+        summaryContains(Settings.BLANK_SEARCH_PAGE.key, "only the search bar", "Searching works as usual", "next time the page updates");
         summaryContains(Settings.HIDE_HOME_TABS.key, "row of tabs", "top of Home", "next time Home updates");
         summaryContains(Settings.HIDE_HEADER_BUTTONS.key, "icon buttons at the end of the top bar", "next time the bar updates", "account controls stay");
         summaryContains(Settings.BLACK_BOTTOM_BAR.key, "In dark mode", "bottom bar pure black", "Light mode stays", "next time the bar redraws");

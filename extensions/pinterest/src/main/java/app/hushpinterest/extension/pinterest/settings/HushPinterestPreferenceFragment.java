@@ -484,6 +484,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide search history"),
                     L10n.t("Hides your recent searches. It doesn't delete your account's search history. The change "
                         + "shows the next time the screen updates."), SettingsIcons.BLOCK);
+            if (build.contains(PatchFamily.HIDE_SEARCH_HISTORY) && PatchFamily.Capability.SEARCH_LANDING.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.BLANK_SEARCH_PAGE, L10n.t("Blank Search page"),
+                        L10n.t("Leaves only the search bar on the Search page, with nothing under it. Searching works "
+                            + "as usual. The change shows the next time the page updates.")), SettingsIcons.BLOCK));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_NAVIGATION_BUTTONS, Settings.HIDE_NAV_CREATE,
                     L10n.t("Hide Create button"), L10n.t("Hides Create in the bottom bar and at the top of Home. The "
                         + "change shows the next time they update."), SettingsIcons.BLOCK);

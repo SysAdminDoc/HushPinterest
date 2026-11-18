@@ -768,3 +768,5 @@ Black toasts	Siyah bildirimler
 In dark mode, paints the messages Pinterest pops up, such as the one after you save or download a pin, pure black. Light mode stays as it is. The change shows on the next message.	Karanlık modda, bir pini kaydettikten veya indirdikten sonra çıkan gibi Pinterest mesajlarını tam siyaha boyar. Açık mod olduğu gibi kalır. Değişiklik bir sonraki mesajda görünür.
 Hide Home tabs	Ana sayfa sekmelerini gizle
 Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Tümü ve pano adlarının bulunduğu sekme satırını Ana sayfanın üstünden kaldırır. Değişiklik Ana sayfa bir sonraki güncellenişinde görünür.
+Blank Search page	Boş Arama sayfası
+Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Ara sayfasında yalnızca arama çubuğunu bırakır, altında hiçbir şey kalmaz. Arama her zamanki gibi çalışır. Değişiklik sayfa bir sonraki güncellenişinde görünür.
