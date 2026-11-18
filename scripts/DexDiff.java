@@ -291,7 +291,7 @@ public class DexDiff {
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
             Map.entry("boardTabCovers", 1),
-            Map.entry("ownAuthorities", 1));
+            Map.entry("closeupGate", 1), Map.entry("ownAuthorities", 1));
 
     /**
      * A start-call, next-call, sole-call or once-call line: its method reference, the next-call's
@@ -6379,6 +6379,43 @@ public class DexDiff {
             capability(c.callee, placed);
         }
 
+        /** One of the hooks that get the last word on whether a closeup module shows for its pin. */
+        static boolean closeupGateCall(Instruction i) {
+            String target = String.valueOf(reference(i));
+            return target.startsWith(OWN) && target.endsWith("(Landroid/view/View;I)I");
+        }
+
+        /**
+         * A closeup module asks itself whether it shows for its pin in the base class's updatePin, and
+         * the hook rewrites that answer in place, on the module and the answer's own register. Other
+         * hooks of the same shape may sit between it and Pinterest's call.
+         */
+        boolean closeupGatePlaced(String hook) {
+            List<Method> updates = new ArrayList<>();
+            ClassDef base = clean.classes.get(CLOSEUP_MODULE);
+            if (base != null) for (Method m : base.getMethods()) if (m.getName().equals("updatePin") && m.getReturnType().equals("V")
+                    && m.getParameterTypes().size() == 1 && !AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getImplementation() != null)
+                updates.add(m);
+            Method m = actual(unique(updates, "closeup module's updatePin"));
+            List<Integer> sites = calls(m, hook, 1);
+            if (m == null || sites.size() != 1) return false;
+            List<Instruction> body = instructions(m);
+            int at = sites.get(0), back = at - 1;
+            while (back >= 2 && closeupGateCall(body.get(back - 1))) back -= 2;
+            boolean placed = back >= 1 && at + 1 < body.size() && body.get(back).getOpcode() == Opcode.MOVE_RESULT
+                    && reference(body.get(back - 1)) instanceof MethodReference ask && ask.getName().equals("shouldShowForPin")
+                    && ask.getReturnType().equals("Z") && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT
+                    && firstRegister(body.get(at + 1)) == firstRegister(body.get(back))
+                    && arguments(body.get(at)).equals(List.of(parameter(m, -1), firstRegister(body.get(back))));
+            if (!placed) { fail(hook + " doesn't rewrite the module's own answer in " + m); return false; }
+            remove(m, at, at + 2);
+            return true;
+        }
+
+        void closeupGate(Contract c) {
+            capability(c.callee, closeupGatePlaced(c.strings.get(0)));
+        }
+
         boolean buildsTitleRow(ClassDef owner) {
             for (Method init : owner.getMethods()) {
                 if (!init.getName().equals("<init>")) continue;
@@ -8499,6 +8536,7 @@ public class DexDiff {
                     case "closeupVisitSite": closeupRows(c, true); break;
                     case "closeupSaveButton": closeupSaveButton(c); break;
                     case "postedDate": postedDate(c); break;
+                    case "closeupGate": closeupGate(c); break;
                     case "saveSheet": saveSheet(c); break;
                     case "blackSheets": blackSheets(c); break;
                     case "blackBoards": blackBoards(c); break;

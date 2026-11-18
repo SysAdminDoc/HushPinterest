@@ -806,3 +806,7 @@ Use as tab cover	Usar como portada
 Open a pin's menu and pick Use as tab cover.	Elige Usar como portada en el menú de un pin.
 Board tab cover set.	Portada guardada.
 That file couldn't be read as a picture.	Ese archivo no se pudo leer como imagen.
+Hide pin author	Ocultar autor del pin
+Removes the creator's whole row, picture and name included, from under a pin you open. The change shows on the next pin you open.	Quita toda la fila del creador, con su foto y su nombre, de debajo del pin que abres. El cambio se ve en el siguiente pin que abras.
+Hide pin title and description	Ocultar título y descripción del pin
+Removes the title and description under a pin you open. The likes and comments bar stays, and so do the posted date and image size when they're on. The change shows on the next pin you open.	Quita el título y la descripción de debajo del pin que abres. La barra de me gusta y comentarios se queda, igual que la fecha de publicación y el tamaño de la imagen si están activados. El cambio se ve en el siguiente pin que abras.

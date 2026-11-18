@@ -806,3 +806,7 @@ Use as tab cover	Sekme kapağı yap
 Open a pin's menu and pick Use as tab cover.	Pin menüsünde Sekme kapağı yap seçeneğini seç.
 Board tab cover set.	Kapak ayarlandı.
 That file couldn't be read as a picture.	Bu dosya resim olarak okunamadı.
+Hide pin author	Pin sahibini gizle
+Removes the creator's whole row, picture and name included, from under a pin you open. The change shows on the next pin you open.	Açtığın pinin altındaki içerik üreticisi satırını, fotoğrafı ve adıyla birlikte tamamen kaldırır. Değişiklik açtığın bir sonraki pinde görünür.
+Hide pin title and description	Pin başlığını ve açıklamasını gizle
+Removes the title and description under a pin you open. The likes and comments bar stays, and so do the posted date and image size when they're on. The change shows on the next pin you open.	Açtığın pinin altındaki başlığı ve açıklamayı kaldırır. Beğeni ve yorum çubuğu kalır, açıksa paylaşım tarihi ve görsel boyutu da kalır. Değişiklik açtığın bir sonraki pinde görünür.

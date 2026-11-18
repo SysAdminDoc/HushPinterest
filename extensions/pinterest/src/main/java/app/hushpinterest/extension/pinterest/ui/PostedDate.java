@@ -90,7 +90,7 @@ public final class PostedDate {
     }
 
     @Nullable
-    private static TextView line(ViewGroup layout) {
+    static TextView line(ViewGroup layout) {
         for (int i = 0; i < layout.getChildCount(); i++) {
             View child = layout.getChildAt(i);
             if (child instanceof TextView && LINE_TAG.equals(child.getTag())) return (TextView) child;

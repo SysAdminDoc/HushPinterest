@@ -609,6 +609,15 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide creator name on pins"),
                     L10n.t("Hides the creator's name and badge under a pin you open. Their picture stays and still "
                         + "opens their profile. The change shows on the next pin you open."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.HIDE_PIN_AUTHOR, Settings.HIDE_PIN_AUTHOR,
+                    L10n.t("Hide pin author"),
+                    L10n.t("Removes the creator's whole row, picture and name included, from under a pin you open. The "
+                        + "change shows on the next pin you open."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.HIDE_PIN_DESCRIPTION, Settings.HIDE_PIN_DESCRIPTION,
+                    L10n.t("Hide pin title and description"),
+                    L10n.t("Removes the title and description under a pin you open. The likes and comments bar stays, "
+                        + "and so do the posted date and image size when they're on. The change shows on the next pin "
+                        + "you open."), SettingsIcons.BLOCK);
             patchToggle(ui, context, build, PatchFamily.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS,
                     L10n.t("Hide related pins"),
                     L10n.t("Leaves the grid of more pins out from under a pin you open, so it doesn't load. "

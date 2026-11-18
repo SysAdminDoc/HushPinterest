@@ -135,6 +135,10 @@ public final class SettingsStatus {
     public static boolean relatedPins() { return false; }
     public static boolean hideCreatorName() { return false; }
     public static boolean creatorName() { return false; }
+    public static boolean hidePinAuthor() { return false; }
+    public static boolean pinAuthor() { return false; }
+    public static boolean hidePinDescription() { return false; }
+    public static boolean pinDescription() { return false; }
     public static boolean customSaveSound() { return false; }
     public static boolean saveSound() { return false; }
     public static boolean customSplashLogo() { return false; }

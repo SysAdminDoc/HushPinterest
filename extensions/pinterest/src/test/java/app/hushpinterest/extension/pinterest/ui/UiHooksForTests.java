@@ -208,6 +208,45 @@ public final class UiHooksForTests {
         return SplashLogo.wanted(RuntimeEnvironment.getApplication());
     }
 
+    /** The kinds of pin page section the pause probes stand in for. */
+    public enum ProbeSection { PIN_CLOSEUP_SOURCE_DESCRIPTION, PIN_CLOSEUP_LINK }
+
+    /** A pin page section telling what it is the way Pinterest's modules do. */
+    public static class ProbeModule extends LinearLayout {
+        private final ProbeSection section;
+
+        ProbeModule(Context context, ProbeSection section) {
+            super(context);
+            this.section = section;
+        }
+
+        public ProbeSection getComponentType() {
+            return section;
+        }
+    }
+
+    /** Named like the row that shows who made a pin. */
+    public static final class PinCloseupCreatorAttributionView {}
+
+    public static final class CreatorModule extends ProbeModule {
+        @SuppressWarnings("unused") PinCloseupCreatorAttributionView row;
+
+        CreatorModule(Context context) {
+            super(context, ProbeSection.PIN_CLOSEUP_LINK);
+        }
+    }
+
+    /** True when a pin's description section is told not to show. */
+    public static boolean hidesPinDescription() {
+        Context context = RuntimeEnvironment.getApplication();
+        return PinPageSections.description(new ProbeModule(context, ProbeSection.PIN_CLOSEUP_SOURCE_DESCRIPTION), 1) == 0;
+    }
+
+    /** True when the section holding a pin's creator row is told not to show. */
+    public static boolean hidesPinAuthor() {
+        return PinPageSections.author(new CreatorModule(RuntimeEnvironment.getApplication()), 1) == 0;
+    }
+
     public static void saveToast(Class<?> type) {
         UiHooks.saveToastForTests = type;
     }

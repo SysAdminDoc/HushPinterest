@@ -456,7 +456,7 @@ public final class InterfaceControls {
     }
 
     /** GONE removes a child from its layout without deleting its model or click handler. */
-    private static void collapse(View view, boolean hide) {
+    static void collapse(View view, boolean hide) {
         if (view == null) return;
         synchronized (hidden) {
             if (hide) {

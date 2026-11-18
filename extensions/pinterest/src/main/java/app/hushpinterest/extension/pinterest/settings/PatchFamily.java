@@ -107,6 +107,8 @@ public enum PatchFamily {
     HIDE_POPUP_BANNERS(FamilyNames.HIDE_POPUP_BANNERS, "hidePopupBanners", null, Settings.HIDE_POPUP_BANNERS),
     HIDE_RELATED_PINS(FamilyNames.HIDE_RELATED_PINS, "hideRelatedPins", null, Settings.HIDE_RELATED_PINS),
     HIDE_CREATOR_NAME(FamilyNames.HIDE_CREATOR_NAME, "hideCreatorName", null, Settings.HIDE_CREATOR_NAME),
+    HIDE_PIN_AUTHOR(FamilyNames.HIDE_PIN_AUTHOR, "hidePinAuthor", null, Settings.HIDE_PIN_AUTHOR),
+    HIDE_PIN_DESCRIPTION(FamilyNames.HIDE_PIN_DESCRIPTION, "hidePinDescription", null, Settings.HIDE_PIN_DESCRIPTION),
     CUSTOM_SAVE_SOUND(FamilyNames.CUSTOM_SAVE_SOUND, "customSaveSound", null, Settings.CUSTOM_SAVE_SOUND),
     CUSTOM_SPLASH_LOGO(FamilyNames.CUSTOM_SPLASH_LOGO, "customSplashLogo", null, Settings.CUSTOM_SPLASH_LOGO),
     BOARD_TABS(FamilyNames.BOARD_TABS, "boardTabs", null, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE,
@@ -172,7 +174,7 @@ public enum PatchFamily {
             LONG_PRESS_DOWNLOAD, SYSTEM_SHARE));
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
             HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
-            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, BOARD_TABS,
+            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, HIDE_PIN_AUTHOR, HIDE_PIN_DESCRIPTION, BOARD_TABS,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
             HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST));
 
@@ -247,6 +249,8 @@ public enum PatchFamily {
         POPUP_BANNERS(HIDE_POPUP_BANNERS, "popupBanners", "Hide pop-up banners"),
         RELATED_PINS(HIDE_RELATED_PINS, "relatedPins", "Hide related pins"),
         CREATOR_NAME(HIDE_CREATOR_NAME, "creatorName", "Hide creator name on pins"),
+        PIN_AUTHOR(HIDE_PIN_AUTHOR, "pinAuthor", "Hide pin author"),
+        PIN_DESCRIPTION(HIDE_PIN_DESCRIPTION, "pinDescription", "Hide pin title and description"),
         SAVE_SOUND(CUSTOM_SAVE_SOUND, "saveSound", "Custom save sound"),
         BOARD_TAB_HEADER(BOARD_TABS, "boardTabHeader", "Board tab header"),
         BOARD_TAB_COVERS(BOARD_TABS, "boardTabCovers", "Board tab covers"),
