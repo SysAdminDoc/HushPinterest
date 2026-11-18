@@ -9,28 +9,14 @@ package app.morphe.patches.pinterest.ui
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patches.pinterest.misc.extension.EXTENSION_PACKAGE
-import app.morphe.patches.pinterest.misc.extension.enableCapability
-import app.morphe.patches.pinterest.misc.extension.enableStatus
-import app.morphe.patches.pinterest.misc.extension.pinterestExtensionPatch
-import app.morphe.patches.pinterest.misc.extension.requireStatusMethod
-import app.morphe.patches.pinterest.misc.settings.settingsPatch
-import app.morphe.patches.shared.compat.AppCompatibilities
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-private const val DESCRIPTION_PATCH = "Hide pin title and description"
-private const val AUTHOR_PATCH = "Hide pin author"
-
 /** What a closeup module asks itself after taking a pin. It keeps its name. */
 internal const val CLOSEUP_SHOULD_SHOW = "shouldShowForPin"
-
-internal const val PIN_DESCRIPTION_HOOK = "$EXTENSION_PACKAGE/ui/PinPageSections;->description(Landroid/view/View;I)I"
-internal const val PIN_AUTHOR_HOOK = "$EXTENSION_PACKAGE/ui/PinPageSections;->author(Landroid/view/View;I)I"
 
 /**
  * Hands every closeup module's answer to "do I show for this pin" through [hook], which gets the
@@ -57,40 +43,4 @@ internal fun BytecodePatchContext.addCloseupGate(patch: String, hook: String) {
         invoke-static { p0, v${answer.registerA} }, $hook
         move-result v${answer.registerA}
     """)
-}
-
-@Suppress("unused")
-val hidePinDescriptionPatch = bytecodePatch(
-    name = DESCRIPTION_PATCH,
-    description = "Removes the title and description under a pin you open. The likes and comments bar stays, and so " +
-        "do the posted date and image size when they're on. Starts off. Turn it on in HushPinterest settings > Interface.",
-) {
-    category("Pin page")
-    dependsOn(settingsPatch, pinterestExtensionPatch)
-    compatibleWith(*AppCompatibilities.pinterest())
-    execute {
-        requireStatusMethod("hidePinDescription")
-        requireStatusMethod("pinDescription")
-        addCloseupGate(DESCRIPTION_PATCH, PIN_DESCRIPTION_HOOK)
-        enableCapability("pinDescription")
-        enableStatus("hidePinDescription")
-    }
-}
-
-@Suppress("unused")
-val hidePinAuthorPatch = bytecodePatch(
-    name = AUTHOR_PATCH,
-    description = "Removes the creator's whole row, picture and name included, from under a pin you open. " +
-        "Starts off. Turn it on in HushPinterest settings > Interface.",
-) {
-    category("Pin page")
-    dependsOn(settingsPatch, pinterestExtensionPatch)
-    compatibleWith(*AppCompatibilities.pinterest())
-    execute {
-        requireStatusMethod("hidePinAuthor")
-        requireStatusMethod("pinAuthor")
-        addCloseupGate(AUTHOR_PATCH, PIN_AUTHOR_HOOK)
-        enableCapability("pinAuthor")
-        enableStatus("hidePinAuthor")
-    }
 }
