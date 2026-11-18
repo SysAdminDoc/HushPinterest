@@ -1259,8 +1259,8 @@ public final class L10nTranslations {
                 "Entfernt die Tab-Leiste mit Alle und deinen Pinnwandnamen oben auf der Startseite. Die \u00c4nderung zeigt sich, wenn sich die Startseite das n\u00e4chste Mal aktualisiert.");
         table.put("Tap to turn it back on.",
                 "Zum Wiedereinschalten tippen.");
-        table.put("That app won't let Pinterest keep the sound. Pick one saved on the phone.",
-                "Diese App l\u00e4sst Pinterest den Ton nicht behalten. W\u00e4hle einen, der auf dem Handy gespeichert ist.");
+        table.put("That app can't share the sound. Pick one saved on the phone.",
+                "Diese App gibt den Ton nicht frei. W\u00e4hle einen vom Handy.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
                 "Diese Datei ist besch\u00e4digt oder unvollst\u00e4ndig. Es wurde nichts ge\u00e4ndert.");
         table.put("That file is from a newer HushPinterest. Nothing was changed.",
@@ -2704,8 +2704,8 @@ public final class L10nTranslations {
                 "Quita la fila de pesta\u00f1as, Todo y los nombres de tus tableros, de la parte superior de Inicio. El cambio se ve la pr\u00f3xima vez que se actualice Inicio.");
         table.put("Tap to turn it back on.",
                 "Toca para volver a activarlo.");
-        table.put("That app won't let Pinterest keep the sound. Pick one saved on the phone.",
-                "Esa app no deja que Pinterest conserve el sonido. Elige uno guardado en el tel\u00e9fono.");
+        table.put("That app can't share the sound. Pick one saved on the phone.",
+                "Esa app no comparte el sonido. Elige uno guardado en el tel\u00e9fono.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
                 "Ese archivo est\u00e1 da\u00f1ado o incompleto. No se cambi\u00f3 nada.");
         table.put("That file is from a newer HushPinterest. Nothing was changed.",
@@ -4149,8 +4149,8 @@ public final class L10nTranslations {
                 "Menghapus deretan tab, Semua dan nama papan Anda, dari bagian atas Beranda. Perubahan terlihat saat Beranda diperbarui berikutnya.");
         table.put("Tap to turn it back on.",
                 "Ketuk untuk mengaktifkan HushPinterest lagi.");
-        table.put("That app won't let Pinterest keep the sound. Pick one saved on the phone.",
-                "Aplikasi itu tidak mengizinkan Pinterest menyimpan suaranya. Pilih yang tersimpan di ponsel.");
+        table.put("That app can't share the sound. Pick one saved on the phone.",
+                "Aplikasi itu tidak membagikan suaranya. Pilih yang ada di ponsel.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
                 "File itu rusak atau hanya terunduh sebagian. Tidak ada yang diubah.");
         table.put("That file is from a newer HushPinterest. Nothing was changed.",
@@ -5594,8 +5594,8 @@ public final class L10nTranslations {
                 "Remove a fileira de abas, Tudo e os nomes das suas pastas, do topo do In\u00edcio. A mudan\u00e7a aparece na pr\u00f3xima vez que o In\u00edcio for atualizado.");
         table.put("Tap to turn it back on.",
                 "Toque para reativar.");
-        table.put("That app won't let Pinterest keep the sound. Pick one saved on the phone.",
-                "Esse app n\u00e3o deixa o Pinterest manter o som. Escolha um salvo no celular.");
+        table.put("That app can't share the sound. Pick one saved on the phone.",
+                "Esse app n\u00e3o compartilha o som. Escolha um salvo no celular.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
                 "Esse arquivo est\u00e1 corrompido ou incompleto. Nada foi alterado.");
         table.put("That file is from a newer HushPinterest. Nothing was changed.",
@@ -7039,8 +7039,8 @@ public final class L10nTranslations {
                 "T\u00fcm\u00fc ve pano adlar\u0131n\u0131n bulundu\u011fu sekme sat\u0131r\u0131n\u0131 Ana sayfan\u0131n \u00fcst\u00fcnden kald\u0131r\u0131r. De\u011fi\u015fiklik Ana sayfa bir sonraki g\u00fcncelleni\u015finde g\u00f6r\u00fcn\u00fcr.");
         table.put("Tap to turn it back on.",
                 "Yeniden a\u00e7mak i\u00e7in dokun.");
-        table.put("That app won't let Pinterest keep the sound. Pick one saved on the phone.",
-                "Bu uygulama Pinterest'in sesi saklamas\u0131na izin vermiyor. Telefonda kay\u0131tl\u0131 bir ses se\u00e7.");
+        table.put("That app can't share the sound. Pick one saved on the phone.",
+                "Bu uygulama sesi payla\u015fm\u0131yor. Telefonda kay\u0131tl\u0131 bir ses se\u00e7.");
         table.put("That file is damaged or partly downloaded. Nothing was changed.",
                 "Bu dosya hasarl\u0131 ya da eksik indirilmi\u015f. Hi\u00e7bir \u015fey de\u011fi\u015ftirilmedi.");
         table.put("That file is from a newer HushPinterest. Nothing was changed.",
