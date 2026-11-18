@@ -770,3 +770,5 @@ Hide Home tabs	Ana sayfa sekmelerini gizle
 Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Tümü ve pano adlarının bulunduğu sekme satırını Ana sayfanın üstünden kaldırır. Değişiklik Ana sayfa bir sonraki güncellenişinde görünür.
 Blank Search page	Boş Arama sayfası
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Ara sayfasında yalnızca arama çubuğunu bırakır, altında hiçbir şey kalmaz. Arama her zamanki gibi çalışır. Değişiklik sayfa bir sonraki güncellenişinde görünür.
+Second Search tap opens the keyboard	Ara'ya ikinci dokunuş klavyeyi açar
+On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Ara sayfasındayken alt çubuktaki Ara'ya yeniden basmak imleci arama çubuğuna getirir ve klavyeyi açar.

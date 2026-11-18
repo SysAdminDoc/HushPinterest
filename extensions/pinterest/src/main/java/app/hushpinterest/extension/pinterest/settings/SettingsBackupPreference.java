@@ -489,6 +489,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_nav_search": return L10n.t("Hide Search button");
             case "hushpinterest_blank_search_page": return L10n.t("Blank Search page");
             case "hushpinterest_hide_home_tabs": return L10n.t("Hide Home tabs");
+            case "hushpinterest_search_tab_keyboard": return L10n.t("Second Search tap opens the keyboard");
             case "hushpinterest_hide_header_buttons": return L10n.t("Hide header buttons");
             case "hushpinterest_black_bottom_bar": return L10n.t("Black bottom bar");
             case "hushpinterest_black_comments": return L10n.t("Black comments");

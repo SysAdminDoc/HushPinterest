@@ -767,3 +767,5 @@ Hide Home tabs	Ocultar abas do Início
 Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Remove a fileira de abas, Tudo e os nomes das suas pastas, do topo do Início. A mudança aparece na próxima vez que o Início for atualizado.
 Blank Search page	Página de pesquisa em branco
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Deixa só a barra de pesquisa na página Pesquisar, sem nada embaixo. A pesquisa funciona normalmente. A mudança aparece na próxima vez que a página for atualizada.
+Second Search tap opens the keyboard	Segundo toque em Pesquisar abre o teclado
+On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Na página Pesquisar, tocar de novo em Pesquisar na barra inferior coloca o cursor na barra de pesquisa e abre o teclado.

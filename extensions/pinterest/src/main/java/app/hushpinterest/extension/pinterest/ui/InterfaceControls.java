@@ -6,8 +6,12 @@
  */
 package app.hushpinterest.extension.pinterest.ui;
 
+import android.os.SystemClock;
+import android.view.InputDevice;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 
 import java.util.Map;
@@ -34,6 +38,9 @@ public final class InterfaceControls {
     private static final String SEARCH_HEADER = "header_bar";
     private static final String SEARCH_BACK = "slp_back_button_container";
     private static final Map<View, Boolean> searchPages = new WeakHashMap<>();
+    private static final String SEARCH_LOCATION = "SEARCH_LANDING";
+    private static final String SEARCH_BAR = "header_static_search_bar";
+    static volatile Object searchLocationForTests;
 
     /** Called after the host assigns a navigation view its ID. Home and Profile always remain. */
     public static void bindNavigation(View view, Object tab) {
@@ -257,6 +264,82 @@ public final class InterfaceControls {
             } catch (Throwable failure) {
                 HookStatus.threw(FamilyNames.HIDE_SEARCH_HISTORY, "search page", failure);
             }
+        }
+    }
+
+    /**
+     * Called first in the bottom bar's click handler. Answers 1 when it has taken the press: Search
+     * pressed again while the Search page is showing, with the page's search bar on screen. The bar
+     * opens Pinterest's typing screen through its header's touch handling rather than a listener of
+     * its own, so it gets a real tap at its center, and Pinterest puts the cursor in the field and
+     * brings up the keyboard the way it does for a finger. Any other press carries on as usual, and
+     * so does this one if nothing takes the tap.
+     */
+    public static int searchTabPress(View bar, View tab) {
+        try {
+            if (bar == null || tab == null) return 0;
+            String name;
+            synchronized (navigation) { name = navigation.get(tab); }
+            if (!"SEARCH".equals(name)) return 0;
+            if (!UiHooks.enabled(FamilyNames.HIDE_NAVIGATION_BUTTONS, Settings.SEARCH_TAB_KEYBOARD)) return 0;
+            Object forced = searchLocationForTests;
+            Object location = forced != null ? forced : currentLocation(bar);
+            if (!(location instanceof Enum<?>) || !SEARCH_LOCATION.equals(((Enum<?>) location).name())) return 0;
+            View[] field = new View[1];
+            visit(bar.getRootView(), view -> {
+                if (field[0] == null && SEARCH_BAR.equals(resourceName(view)) && searchHeader(view) != null
+                        && onScreen(view)) field[0] = view;
+            });
+            return field[0] != null && tap(searchHeader(field[0]), field[0]) ? 1 : 0;
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.HIDE_NAVIGATION_BUTTONS, "search tab", failure);
+            return 0;
+        }
+    }
+
+    /** Answers null here. Patching writes the read of the screen the bottom bar's navigation is on. */
+    public static Object currentLocation(Object bar) {
+        return null;
+    }
+
+    private static ViewGroup searchHeader(View field) {
+        for (ViewParent parent = field.getParent(); parent instanceof ViewGroup; parent = parent.getParent()) {
+            if (SEARCH_HEADER.equals(resourceName((View) parent))) return (ViewGroup) parent;
+        }
+        return null;
+    }
+
+    private static boolean onScreen(View view) {
+        if (view.getWidth() <= 0 || view.getHeight() <= 0) return false;
+        View current = view;
+        while (true) {
+            if (current.getVisibility() != View.VISIBLE) return false;
+            ViewParent parent = current.getParent();
+            if (!(parent instanceof View)) return true;
+            current = (View) parent;
+        }
+    }
+
+    private static boolean tap(ViewGroup header, View field) {
+        float x = field.getWidth() / 2f;
+        float y = field.getHeight() / 2f;
+        for (View view = field; view != header; view = (View) view.getParent()) {
+            View parent = (View) view.getParent();
+            x += view.getLeft() + view.getTranslationX() - parent.getScrollX();
+            y += view.getTop() + view.getTranslationY() - parent.getScrollY();
+        }
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0);
+        MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, x, y, 0);
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        up.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        try {
+            if (!header.dispatchTouchEvent(down)) return false;
+            header.dispatchTouchEvent(up);
+            return true;
+        } finally {
+            down.recycle();
+            up.recycle();
         }
     }
 

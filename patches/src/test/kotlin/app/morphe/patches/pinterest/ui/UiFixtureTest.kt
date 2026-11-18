@@ -73,6 +73,7 @@ class UiFixtureTest {
         "hideSearchHistory" to "recentSearchRows", "hideSearchHistory" to "recentSearchHeading",
         "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
         "hideNavigationButtons" to "homeTabs", "hideSearchHistory" to "searchLanding",
+        "hideNavigationButtons" to "searchKeyboard",
     )
 
     @Test fun `every interface family matches each supported vendor build without a warning`() {
@@ -446,6 +447,43 @@ class UiFixtureTest {
         assertFlag(context, "searchLanding", false)
         assertFlag(context, "searchHistory", true)
         assertFlag(context, "hideSearchHistory", true)
+    }
+
+    @Test fun `the bottom bar offers every press to the extension and returns only when it was taken`() {
+        for (build in Fixtures.declaredBuilds()) {
+            val classes = read(build)
+            val stock = classes.single { it.type == BOTTOM_BAR }.methods.single { it.name == "onClick" }
+            val context = PatchContexts.of(ExtensionDex.classes() + classes)
+            hideNavigationButtonsPatch.execute(context)
+            assertFlag(context, "searchKeyboard", true)
+            val click = context.mutable(stock).implementation!!
+            val hook = click.instructions[0]
+            assertEquals(build.name, Opcode.INVOKE_STATIC_RANGE, hook.opcode)
+            assertEquals(build.name, SEARCH_TAB_HOOK, (hook as ReferenceInstruction).reference.toString())
+            assertEquals("${build.name}: the bar and the tab", click.registerCount - 2, (hook as RegisterRangeInstruction).startRegister)
+            assertEquals(build.name, 2, hook.registerCount)
+            assertEquals(build.name, listOf(Opcode.MOVE_RESULT, Opcode.IF_EQZ, Opcode.RETURN_VOID),
+                click.instructions.subList(1, 4).map { it.opcode })
+            val branch = click.instructions[2] as BuilderOffsetInstruction
+            assertTrue("${build.name}: a press left alone runs Pinterest's handler from its start",
+                branch.target.location.index == 4)
+            assertEquals(build.name, stock.instructions().map { it.opcode }.filter { it != Opcode.NOP },
+                click.instructions.drop(4).map { it.opcode }.filter { it != Opcode.NOP })
+            val stub = context.mutableClassDefBy(INTERFACE_CONTROLS).methods.single { it.name == "currentLocation" }
+            assertEquals("${build.name}: the stub reads the screen the way the handler does",
+                listOf(BOTTOM_BAR, "Lcom/pinterest/navigation/Navigation;"), stub.calls().map { it.definingClass })
+        }
+    }
+
+    @Test fun `a bottom bar with no click handler keeps the navigation switches and the plain Search press`() {
+        val build = Fixtures.declaredBuilds().last()
+        val context = PatchContexts.of(ExtensionDex.classes() + read(build))
+        context.mutableClassDefBy(BOTTOM_BAR).methods.removeAll { it.name == "onClick" }
+        val warnings = PatchLogCapture.warnings { hideNavigationButtonsPatch.execute(context) }
+        assertEquals(warnings.toString(), 1, warnings.size)
+        assertTrue(warnings.single(), warnings.single().contains("Second Search tap left out"))
+        assertFlag(context, "searchKeyboard", false)
+        assertFlag(context, "navigationButtons", true)
     }
 
     private fun asksForAssistant(method: Method) = method.returnType == "Z" && method.parameterTypes.isEmpty() &&

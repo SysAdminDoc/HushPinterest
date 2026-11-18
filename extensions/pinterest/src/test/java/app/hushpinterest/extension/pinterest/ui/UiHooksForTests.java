@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -56,6 +57,63 @@ public final class UiHooksForTests {
         };
         frame.setId(View.generateViewId());
         return frame;
+    }
+
+    /** Screens the bottom bar's navigation can report, by the names the hook goes by. */
+    public enum Screen { SEARCH_LANDING, HOME_FEED }
+
+    private enum NavigationTab { SEARCH, HOME }
+
+    /** A window with the bottom bar's tabs and the Search page's header holding its search bar. */
+    public static final class SearchWindow {
+        public final FrameLayout root = namedFrame("content");
+        public final View bar = named("bottom_bar");
+        public final View searchTab = named("search_tab");
+        public final View homeTab = named("home_tab");
+        public final View field = named("header_static_search_bar");
+        public final FrameLayout holder = namedFrame("header_content");
+        public final FrameLayout header;
+        public boolean takesTouches = true;
+        public int downs;
+        public int ups;
+        public float x;
+        public float y;
+
+        public SearchWindow() {
+            Context context = RuntimeEnvironment.getApplication();
+            Resources resources = naming(context, "header_bar");
+            header = new FrameLayout(context) {
+                @Override public Resources getResources() { return resources; }
+                @Override public boolean dispatchTouchEvent(MotionEvent event) {
+                    x = event.getX();
+                    y = event.getY();
+                    if (event.getActionMasked() == MotionEvent.ACTION_DOWN) downs++;
+                    if (event.getActionMasked() == MotionEvent.ACTION_UP) ups++;
+                    return takesTouches;
+                }
+            };
+            header.setId(View.generateViewId());
+            holder.addView(field);
+            header.addView(holder);
+            root.addView(header);
+            root.addView(bar);
+            root.addView(searchTab);
+            root.addView(homeTab);
+            InterfaceControls.bindNavigation(searchTab, NavigationTab.SEARCH);
+            InterfaceControls.bindNavigation(homeTab, NavigationTab.HOME);
+            holder.layout(10, 20, 410, 120);
+            field.layout(30, 40, 230, 80);
+        }
+
+        /** Presses [tab] while the bottom bar's navigation reports [screen]. */
+        public int press(View tab, Object screen) {
+            InterfaceControls.searchLocationForTests = screen;
+            try {
+                return InterfaceControls.searchTabPress(bar, tab);
+            } finally {
+                InterfaceControls.searchLocationForTests = null;
+            }
+        }
     }
 
     /** Names the class the save toast hook treats as Pinterest's downloaded toast. */

@@ -287,6 +287,7 @@ public class DexDiff {
             Map.entry("blackToasts", 1),
             Map.entry("homeTabs", 1),
             Map.entry("searchLanding", 1),
+            Map.entry("searchKeyboard", 1),
             Map.entry("ownAuthorities", 1));
 
     /**
@@ -3642,6 +3643,16 @@ public class DexDiff {
                 else remove(m, 0, 1);
             }
             capability(c.callee, placed);
+        }
+
+        /** The bottom bar's click handler lets the extension take a press before it reads anything. */
+        void searchKeyboard(Contract c) {
+            ClassDef bar = uniqueClass(clean.classesHolding("BottomNavBar tab insertion out of range"), "navigation view");
+            Method stock = bar == null ? null : clean.methods.get(bar.getType() + "->onClick(Landroid/view/View;)V");
+            if (stock == null) { fail("the bottom bar has no onClick to guard"); capability(c.callee, false); return; }
+            Method m = actual(stock);
+            if (m != null) guard(m, c.strings.get(0), 0, List.of(parameter(m, -1), parameter(m, 0)), 0, false, false);
+            capability(c.callee, m != null);
         }
 
         void refresh(Contract c) {
@@ -8352,6 +8363,7 @@ public class DexDiff {
                     case "blackToasts": blackToasts(c); break;
                     case "homeTabs": homeTabs(c); break;
                     case "searchLanding": searchLanding(c); break;
+                    case "searchKeyboard": searchKeyboard(c); break;
                     case "settings": settings(c); break;
                     default: fail("unknown mutation kind " + c.target);
                 }

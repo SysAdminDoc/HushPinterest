@@ -503,6 +503,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                         L10n.t("Takes the row of tabs, All and your board names, off the top of Home. The change "
                             + "shows the next time Home updates.")), SettingsIcons.BLOCK));
             }
+            if (build.contains(PatchFamily.HIDE_NAVIGATION_BUTTONS) && PatchFamily.Capability.SEARCH_KEYBOARD.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.SEARCH_TAB_KEYBOARD, L10n.t("Second Search tap opens the keyboard"),
+                        L10n.t("On the Search page, pressing Search in the bottom bar again puts the cursor in the "
+                            + "search bar and opens the keyboard.")), SettingsIcons.SEARCH));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_HEADER_BUTTONS, Settings.HIDE_HEADER_BUTTONS,
                     L10n.t("Hide header buttons"),
                     L10n.t("Hides the small icon buttons at the end of the top bar. Back, text buttons and account "

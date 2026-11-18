@@ -770,3 +770,5 @@ Hide Home tabs	Startseiten-Tabs ausblenden
 Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Entfernt die Tab-Leiste mit Alle und deinen Pinnwandnamen oben auf der Startseite. Die Änderung zeigt sich, wenn sich die Startseite das nächste Mal aktualisiert.
 Blank Search page	Leere Suchseite
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Lässt auf der Suchseite nur die Suchleiste stehen, darunter bleibt alles leer. Die Suche funktioniert wie gewohnt. Die Änderung zeigt sich, wenn sich die Seite das nächste Mal aktualisiert.
+Second Search tap opens the keyboard	Zweites Tippen auf Suche öffnet die Tastatur
+On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Auf der Suchseite setzt ein erneutes Tippen auf Suche in der unteren Leiste den Cursor in die Suchleiste und öffnet die Tastatur.

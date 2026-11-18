@@ -176,6 +176,8 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_header_buttons", FALSE);
     public static final BooleanSetting HIDE_HOME_TABS =
             new BooleanSetting("hushpinterest_hide_home_tabs", FALSE);
+    public static final BooleanSetting SEARCH_TAB_KEYBOARD =
+            new BooleanSetting("hushpinterest_search_tab_keyboard", FALSE);
     public static final BooleanSetting HIDE_ASSISTANT =
             new BooleanSetting("hushpinterest_hide_assistant", FALSE);
     public static final BooleanSetting BLACK_BOTTOM_BAR =

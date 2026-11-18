@@ -770,3 +770,5 @@ Hide Home tabs	Sembunyikan tab Beranda
 Takes the row of tabs, All and your board names, off the top of Home. The change shows the next time Home updates.	Menghapus deretan tab, Semua dan nama papan Anda, dari bagian atas Beranda. Perubahan terlihat saat Beranda diperbarui berikutnya.
 Blank Search page	Halaman Cari kosong
 Leaves only the search bar on the Search page, with nothing under it. Searching works as usual. The change shows the next time the page updates.	Hanya menyisakan bilah pencarian di halaman Cari, tanpa apa pun di bawahnya. Pencarian berfungsi seperti biasa. Perubahan terlihat saat halaman diperbarui berikutnya.
+Second Search tap opens the keyboard	Ketuk Cari kedua kali membuka keyboard
+On the Search page, pressing Search in the bottom bar again puts the cursor in the search bar and opens the keyboard.	Di halaman Cari, menekan Cari lagi di bilah bawah menempatkan kursor di bilah pencarian dan membuka keyboard.
