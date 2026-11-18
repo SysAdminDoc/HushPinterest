@@ -1130,6 +1130,52 @@ public class UiHooksTest {
         assertEquals("orig comes first", "https://i.pinimg.com/originals/aa/bb/cc/c.jpg", UiHooks.pageImage(images, "736x"));
     }
 
+    @Test public void aRefusedOriginalWalksThroughTheOtherFileTypesToALargeCopy() {
+        String stem = "https://i.pinimg.com/originals/6b/e1/fc/6be1fc9c";
+        String large = "https://i.pinimg.com/736x/6b/e1/fc/6be1fc9c.jpg";
+        assertNull("the switch starts off", UiHooks.originalRetry(403, stem + ".jpg"));
+
+        Settings.ORIGINAL_IMAGES.save(true);
+        assertEquals(stem + ".png", UiHooks.originalRetry(403, stem + ".jpg"));
+        assertEquals(stem + ".png", UiHooks.originalRetry(404, stem + ".jpeg"));
+        assertEquals(stem + ".webp", UiHooks.originalRetry(403, stem + ".png"));
+        assertEquals(large, UiHooks.originalRetry(403, stem + ".webp"));
+        assertEquals("a type with no sibling goes straight to the copy", large, UiHooks.originalRetry(403, stem + ".gif"));
+        assertNull("the copy is the last stop", UiHooks.originalRetry(403, large));
+
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertNull("paused", UiHooks.originalRetry(403, stem + ".jpg"));
+    }
+
+    @Test public void onlyARefusalOfAnImageHostOriginalIsRetried() {
+        Settings.ORIGINAL_IMAGES.save(true);
+        String original = "https://i.pinimg.com/originals/aa/bb/cc/a.jpg";
+        for (int status : new int[]{200, 206, 301, 401, 410, 429, 500, 503}) assertNull("status " + status, UiHooks.originalRetry(status, original));
+        for (String other : Arrays.asList(
+                "http://i.pinimg.com/originals/aa/bb/cc/a.jpg",
+                "https://v.pinimg.com/originals/aa/bb/cc/a.jpg",
+                "https://i.pinimg.com.example.net/originals/aa/bb/cc/a.jpg",
+                "https://i.pinimg.com:8443/originals/aa/bb/cc/a.jpg",
+                "https://user@i.pinimg.com/originals/aa/bb/cc/a.jpg",
+                "https://i.pinimg.com/1200x/aa/bb/cc/a.jpg",
+                "https://api.pinterest.com/v3/pins/1/",
+                "https://i.pinimg.com/originals/aa/bb/cc/noextension",
+                "not an address at all")) {
+            assertNull(other, UiHooks.originalRetry(403, other));
+        }
+        assertNull("no address", UiHooks.originalRetry(403, null));
+    }
+
+    @Test public void everyRefusedOriginalWalkEnds() {
+        Settings.ORIGINAL_IMAGES.save(true);
+        for (String type : Arrays.asList("jpg", "jpeg", "JPG", "png", "webp", "gif", "heic")) {
+            String address = "https://i.pinimg.com/originals/aa/bb/cc/a." + type;
+            int steps = 0;
+            for (String next = UiHooks.originalRetry(403, address); next != null; next = UiHooks.originalRetry(403, next)) steps++;
+            assertTrue(type + " took " + steps + " steps", steps >= 1 && steps <= 3);
+        }
+    }
+
     @Test public void menuCensusDistinguishesConstructionTimeHiddenRowsFromFilterDecisions() {
         View row = new View(RuntimeEnvironment.getApplication());
         row.setVisibility(View.INVISIBLE);

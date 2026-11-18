@@ -160,6 +160,7 @@ public final class SettingsStatus {
     public static boolean imageChooser() { return false; }
     public static boolean closeupImage() { return false; }
     public static boolean pageImage() { return false; }
+    public static boolean originalRetry() { return false; }
     public static boolean showPostedDate() { return false; }
     public static boolean postedDate() { return false; }
     public static boolean hideSuggestedBoards() { return false; }

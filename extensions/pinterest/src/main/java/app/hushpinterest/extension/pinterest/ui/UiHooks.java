@@ -490,6 +490,53 @@ public final class UiHooks {
         }
     }
 
+    private static final String IMAGE_HOST = "i.pinimg.com", ORIGINALS_PATH = "/originals/";
+
+    /**
+     * Where to ask next after the image host refused an original, or null to let the answer stand.
+     * Pinterest's data can name a .jpg original for a picture uploaded as a .png or .webp. The host
+     * answers that address 403, and the picture stayed a grey box (14.45.0).
+     */
+    public static String originalRetry(int status, Object address) {
+        if (status != 403 && status != 404 || address == null || !originalImages()) return null;
+        try {
+            String next = nextOriginal(address.toString());
+            if (next != null) HookStatus.counted(FamilyNames.ORIGINAL_IMAGES, "refused original retried");
+            return next;
+        } catch (RuntimeException failure) {
+            HookStatus.threw(FamilyNames.ORIGINAL_IMAGES, "original retry", failure);
+            return null;
+        }
+    }
+
+    /**
+     * The next address for a refused original: .jpg, then .png, then .webp, then the 736x copy every
+     * picture has. Only an original has a next address, so the walk always ends.
+     */
+    static String nextOriginal(String address) {
+        URI uri;
+        try {
+            uri = new URI(address);
+        } catch (URISyntaxException malformed) {
+            return null;
+        }
+        String path = uri.getRawPath();
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || !IMAGE_HOST.equalsIgnoreCase(uri.getHost())
+                || uri.getPort() != -1 || uri.getRawUserInfo() != null || path == null || !path.startsWith(ORIGINALS_PATH)) return null;
+        int dot = path.lastIndexOf('.');
+        if (dot <= path.lastIndexOf('/')) return null;
+        String stem = path.substring(0, dot), base = "https://" + IMAGE_HOST;
+        switch (path.substring(dot + 1).toLowerCase(Locale.ROOT)) {
+            case "jpg":
+            case "jpeg":
+                return base + stem + ".png";
+            case "png":
+                return base + stem + ".webp";
+            default:
+                return base + "/736x/" + stem.substring(ORIGINALS_PATH.length()) + ".jpg";
+        }
+    }
+
     /** Whether a size key such as 1200x names a width of at least [LARGE_PAGE_WIDTH]. */
     private static boolean largeSize(String size) {
         if (size == null || !size.endsWith("x")) return false;

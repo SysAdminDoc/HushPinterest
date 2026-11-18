@@ -267,6 +267,7 @@ public enum PatchFamily {
         IMAGE_CHOOSER(ORIGINAL_IMAGES, "imageChooser", "collage images"),
         CLOSEUP_IMAGE(ORIGINAL_IMAGES, "closeupImage", "pin closeups"),
         PAGE_IMAGE(ORIGINAL_IMAGES, "pageImage", "idea pin pages"),
+        ORIGINAL_RETRY(ORIGINAL_IMAGES, "originalRetry", "refused originals"),
         POSTED_DATE(SHOW_POSTED_DATE, "postedDate", "Show posted date"),
         SUGGESTED_BOARDS(HIDE_SUGGESTED_BOARDS, "suggestedBoards", "Hide suggested boards"),
         BOARD_LIST_HEIGHT(EXPAND_BOARD_LIST, "boardListHeight", "Expand board list"),

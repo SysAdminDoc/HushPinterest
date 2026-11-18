@@ -75,7 +75,7 @@ family|customSaveSound|Custom save sound|saveSound
 family|customSplashLogo|Custom splash logo|
 family|boardTabs|Customize board tabs|boardTabHeader,boardTabCovers
 family|hideSaveToasts|Hide save toasts|saveToasts,downloadToasts
-family|originalImages|Original-quality images|imageChooser,closeupImage,pageImage
+family|originalImages|Original-quality images|imageChooser,closeupImage,pageImage,originalRetry
 family|showPostedDate|Show posted date|postedDate
 family|hideSuggestedBoards|Hide suggested boards|suggestedBoards
 family|expandBoardList|Expand board list|boardListHeight
@@ -147,6 +147,7 @@ mutation|saveToasts|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hi
 mutation|imageChooser|imageOrder|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->originalImages()Z
 mutation|closeupImage|closeupImage|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->imageSizes(Ljava/util/Set;)V|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->closeupImage(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 mutation|pageImage|pageImage|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->pageImage(Ljava/util/Map;Ljava/lang/String;)Ljava/lang/String;
+mutation|originalRetry|originalRetry|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->originalRetry(ILjava/lang/Object;)Ljava/lang/String;
 mutation|updateNag|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->disableUpdateNag()Z|update
 mutation|signInFailure|signInFailure|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->requestFailed(Ljava/lang/Exception;)V|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->signsInThroughMicroG()Z|Lapp/hushpinterest/extension/pinterest/settings/GoogleSignInReadiness;->isGoogleIdOption(Ljava/lang/String;)Z
 mutation|saveAndDownload|saveAndDownload|Lapp/hushpinterest/extension/pinterest/actions/SaveAndDownload;->saving(Ljava/lang/Object;)V|Lapp/hushpinterest/extension/pinterest/actions/SaveAndDownload;->saver(Ljava/lang/Object;)V|Lcom/pinterest/feature/pin/closeup/presenter/OrganicPinCloseupPresenter;

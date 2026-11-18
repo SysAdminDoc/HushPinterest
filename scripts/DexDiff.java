@@ -276,7 +276,7 @@ public class DexDiff {
     private static final Map<String, Integer> MUTATION_COLUMNS = Map.ofEntries(
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7), Map.entry("closeupModule", 4),
-            Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("pageImage", 1), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
+            Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("pageImage", 1), Map.entry("originalRetry", 1), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("saveSound", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
@@ -5115,6 +5115,90 @@ public class DexDiff {
             capability(c.callee, found);
         }
 
+        /** The instruction a branch at [at] lands on, or -1 when it lands between instructions. */
+        private static int branchTarget(Layout code, int at) {
+            return code.addresses.indexOf(code.addresses.get(at) + ((OffsetInstruction) code.instructions.get(at)).getCodeOffset());
+        }
+
+        private static final List<Opcode> ORIGINAL_RETRY = List.of(Opcode.IGET, Opcode.IGET_OBJECT, Opcode.IGET_OBJECT, Opcode.INVOKE_STATIC,
+                Opcode.MOVE_RESULT_OBJECT, Opcode.IF_EQZ, Opcode.INVOKE_VIRTUAL, Opcode.MOVE_RESULT_OBJECT, Opcode.IF_EQZ, Opcode.INVOKE_VIRTUAL,
+                Opcode.MOVE_RESULT_OBJECT, Opcode.IPUT_OBJECT, Opcode.NEW_INSTANCE, Opcode.INVOKE_DIRECT);
+
+        /** True when the retry block starts at [at], asks about [response], and gives up at [at] + 15. */
+        private boolean retryBlock(Method m, int at, int response) {
+            List<Instruction> body = instructions(m);
+            if (at < 0 || at + 15 >= body.size()) return false;
+            for (int k = 0; k < ORIGINAL_RETRY.size(); k++) if (body.get(at + k).getOpcode() != ORIGINAL_RETRY.get(k)) return false;
+            Layout code = new Layout(m.getImplementation());
+            return ((TwoRegisterInstruction) body.get(at)).getRegisterB() == response
+                    && ((TwoRegisterInstruction) body.get(at + 1)).getRegisterB() == response
+                    && arguments(body.get(at + 3)).equals(List.of(firstRegister(body.get(at)), firstRegister(body.get(at + 2))))
+                    && branchTarget(code, at + 5) == at + 15 && branchTarget(code, at + 8) == at + 15;
+        }
+
+        /**
+         * A refused original: the network library's follow-up method opens with the hook, and the loop
+         * Pinterest's Cronet client runs asks it on the path where it found no next request. Each makes
+         * a request for the address the hook names. Both are found in the clean target, by the error
+         * text each holds with the Location header, never from the hook.
+         */
+        void originalRetry(Contract c) {
+            String hook = c.strings.get(0);
+            List<Method> location = clean.holding("Location");
+            List<Method> stocks = new ArrayList<>(clean.holding("Received HTTP_PROXY_AUTH (407) code while not using proxy"));
+            stocks.retainAll(location);
+            Method stock = unique(stocks, "the follow-up method");
+            boolean found = stock != null && stock.getImplementation() != null && stock.getParameterTypes().size() == 2;
+            if (stock != null && !found) fail("the follow-up method no longer takes the response and one other object");
+            Method loop = null;
+            int exit = -1, next = -1, answer = -1;
+            if (found) {
+                String response = stock.getParameterTypes().get(0).toString(), request = stock.getReturnType();
+                List<Method> loops = new ArrayList<>();
+                for (Method m : clean.holding("Too many follow-up requests: ")) if (location.contains(m) && m.getReturnType().equals(response)) loops.add(m);
+                loop = unique(loops, "the follow-up loop");
+                found = loop != null;
+                if (found) {
+                    Layout code = new Layout(loop.getImplementation());
+                    List<Instruction> was = code.instructions;
+                    int exits = 0;
+                    for (int at = 0; at + 2 < was.size(); at++) {
+                        Instruction test = was.get(at), jump = was.get(at + 1), read = was.get(at + 2);
+                        if (test.getOpcode() != Opcode.IF_NEZ || !jump.getOpcode().name.startsWith("goto") || read.getOpcode() != Opcode.IGET_OBJECT
+                                || branchTarget(code, at) != at + 2 || ((TwoRegisterInstruction) read).getRegisterB() != firstRegister(test)
+                                || !(reference(read) instanceof FieldReference field) || !field.getDefiningClass().equals(request)) continue;
+                        int end = branchTarget(code, at + 1);
+                        if (end < 0 || was.get(end).getOpcode() != Opcode.RETURN_OBJECT) continue;
+                        exits++;
+                        exit = at + 1;
+                        next = firstRegister(test);
+                        answer = firstRegister(was.get(end));
+                    }
+                    found = exits == 1;
+                    if (!found) fail("the follow-up loop has " + exits + " exits with no next request, expected 1");
+                }
+            }
+            if (found) {
+                Method m = actual(stock);
+                List<Integer> sites = calls(m, hook, 1);
+                List<Instruction> body = m == null ? List.of() : instructions(m);
+                boolean shaped = sites.size() == 1 && sites.get(0) == 3 && retryBlock(m, 0, parameter(stock, 0))
+                        && firstRegister(body.get(12)) == firstRegister(body.get(14)) && body.get(14).getOpcode() == Opcode.RETURN_OBJECT;
+                if (!shaped) { fail(hook + " does not open the follow-up method " + stock); found = false; }
+                else remove(m, 0, 15);
+                m = actual(loop);
+                sites = calls(m, hook, 1);
+                body = m == null ? List.of() : instructions(m);
+                int first = exit;
+                shaped = sites.size() == 1 && sites.get(0) == first + 3 && retryBlock(m, first, answer) && firstRegister(body.get(first + 12)) == next
+                        && body.get(first + 14).getOpcode().name.startsWith("goto") && onlyFrom(m, first, first - 1)
+                        && branchTarget(new Layout(m.getImplementation()), first + 14) == first + 16;
+                if (!shaped) { fail(hook + " does not sit on the follow-up loop's exit in " + loop); found = false; }
+                else remove(m, first, first + 15);
+            }
+            capability(c.callee, found);
+        }
+
         /**
          * The pin closeup's original image: the size set Pinterest requests with pins goes through the
          * sizes hook just before it's returned, and the closeup builder's large image goes through the
@@ -8697,6 +8781,7 @@ public class DexDiff {
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;
                     case "pageImage": pageImage(c); break;
+                    case "originalRetry": originalRetry(c); break;
                     case "topicSuggestions": topicSuggestions(c); break;
                     case "inboxUpdates": inboxUpdates(c); break;
                     case "feedbackFlyout": feedbackFlyout(c); break;
