@@ -42,6 +42,8 @@ A patched Pinterest can't install over the stock app, because Android only accep
 
 In Brazil, Indonesia, Singapore and Thailand, Android has been checking who made the apps people install from the big app stores since September 30, 2026, and [Google plans](https://developer.android.com/developer-verification/guides) to check every install on certified phones in 2027. A patched Pinterest is signed with your own key, which no registered developer owns, so once those checks reach Manager's installs you'll need Android's advanced flow first (turn on developer mode, wait a day, then allow apps from unverified developers).
 
+There are Hush patch sources for other apps too: [Hushfacebook](https://github.com/SysAdminDoc/HushFacebook) for Facebook, [HushGram](https://github.com/SysAdminDoc/HushGram) for Instagram, [HushMessenger](https://github.com/SysAdminDoc/HushMessenger) for Messenger, [HushPine](https://github.com/SysAdminDoc/HushPine) for PineDrama, [HushTelegram](https://github.com/SysAdminDoc/HushTelegram) for Telegram, [HushThreads](https://github.com/SysAdminDoc/HushThreads) for Threads, [Hushfeed](https://github.com/SysAdminDoc/HushFeed) for TikTok and [HushTumblr](https://github.com/SysAdminDoc/HushTumblr) for Tumblr. Each one is a separate source in Manager, so add only the ones for apps you patch.
+
 ### Signing in
 
 Sign in with your email and a Pinterest password. Google's sign-in button checks the [app's signing certificate](https://developers.google.com/android/guides/client-auth), and a patched Pinterest carries your key instead of Pinterest's, so it won't work.
