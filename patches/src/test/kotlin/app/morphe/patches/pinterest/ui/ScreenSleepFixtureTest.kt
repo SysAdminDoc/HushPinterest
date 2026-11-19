@@ -16,7 +16,9 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.immutable.ImmutableClassDef
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -28,14 +30,18 @@ import org.junit.experimental.categories.Category
 @Category(FixtureTests::class)
 class ScreenSleepFixtureTest {
     @Test
-    fun `each declared APK hands the video view's screen hold to the extension on the same registers`() {
+    fun `each declared APK hands every screen hold to the extension on the same registers`() {
         for (build in Fixtures.declaredBuilds()) {
             val classes = read(build)
             val holds = holdsIn(classes)
-            // The 14.45.0 dex holds the screen in one place: the builder that makes the video view.
-            assertEquals("${build.name}: screen holds", 1, holds.values.sumOf { it.size })
-            assertTrue("${build.name}: the hold is in the video view's builder",
-                holds.keys.all { it.returnType == VIDEO_VIEW })
+            fun callsIn(method: Method) = holds.getValue(method).map { method.implementation!!.instructions.toList()[it].screenHoldCall() }
+            // The video view's builder holds the screen through the view, and a pin page with a video
+            // holds its whole window on through addFlags (#47), which is what kept the screen on.
+            val viewHolds = holds.keys.filter { KEEP_SCREEN_ON in callsIn(it) }
+            assertTrue("${build.name}: the video view's hold", viewHolds.isNotEmpty())
+            assertTrue("${build.name}: only the video view's builder holds a view on", viewHolds.all { it.returnType == VIDEO_VIEW })
+            for (page in PIN_PAGES) assertTrue("${build.name}: $page holds its window on",
+                holds.keys.any { it.definingClass == page && ADD_WINDOW_FLAGS in callsIn(it) })
             val context = PatchContexts.of(ExtensionDex.classes() + classes)
             letScreenSleepPatch.execute(context)
             for (flag in listOf("letScreenSleep", "screenSleep")) assertEquals("${build.name}: $flag", 1, PinPageKit.flag(context, flag))
@@ -45,17 +51,17 @@ class ScreenSleepFixtureTest {
                 val after = PinPageKit.patched(context, method)
                 assertEquals("${build.name}: ${method.name} keeps its length", before.size, after.size)
                 for (index in indexes) {
-                    val was = before[index] as FiveRegisterInstruction
-                    val call = after[index] as FiveRegisterInstruction
-                    assertEquals(build.name, Opcode.INVOKE_STATIC, after[index].opcode)
-                    assertEquals(build.name, SCREEN_SLEEP_HOOK, (call as ReferenceInstruction).reference.toString())
-                    assertEquals("${build.name}: the view register", was.registerC, call.registerC)
-                    assertEquals("${build.name}: the value register", was.registerD, call.registerD)
+                    val hook = SCREEN_HOLD_HOOKS.getValue(before[index].screenHoldCall()!!)
+                    val call = after[index]
+                    assertTrue("${build.name}: ${call.opcode} in ${method.name}",
+                        call.opcode == Opcode.INVOKE_STATIC || call.opcode == Opcode.INVOKE_STATIC_RANGE)
+                    assertEquals(build.name, hook, (call as ReferenceInstruction).reference.toString())
+                    assertEquals("${build.name}: the registers in ${method.name}", registers(before[index]), registers(call))
                 }
                 val rest = before.indices.filter { it !in indexes }
                 assertEquals("${build.name}: the rest of ${method.name} is unchanged",
                     rest.map { before[it].opcode }, rest.map { after[it].opcode })
-                assertTrue("${build.name}: no screen hold is left in ${method.name}", after.none { it.isKeepScreenOnCall() })
+                assertTrue("${build.name}: no screen hold is left in ${method.name}", after.none { it.screenHoldCall() != null })
             }
         }
     }
@@ -71,6 +77,8 @@ class ScreenSleepFixtureTest {
             "no letScreenSleep stub" to (PinPageKit.extensionWithout("letScreenSleep") + classes to "letScreenSleep"),
             "no screenSleep stub" to (PinPageKit.extensionWithout("screenSleep") + classes to "screenSleep"),
             "no keepScreenOn hook" to (without("keepScreenOn") + classes to "no keepScreenOn"),
+            "no addWindowFlags hook" to (without("addWindowFlags") + classes to "no addWindowFlags"),
+            "no setWindowFlags hook" to (without("setWindowFlags") + classes to "no setWindowFlags"),
             "no screen hold" to (extension to "never asks to hold the screen on"),
         )
         for ((reason, case) in cases) {
@@ -88,11 +96,19 @@ class ScreenSleepFixtureTest {
         }
     }
 
-    /** Each method that calls View.setKeepScreenOn, with where, read off the clean dex. */
+    /** Each method that can hold the screen on, with where, read off the clean dex. */
     private fun holdsIn(classes: List<ClassDef>): Map<Method, List<Int>> =
         classes.flatMap { it.methods }.associateWith { screenHoldIndexes(it) }.filterValues { it.isNotEmpty() }
 
-    /** Every class in the APK that calls View.setKeepScreenOn. */
+    /** The registers a call passes, in order. */
+    private fun registers(call: Instruction): List<Int> = when (call) {
+        is RegisterRangeInstruction -> (call.startRegister until call.startRegister + call.registerCount).toList()
+        is FiveRegisterInstruction -> listOf(call.registerC, call.registerD, call.registerE, call.registerF, call.registerG)
+            .take(call.registerCount)
+        else -> error("not a call: ${call.opcode}")
+    }
+
+    /** Every class in the APK that can hold the screen on. */
     private fun read(build: java.io.File): List<ClassDef> {
         val found = FixtureDex.classesWhere(build, { true }) { method -> screenHoldIndexes(method).isNotEmpty() }
         check(found.isNotEmpty()) { "${build.name}: nothing holds the screen on" }
@@ -101,3 +117,9 @@ class ScreenSleepFixtureTest {
 }
 
 private const val VIDEO_VIEW = "Lcom/pinterest/video/core/view/StyledPinterestVideoView;"
+
+/** The pin pages, which hold their window on while the pin has a video. */
+private val PIN_PAGES = listOf(
+    "Lcom/pinterest/feature/pin/closeup/view/OrganicPinCloseupFragment;",
+    "Lcom/pinterest/feature/pin/closeup/view/PromotedPinCloseupFragment;",
+)

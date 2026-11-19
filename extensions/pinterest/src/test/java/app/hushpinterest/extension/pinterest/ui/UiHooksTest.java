@@ -16,6 +16,8 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
@@ -269,6 +271,34 @@ public class UiHooksTest {
         UiHooks.keepScreenOn(video, false);
         assertFalse("Pinterest letting go always goes through", video.getKeepScreenOn());
         UiHooks.keepScreenOn(null, true);
+    }
+
+    @Test public void aPinPageHoldsItsWindowOnUnlessTheScreenMaySleep() {
+        ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup();
+        Window window = controller.get().getWindow();
+        int keep = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+        int dim = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        UiHooks.addWindowFlags(window, keep);
+        assertTrue("off by default, Pinterest's hold goes through", (window.getAttributes().flags & keep) != 0);
+        window.clearFlags(keep);
+        Settings.LET_SCREEN_SLEEP.save(true);
+        UiHooks.addWindowFlags(window, keep | dim);
+        assertEquals("the hold stays off and the other flag goes through", dim, window.getAttributes().flags & (keep | dim));
+        String report = String.join(" ", HookStatus.report());
+        assertTrue(report, report.contains("screen hold skipped"));
+        UiHooks.setWindowFlags(window, keep, keep | dim);
+        assertEquals("under a mask the hold stays off and the mask still clears", 0, window.getAttributes().flags & (keep | dim));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        UiHooks.addWindowFlags(window, keep);
+        assertTrue("paused, Pinterest's hold goes through", (window.getAttributes().flags & keep) != 0);
+        UiHooks.setWindowFlags(window, 0, keep);
+        assertEquals("Pinterest letting go always goes through", 0, window.getAttributes().flags & keep);
+        UiHooks.setWindowFlags(window, keep, keep);
+        assertTrue("paused, a masked hold goes through too", (window.getAttributes().flags & keep) != 0);
+        PauseForTests.resume();
+        UiHooks.addWindowFlags(null, keep);
+        UiHooks.setWindowFlags(null, keep, keep);
+        controller.pause().stop().destroy();
     }
 
     @Test public void visualSearchCropsAreWithheldOnlyWhileTheirSwitchIsOn() {

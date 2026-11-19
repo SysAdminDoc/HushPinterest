@@ -20,20 +20,32 @@ import app.morphe.patches.shared.compat.AppCompatibilities
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val PATCH = "Let the screen sleep"
 
-/** The one call that holds the screen on for as long as its view is on the screen. */
+/** The call that holds the screen on for as long as its view is on the screen. */
 internal const val KEEP_SCREEN_ON = "Landroid/view/View;->setKeepScreenOn(Z)V"
 
-internal const val SCREEN_SLEEP_HOOK = "$UI_HOOKS->keepScreenOn(Landroid/view/View;Z)V"
+/** The calls that can put a window's own screen hold on: its flags added, or set under a mask. */
+internal const val ADD_WINDOW_FLAGS = "Landroid/view/Window;->addFlags(I)V"
+internal const val SET_WINDOW_FLAGS = "Landroid/view/Window;->setFlags(II)V"
 
-/** One call in Pinterest that asks to hold the screen on: the [method] and where in it. */
-internal data class ScreenHold(val method: Method, val index: Int)
+internal const val SCREEN_SLEEP_HOOK = "$UI_HOOKS->keepScreenOn(Landroid/view/View;Z)V"
+internal const val ADD_WINDOW_FLAGS_HOOK = "$UI_HOOKS->addWindowFlags(Landroid/view/Window;I)V"
+internal const val SET_WINDOW_FLAGS_HOOK = "$UI_HOOKS->setWindowFlags(Landroid/view/Window;II)V"
+
+/** Each call that can hold the screen on, with the UiHooks stand-in that takes it over on the same registers. */
+internal val SCREEN_HOLD_HOOKS = linkedMapOf(
+    KEEP_SCREEN_ON to SCREEN_SLEEP_HOOK,
+    ADD_WINDOW_FLAGS to ADD_WINDOW_FLAGS_HOOK,
+    SET_WINDOW_FLAGS to SET_WINDOW_FLAGS_HOOK,
+)
+
+/** One call in Pinterest that can ask to hold the screen on: the [method], where in it, and which [call]. */
+internal data class ScreenHold(val method: Method, val index: Int, val call: String)
 
 @Suppress("unused")
 val letScreenSleepPatch = bytecodePatch(
@@ -49,18 +61,20 @@ val letScreenSleepPatch = bytecodePatch(
     execute {
         requireStatusMethod("letScreenSleep")
         requireStatusMethod("screenSleep")
-        requireScreenSleepHook()
+        requireScreenSleepHooks()
         val holds = screenHolds()
         if (holds.isEmpty()) throw PatchException("$PATCH: this Pinterest build never asks to hold the screen on")
-        // The hook takes the view and the value on the same registers and answers nothing, as the
-        // call it stands in for does. A method's later calls go first, so earlier indexes still hold.
+        // Each hook takes the call's own registers and answers nothing, as the call it stands in for
+        // does. A pin page with a video holds its whole window on through addFlags (#47), so every
+        // window flag call goes through, and the hook drops only the screen hold. A method's later
+        // calls go first, so earlier indexes still hold.
         holds.groupBy { it.method }.forEach { (method, sites) ->
             val target = mutable(method)
             sites.sortedByDescending { it.index }.forEach { site ->
-                target.instructions().getOrNull(site.index)?.takeIf { it.isKeepScreenOnCall() } ?: throw PatchException(
+                target.instructions().getOrNull(site.index)?.takeIf { it.screenHoldCall() == site.call } ?: throw PatchException(
                     "$PATCH: ${method.definingClass}->${method.name} doesn't hold the screen where it was found",
                 )
-                target.sendToStandIn(site.index, SCREEN_SLEEP_HOOK)
+                target.sendToStandIn(site.index, SCREEN_HOLD_HOOKS.getValue(site.call))
             }
         }
         enableCapability("screenSleep")
@@ -68,34 +82,42 @@ val letScreenSleepPatch = bytecodePatch(
     }
 }
 
-/** Throws unless UiHooks has a public static keepScreenOn that takes a view and a boolean. */
-private fun BytecodePatchContext.requireScreenSleepHook() {
-    mutableClassDefBy(UI_HOOKS).methods.singleOrNull { method ->
-        method.name == "keepScreenOn" &&
-            method.parameterTypes.map(CharSequence::toString) == listOf("Landroid/view/View;", "Z") &&
-            method.returnType == "V" &&
-            AccessFlags.PUBLIC.isSet(method.accessFlags) && AccessFlags.STATIC.isSet(method.accessFlags)
-    } ?: throw PatchException("$UI_HOOKS has no keepScreenOn(Landroid/view/View;Z)V")
+/** Throws unless UiHooks has each of [SCREEN_HOLD_HOOKS] as a public static method answering nothing. */
+private fun BytecodePatchContext.requireScreenSleepHooks() {
+    val methods = mutableClassDefBy(UI_HOOKS).methods
+    for (hook in SCREEN_HOLD_HOOKS.values) {
+        val signature = hook.substringAfter("->")
+        methods.singleOrNull { method ->
+            method.name == signature.substringBefore('(') &&
+                method.parameterTypes.joinToString("") { it.toString() } == signature.substringAfter('(').substringBefore(')') &&
+                method.returnType == "V" &&
+                AccessFlags.PUBLIC.isSet(method.accessFlags) && AccessFlags.STATIC.isSet(method.accessFlags)
+        } ?: throw PatchException("$UI_HOOKS has no $signature")
+    }
 }
 
-/** Every View.setKeepScreenOn call in Pinterest's own code, the extension's left out. */
+/** Every call in Pinterest's own code that can hold the screen on, the extension's left out. */
 internal fun BytecodePatchContext.screenHolds(): List<ScreenHold> {
     val found = mutableListOf<ScreenHold>()
     classDefForEach { classDef ->
         if (classDef.type.startsWith(EXTENSION_ROOT)) return@classDefForEach
-        classDef.methods.forEach { method -> screenHoldIndexes(method).forEach { found += ScreenHold(method, it) } }
+        classDef.methods.forEach { method ->
+            val body = method.implementation?.instructions?.toList() ?: return@forEach
+            screenHoldIndexes(method).forEach { found += ScreenHold(method, it, body[it].screenHoldCall()!!) }
+        }
     }
     return found
 }
 
-/** Where [method] calls View.setKeepScreenOn. */
+/** Where [method] makes one of the calls in [SCREEN_HOLD_HOOKS]. */
 internal fun screenHoldIndexes(method: Method): List<Int> {
     val body = method.implementation?.instructions?.toList() ?: return emptyList()
-    return body.indices.filter { body[it].isKeepScreenOnCall() }
+    return body.indices.filter { body[it].screenHoldCall() != null }
 }
 
-/** True for an invoke-virtual of View.setKeepScreenOn(boolean) on two plain registers. */
-internal fun Instruction.isKeepScreenOnCall(): Boolean {
-    if (opcode != Opcode.INVOKE_VIRTUAL || this !is FiveRegisterInstruction || registerCount != 2) return false
-    return ((this as ReferenceInstruction).reference as? MethodReference)?.toString() == KEEP_SCREEN_ON
+/** The [SCREEN_HOLD_HOOKS] call an invoke-virtual makes, or null when it makes none of them. */
+internal fun Instruction.screenHoldCall(): String? {
+    if (opcode != Opcode.INVOKE_VIRTUAL && opcode != Opcode.INVOKE_VIRTUAL_RANGE) return null
+    val call = ((this as? ReferenceInstruction)?.reference as? MethodReference)?.toString() ?: return null
+    return call.takeIf { it in SCREEN_HOLD_HOOKS }
 }

@@ -11,6 +11,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -175,6 +177,31 @@ public final class UiHooks {
             on = false;
         }
         view.setKeepScreenOn(on);
+    }
+
+    /**
+     * A pin page with a video asks its whole window to hold the screen on, when it opens and again a
+     * few seconds later. With Let the screen sleep on that one flag stays off and the rest go through.
+     */
+    public static void addWindowFlags(Window window, int flags) {
+        if (window == null) return;
+        if ((flags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0
+                && enabled(FamilyNames.LET_SCREEN_SLEEP, Settings.LET_SCREEN_SLEEP)) {
+            HookStatus.counted(FamilyNames.LET_SCREEN_SLEEP, "screen hold skipped");
+            flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+        }
+        window.addFlags(flags);
+    }
+
+    /** The same for a window's flags set under a mask: the hold comes off, the mask still clears it. */
+    public static void setWindowFlags(Window window, int flags, int mask) {
+        if (window == null) return;
+        if ((flags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0
+                && enabled(FamilyNames.LET_SCREEN_SLEEP, Settings.LET_SCREEN_SLEEP)) {
+            HookStatus.counted(FamilyNames.LET_SCREEN_SLEEP, "screen hold skipped");
+            flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+        }
+        window.setFlags(flags, mask);
     }
 
     /**
