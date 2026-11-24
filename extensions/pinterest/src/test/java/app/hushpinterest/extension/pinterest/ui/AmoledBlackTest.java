@@ -41,10 +41,12 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.GraphicsMode;
+import org.robolectric.shadows.ShadowSystemClock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import app.hushpinterest.extension.pinterest.settings.Settings;
 import app.hushpinterest.extension.shared.SettingsContextRule;
@@ -1001,6 +1003,112 @@ public class AmoledBlackTest {
         assertEquals(PAGE, color(band));
         band.getViewTreeObserver().dispatchOnPreDraw();
         assertEquals("the switch is off and the band turned black anyway", PAGE, color(band));
+    }
+
+    /** Pinterest's main screen, which the extension tells apart by its simple name. */
+    public static final class MainActivity extends Activity {}
+
+    /** The gray the window gives its own navigation bar band as Pinterest starts. */
+    private static final int STARTING_BAND = 0xFF222226;
+
+    /** A screen just started, its window holding the strip behind the gesture handle and its own band, both gray, and no bar yet. */
+    private static <T extends Activity> T starting(Class<T> screen) {
+        T activity = Robolectric.buildActivity(screen).setup().get();
+        FrameLayout content = new FrameLayout(activity);
+        View strip = new View(activity);
+        strip.setId(STRIP);
+        strip.setBackgroundColor(PAGE);
+        content.addView(strip);
+        View band = new View(activity);
+        band.setId(android.R.id.navigationBarBackground);
+        band.setBackgroundColor(STARTING_BAND);
+        content.addView(band);
+        activity.setContentView(content);
+        return activity;
+    }
+
+    private static View root(Activity activity) {
+        return activity.getWindow().getDecorView();
+    }
+
+    private static void nextFrame(Activity activity) {
+        root(activity).getViewTreeObserver().dispatchOnPreDraw();
+    }
+
+    @Test @Config(qualifiers = "night")
+    public void theMainScreensBandsAreBlackFromItsFirstFrameUntilTheBarTakesThemOver() {
+        Settings.BLACK_BOTTOM_BAR.save(true);
+        AmoledBlack.gestureStrip = STRIP;
+        MainActivity main = starting(MainActivity.class);
+        View strip = root(main).findViewById(STRIP), band = root(main).findViewById(android.R.id.navigationBarBackground);
+        AmoledBlack.mainScreenStarting(main);
+        nextFrame(main);
+        assertEquals(Color.BLACK, color(band));
+        assertEquals(Color.BLACK, color(strip));
+        // Pinterest colors the window again before its bar draws.
+        band.setBackgroundColor(STARTING_BAND);
+        nextFrame(main);
+        assertEquals("gray again before the bar drew", Color.BLACK, color(band));
+
+        // The bar's first frame takes both bands over, and the bar's switch decides from then on.
+        LinearLayout bar = bar(true);
+        ((FrameLayout) strip.getParent()).addView(bar);
+        AmoledBlack.bottomBar(bar);
+        nextFrame(main);
+        assertEquals(Color.BLACK, color(band));
+        Settings.BLACK_BOTTOM_BAR.save(false);
+        AmoledBlack.bottomBar(bar);
+        nextFrame(main);
+        assertEquals(PAGE, color(strip));
+        assertEquals("the start's hold let go once the bar drew", STARTING_BAND, color(band));
+    }
+
+    @Test @Config(qualifiers = "night")
+    public void aMainScreenWhoseBarNeverDrawsGetsItsGrayBackOnceTheHoldRunsOut() {
+        Settings.BLACK_BOTTOM_BAR.save(true);
+        AmoledBlack.gestureStrip = STRIP;
+        MainActivity main = starting(MainActivity.class);
+        View strip = root(main).findViewById(STRIP), band = root(main).findViewById(android.R.id.navigationBarBackground);
+        AmoledBlack.mainScreenStarting(main);
+        nextFrame(main);
+        assertEquals(Color.BLACK, color(band));
+        ShadowSystemClock.advanceBy(AmoledBlack.START_HOLD_MS + 1, TimeUnit.MILLISECONDS);
+        nextFrame(main);
+        assertEquals(STARTING_BAND, color(band));
+        assertEquals(PAGE, color(strip));
+        band.setBackgroundColor(ELEVATION);
+        nextFrame(main);
+        assertEquals("let go for good", ELEVATION, color(band));
+    }
+
+    @Test @Config(qualifiers = "night")
+    public void anotherScreenOrTheSwitchOffKeepsTheStartingGray() {
+        AmoledBlack.gestureStrip = STRIP;
+        MainActivity off = starting(MainActivity.class);
+        AmoledBlack.mainScreenStarting(off);
+        nextFrame(off);
+        assertEquals(STARTING_BAND, color(root(off).findViewById(android.R.id.navigationBarBackground)));
+        assertEquals(PAGE, color(root(off).findViewById(STRIP)));
+
+        Settings.BLACK_BOTTOM_BAR.save(true);
+        Activity other = starting(Activity.class);
+        AmoledBlack.mainScreenStarting(other);
+        nextFrame(other);
+        assertEquals(STARTING_BAND, color(root(other).findViewById(android.R.id.navigationBarBackground)));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        MainActivity paused = starting(MainActivity.class);
+        AmoledBlack.mainScreenStarting(paused);
+        nextFrame(paused);
+        assertEquals("paused", STARTING_BAND, color(root(paused).findViewById(android.R.id.navigationBarBackground)));
+    }
+
+    @Test public void aMainScreenInLightModeKeepsItsBands() {
+        Settings.BLACK_BOTTOM_BAR.save(true);
+        AmoledBlack.gestureStrip = STRIP;
+        MainActivity light = starting(MainActivity.class);
+        AmoledBlack.mainScreenStarting(light);
+        nextFrame(light);
+        assertEquals(STARTING_BAND, color(root(light).findViewById(android.R.id.navigationBarBackground)));
     }
 
     /** A window on show holding the bar and the strip behind the gesture handle, in a pin page's gray. */

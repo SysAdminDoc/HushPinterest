@@ -6,6 +6,9 @@
  */
 package app.hushpinterest.extension.pinterest.ui;
 
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -13,6 +16,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -31,6 +36,7 @@ import java.util.WeakHashMap;
 
 import app.hushpinterest.extension.pinterest.settings.FamilyNames;
 import app.hushpinterest.extension.pinterest.settings.Settings;
+import app.hushpinterest.extension.pinterest.settings.SettingsStatus;
 import app.hushpinterest.extension.shared.Logger;
 import app.hushpinterest.extension.shared.Utils;
 import app.hushpinterest.extension.shared.diagnostics.HookStatus;
@@ -137,6 +143,113 @@ public final class AmoledBlack {
         } catch (Throwable failure) {
             HookStatus.threw(FamilyNames.AMOLED_BLACK, "bottom bar", failure);
         }
+    }
+
+    /**
+     * How long after Pinterest's main screen starts its window bands are held black while no bottom
+     * bar has drawn. The bar's first frame takes about a second on a Galaxy S25 (#48); a screen
+     * that never shows one, like signing in, gets its gray back after this.
+     */
+    static final long START_HOLD_MS = 5000;
+    private static boolean startWatched;
+    /** Main screens whose bands are held black until their bar draws, so each gets one listener. */
+    private static final Map<View, Boolean> starting = new WeakHashMap<>();
+
+    /**
+     * Called as Pinterest starts. On a cold start the window's navigation bar band and the strip
+     * behind the gesture handle show Pinterest's gray until the bottom bar's first frame paints
+     * them, so the main screen is watched from its start with the bar's switch on.
+     */
+    public static void install(Context context) {
+        try {
+            if (startWatched || !(context instanceof Application) || !SettingsStatus.amoledBlack()) return;
+            ((Application) context).registerActivityLifecycleCallbacks(new StartWatcher());
+            startWatched = true;
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, "main screen start", failure);
+        }
+    }
+
+    /**
+     * Pinterest's main screen is starting. In dark mode with the bar's switch on and no bar in its
+     * window yet, its bands turn black before each frame until the bar draws or the hold runs out.
+     */
+    static void mainScreenStarting(Activity activity) {
+        try {
+            if (activity == null || !"MainActivity".equals(activity.getClass().getSimpleName())) return;
+            View root = activity.getWindow() == null ? null : activity.getWindow().peekDecorView();
+            if (root == null || starting.containsKey(root) || barIn(root)) return;
+            if (!UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BOTTOM_BAR) || !night(root)) return;
+            starting.put(root, Boolean.TRUE);
+            root.getViewTreeObserver().addOnPreDrawListener(new StartBand(root));
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, "main screen start", failure);
+        }
+    }
+
+    /** Whether a bottom bar has drawn in this window. */
+    private static boolean barIn(View root) {
+        for (View bar : bars.keySet()) if (bar != null && bar.getRootView() == root) return true;
+        return false;
+    }
+
+    /** Before each frame of a starting main screen: its bands black until the bar takes them over. */
+    private static final class StartBand implements ViewTreeObserver.OnPreDrawListener {
+        private final WeakReference<View> root;
+        private final long until = SystemClock.uptimeMillis() + START_HOLD_MS;
+        private boolean noted;
+
+        StartBand(View root) {
+            this.root = new WeakReference<>(root);
+        }
+
+        @Override public boolean onPreDraw() {
+            View window = root.get();
+            try {
+                if (window == null) return true;
+                if (barIn(window)) {
+                    done(window);
+                    return true;
+                }
+                View band = window.findViewById(android.R.id.navigationBarBackground), strip = stripIn(window);
+                if (SystemClock.uptimeMillis() > until || !UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BOTTOM_BAR)) {
+                    paint(band, false);
+                    paint(strip, false);
+                    done(window);
+                    return true;
+                }
+                if (!noted && (band != null || strip != null)) {
+                    noted = true;
+                    String was = band == null ? colorOf(strip) : colorOf(band);
+                    Logger.printDebug(() -> "Main screen starting: navigation band " + was + " painted black until the bar draws");
+                }
+                if (band != null && !showsBlack(band)) paint(band, true);
+                if (strip != null && !showsBlack(strip)) paint(strip, true);
+            } catch (Throwable failure) {
+                HookStatus.threw(FamilyNames.AMOLED_BLACK, "main screen start", failure);
+                if (window != null) done(window);
+            }
+            return true;
+        }
+
+        private void done(View window) {
+            window.getViewTreeObserver().removeOnPreDrawListener(this);
+            starting.remove(window);
+        }
+    }
+
+    /** Hands Pinterest's main screen to [mainScreenStarting] as it starts. */
+    private static final class StartWatcher implements Application.ActivityLifecycleCallbacks {
+        @Override public void onActivityStarted(Activity activity) {
+            mainScreenStarting(activity);
+        }
+
+        @Override public void onActivityCreated(Activity activity, Bundle saved) {}
+        @Override public void onActivityResumed(Activity activity) {}
+        @Override public void onActivityPaused(Activity activity) {}
+        @Override public void onActivityStopped(Activity activity) {}
+        @Override public void onActivitySaveInstanceState(Activity activity, Bundle state) {}
+        @Override public void onActivityDestroyed(Activity activity) {}
     }
 
     /**

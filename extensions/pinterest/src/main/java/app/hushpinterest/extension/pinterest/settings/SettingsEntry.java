@@ -46,6 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import app.hushpinterest.extension.pinterest.actions.DownloadLedger;
 import app.hushpinterest.extension.pinterest.ui.PinterestToasts;
+import app.hushpinterest.extension.pinterest.ui.AmoledBlack;
 import app.hushpinterest.extension.pinterest.ui.SplashLogo;
 import app.hushpinterest.extension.shared.L10n;
 import app.hushpinterest.extension.shared.Logger;
@@ -130,6 +131,7 @@ public final class SettingsEntry {
             }
             ReopenSettingsAfterRestart.reopenIfPending(SettingsEntry::reopenOn);
             SplashLogo.install(context);
+            AmoledBlack.install(context);
         } catch (Exception ex) {
             Logger.printException(() -> "Settings entry: could not watch activities", ex);
         }
