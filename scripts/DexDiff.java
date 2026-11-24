@@ -277,7 +277,7 @@ public class DexDiff {
             Map.entry("feed", 4), Map.entry("views", 3), Map.entry("guard", 2), Map.entry("refresh", 2), Map.entry("draw", 2), Map.entry("drawWash", 4), Map.entry("builtView", 3),
             Map.entry("navigation", 2), Map.entry("menu", 2), Map.entry("downloads", 2), Map.entry("comments", 7), Map.entry("closeupModule", 4),
             Map.entry("links", 6), Map.entry("analytics", 5), Map.entry("answers", 4), Map.entry("imageOrder", 1), Map.entry("closeupImage", 2), Map.entry("pageImage", 1), Map.entry("originalRetry", 1), Map.entry("topicSuggestions", 2), Map.entry("inboxUpdates", 3), Map.entry("feedbackFlyout", 2), Map.entry("recentSearchRows", 2), Map.entry("recentSearchHeading", 2), Map.entry("boardMenu", 1), Map.entry("settings", 4),
-            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("saveSound", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
+            Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("saveSound", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("likeHistory", 2), Map.entry("commentHistory", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1), Map.entry("boardOrder", 2),
@@ -7929,6 +7929,220 @@ public class DexDiff {
             capability(c.callee, placed);
         }
 
+        /** The API paths Like and comment history follows, as the patch names them. */
+        static final String HISTORY_REACT_PATH = "pins/{pinUid}/react/",
+                HISTORY_PIN_COMMENT_PATH = "aggregated_pin_data/{aggregatedPinDataId}/comment/",
+                HISTORY_REPLY_PATH = "aggregated_comments/{aggregatedCommentId}/reply/",
+                HISTORY_STRING = "Ljava/lang/String;";
+        static final Set<String> HISTORY_COMMENT_PATHS =
+                Set.of(HISTORY_PIN_COMMENT_PATH, "did_it/{didItId}/comments/", HISTORY_REPLY_PATH);
+
+        /** The clean APK's reaction and comment API methods by signature, and the calls to each, once [indexHistory] ran. */
+        Map<String, Method> historyEndpoints;
+        Map<String, List<FeatureSite>> historyCalls;
+
+        void indexHistory() {
+            if (historyEndpoints != null) return;
+            historyEndpoints = new LinkedHashMap<>();
+            historyCalls = new LinkedHashMap<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN) || !AccessFlags.INTERFACE.isSet(cd.getAccessFlags())) continue;
+                for (Method m : cd.getMethods()) if (historyPath(m) != null) historyEndpoints.put(m.toString(), m);
+            }
+            if (historyEndpoints.isEmpty()) return;
+            for (Method m : clean.methods.values()) {
+                if (m.getDefiningClass().startsWith(OWN) || m.getImplementation() == null) continue;
+                int at = 0;
+                for (Instruction i : m.getImplementation().getInstructions()) {
+                    if ((i.getOpcode() == Opcode.INVOKE_INTERFACE || i.getOpcode() == Opcode.INVOKE_INTERFACE_RANGE)
+                            && reference(i) instanceof MethodReference called && historyEndpoints.containsKey(called.toString()))
+                        historyCalls.computeIfAbsent(called.toString(), k -> new ArrayList<>()).add(new FeatureSite(m, at));
+                    at++;
+                }
+            }
+        }
+
+        /** The reaction or comment path on an API method, or null. */
+        static String historyPath(Method m) {
+            for (var annotation : m.getAnnotations()) for (var element : annotation.getElements())
+                if (element.getName().equals("value") && element.getValue() instanceof StringEncodedValue s
+                        && (s.getValue().equals(HISTORY_REACT_PATH) || HISTORY_COMMENT_PATHS.contains(s.getValue()))) return s.getValue();
+            return null;
+        }
+
+        /** The declared parameters of [m] whose request value is named [name], of [type] or any type when null. */
+        static List<Integer> historyParameters(Method m, String name, String type) {
+            List<Integer> found = new ArrayList<>();
+            for (int k = 0; k < m.getParameters().size(); k++) {
+                var p = m.getParameters().get(k);
+                if (type != null && !p.getType().equals(type)) continue;
+                boolean named = false;
+                for (var annotation : p.getAnnotations()) for (var element : annotation.getElements())
+                    if (element.getName().equals("value") && element.getValue() instanceof StringEncodedValue s && s.getValue().equals(name)) named = true;
+                if (named) found.add(k);
+            }
+            return found;
+        }
+
+        /** The register [call] passes declared parameter [parameter] of [endpoint] in, or -1. */
+        static int historyArgument(Method endpoint, Instruction call, int parameter) {
+            int slot = 1;
+            for (int k = 0; k < parameter; k++) slot += slots(endpoint.getParameterTypes().get(k));
+            List<Integer> passed = arguments(call);
+            return slot < passed.size() ? passed.get(slot) : -1;
+        }
+
+        /** The declared parameter [m] copies into a local and casts there among its first few instructions, or -1 unless exactly one. */
+        int historyCastParameter(Method m) {
+            List<Instruction> body = instructions(m);
+            int found = -1;
+            for (int k = 0; k < m.getParameterTypes().size(); k++) {
+                int register = parameter(m, k);
+                boolean cast = false;
+                for (int at = 0; at < Math.min(4, body.size() - 1) && !cast; at++) {
+                    Instruction copy = body.get(at), next = body.get(at + 1);
+                    cast = (copy.getOpcode() == Opcode.MOVE_OBJECT || copy.getOpcode() == Opcode.MOVE_OBJECT_FROM16
+                            || copy.getOpcode() == Opcode.MOVE_OBJECT_16) && ((TwoRegisterInstruction) copy).getRegisterB() == register
+                            && next.getOpcode() == Opcode.CHECK_CAST && firstRegister(next) == firstRegister(copy);
+                }
+                if (cast && found >= 0) return -1;
+                if (cast) found = k;
+            }
+            return found;
+        }
+
+        /**
+         * Like and comment history's likes (#48). In front of the one call that sends a reaction on
+         * a pin, the pin model parameter goes into a free local and on to the extension with the
+         * pin's id and the reaction type the call passes. In front of the one call that takes a
+         * reaction back goes the pin's id it passes. A build without exactly one of each, or with
+         * the pin or type out of a call's reach, gets neither.
+         */
+        void likeHistory(Contract c) {
+            String sentHook = c.strings.get(0), removedHook = c.strings.get(1);
+            indexHistory();
+            List<Method> reacts = new ArrayList<>(), unreacts = new ArrayList<>();
+            for (Method e : historyEndpoints.values()) {
+                if (!HISTORY_REACT_PATH.equals(historyPath(e)) || historyParameters(e, "pinUid", HISTORY_STRING).size() != 1) continue;
+                if (historyParameters(e, "reaction_type", "I").size() == 1) reacts.add(e);
+                else if (historyParameters(e, "reaction_type", null).isEmpty()) unreacts.add(e);
+            }
+            Method react = reacts.size() == 1 ? reacts.get(0) : null, unreact = unreacts.size() == 1 ? unreacts.get(0) : null;
+            List<FeatureSite> sent = react == null ? List.of() : historyCalls.getOrDefault(react.toString(), List.of());
+            List<FeatureSite> taken = unreact == null ? List.of() : historyCalls.getOrDefault(unreact.toString(), List.of());
+            if (sent.size() != 1 || taken.size() != 1) { capability(c.callee, false); return; }
+            FeatureSite send = sent.get(0), take = taken.get(0);
+            Instruction stock = instructions(send.method).get(send.at);
+            int model = historyCastParameter(send.method);
+            int pin = historyArgument(react, stock, historyParameters(react, "pinUid", HISTORY_STRING).get(0));
+            int type = historyArgument(react, stock, historyParameters(react, "reaction_type", "I").get(0));
+            if (model < 0 || pin < 0 || pin > 15 || type < 0 || type > 15) { capability(c.callee, false); return; }
+
+            Method m = actual(send.method);
+            List<Integer> hooks = calls(m, sentHook, 1);
+            boolean liked = false;
+            if (m != null && hooks.size() == 1) {
+                List<Instruction> body = instructions(m);
+                int at = hooks.get(0);
+                List<Integer> passed = arguments(body.get(at));
+                Instruction copy = at > 0 ? body.get(at - 1) : null;
+                Instruction call = at + 1 < body.size() ? body.get(at + 1) : null;
+                liked = passed.size() == 3 && copy != null && copy.getOpcode() == Opcode.MOVE_OBJECT_FROM16
+                        && firstRegister(copy) == passed.get(0) && ((TwoRegisterInstruction) copy).getRegisterB() == parameter(m, model)
+                        && passed.get(0) < parameter(m, -1) && !arguments(stock).contains(passed.get(0))
+                        && passed.subList(1, 3).equals(List.of(pin, type))
+                        && call != null && call.getOpcode() == stock.getOpcode()
+                        && String.valueOf(reference(call)).equals(String.valueOf(reference(stock))) && arguments(call).equals(arguments(stock))
+                        && onlyFrom(m, at, at - 1) && onlyFrom(m, at + 1, at);
+                if (liked) remove(m, at - 1, at + 1);
+                else fail(sentHook + " doesn't take the pin model, its id and the reaction type right in front of the reaction call in " + m);
+            }
+
+            Method u = actual(take.method);
+            List<Integer> drops = calls(u, removedHook, 1);
+            boolean unliked = false;
+            if (u != null && drops.size() == 1) {
+                List<Instruction> body = instructions(u);
+                Instruction was = instructions(take.method).get(take.at);
+                int at = drops.get(0);
+                int dropped = historyArgument(unreact, was, historyParameters(unreact, "pinUid", HISTORY_STRING).get(0));
+                Instruction call = at + 1 < body.size() ? body.get(at + 1) : null;
+                unliked = dropped >= 0 && arguments(body.get(at)).equals(List.of(dropped)) && call != null
+                        && call.getOpcode() == was.getOpcode() && String.valueOf(reference(call)).equals(String.valueOf(reference(was)))
+                        && arguments(call).equals(arguments(was)) && onlyFrom(u, at + 1, at);
+                if (unliked) remove(u, at, at + 1);
+                else fail(removedHook + " doesn't take the pin's id right in front of the call that takes a reaction back in " + u);
+            }
+            capability(c.callee, liked && unliked);
+        }
+
+        /**
+         * Like and comment history's comments (#48). In front of every call that posts a comment on
+         * a pin or a "did it" photo goes the comment hook, and in front of every reply the reply
+         * hook, each with the pin's id and the text the call passes. A build that posts no comment on
+         * a pin, or passes one out of a call's reach, gets none.
+         */
+        void commentHistory(Contract c) {
+            String commentHook = c.strings.get(0), replyHook = c.strings.get(1);
+            indexHistory();
+            Map<String, List<FeatureSite>> byMethod = new LinkedHashMap<>();
+            Map<FeatureSite, Method> endpointOf = new HashMap<>();
+            boolean onPin = false;
+            for (Method e : historyEndpoints.values()) {
+                String path = historyPath(e);
+                if (path == null || !HISTORY_COMMENT_PATHS.contains(path) || historyParameters(e, "pin", HISTORY_STRING).size() != 1
+                        || historyParameters(e, "text", HISTORY_STRING).size() != 1) continue;
+                for (FeatureSite site : historyCalls.getOrDefault(e.toString(), List.of())) {
+                    Instruction stock = instructions(site.method).get(site.at);
+                    int pin = historyArgument(e, stock, historyParameters(e, "pin", HISTORY_STRING).get(0));
+                    int text = historyArgument(e, stock, historyParameters(e, "text", HISTORY_STRING).get(0));
+                    if (pin < 0 || text < 0 || (pin > 15 || text > 15) && text != pin + 1) { capability(c.callee, false); return; }
+                    byMethod.computeIfAbsent(site.method.toString(), k -> new ArrayList<>()).add(site);
+                    endpointOf.put(site, e);
+                    onPin |= path.equals(HISTORY_PIN_COMMENT_PATH);
+                }
+            }
+            if (!onPin) { capability(c.callee, false); return; }
+            boolean posted = true;
+            for (List<FeatureSite> sites : byMethod.values()) {
+                sites.sort((a, b) -> Integer.compare(a.at, b.at));
+                Method was = sites.get(0).method;
+                Method m = actual(was);
+                int comments = 0, replies = 0;
+                for (FeatureSite site : sites) {
+                    if (HISTORY_REPLY_PATH.equals(historyPath(endpointOf.get(site)))) replies++;
+                    else comments++;
+                }
+                List<Integer> commentCalls = calls(m, commentHook, comments);
+                List<Integer> replyCalls = calls(m, replyHook, replies);
+                if (m == null || commentCalls.size() != comments || replyCalls.size() != replies) { posted = false; continue; }
+                List<Integer> hooks = new ArrayList<>(commentCalls);
+                hooks.addAll(replyCalls);
+                hooks.sort(null);
+                List<Instruction> before = instructions(was), body = instructions(m);
+                for (int k = 0; k < sites.size(); k++) {
+                    FeatureSite site = sites.get(k);
+                    Method e = endpointOf.get(site);
+                    Instruction stock = before.get(site.at);
+                    int at = hooks.get(k);
+                    String hook = HISTORY_REPLY_PATH.equals(historyPath(e)) ? replyHook : commentHook;
+                    List<Integer> want = List.of(historyArgument(e, stock, historyParameters(e, "pin", HISTORY_STRING).get(0)),
+                            historyArgument(e, stock, historyParameters(e, "text", HISTORY_STRING).get(0)));
+                    Instruction call = at + 1 < body.size() ? body.get(at + 1) : null;
+                    boolean placed = String.valueOf(reference(body.get(at))).equals(hook) && arguments(body.get(at)).equals(want)
+                            && call != null && call.getOpcode() == stock.getOpcode()
+                            && String.valueOf(reference(call)).equals(String.valueOf(reference(stock)))
+                            && arguments(call).equals(arguments(stock)) && onlyFrom(m, at + 1, at);
+                    if (placed) remove(m, at, at + 1);
+                    else {
+                        posted = false;
+                        fail(hook + " doesn't take the pin's id and the text right in front of the comment call at " + site.at + " in " + m);
+                    }
+                }
+            }
+            capability(c.callee, posted);
+        }
+
         void boardListHeight(Contract c) {
             String hook = c.strings.get(0);
             ClassDef picker = boardPicker();
@@ -9518,6 +9732,8 @@ public class DexDiff {
                     case "creatorName": creatorName(c); break;
                     case "saveSound": saveSound(c); break;
                     case "pinInvites": pinInvites(c); break;
+                    case "likeHistory": likeHistory(c); break;
+                    case "commentHistory": commentHistory(c); break;
                     case "downloadToasts": downloadToasts(c); break;
                     case "blackToasts": blackToasts(c); break;
                     case "homeTabs": homeTabs(c); break;

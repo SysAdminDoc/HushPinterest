@@ -848,3 +848,24 @@ Black buttons	Siyah düğmeler
 In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. Light mode stays as it is. The change shows the next time Pinterest draws a button.	Karanlık modda, Pinterest'in bir profildeki Mesaj ve Profili düzenle gibi gri düğmelerini tamamen siyaha boyar, yazıları yerinde kalır. Aydınlık mod olduğu gibi kalır. Değişiklik Pinterest bir sonraki düğmeyi çizdiğinde görünür.
 Save color on other red buttons	Diğer kırmızı düğmelerde Kaydet rengi
 Paints Pinterest's other red buttons, such as Follow and Done, the color you picked for the Save button. Pick that color first. The change shows the next time Pinterest draws a button.	Pinterest'in Takip et ve Bitti gibi diğer kırmızı düğmelerini, Kaydet düğmesi için seçtiğin renge boyar. Önce o rengi seç. Değişiklik Pinterest bir sonraki düğmeyi çizdiğinde görünür.
+Like and comment history	Beğeni ve yorum geçmişi
+Keeps a list of the pins you like and the comments you post. Open it from Your likes and comments below. The list stays on this phone.	Beğendiğin pinlerin ve yazdığın yorumların listesini tutar. Aşağıdaki Beğenilerin ve yorumların satırından aç. Liste bu telefonda kalır.
+Your likes and comments	Beğenilerin ve yorumların
+See the pins you liked and commented on, newest first. The list keeps the newest 500.	Beğendiğin ve yorum yaptığın pinleri en yeniden başlayarak gör. Liste en yeni 500 kaydı tutar.
+All	Tümü
+Likes	Beğeniler
+Comments	Yorumlar
+Liked	Beğendin
+Commented	Yorum yaptın
+Replied	Yanıtladın
+One entry. Tap it to open its pin.	Bir kayıt. Pinini açmak için dokun.
+%1$d entries, newest first. Tap one to open its pin.	%1$d kayıt, en yeniler önce. Pinini açmak için birine dokun.
+Nothing here yet. Pins you like and comments you post show up here.	Henüz bir şey yok. Beğendiğin pinler ve yazdığın yorumlar burada görünür.
+Nothing here yet. Turn on Like and comment history to start a list.	Henüz bir şey yok. Liste başlatmak için Beğeni ve yorum geçmişi'ni aç.
+No likes in the list.	Listede beğeni yok.
+No comments in the list.	Listede yorum yok.
+Couldn't open the list. Try again.	Liste açılamadı. Yeniden dene.
+Cleared your likes and comments.	Beğenilerin ve yorumların temizlendi.
+Couldn't clear the list. Try again.	Liste temizlenemedi. Yeniden dene.
+likes	beğeniler
+comments and replies	yorumlar ve yanıtlar

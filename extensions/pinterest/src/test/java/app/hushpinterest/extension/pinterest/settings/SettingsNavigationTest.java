@@ -1343,6 +1343,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.FULL_SIZE_PROFILE_PHOTOS.key, "profile photo", "full size", "next profile you open");
         summaryContains(Settings.BEST_VIDEO_QUALITY.key, "largest size", "more data", "next video you open");
         summaryContains(Settings.BOARD_ORDER_WHEN_SAVING.key, "Save to sheet", "custom order", "A to Z");
+        summaryContains(Settings.LIKE_COMMENT_HISTORY.key, "pins you like", "comments you post", "stays on this phone");
         summaryContains(Settings.NO_PIN_VIDEO_AUTOPLAY.key, "tap play", "go back to", "next pin you open");
         summaryContains(Settings.START_PIN_VIDEOS_MUTED.key, "sound off", "speaker", "next pin you open");
         summaryContains(Settings.PINCH_TO_ZOOM_ONLY.key, "full screen", "look like it", "next time you pinch");

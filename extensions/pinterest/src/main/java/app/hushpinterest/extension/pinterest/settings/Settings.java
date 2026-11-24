@@ -115,6 +115,9 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_plain_pin_links", FALSE);
     public static final BooleanSetting HIDE_ADVERTISING_ID =
             new BooleanSetting("hushpinterest_hide_ad_id", TRUE);
+    /** #48: a list on the phone of the pins you like and the comments you post. */
+    public static final BooleanSetting LIKE_COMMENT_HISTORY =
+            new BooleanSetting("hushpinterest_like_comment_history", FALSE);
     public static final BooleanSetting DOWNLOAD_PINS =
             new BooleanSetting("hushpinterest_download_pins", FALSE);
     /**

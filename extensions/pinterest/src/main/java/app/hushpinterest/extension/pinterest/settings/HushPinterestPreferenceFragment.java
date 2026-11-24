@@ -374,6 +374,14 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide advertising ID"), L10n.t("Shows an empty ad ID with tracking limited, as if you deleted "
                         + "it in Android. Also stops Google's Block Store from keeping Pinterest's browser ID across reinstalls."),
                         SettingsIcons.BLOCK);
+            patchToggle(privacy, context, build, PatchFamily.LIKE_COMMENT_HISTORY, Settings.LIKE_COMMENT_HISTORY,
+                    L10n.t("Like and comment history"),
+                    L10n.t("Keeps a list of the pins you like and the comments you post. Open it from Your likes and "
+                        + "comments below. The list stays on this phone."), SettingsIcons.UPDATES);
+            // The list it keeps, on the phone only, whether the switch is on or not.
+            if (build.contains(PatchFamily.LIKE_COMMENT_HISTORY)) {
+                privacy.addPreference(mark(new ActivityHistoryPreference(context), SettingsIcons.UPDATES));
+            }
             // A patch-time fact with no switch: an explanation, so it takes the info mark.
             if (build.contains(PatchFamily.REMOVE_AD_TRACKING_PERMISSIONS)) {
                 privacy.addPreference(mark(info(context, L10n.t("Remove ad tracking permissions"),

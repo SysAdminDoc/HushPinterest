@@ -465,6 +465,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_strip_link_tracking": return L10n.t("Strip link tracking");
             case "hushpinterest_plain_pin_links": return L10n.t("Plain pin links");
             case "hushpinterest_hide_ad_id": return L10n.t("Hide advertising ID");
+            case "hushpinterest_like_comment_history": return L10n.t("Like and comment history");
             case "hushpinterest_download_pins": return L10n.t("Download pins");
             case "hushpinterest_save_in_pinterest_folder": return L10n.t("Save in Pinterest's folder");
             case "hushpinterest_download_unmetered_only": return L10n.t("Download on unmetered networks only");

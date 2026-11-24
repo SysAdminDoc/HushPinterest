@@ -93,7 +93,7 @@ public final class SettingsBackup {
             Settings.HIDE_HOME_SUGGESTIONS,
             Settings.KEEP_HOME_FEED, Settings.BACK_LEAVES_HOME, Settings.HIDE_REFRESH_PILL,
             Settings.DISABLE_ANALYTICS, Settings.STRIP_LINK_TRACKING, Settings.PLAIN_PIN_LINKS,
-            Settings.HIDE_ADVERTISING_ID, Settings.DOWNLOAD_PINS, Settings.SAVE_IN_PINTEREST_FOLDER,
+            Settings.HIDE_ADVERTISING_ID, Settings.LIKE_COMMENT_HISTORY, Settings.DOWNLOAD_PINS, Settings.SAVE_IN_PINTEREST_FOLDER,
             Settings.DOWNLOAD_UNMETERED_ONLY, Settings.DOWNLOAD_NO_ROAMING, Settings.COPY_IMAGE, Settings.SHARE_IMAGE, Settings.SAVE_DOWNLOADED_PINS, Settings.DOWNLOAD_SAVED_PINS, Settings.DOWNLOAD_BOARD, Settings.LONG_PRESS_DOWNLOAD, Settings.LONG_PRESS_VIEW,
             Settings.LONG_PRESS_HIDE_SAVE, Settings.LONG_PRESS_HIDE_SEND, Settings.LONG_PRESS_HIDE_SEARCH,
             Settings.LONG_PRESS_HIDE_SEND_APP, Settings.EXTERNAL_BROWSER, Settings.SYSTEM_SHARE,

@@ -140,6 +140,7 @@
         "patches/src/main/kotlin/app/morphe/patches/pinterest/ui/**",
         "extensions/pinterest/src/main/java/app/hushpinterest/extension/pinterest/actions/**",
         "extensions/pinterest/src/main/java/app/hushpinterest/extension/pinterest/settings/DownloadHistoryPreference.java",
+        "extensions/pinterest/src/main/java/app/hushpinterest/extension/pinterest/settings/ActivityHistoryPreference.java",
         "extensions/pinterest/src/main/java/app/hushpinterest/extension/pinterest/settings/DownloadFolderPreference.java",
         "extensions/pinterest/src/main/java/app/hushpinterest/extension/pinterest/settings/SetupGuidancePreference.java",
         "extensions/pinterest/src/main/java/app/hushpinterest/extension/pinterest/settings/PushReadiness.java",

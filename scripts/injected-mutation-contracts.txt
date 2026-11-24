@@ -40,6 +40,7 @@ family|keepHomeFeed|Keep Home feed|homeFeed,homeBack,refreshPill
 family|disableAnalytics|Disable analytics|analyticsTasks,analyticsUploads
 family|stripLinkTracking|Strip link tracking|linkTracking,plainPinLinks
 family|hideAdvertisingId|Hide advertising ID|advertisingId,browserId
+family|likeCommentHistory|Like and comment history|likeHistory,commentHistory
 family|removeAdTrackingPermissions|Remove ad tracking permissions|
 family|spoofSignature|Spoof signature for Google sign-in|
 family|gmsCoreSupport|GmsCore support|signInFailure
@@ -103,6 +104,8 @@ mutation|linkTracking|links|Landroid/content/Intent;->putExtra(Ljava/lang/String
 mutation|plainPinLinks|pinInvites|Lapp/hushpinterest/extension/pinterest/privacy/PlainPinLinks;->invite(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V|Lapp/hushpinterest/extension/pinterest/privacy/PlainPinLinks;->directShare(Ljava/lang/Object;Ljava/lang/Object;Landroid/content/Intent;)V
 mutation|advertisingId|answers|Lcom/google/android/gms/ads/identifier/AdvertisingIdClient$Info;->getId()Ljava/lang/String;|Lapp/hushpinterest/extension/pinterest/privacy/AdvertisingId;->id(Ljava/lang/String;)Ljava/lang/String;|Lcom/google/android/gms/ads/identifier/AdvertisingIdClient$Info;->isLimitAdTrackingEnabled()Z|Lapp/hushpinterest/extension/pinterest/privacy/AdvertisingId;->limitTracking(Z)Z
 mutation|browserId|browserId|Lapp/hushpinterest/extension/pinterest/privacy/AdvertisingId;->skipBrowserId(Ljava/lang/String;)Z|Lapp/hushpinterest/extension/pinterest/privacy/AdvertisingId;->saveBrowserId(Ljava/lang/Object;Ljava/lang/String;[BLjava/lang/Object;)Ljava/lang/Object;
+mutation|likeHistory|likeHistory|Lapp/hushpinterest/extension/pinterest/privacy/ActivityHistory;->likeSent(Ljava/lang/Object;Ljava/lang/String;I)V|Lapp/hushpinterest/extension/pinterest/privacy/ActivityHistory;->likeRemoved(Ljava/lang/String;)V
+mutation|commentHistory|commentHistory|Lapp/hushpinterest/extension/pinterest/privacy/ActivityHistory;->commentPosted(Ljava/lang/String;Ljava/lang/String;)V|Lapp/hushpinterest/extension/pinterest/privacy/ActivityHistory;->replyPosted(Ljava/lang/String;Ljava/lang/String;)V
 mutation|pinDownloads,copyImage,shareImage|downloads|Lapp/hushpinterest/extension/pinterest/actions/PinDownloads;->attach(Ljava/lang/Object;)V|Lcom/pinterest/feature/gridactions/modal/view/PinOverflowMenuModalImpl;
 mutation|boardMenu|boardMenu|Lapp/hushpinterest/extension/pinterest/actions/BoardDownloads;->menu(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 mutation|longPressMenu|longPress|Lapp/hushpinterest/extension/pinterest/actions/LongPressDownload;->show(Ljava/lang/Object;Ljava/lang/Object;)V|Lcom/pinterest/ui/menu/ContextMenuView;|Lapp/hushpinterest/extension/pinterest/actions/LongPressDownload;->composeItems(Ljava/util/ArrayList;Ljava/lang/Object;)Ljava/util/ArrayList;|Lapp/hushpinterest/extension/pinterest/actions/LongPressDownload;->composeClick(Ljava/lang/Object;Ljava/lang/Object;)Z

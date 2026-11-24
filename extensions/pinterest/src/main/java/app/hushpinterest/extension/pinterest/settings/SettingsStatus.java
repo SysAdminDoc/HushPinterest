@@ -64,6 +64,9 @@ public final class SettingsStatus {
     public static boolean hideAdvertisingId() { return false; }
     public static boolean advertisingId() { return false; }
     public static boolean browserId() { return false; }
+    public static boolean likeCommentHistory() { return false; }
+    public static boolean likeHistory() { return false; }
+    public static boolean commentHistory() { return false; }
     public static boolean removeAdTrackingPermissions() { return false; }
     public static boolean spoofSignature() { return false; }
     public static boolean gmsCoreSupport() { return false; }

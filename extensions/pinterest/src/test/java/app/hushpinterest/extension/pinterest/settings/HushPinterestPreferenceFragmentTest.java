@@ -96,6 +96,7 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.DISABLE_ANALYTICS, "Disable analytics");
         ROW_TITLES.put(PatchFamily.STRIP_LINK_TRACKING, "Strip link tracking");
         ROW_TITLES.put(PatchFamily.HIDE_ADVERTISING_ID, "Hide advertising ID");
+        ROW_TITLES.put(PatchFamily.LIKE_COMMENT_HISTORY, "Like and comment history");
         ROW_TITLES.put(PatchFamily.REMOVE_AD_TRACKING_PERMISSIONS, "Remove ad tracking permissions");
         ROW_TITLES.put(PatchFamily.SPOOF_SIGNATURE, "Spoof signature for Google sign-in");
         ROW_TITLES.put(PatchFamily.GMS_CORE_SUPPORT, "GmsCore support");

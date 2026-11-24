@@ -848,3 +848,24 @@ Black buttons	Schwarze Schaltflächen
 In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. Light mode stays as it is. The change shows the next time Pinterest draws a button.	Färbt im Dunkelmodus die grauen Schaltflächen von Pinterest, etwa Nachricht und Profil bearbeiten in einem Profil, tiefschwarz und lässt ihre Beschriftung stehen. Der helle Modus bleibt, wie er ist. Die Änderung zeigt sich, wenn Pinterest das nächste Mal eine Schaltfläche zeichnet.
 Save color on other red buttons	Merken-Farbe für andere rote Schaltflächen
 Paints Pinterest's other red buttons, such as Follow and Done, the color you picked for the Save button. Pick that color first. The change shows the next time Pinterest draws a button.	Färbt die anderen roten Schaltflächen von Pinterest, etwa Folgen und Fertig, in der Farbe, die du für die Merken-Schaltfläche gewählt hast. Wähle diese Farbe zuerst. Die Änderung zeigt sich, wenn Pinterest das nächste Mal eine Schaltfläche zeichnet.
+Like and comment history	Like- und Kommentarverlauf
+Keeps a list of the pins you like and the comments you post. Open it from Your likes and comments below. The list stays on this phone.	Führt eine Liste der Pins, die du likest, und der Kommentare, die du schreibst. Öffne sie unten über Deine Likes und Kommentare. Die Liste bleibt auf diesem Telefon.
+Your likes and comments	Deine Likes und Kommentare
+See the pins you liked and commented on, newest first. The list keeps the newest 500.	Zeigt die Pins, die du gelikt und kommentiert hast, die neuesten zuerst. Die Liste behält die neuesten 500.
+All	Alle
+Likes	Likes
+Comments	Kommentare
+Liked	Gelikt
+Commented	Kommentiert
+Replied	Geantwortet
+One entry. Tap it to open its pin.	Ein Eintrag. Tippe darauf, um seinen Pin zu öffnen.
+%1$d entries, newest first. Tap one to open its pin.	%1$d Einträge, die neuesten zuerst. Tippe auf einen, um seinen Pin zu öffnen.
+Nothing here yet. Pins you like and comments you post show up here.	Noch nichts da. Pins, die du likest, und Kommentare, die du schreibst, erscheinen hier.
+Nothing here yet. Turn on Like and comment history to start a list.	Noch nichts da. Schalte den Like- und Kommentarverlauf ein, um eine Liste zu beginnen.
+No likes in the list.	Keine Likes in der Liste.
+No comments in the list.	Keine Kommentare in der Liste.
+Couldn't open the list. Try again.	Die Liste konnte nicht geöffnet werden. Versuche es erneut.
+Cleared your likes and comments.	Deine Likes und Kommentare wurden gelöscht.
+Couldn't clear the list. Try again.	Die Liste konnte nicht geleert werden. Versuche es erneut.
+likes	Likes
+comments and replies	Kommentare und Antworten

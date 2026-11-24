@@ -59,6 +59,7 @@ public enum PatchFamily {
     STRIP_LINK_TRACKING(FamilyNames.STRIP_LINK_TRACKING, "stripLinkTracking", null, Settings.STRIP_LINK_TRACKING,
             Settings.PLAIN_PIN_LINKS),
     HIDE_ADVERTISING_ID(FamilyNames.HIDE_ADVERTISING_ID, "hideAdvertisingId", null, Settings.HIDE_ADVERTISING_ID),
+    LIKE_COMMENT_HISTORY(FamilyNames.LIKE_COMMENT_HISTORY, "likeCommentHistory", null, Settings.LIKE_COMMENT_HISTORY),
     /** Manifest permissions removed when patching: no switch, so Pause can't reach it. */
     REMOVE_AD_TRACKING_PERMISSIONS(FamilyNames.REMOVE_AD_TRACKING_PERMISSIONS, "removeAdTrackingPermissions",
             "Pinterest's access to the ad ID and Android's ad services is removed"),
@@ -183,7 +184,7 @@ public enum PatchFamily {
     static final Set<PatchFamily> FEED_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_ADS, HIDE_AI_PINS, HIDE_SHOPPING,
             FILTER_FEED, KEEP_HOME_FEED));
     static final Set<PatchFamily> PRIVACY_PAGE = Collections.unmodifiableSet(EnumSet.of(DISABLE_ANALYTICS, STRIP_LINK_TRACKING,
-            HIDE_ADVERTISING_ID, REMOVE_AD_TRACKING_PERMISSIONS, SPOOF_SIGNATURE, GMS_CORE_SUPPORT));
+            HIDE_ADVERTISING_ID, LIKE_COMMENT_HISTORY, REMOVE_AD_TRACKING_PERMISSIONS, SPOOF_SIGNATURE, GMS_CORE_SUPPORT));
     static final Set<PatchFamily> ACTIONS_PAGE = Collections.unmodifiableSet(EnumSet.of(DOWNLOAD_PINS, DOWNLOAD_BOARD,
             LONG_PRESS_DOWNLOAD, SYSTEM_SHARE));
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
@@ -219,6 +220,8 @@ public enum PatchFamily {
         PLAIN_PIN_LINKS(STRIP_LINK_TRACKING, "plainPinLinks", "Plain pin links"),
         ADVERTISING_ID(HIDE_ADVERTISING_ID, "advertisingId", "Hide advertising ID"),
         BROWSER_ID(HIDE_ADVERTISING_ID, "browserId", "Block Store browser ID"),
+        LIKE_HISTORY(LIKE_COMMENT_HISTORY, "likeHistory", "likes"),
+        COMMENT_HISTORY(LIKE_COMMENT_HISTORY, "commentHistory", "comments and replies"),
         PIN_DOWNLOADS(DOWNLOAD_PINS, "pinDownloads", "Download pins"),
         COPY_IMAGE(DOWNLOAD_PINS, "copyImage", "Copy image"),
         SHARE_IMAGE(DOWNLOAD_PINS, "shareImage", "Share image"),

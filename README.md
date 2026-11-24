@@ -80,7 +80,7 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 56 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 57 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
@@ -127,6 +127,7 @@ There are 56 patches. Where a patch has a switch, its description names the sett
 | `HushPinterest settings` | Adds a HushPinterest page to Pinterest where you turn features on or off, pause HushPinterest, back up your settings and read the licenses. Open it from Pinterest's settings, or by long-pressing the Pinterest logo at the top of your home feed, the Home button in the bottom bar or Pinterest's app icon. Works as soon as you patch it in, with no switch. |
 | `Keep Home feed` | Keeps your Home feed where you left it when you come back to Pinterest or to the Home tab, instead of loading new pins on its own. Pull down to refresh whenever you want new pins. A second switch lets Back leave Pinterest from a scrolled-down Home without jumping to the top first, and a third hides the pill that offers new pins after you've been away. All start off. Turn them on in HushPinterest settings > Feed. |
 | `Let the screen sleep` | Lets the screen turn off after your phone's usual timeout while a pin is open. Pinterest keeps it on while a video is on the screen, playing or not. Starts off. Turn it on in HushPinterest settings > Interface. |
+| `Like and comment history` | Keeps a list on your phone of the pins you like and the comments and replies you post. Find it under Your likes and comments in HushPinterest settings > Privacy, where you can show only likes or only comments and tap one to open its pin. Unliking a pin takes it off the list. Starts off. Turn it on in HushPinterest settings > Privacy. |
 | `Long-press download` | Adds a Download button to the menu you get when you long-press a pin in a grid, the round one and the newer list, so you can save a pin without opening it. Needs Download pins on too. Four more switches take Pinterest's Save, Send, Search image or Send with an app button out of that menu, and another adds View, which shows the pin's picture full screen. All start off. Turn them on in HushPinterest settings > Pin actions. |
 | `No screenshot share menu` | Stops Pinterest from popping up sharing suggestions after you take a screenshot. Screenshots still work as usual. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Open links in your browser` | Opens a pin's Visit link and profile websites in your web browser. Pinterest links and sign-in work as before. Good if you prefer your own browser. Starts off. Turn it on in HushPinterest settings > Links. |
@@ -170,7 +171,7 @@ HushPinterest doesn't collect anything and has no server. Its own code only reac
 
 Shared pin links use `www.pinterest.com`. The About, Licenses and setup guide screens link to `github.com`, `gitlab.com`, `www.gnu.org`, `help.pinterest.com` and `ko-fi.com`, which open in your browser only when you tap one. **Report a problem** opens a new issue form on `github.com` with your versions, phone model and the switches you have on filled in, and nothing is sent until you submit it there. Browser discovery asks Android which apps handle `example.com` without ever loading it.
 
-Disable analytics stops Pinterest's usage uploads, the AppsFlyer and Bugsnag transports and Google's Engage publishing, and turns off Firebase Analytics, Crashlytics and Performance collection in the manifest. Hide advertising ID gives Pinterest an empty ad ID with tracking limited. It doesn't touch the ad ID other apps see. Fix push notifications only swaps the certificate fingerprint in Firebase's own sign-up request and opens no connection itself.
+Disable analytics stops Pinterest's usage uploads, the AppsFlyer and Bugsnag transports and Google's Engage publishing, and turns off Firebase Analytics, Crashlytics and Performance collection in the manifest. Hide advertising ID gives Pinterest an empty ad ID with tracking limited. It doesn't touch the ad ID other apps see. Like and comment history keeps its list in Pinterest's app data on your phone. It never leaves the phone, and settings exports don't include it. Fix push notifications only swaps the certificate fingerprint in Firebase's own sign-up request and opens no connection itself.
 
 ## Supported Pinterest build
 

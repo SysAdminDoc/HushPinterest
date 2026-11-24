@@ -88,6 +88,8 @@ import app.hushpinterest.extension.pinterest.ads.Ads;
 import app.hushpinterest.extension.pinterest.ads.FeedFilter;
 import app.hushpinterest.extension.pinterest.ads.HomeFeed;
 import app.hushpinterest.extension.pinterest.ads.SavedPins;
+import app.hushpinterest.extension.pinterest.privacy.ActivityHistory;
+import app.hushpinterest.extension.pinterest.privacy.ActivityHistoryForTests;
 import app.hushpinterest.extension.pinterest.privacy.Analytics;
 import app.hushpinterest.extension.pinterest.privacy.AdvertisingId;
 import app.hushpinterest.extension.pinterest.notifications.PushNotificationsTest;
@@ -482,6 +484,12 @@ public class PausedHooksTest {
                 () -> !"real".equals(AdvertisingId.id("real")),
                 () -> AdvertisingId.limitTracking(false),
                 () -> AdvertisingId.skipBrowserId("pid")));
+        // A like, an unlike, a comment and a reply each change the list.
+        probes.put(Settings.LIKE_COMMENT_HISTORY, Arrays.asList(
+                () -> ActivityHistoryForTests.notes(() -> ActivityHistory.likeSent(null, "4242", 1)),
+                () -> ActivityHistoryForTests.unlikes("4242"),
+                () -> ActivityHistoryForTests.notes(() -> ActivityHistory.commentPosted("4242", "Nice")),
+                () -> ActivityHistoryForTests.notes(() -> ActivityHistory.replyPosted("4242", "Thanks"))));
         probes.put(Settings.DOWNLOAD_PINS, Collections.singletonList(PausedHooksTest::queuesPinDownload));
         probes.put(Settings.SAVE_IN_PINTEREST_FOLDER, Collections.singletonList(PausedHooksTest::savesInPinterestsFolder));
         probes.put(Settings.DOWNLOAD_UNMETERED_ONLY, Collections.singletonList(
