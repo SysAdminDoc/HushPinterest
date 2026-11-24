@@ -54,6 +54,7 @@ public final class SettingsStatus {
     public static boolean keepHomeFeed() { return false; }
     public static boolean homeFeed() { return false; }
     public static boolean homeBack() { return false; }
+    public static boolean refreshPill() { return false; }
     public static boolean disableAnalytics() { return false; }
     public static boolean analyticsTasks() { return false; }
     public static boolean analyticsUploads() { return false; }
@@ -93,6 +94,7 @@ public final class SettingsStatus {
     public static boolean recentSearchRows() { return false; }
     public static boolean recentSearchHeading() { return false; }
     public static boolean searchLanding() { return false; }
+    public static boolean searchSuggestions() { return false; }
     public static boolean hideNavigationButtons() { return false; }
     public static boolean navigationButtons() { return false; }
     public static boolean homeTabs() { return false; }
@@ -131,6 +133,7 @@ public final class SettingsStatus {
     public static boolean surveyPrompts() { return false; }
     public static boolean hidePopupBanners() { return false; }
     public static boolean popupBanners() { return false; }
+    public static boolean offlineBanner() { return false; }
     public static boolean hideRelatedPins() { return false; }
     public static boolean relatedPins() { return false; }
     public static boolean hideCreatorName() { return false; }

@@ -101,6 +101,20 @@ public final class UiHooks {
         return true;
     }
 
+    /**
+     * Injected at the start of the main activity's connection handler, with whether the phone is
+     * [online], non-zero for yes (#48). Offline, it puts up the bar that says so, and back online it swaps that bar for
+     * "back online", which shows only after an offline bar. True returns before the offline bar is
+     * built or shown, so neither appears. Coming back online always goes through, so a bar that was
+     * already up when the switch went on still clears. Off or paused, the bar works as before.
+     */
+    public static boolean hideOfflineBanner(int online) {
+        if (online != 0) return false;
+        if (!enabled(FamilyNames.HIDE_POPUP_BANNERS, Settings.HIDE_OFFLINE_BANNER)) return false;
+        HookStatus.counted(FamilyNames.HIDE_POPUP_BANNERS, "offline banner skipped");
+        return true;
+    }
+
     /** The close button on Pinterest's pop-up banner, a resource name it keeps. */
     static final String BANNER_DISMISS = "bannerOverlay_dismiss_icon_button";
 

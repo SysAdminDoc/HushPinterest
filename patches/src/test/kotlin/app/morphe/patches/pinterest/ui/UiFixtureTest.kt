@@ -75,6 +75,7 @@ class UiFixtureTest {
         "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
         "hideNavigationButtons" to "homeTabs", "hideSearchHistory" to "searchLanding",
         "hideNavigationButtons" to "searchKeyboard", "hidePinMenuItems" to "pinMenuRows",
+        "hideSearchHistory" to "searchSuggestions",
     )
 
     @Test fun `every interface family matches each supported vendor build without a warning`() {
@@ -886,7 +887,7 @@ class UiFixtureTest {
     private fun read(build: File): List<ClassDef> {
         val anchors = setOf("sg_android_new_screenshot_api_14", "ai_fwd_android_assistant_ask_mode", "BottomNavTabModel(type=",
             "BottomNavBar tab insertion out of range", "confirmEmailButton", "inAppUpdateManager",
-            "unifiedCommentsModulePresenterFactory", "CommentsZone(isVisible=", INBOX_UPDATES_FEED)
+            "unifiedCommentsModulePresenterFactory", "CommentsZone(isVisible=", INBOX_UPDATES_FEED, ONE_BAR_MODULES)
         val required = (SEARCH_HISTORY_VIEWS + TYPEAHEAD_ROW + COMMENT_PREVIEW + COMMENTS_IMAGES + COMMENTS_QUICK_REPLIES + HEADER_BAR + BOTTOM_BAR +
             BLUR_VIEW + PIN_MENU + "Lcom/pinterest/activity/pin/view/modules/PinCloseupVideoModule;" +
             BOARD_TOOL_BAR + PROFILE_PILL + PROFILE_FILTER_BAR + BOARD_HEADER_IMAGE + TOAST_CONTAINER + TAB_LAYOUT).toSet()
@@ -924,6 +925,11 @@ class UiFixtureTest {
         // The interfaces the typing-screen row shares with the recent-search pill name its recent search bind.
         found += FixtureDex.classes(build, listOfNotNull(found[TYPEAHEAD_ROW], found[RECENT_SEARCH_PILL])
             .flatMap { it.interfaces }.toSet() - found.keys)
+        // The parser every reader of the row under the search bar calls, which Hide suggested searches hooks.
+        found += FixtureDex.classes(build, found.values.flatMap { it.methods }.filter { ONE_BAR_MODULES in it.strings() }
+            .flatMap { it.instructions() }.mapNotNull { (it as? ReferenceInstruction)?.reference as? MethodReference }
+            .filter { it.returnType == "Ljava/util/ArrayList;" && it.parameterTypes.size == 1 }.map { it.definingClass }
+            .toSet() - found.keys)
         // The search page's Recent searches block is the view whose cell list the cell builder reads.
         found += FixtureDex.classes(build, found.values.flatMap { it.methods }.filter { it.buildsRecentSearchCell() }
             .flatMap { it.fields() }.filter { it.type == ARRAY_LIST }.map { it.definingClass }.toSet() - found.keys)

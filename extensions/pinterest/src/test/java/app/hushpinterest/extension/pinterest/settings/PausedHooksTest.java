@@ -96,6 +96,7 @@ import app.hushpinterest.extension.pinterest.ui.AmoledBlack;
 import app.hushpinterest.extension.pinterest.ui.CloseupButtons;
 import app.hushpinterest.extension.pinterest.ui.InterfaceControls;
 import app.hushpinterest.extension.pinterest.ui.PostedDate;
+import app.hushpinterest.extension.pinterest.ui.SearchSuggestions;
 import app.hushpinterest.extension.pinterest.ui.UiHooks;
 import app.hushpinterest.extension.pinterest.ui.UiHooksForTests;
 import app.hushpinterest.extension.shared.SettingsContextRule;
@@ -447,6 +448,8 @@ public class PausedHooksTest {
                 () -> HomeFeed.holdHomeRefresh(null, 1)));
         // Back on a scrolled-down Home goes on out instead of jumping to the top.
         probes.put(Settings.BACK_LEAVES_HOME, Arrays.asList(HomeFeed::leave));
+        // Home's refresh pill never comes up after time away (#48).
+        probes.put(Settings.HIDE_REFRESH_PILL, Arrays.asList(HomeFeed::hideRefreshPill));
         probes.put(Settings.DISABLE_ANALYTICS, Arrays.asList(Analytics::blockUpload,
                 () -> Analytics.blockTask(Task.TAG_APPSFLYER_INIT), PausedHooksTest::quietsSdkConnection));
         probes.put(Settings.STRIP_LINK_TRACKING, Arrays.asList(
@@ -539,6 +542,8 @@ public class PausedHooksTest {
             return window.press(window.searchTab, UiHooksForTests.Screen.SEARCH_LANDING) != 0;
         }));
         probes.put(Settings.BLANK_SEARCH_PAGE, Collections.singletonList(PausedHooksTest::blanksSearchPage));
+        probes.put(Settings.HIDE_SEARCH_SUGGESTIONS, Collections.singletonList(() -> SearchSuggestions.drop(
+                "{\"action\":{\"search_query\":\"x\"},\"display\":{\"background_color_hex\":\"#E8DCCB\"}}")));
         probes.put(Settings.HIDE_HOME_TABS, Collections.singletonList(() -> InterfaceControls.homeTabsHeight(
                 namedView("home_feed_view_pager_tab_layout"), MEASURE_SPEC, MEASURE_SPEC) != MEASURE_SPEC));
         probes.put(Settings.HIDE_HEADER_BUTTONS, Collections.singletonList(() -> {
@@ -590,6 +595,8 @@ public class PausedHooksTest {
         probes.put(Settings.QUIET_EMAIL_REMINDER, Collections.singletonList(UiHooks::quietEmailReminder));
         probes.put(Settings.HIDE_SURVEY_PROMPTS, Arrays.asList(UiHooks::hideSurveyPrompts, UiHooks::hideSponsoredPolls));
         probes.put(Settings.HIDE_POPUP_BANNERS, Collections.singletonList(PausedHooksTest::closesPopupBanner));
+        // The bar that says you're offline is skipped before it's built (#48).
+        probes.put(Settings.HIDE_OFFLINE_BANNER, Collections.singletonList(() -> UiHooks.hideOfflineBanner(0)));
         probes.put(Settings.HIDE_RELATED_PINS, Collections.singletonList(UiHooks::hideRelatedPins));
         probes.put(Settings.HIDE_CREATOR_NAME, Collections.singletonList(PausedHooksTest::hidesCreatorName));
         probes.put(Settings.HIDE_PIN_AUTHOR, Collections.singletonList(UiHooksForTests::hidesPinAuthor));

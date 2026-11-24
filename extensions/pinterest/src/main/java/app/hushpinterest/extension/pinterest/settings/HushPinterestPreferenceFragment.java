@@ -340,6 +340,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                         L10n.t("When you've scrolled down Home, Back leaves Pinterest instead of jumping to the top "
                             + "and loading new pins first.")), SettingsIcons.BLOCK));
             }
+            // Its own hook, on Home's refresh prompt: no row where that wasn't found.
+            if (build.contains(PatchFamily.KEEP_HOME_FEED) && PatchFamily.Capability.REFRESH_PILL.installed()) {
+                feed.addPreference(mark(toggle(context, Settings.HIDE_REFRESH_PILL, L10n.t("Hide the refresh pill"),
+                        L10n.t("Home no longer shows the pill that offers new pins after you've been away. Pull down "
+                            + "on Home when you want them.")), SettingsIcons.BLOCK));
+            }
         }
 
         if (!Collections.disjoint(build, PatchFamily.PRIVACY_PAGE)) {
@@ -488,6 +494,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                 ui.addPreference(mark(toggle(context, Settings.BLANK_SEARCH_PAGE, L10n.t("Blank Search page"),
                         L10n.t("Leaves only the search bar on the Search page, with nothing under it. Searching works "
                             + "as usual. The change shows the next time the page updates.")), SettingsIcons.BLOCK));
+            }
+            if (build.contains(PatchFamily.HIDE_SEARCH_HISTORY) && PatchFamily.Capability.SEARCH_SUGGESTIONS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_SEARCH_SUGGESTIONS, L10n.t("Hide suggested searches"),
+                        L10n.t("The colored searches under the search bar on search results no longer show. The filter "
+                            + "button stays. The change shows the next time you search.")), SettingsIcons.BLOCK));
             }
             patchToggle(ui, context, build, PatchFamily.HIDE_NAVIGATION_BUTTONS, Settings.HIDE_NAV_CREATE,
                     L10n.t("Hide Create button"), L10n.t("Hides Create in the bottom bar and at the top of Home. The "
@@ -724,6 +735,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             patchToggle(ui, context, build, PatchFamily.HIDE_POPUP_BANNERS, Settings.HIDE_POPUP_BANNERS,
                     L10n.t("Hide pop-up banners"),
                     L10n.t("Closes the banners Pinterest pops up over your feed, such as \"Shop recommended merchants\", the way their X does, so that one doesn't come back. A banner that's already open stays."), SettingsIcons.BELL);
+            // Its own hook, on the activity that shows the banner: no row where that wasn't found.
+            if (build.contains(PatchFamily.HIDE_POPUP_BANNERS) && PatchFamily.Capability.OFFLINE_BANNER.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.HIDE_OFFLINE_BANNER, L10n.t("Hide offline banner"),
+                        L10n.t("The bar at the top that says you're offline, then back online, no longer shows. The "
+                            + "change shows the next time your connection drops.")), SettingsIcons.BELL));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_SAVE_TOASTS, Settings.HIDE_SAVE_TOASTS,
                     L10n.t("Hide save toasts"),
                     L10n.t("Saving a pin no longer shows the \"Saved to\" message or a suggestion to follow its creator. The pin is still saved."), SettingsIcons.BELL);

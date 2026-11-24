@@ -36,7 +36,7 @@ family|hideAds|Hide ads|feedAds,adViews,googleAds,metaAds,interstitialAds
 family|hideAiPins|Hide AI-labeled pins|feedAiPins
 family|hideShopping|Hide shopping and product pins|feedShopping,closeupShopping
 family|filterFeed|Filter feed|feedVideoPins,feedMutedWords,feedSavedPins,feedSavedSearch,feedSavedRelated,feedHomeSuggestions,feedbackFlyout
-family|keepHomeFeed|Keep Home feed|homeFeed,homeBack
+family|keepHomeFeed|Keep Home feed|homeFeed,homeBack,refreshPill
 family|disableAnalytics|Disable analytics|analyticsTasks,analyticsUploads
 family|stripLinkTracking|Strip link tracking|linkTracking,plainPinLinks
 family|hideAdvertisingId|Hide advertising ID|advertisingId,browserId
@@ -51,7 +51,7 @@ family|externalBrowser|Open links in your browser|visitLinks
 family|systemShare|System share sheet|pinShare
 family|hideScreenshotShare|No screenshot share menu|screenshotShare
 family|hideAssistant|Hide Assistant|assistantEntries
-family|hideSearchHistory|Hide search history|searchHistory,recentSearchRows,recentSearchHeading,searchLanding
+family|hideSearchHistory|Hide search history|searchHistory,recentSearchRows,recentSearchHeading,searchLanding,searchSuggestions
 family|hideNavigationButtons|Hide navigation buttons|navigationButtons,homeTabs,searchKeyboard
 family|hideHeaderButtons|Hide header buttons|headerButtons
 family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards,blackToasts
@@ -62,7 +62,7 @@ family|hideTopicSuggestions|Hide topic suggestions|topicSuggestions
 family|hideInboxUpdates|Hide Inbox updates|inboxUpdates
 family|quietEmailReminder|Quiet email reminders|emailReminder
 family|hideSurveyPrompts|Hide survey prompts|surveyPrompts
-family|hidePopupBanners|Hide pop-up banners|popupBanners
+family|hidePopupBanners|Hide pop-up banners|popupBanners,offlineBanner
 family|hideRelatedPins|Hide related pins|relatedPins
 family|hideCreatorName|Hide creator name on pins|creatorName
 family|hidePinAuthor|Hide pin author|pinAuthor
@@ -91,6 +91,7 @@ mutation|metaAds|guard|Lapp/hushpinterest/extension/pinterest/ads/Ads;->skipMeta
 mutation|interstitialAds|guard|Lapp/hushpinterest/extension/pinterest/ads/Ads;->killInterstitials()Z|interstitialKillswitch|Lapp/hushpinterest/extension/pinterest/ads/Ads;->skipInterstitials()Z|interstitialExperiment
 mutation|homeFeed|guard|Lapp/hushpinterest/extension/pinterest/ads/HomeFeed;->holdResumeRefresh(J)Z|homeResume|Lapp/hushpinterest/extension/pinterest/ads/HomeFeed;->holdHomeRefresh(Ljava/util/Map;I)Z|homeRefresh
 mutation|homeBack|homeBack|Lapp/hushpinterest/extension/pinterest/ads/HomeFeed;->leave()Z
+mutation|refreshPill|refreshPill|Lapp/hushpinterest/extension/pinterest/ads/HomeFeed;->hideRefreshPill()Z
 mutation|analyticsTasks,analyticsUploads|analytics|Lapp/hushpinterest/extension/pinterest/privacy/Analytics;->blockTask(Ljava/lang/Object;)Z|Ljava/net/URL;->openConnection()Ljava/net/URLConnection;|Lapp/hushpinterest/extension/pinterest/privacy/Analytics;->openConnection(Ljava/net/URL;)Ljava/net/URLConnection;|Lapp/hushpinterest/extension/pinterest/privacy/Analytics;->blockUpload()Z|Lapp/hushpinterest/extension/pinterest/privacy/Analytics;->engageService(Ljava/lang/Object;)Ljava/lang/Object;
 mutation|linkTracking|links|Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;|Lapp/hushpinterest/extension/pinterest/privacy/LinkTracking;->putStringExtra(Landroid/content/Intent;Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;|Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/CharSequence;)Landroid/content/Intent;|Lapp/hushpinterest/extension/pinterest/privacy/LinkTracking;->putTextExtra(Landroid/content/Intent;Ljava/lang/String;Ljava/lang/CharSequence;)Landroid/content/Intent;|Landroid/content/ClipData;->newPlainText(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Landroid/content/ClipData;|Lapp/hushpinterest/extension/pinterest/privacy/LinkTracking;->newPlainText(Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Landroid/content/ClipData;
 mutation|plainPinLinks|pinInvites|Lapp/hushpinterest/extension/pinterest/privacy/PlainPinLinks;->invite(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V|Lapp/hushpinterest/extension/pinterest/privacy/PlainPinLinks;->directShare(Ljava/lang/Object;Ljava/lang/Object;Landroid/content/Intent;)V
@@ -135,6 +136,7 @@ mutation|recentSearchHeading|recentSearchHeading|Lapp/hushpinterest/extension/pi
 mutation|emailReminder|guard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->quietEmailReminder()Z|email
 mutation|surveyPrompts|surveyPrompts|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideSurveyPrompts()Z|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideSponsoredPolls()Z
 mutation|popupBanners|popupBanners|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->popupBanner(Landroid/view/View;)V
+mutation|offlineBanner|offlineBanner|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideOfflineBanner(I)Z
 mutation|relatedPins|relatedPins|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->hideRelatedPins()Z|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->relatedPinsLoading()Z|PinCloseupLoadingIndicatorManager must have moduleList set before onPresenterBound()
 mutation|creatorName|creatorName|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->creatorName(Landroid/view/View;)V
 mutation|pinAuthor|closeupGate|Lapp/hushpinterest/extension/pinterest/ui/PinPageSections;->author(Landroid/view/View;I)I
@@ -161,6 +163,7 @@ mutation|downloadToasts|downloadToasts|Lapp/hushpinterest/extension/pinterest/ui
 mutation|blackToasts|blackToasts|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->toast(Landroid/view/View;)V
 mutation|homeTabs|homeTabs|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->homeTabsHeight(Landroid/view/View;II)I
 mutation|searchLanding|searchLanding|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchLanding(Landroid/view/View;)V
+mutation|searchSuggestions|searchSuggestions|Lapp/hushpinterest/extension/pinterest/ui/SearchSuggestions;->drop(Ljava/lang/Object;)Z
 mutation|searchKeyboard|searchKeyboard|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchTabPress(Landroid/view/View;Landroid/view/View;)I
 mutation|pinMenuRows|pinMenuRows|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuRows(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuSheet(Landroid/view/View;)V
 mutation|boardTabHeader|boardTabHeader|Lapp/hushpinterest/extension/pinterest/ui/BoardTabs;->bind(Landroid/view/View;Ljava/lang/Object;)V

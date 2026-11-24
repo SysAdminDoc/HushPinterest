@@ -1277,6 +1277,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_NAV_SEARCH.key, "Search in the bottom bar", "next time the bar updates");
         summaryContains(Settings.SEARCH_TAB_KEYBOARD.key, "pressing Search in the bottom bar again", "opens the keyboard");
         summaryContains(Settings.BLANK_SEARCH_PAGE.key, "only the search bar", "Searching works as usual", "next time the page updates");
+        summaryContains(Settings.HIDE_SEARCH_SUGGESTIONS.key, "colored searches under the search bar", "filter button stays", "next time you search");
         summaryContains(Settings.HIDE_HOME_TABS.key, "row of tabs", "top of Home", "next time Home updates");
         summaryContains(Settings.HIDE_HEADER_BUTTONS.key, "icon buttons at the end of the top bar", "next time the bar updates", "account controls stay");
         summaryContains(Settings.BLACK_BOTTOM_BAR.key, "In dark mode", "bottom bar pure black", "Light mode stays", "next time the bar redraws");
@@ -1319,6 +1320,10 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_SAVED_PINS.key, "out of your home feed", "Your boards still show them");
         summaryContains(Settings.BACK_LEAVES_HOME.key, "scrolled down Home", "Back leaves Pinterest",
                 "instead of jumping to the top");
+        summaryContains(Settings.HIDE_REFRESH_PILL.key, "pill that offers new pins", "after you've been away",
+                "Pull down on Home");
+        summaryContains(Settings.HIDE_OFFLINE_BANNER.key, "says you're offline, then back online",
+                "next time your connection drops");
         summaryContains(Settings.HIDE_SAVED_PINS_ELSEWHERE.key, "out of search results", "More to explore pins under a pin you open",
                 "Your boards still show them");
         summaryContains(Settings.QUIET_EMAIL_REMINDER.key, "optional reminder to confirm your email", "already open stays", "sign-in still work as usual");

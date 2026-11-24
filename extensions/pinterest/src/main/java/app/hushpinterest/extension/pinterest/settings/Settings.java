@@ -100,6 +100,12 @@ public class Settings extends BaseSettings {
      */
     public static final BooleanSetting BACK_LEAVES_HOME =
             new BooleanSetting("hushpinterest_back_leaves_home", FALSE);
+    /**
+     * Home doesn't show the pill that offers to refresh it after you've been away (#48). Keep Home
+     * feed's patch, its own switch. Off to start.
+     */
+    public static final BooleanSetting HIDE_REFRESH_PILL =
+            new BooleanSetting("hushpinterest_hide_refresh_pill", FALSE);
     /** Its row asks for a restart after turning it off, so a change brings up the restart row. */
     public static final BooleanSetting DISABLE_ANALYTICS =
             new BooleanSetting("hushpinterest_disable_analytics", TRUE, true);
@@ -166,6 +172,9 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_search_history", FALSE);
     public static final BooleanSetting BLANK_SEARCH_PAGE =
             new BooleanSetting("hushpinterest_blank_search_page", FALSE);
+    /** #48: skips the colored suggested searches in the row under the search bar on search results. */
+    public static final BooleanSetting HIDE_SEARCH_SUGGESTIONS =
+            new BooleanSetting("hushpinterest_hide_search_suggestions", FALSE);
     public static final BooleanSetting HIDE_NAV_CREATE =
             new BooleanSetting("hushpinterest_hide_nav_create", FALSE);
     public static final BooleanSetting HIDE_NAV_NOTIFICATIONS =
@@ -239,6 +248,12 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_survey_prompts", FALSE);
     public static final BooleanSetting HIDE_POPUP_BANNERS =
             new BooleanSetting("hushpinterest_hide_popup_banners", FALSE);
+    /**
+     * The banner at the top that says you're offline, then back online, never shows (#48). Hide
+     * pop-up banners' patch, its own switch. Off to start.
+     */
+    public static final BooleanSetting HIDE_OFFLINE_BANNER =
+            new BooleanSetting("hushpinterest_hide_offline_banner", FALSE);
     public static final BooleanSetting HIDE_RELATED_PINS =
             new BooleanSetting("hushpinterest_hide_related_pins", FALSE);
     public static final BooleanSetting HIDE_CREATOR_NAME =

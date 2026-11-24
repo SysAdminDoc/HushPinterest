@@ -460,6 +460,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_home_suggestions": return L10n.t("Hide Home suggestions");
             case "hushpinterest_keep_home_feed": return L10n.t("Keep Home feed");
             case "hushpinterest_back_leaves_home": return L10n.t("Back leaves Home right away");
+            case "hushpinterest_hide_refresh_pill": return L10n.t("Hide the refresh pill");
             case "hushpinterest_disable_analytics": return L10n.t("Disable analytics");
             case "hushpinterest_strip_link_tracking": return L10n.t("Strip link tracking");
             case "hushpinterest_plain_pin_links": return L10n.t("Plain pin links");
@@ -488,6 +489,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_nav_notifications": return L10n.t("Hide Notifications button");
             case "hushpinterest_hide_nav_search": return L10n.t("Hide Search button");
             case "hushpinterest_blank_search_page": return L10n.t("Blank Search page");
+            case "hushpinterest_hide_search_suggestions": return L10n.t("Hide suggested searches");
             case "hushpinterest_hide_home_tabs": return L10n.t("Hide Home tabs");
             case "hushpinterest_search_tab_keyboard": return L10n.t("Second Search tap opens the keyboard");
             case "hushpinterest_hide_header_buttons": return L10n.t("Hide header buttons");
@@ -520,6 +522,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_quiet_email_reminder": return L10n.t("Quiet email reminders");
             case "hushpinterest_hide_survey_prompts": return L10n.t("Hide survey prompts");
             case "hushpinterest_hide_popup_banners": return L10n.t("Hide pop-up banners");
+            case "hushpinterest_hide_offline_banner": return L10n.t("Hide offline banner");
             case "hushpinterest_hide_related_pins": return L10n.t("Hide related pins");
             case "hushpinterest_hide_creator_name": return L10n.t("Hide creator name on pins");
             case "hushpinterest_hide_pin_creator": return L10n.t("Hide pin author");

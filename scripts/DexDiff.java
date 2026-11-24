@@ -282,11 +282,11 @@ public class DexDiff {
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
             Map.entry("blackSheets", 3), Map.entry("blackBoards", 7),
-            Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1),
+            Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1), Map.entry("offlineBanner", 1), Map.entry("refreshPill", 1),
             Map.entry("downloadToasts", 1),
             Map.entry("blackToasts", 1),
             Map.entry("homeTabs", 1),
-            Map.entry("searchLanding", 1),
+            Map.entry("searchLanding", 1), Map.entry("searchSuggestions", 1),
             Map.entry("searchKeyboard", 1),
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
@@ -3653,6 +3653,64 @@ public class DexDiff {
         }
 
         /** The one fragment reading the landing list's id gets its root view before anything else runs. */
+        static final String ONE_BAR_MODULES = "one_bar_modules";
+
+        /**
+         * Hide suggested searches (#48): every reader of the row under the search bar calls one
+         * static (X)ArrayList parser right after naming its key. The hook takes each module right
+         * after the parser casts it, and a yes goes back to the loop's hasNext. The answer borrows a
+         * register nothing reads after the hook.
+         */
+        void searchSuggestions(Contract c) {
+            String hook = c.strings.get(0);
+            Set<String> parsers = new HashSet<>();
+            for (Method reader : clean.methods.values()) {
+                if (reader.getDefiningClass().startsWith(OWN) || reader.getImplementation() == null
+                        || !clean.texts.getOrDefault(reader.toString(), Set.of()).contains(ONE_BAR_MODULES)) continue;
+                List<Instruction> body = instructions(reader);
+                for (int k = 0; k < body.size(); k++) {
+                    if (!(reference(body.get(k)) instanceof StringReference s) || !s.getString().equals(ONE_BAR_MODULES)) continue;
+                    for (int j = k + 1; j < body.size(); j++) {
+                        Instruction i = body.get(j);
+                        if ((i.getOpcode() == Opcode.INVOKE_STATIC || i.getOpcode() == Opcode.INVOKE_STATIC_RANGE)
+                                && reference(i) instanceof MethodReference r && r.getReturnType().equals("Ljava/util/ArrayList;")
+                                && r.getParameterTypes().size() == 1) { parsers.add(r.toString()); break; }
+                    }
+                }
+            }
+            Method original = parsers.size() == 1 ? clean.methods.get(parsers.iterator().next()) : null;
+            if (original == null || original.getImplementation() == null) { capability(c.callee, false); return; }
+            List<Instruction> was = instructions(original);
+            int next = -1, hasNext = -1, nexts = 0, hasNexts = 0;
+            for (int k = 0; k < was.size(); k++) {
+                if (was.get(k).getOpcode() != Opcode.INVOKE_INTERFACE) continue;
+                String called = String.valueOf(reference(was.get(k)));
+                if (called.equals("Ljava/util/Iterator;->next()Ljava/lang/Object;")) { next = k; nexts++; }
+                if (called.equals("Ljava/util/Iterator;->hasNext()Z")) { hasNext = k; hasNexts++; }
+            }
+            boolean shaped = nexts == 1 && hasNexts == 1 && hasNext < next && next + 2 < was.size()
+                    && was.get(next + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT && was.get(next + 2).getOpcode() == Opcode.CHECK_CAST
+                    && firstRegister(was.get(next + 1)) == firstRegister(was.get(next + 2));
+            if (!shaped) { capability(c.callee, false); return; }
+            int module = firstRegister(was.get(next + 1)), at = next + 3;
+            Method m = actual(original);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean hooked = m != null && sites.size() == 1;
+            if (hooked) {
+                List<Instruction> body = instructions(m);
+                Layout layout = new Layout(m.getImplementation());
+                int answer = at + 2 < body.size() ? firstRegister(body.get(at + 1)) : -1;
+                hooked = sites.get(0) == at && arguments(body.get(at)).equals(List.of(module)) && answer >= 0
+                        && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT && body.get(at + 2).getOpcode() == Opcode.IF_NEZ
+                        && firstRegister(body.get(at + 2)) == answer
+                        && layout.addresses.get(at + 2) + ((OffsetInstruction) body.get(at + 2)).getCodeOffset() == layout.addresses.get(hasNext)
+                        && unread(new FeatureFlow(original), was, at, answer);
+                if (hooked) remove(m, at, at + 3);
+                else fail(hook + " doesn't take each module right after the row parser casts it in " + m);
+            }
+            capability(c.callee, hooked);
+        }
+
         void searchLanding(Contract c) {
             String hook = c.strings.get(0);
             Set<String> pages = new TreeSet<>();
@@ -7014,6 +7072,69 @@ public class DexDiff {
             return init + 1;
         }
 
+        static final String MAIN_ACTIVITY = "Lcom/pinterest/activityLibrary/activity/task/activity/MainActivity;";
+
+        /**
+         * Hide offline banner (#48): the main activity's one (Z)V connection handler, the one that
+         * calls two or more ()V methods on its offline bar (the activity field whose class is a
+         * FrameLayout built from the activity and a view), asks first with whether you're online and
+         * returns when the answer is yes, ahead of everything Pinterest's handler does.
+         */
+        void offlineBanner(Contract c) {
+            ClassDef activity = clean.classes.get(MAIN_ACTIVITY);
+            if (activity == null) { capability(c.callee, false); return; }
+            Set<String> bars = new HashSet<>();
+            for (Field f : activity.getFields()) {
+                ClassDef type = clean.classes.get(f.getType());
+                if (type == null || !"Landroid/widget/FrameLayout;".equals(type.getSuperclass())) continue;
+                for (Method m : type.getMethods()) if (m.getName().equals("<init>")
+                        && descriptor(m).equals("(" + MAIN_ACTIVITY + "Landroid/view/View;)V")) bars.add(type.getType());
+            }
+            if (bars.size() != 1) { capability(c.callee, false); return; }
+            String bar = bars.iterator().next();
+            List<Method> handlers = new ArrayList<>();
+            for (Method m : activity.getMethods()) if (m.getImplementation() != null && descriptor(m).equals("(Z)V")
+                    && instructions(m).stream().filter(i -> reference(i) instanceof MethodReference r && r.getDefiningClass().equals(bar)
+                    && descriptor(r).equals("()V")).count() >= 2) handlers.add(m);
+            if (handlers.size() != 1 || handlers.get(0).getImplementation().getRegisterCount() - 2 < 1) { capability(c.callee, false); return; }
+            Method m = actual(handlers.get(0));
+            guard(m, c.strings.get(0), 0, m == null ? List.of() : List.of(parameter(m, 0)), 0, false, false);
+            capability(c.callee, m != null);
+        }
+
+        static final String REFRESH_PROMPT_STUB = "stub_refresh_prompt";
+
+        /**
+         * Hide the refresh pill (#48): Home's one onEventMainThread that reads the pill's stub hands
+         * its event to the presenter (a (Object)V call) before it reads the stub, and the hook asks
+         * right after that call, returning before the pill or its timer when the answer is yes. The
+         * answer borrows a register nothing reads after the hook.
+         */
+        void refreshPill(Contract c) {
+            List<Method> handlers = clean.methods.values().stream().filter(m -> !m.getDefiningClass().startsWith(OWN)
+                    && m.getName().equals("onEventMainThread") && m.getImplementation() != null
+                    && instructions(m).stream().anyMatch(i -> readsId(i, REFRESH_PROMPT_STUB))).toList();
+            if (handlers.size() != 1) { capability(c.callee, false); return; }
+            Method original = handlers.get(0);
+            List<Instruction> was = instructions(original);
+            int taken = -1;
+            for (int k = 0; k < was.size() && taken < 0; k++) if (was.get(k).getOpcode() == Opcode.INVOKE_VIRTUAL
+                    && reference(was.get(k)) instanceof MethodReference r && descriptor(r).equals("(Ljava/lang/Object;)V")) taken = k;
+            final int from = taken + 1;
+            if (taken < 0 || was.subList(from, was.size()).stream().noneMatch(i -> readsId(i, REFRESH_PROMPT_STUB))) {
+                capability(c.callee, false); return;
+            }
+            Method m = actual(original);
+            List<Integer> sites = calls(m, c.strings.get(0), 1);
+            if (m != null && sites.size() == 1) {
+                int answer = from + 1 < instructions(m).size() ? firstRegister(instructions(m).get(from + 1)) : -1;
+                if (answer < 0 || !unread(new FeatureFlow(original), was, from, answer))
+                    fail(c.strings.get(0) + " borrows a register Home's pill handler still reads in " + m);
+            }
+            guard(m, c.strings.get(0), from, List.of(), 0, false, false);
+            capability(c.callee, m != null && sites.size() == 1);
+        }
+
         /**
          * Hide pop-up banners: the education container's one static show method, the one that wires the
          * banner's four click listeners, loads the container from its first parameter, reads the banner
@@ -8562,6 +8683,7 @@ public class DexDiff {
                 replacement(manager + "->" + name + "(" + parameters + ")" + answer, entry + "->" + name + "(" + manager + parameters + ")" + answer, null, true);
             }
             greetingHeader(entry + "->onGreetingHeader(Landroid/view/View;)V");
+            tabLongPress(entry + "->onTabLongPress(Landroid/view/View$OnLongClickListener;)Landroid/view/View$OnLongClickListener;");
             nativeSettings(entry);
         }
 
@@ -8658,6 +8780,48 @@ public class DexDiff {
         }
 
         static final String GREETING_HEADER_ID = "home_feed_greeting_header_view";
+        static final String BOTTOM_BAR = "Lcom/pinterest/navigation/view/FloatingBottomNavBar;";
+
+        /**
+         * Every bottom bar tab's long press goes through the settings entry, which opens the screen
+         * for the Home tab alone (#48): in each bottom bar method that gives a tab its id
+         * (View.setId) and then a two-register setOnLongClickListener, the listener register goes
+         * into the hook and its answer back into that register right in front of the call. A build
+         * whose bar has no such call is left as it was. Found in the clean target, never from the hook.
+         */
+        void tabLongPress(String hook) {
+            ClassDef bar = clean.classes.get(BOTTOM_BAR);
+            if (bar == null) return;
+            for (Method original : bar.getMethods()) {
+                if (original.getImplementation() == null) continue;
+                List<Instruction> was = instructions(original);
+                int id = -1;
+                for (int k = 0; k < was.size() && id < 0; k++) if ("Landroid/view/View;->setId(I)V".equals(String.valueOf(reference(was.get(k))))) id = k;
+                if (id < 0) continue;
+                List<Integer> sites = new ArrayList<>();
+                for (int k = id + 1; k < was.size(); k++) if (was.get(k) instanceof FiveRegisterInstruction set
+                        && (set.getOpcode() == Opcode.INVOKE_VIRTUAL || set.getOpcode() == Opcode.INVOKE_INTERFACE) && set.getRegisterCount() == 2
+                        && reference(set) instanceof MethodReference r && r.getName().equals("setOnLongClickListener")
+                        && descriptor(r).equals("(Landroid/view/View$OnLongClickListener;)V")) sites.add(k);
+                if (sites.isEmpty()) continue;
+                Method m = actual(original);
+                List<Integer> at = calls(m, hook, sites.size());
+                if (m == null || at.size() != sites.size()) continue;
+                List<Instruction> body = instructions(m);
+                for (int n = 0; n < sites.size(); n++) {
+                    int site = sites.get(n), k = at.get(n), listener = ((FiveRegisterInstruction) was.get(site)).getRegisterD();
+                    if (k != site + 2 * n || !arguments(body.get(k)).equals(List.of(listener)) || k + 2 >= body.size()
+                            || body.get(k + 1).getOpcode() != Opcode.MOVE_RESULT_OBJECT || firstRegister(body.get(k + 1)) != listener
+                            || !String.valueOf(reference(body.get(k + 2))).equals(String.valueOf(reference(was.get(site))))
+                            || !arguments(body.get(k + 2)).equals(arguments(was.get(site)))
+                            || !onlyFrom(m, k + 1, k) || !onlyFrom(m, k + 2, k + 1)) {
+                        fail(hook + " doesn't hand over the tab's long press in front of instruction " + site + " of " + m);
+                        continue;
+                    }
+                    remove(m, k, k + 2);
+                }
+            }
+        }
 
         record HeaderSite(Method method, int at, int register) {}
 
@@ -8857,6 +9021,8 @@ public class DexDiff {
                     case "boardMenu": boardMenu(c); break;
                     case "surveyPrompts": surveyPrompts(c); break;
                     case "popupBanners": popupBanners(c); break;
+                    case "offlineBanner": offlineBanner(c); break;
+                    case "refreshPill": refreshPill(c); break;
                     case "relatedPins": relatedPins(c); break;
                     case "creatorName": creatorName(c); break;
                     case "saveSound": saveSound(c); break;
@@ -8865,6 +9031,7 @@ public class DexDiff {
                     case "blackToasts": blackToasts(c); break;
                     case "homeTabs": homeTabs(c); break;
                     case "searchLanding": searchLanding(c); break;
+                    case "searchSuggestions": searchSuggestions(c); break;
                     case "searchKeyboard": searchKeyboard(c); break;
                     case "pinMenuRows": pinMenuRows(c); break;
                     case "boardTabHeader": boardTabHeader(c); break;

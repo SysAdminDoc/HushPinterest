@@ -824,3 +824,9 @@ Show related pins	İlgili pinleri göster
 # context: a Pin page switch on the Interface page, from the Let the screen sleep patch. Pinterest keeps the phone's screen on while one of its videos is on the screen. When this is on, the screen turns off after the phone's normal screen timeout instead. The title is also the patch's name in the build report and in the settings import preview
 Let the screen sleep	Ekranın kapanmasına izin ver
 Pinterest keeps the screen on while a video is on it, playing or not, so an open pin can keep the phone awake. With this on, the screen turns off after your phone's usual timeout, videos included. The change shows on the next pin you open.	Pinterest, ekranda bir video olduğu sürece, oynasın ya da oynamasın, ekranı açık tutar. Bu yüzden açık bir pin telefonu uyanık tutabilir. Bu açıkken ekran, videolarda da telefonunun her zamanki süresi dolunca kapanır. Değişiklik açtığın bir sonraki pinde görünür.
+Hide the refresh pill	Yenileme hapını gizle
+Home no longer shows the pill that offers new pins after you've been away. Pull down on Home when you want them.	Bir süre uzak kaldıktan sonra Ana Sayfa yeni pinler öneren hapı artık göstermez. İstediğinde Ana Sayfa'da aşağı çek.
+Hide offline banner	Çevrimdışı çubuğunu gizle
+The bar at the top that says you're offline, then back online, no longer shows. The change shows the next time your connection drops.	Üstte çevrimdışı olduğunu, sonra yeniden çevrimiçi olduğunu söyleyen çubuk artık görünmez. Değişiklik, bağlantın bir sonraki kopuşunda görünür.
+Hide suggested searches	Önerilen aramaları gizle
+The colored searches under the search bar on search results no longer show. The filter button stays. The change shows the next time you search.	Arama sonuçlarında arama çubuğunun altındaki renkli aramalar artık görünmez. Filtre düğmesi kalır. Değişiklik bir sonraki aramanda görünür.

@@ -78,7 +78,7 @@ public class UiHooksTest {
     // SettingsContextRule must install the context before the registry is first read.
     private static BooleanSetting[] switches() { return new BooleanSetting[] {
             Settings.HIDE_SCREENSHOT_SHARE, Settings.HIDE_ASSISTANT, Settings.HIDE_SEARCH_HISTORY,
-            Settings.BLANK_SEARCH_PAGE,
+            Settings.BLANK_SEARCH_PAGE, Settings.HIDE_SEARCH_SUGGESTIONS,
             Settings.HIDE_NAV_CREATE, Settings.HIDE_NAV_NOTIFICATIONS, Settings.HIDE_NAV_SEARCH, Settings.HIDE_HEADER_BUTTONS,
             Settings.HIDE_HOME_TABS, Settings.SEARCH_TAB_KEYBOARD,
             Settings.BLACK_BOTTOM_BAR, Settings.BLACK_COMMENTS, Settings.BLACK_PIN_MENU, Settings.BLACK_SAVE_SHEET,
@@ -91,7 +91,7 @@ public class UiHooksTest {
             Settings.HIDE_PIN_MENU_ROWS,
             Settings.HIDE_COMMENTS, Settings.HIDE_SUGGESTED_REPLIES, Settings.HIDE_COMMENT_PREVIEWS,
             Settings.HIDE_TOPIC_SUGGESTIONS, Settings.HIDE_INBOX_UPDATES, Settings.QUIET_EMAIL_REMINDER,
-            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.HIDE_HIGHLIGHT_RING, Settings.LET_SCREEN_SLEEP, Settings.HIDE_VISUAL_SEARCH_THUMBNAILS, Settings.CUSTOM_SAVE_SOUND, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE, Settings.BOARD_TAB_COVERS, Settings.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
+            Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_OFFLINE_BANNER, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.HIDE_HIGHLIGHT_RING, Settings.LET_SCREEN_SLEEP, Settings.HIDE_VISUAL_SEARCH_THUMBNAILS, Settings.CUSTOM_SAVE_SOUND, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE, Settings.BOARD_TAB_COVERS, Settings.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
             Settings.DISABLE_UPDATE_NAG, Settings.HIDE_SHOPPING
     }; }
@@ -231,6 +231,20 @@ public class UiHooksTest {
         assertTrue(Settings.HIDE_POPUP_BANNERS.savedValue());
         PauseForTests.resume();
         UiHooks.popupBanner(null);
+    }
+
+    /** #48: the offline bar is skipped only while its switch is on, and back online always goes through. */
+    @Test public void theOfflineBarIsSkippedOnlyWhileItsSwitchIsOnAndOnlineAlwaysGoesThrough() {
+        assertFalse("off by default, the offline bar shows", UiHooks.hideOfflineBanner(0));
+        Settings.HIDE_POPUP_BANNERS.save(true);
+        assertFalse("the banner switch alone leaves it", UiHooks.hideOfflineBanner(0));
+        Settings.HIDE_OFFLINE_BANNER.save(true);
+        assertTrue(UiHooks.hideOfflineBanner(0));
+        assertFalse("back online clears a bar that was already up", UiHooks.hideOfflineBanner(1));
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("offline banner skipped"));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertFalse("paused, the bar shows", UiHooks.hideOfflineBanner(0));
     }
 
     @Test public void relatedPinsAreLeftOutOnlyWhileTheSwitchIsOnAndCounted() {
