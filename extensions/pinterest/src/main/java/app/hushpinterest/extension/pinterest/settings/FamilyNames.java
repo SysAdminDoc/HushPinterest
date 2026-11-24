@@ -61,6 +61,8 @@ public final class FamilyNames {
     public static final String HIDE_PIN_AUTHOR = "Hide pin author";
     public static final String HIDE_PIN_DESCRIPTION = "Hide pin title and description";
     public static final String SHOW_IMAGE_SIZE = "Show image size";
+    public static final String SWIPE_TO_CLOSE_PINS = "Swipe down to close pins";
+    public static final String FULL_SIZE_PROFILE_PHOTOS = "Full-size profile photos";
     public static final String HIDE_HIGHLIGHT_RING = "Hide blue highlight ring";
     public static final String HIDE_VISUAL_SEARCH_THUMBNAILS = "Hide visual search thumbnails";
     public static final String FOLD_RELATED_PINS = "Fold related pins";

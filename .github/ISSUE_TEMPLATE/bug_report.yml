@@ -83,6 +83,7 @@ body:
         - Expand board list
         - Fix push notifications
         - Fold related pins
+        - Full-size profile photos
         - GmsCore support
         - Hide AI-labeled pins
         - Hide ads
@@ -118,6 +119,7 @@ body:
         - Show posted date
         - Spoof signature for Google sign-in
         - Strip link tracking
+        - Swipe down to close pins
         - System share sheet
     validations:
       required: true

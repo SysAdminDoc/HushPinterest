@@ -634,6 +634,15 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Shows a picture's width and height under it when you open a pin, beside the posted date "
                         + "when that's on. It reads the largest copy Pinterest sends the app, which can be smaller "
                         + "than the original upload. Videos show nothing. The change shows on the next pin you open."), SettingsIcons.TOOLS);
+            patchToggle(ui, context, build, PatchFamily.SWIPE_TO_CLOSE_PINS, Settings.SWIPE_TO_CLOSE_PINS,
+                    L10n.t("Swipe down to close pins"),
+                    L10n.t("Close a pin you opened by pulling it down. Pinterest built this gesture but only gives it to "
+                        + "some accounts. Back and the back arrow work as before. The change shows on the next pin you "
+                        + "open."), SettingsIcons.TOOLS);
+            patchToggle(ui, context, build, PatchFamily.FULL_SIZE_PROFILE_PHOTOS, Settings.FULL_SIZE_PROFILE_PHOTOS,
+                    L10n.t("Full-size profile photos"),
+                    L10n.t("Tap someone's profile photo on their profile to see it full size. Pinterest already does this "
+                        + "for some accounts. The change shows on the next profile you open."), SettingsIcons.TOOLS);
             patchToggle(ui, context, build, PatchFamily.HIDE_HIGHLIGHT_RING, Settings.HIDE_HIGHLIGHT_RING,
                     L10n.t("Hide blue highlight ring"),
                     L10n.t("Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature."), SettingsIcons.BLOCK);

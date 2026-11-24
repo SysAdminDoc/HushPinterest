@@ -124,6 +124,8 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.HIDE_PIN_AUTHOR, "Hide pin author");
         ROW_TITLES.put(PatchFamily.HIDE_PIN_DESCRIPTION, "Hide pin title and description");
         ROW_TITLES.put(PatchFamily.SHOW_IMAGE_SIZE, "Show image size");
+        ROW_TITLES.put(PatchFamily.SWIPE_TO_CLOSE_PINS, "Swipe down to close pins");
+        ROW_TITLES.put(PatchFamily.FULL_SIZE_PROFILE_PHOTOS, "Full-size profile photos");
         ROW_TITLES.put(PatchFamily.HIDE_HIGHLIGHT_RING, "Hide blue highlight ring");
         ROW_TITLES.put(PatchFamily.HIDE_VISUAL_SEARCH_THUMBNAILS, "Hide visual search thumbnails");
         ROW_TITLES.put(PatchFamily.FOLD_RELATED_PINS, "Fold related pins");

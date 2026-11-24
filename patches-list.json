@@ -543,6 +543,42 @@
       "options": []
     },
     {
+      "name": "Full-size profile photos",
+      "description": "Opens someone's profile photo full size when you tap it on their profile, the way Pinterest already does for some accounts. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Interface",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "GmsCore support",
       "description": "Lets Google sign-in and push notifications go through microG-RE instead of Google Play services. Pick it only if microG-RE is on your phone. Without microG-RE, Google sign-in and push notifications stop working in the patched app. It brings Spoof signature for Google sign-in along. It isn't selected by default. Works as soon as you patch it in, with no switch.",
       "category": "Privacy",
@@ -1302,7 +1338,7 @@
     {
       "name": "Hide topic suggestions",
       "description": "Hides the Ideas you might love row of topic bubbles under pins, without leaving a gap. Comments and related pins stay. Starts off. Turn it on in HushPinterest settings > Interface.",
-      "category": "Interface",
+      "category": "Pin page",
       "use": true,
       "dependencies": [
         "BytecodePatch",
@@ -1811,6 +1847,42 @@
       "name": "Strip link tracking",
       "description": "Removes tracking tags from links you copy or share from Pinterest. The link still goes to the same place. Its Plain pin links switch also turns short pin.it links into the pin's own pinterest.com link, so they don't show who shared them. Strip link tracking is on by default and Plain pin links starts off. Both are in HushPinterest settings > Privacy.",
       "category": "Privacy",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Swipe down to close pins",
+      "description": "Lets you close a pin you opened by pulling it down, a gesture Pinterest has built but only gives some accounts. Back and the back arrow work as before. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
       "use": true,
       "dependencies": [
         "BytecodePatch",

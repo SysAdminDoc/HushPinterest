@@ -144,6 +144,10 @@ public final class SettingsStatus {
     public static boolean pinDescription() { return false; }
     public static boolean showImageSize() { return false; }
     public static boolean imageSize() { return false; }
+    public static boolean swipeToClosePins() { return false; }
+    public static boolean pullToDismiss() { return false; }
+    public static boolean fullSizeProfilePhotos() { return false; }
+    public static boolean profilePhotoSheet() { return false; }
     public static boolean hideHighlightRing() { return false; }
     public static boolean highlightRing() { return false; }
     public static boolean hideVisualSearchThumbnails() { return false; }

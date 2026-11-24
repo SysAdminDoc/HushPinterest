@@ -286,7 +286,7 @@ public class DexDiff {
             Map.entry("downloadToasts", 1),
             Map.entry("blackToasts", 1),
             Map.entry("homeTabs", 1),
-            Map.entry("searchLanding", 1), Map.entry("searchSuggestions", 1),
+            Map.entry("searchLanding", 1), Map.entry("searchSuggestions", 1), Map.entry("experimentGroup", 1),
             Map.entry("searchKeyboard", 1),
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
@@ -3707,6 +3707,42 @@ public class DexDiff {
                         && unread(new FeatureFlow(original), was, at, answer);
                 if (hooked) remove(m, at, at + 3);
                 else fail(hook + " doesn't take each module right after the row parser casts it in " + m);
+            }
+            capability(c.callee, hooked);
+        }
+
+        static final String EXPERIMENT_ACTIVATED = "_activated";
+
+        /**
+         * Swipe down to close pins and Full-size profile photos (#48): Pinterest's one experiment
+         * group lookup, the only method naming "_activated", asks the extension first with the
+         * experiment's name. A group it answers is returned; null runs the lookup as it was.
+         */
+        void experimentGroup(Contract c) {
+            String hook = c.strings.get(0);
+            List<Method> lookups = new ArrayList<>();
+            for (Method m : clean.methods.values()) {
+                if (m.getDefiningClass().startsWith(OWN) || m.getImplementation() == null) continue;
+                if (clean.texts.getOrDefault(m.toString(), Set.of()).contains(EXPERIMENT_ACTIVATED)) lookups.add(m);
+            }
+            Method original = lookups.size() == 1 ? lookups.get(0) : null;
+            if (original == null || AccessFlags.STATIC.isSet(original.getAccessFlags()) || !original.getReturnType().equals("Ljava/lang/String;")
+                    || original.getParameterTypes().size() != 3 || !original.getParameterTypes().get(0).toString().equals("Ljava/lang/String;")
+                    || !original.getParameterTypes().get(2).toString().equals("Z")) { capability(c.callee, false); return; }
+            Method m = actual(original);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean hooked = m != null && sites.size() == 1;
+            if (hooked) {
+                List<Instruction> body = instructions(m);
+                Layout layout = new Layout(m.getImplementation());
+                int answer = body.size() > 4 ? firstRegister(body.get(1)) : -1;
+                hooked = sites.get(0) == 0 && arguments(body.get(0)).equals(List.of(parameter(m, 0))) && answer >= 0
+                        && body.get(1).getOpcode() == Opcode.MOVE_RESULT_OBJECT
+                        && body.get(2).getOpcode() == Opcode.IF_EQZ && firstRegister(body.get(2)) == answer
+                        && layout.addresses.get(2) + ((OffsetInstruction) body.get(2)).getCodeOffset() == layout.addresses.get(4)
+                        && body.get(3).getOpcode() == Opcode.RETURN_OBJECT && firstRegister(body.get(3)) == answer;
+                if (hooked) remove(m, 0, 4);
+                else fail(hook + " doesn't answer first in the experiment group lookup " + m);
             }
             capability(c.callee, hooked);
         }
@@ -9032,6 +9068,7 @@ public class DexDiff {
                     case "homeTabs": homeTabs(c); break;
                     case "searchLanding": searchLanding(c); break;
                     case "searchSuggestions": searchSuggestions(c); break;
+                    case "experimentGroup": experimentGroup(c); break;
                     case "searchKeyboard": searchKeyboard(c); break;
                     case "pinMenuRows": pinMenuRows(c); break;
                     case "boardTabHeader": boardTabHeader(c); break;

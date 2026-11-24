@@ -264,6 +264,12 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_pin_description", FALSE);
     public static final BooleanSetting SHOW_IMAGE_SIZE =
             new BooleanSetting("hushpinterest_show_image_size", FALSE);
+    /** #48: Pinterest's own pull-down that closes a pin, kept behind an experiment. */
+    public static final BooleanSetting SWIPE_TO_CLOSE_PINS =
+            new BooleanSetting("hushpinterest_swipe_to_close_pins", FALSE);
+    /** #48: someone else's profile photo opens full size when tapped, kept behind an experiment. */
+    public static final BooleanSetting FULL_SIZE_PROFILE_PHOTOS =
+            new BooleanSetting("hushpinterest_full_size_profile_photos", FALSE);
     public static final BooleanSetting HIDE_HIGHLIGHT_RING =
             new BooleanSetting("hushpinterest_hide_highlight_ring", FALSE);
     public static final BooleanSetting HIDE_VISUAL_SEARCH_THUMBNAILS =

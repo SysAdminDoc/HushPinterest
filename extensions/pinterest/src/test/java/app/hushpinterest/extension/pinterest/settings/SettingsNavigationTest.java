@@ -1337,6 +1337,8 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_PIN_AUTHOR.key, "creator's whole row", "picture and name", "next pin you open");
         summaryContains(Settings.HIDE_PIN_DESCRIPTION.key, "title and description", "likes and comments bar stays", "posted date and image size");
         summaryContains(Settings.SHOW_IMAGE_SIZE.key, "width and height", "largest copy", "Videos show nothing");
+        summaryContains(Settings.SWIPE_TO_CLOSE_PINS.key, "pulling it down", "Back and the back arrow", "next pin you open");
+        summaryContains(Settings.FULL_SIZE_PROFILE_PHOTOS.key, "profile photo", "full size", "next profile you open");
         summaryContains(Settings.HIDE_HIGHLIGHT_RING.key, "thick blue ring", "buttons such as Save");
         summaryContains(Settings.HIDE_VISUAL_SEARCH_THUMBNAILS.key, "lens button", "stack of cropped pictures", "next pin you open");
         summaryContains(Settings.FOLD_RELATED_PINS.key, "arrow under a pin", "don't load until you tap it", "last choice is kept", "Hide related pins wins");

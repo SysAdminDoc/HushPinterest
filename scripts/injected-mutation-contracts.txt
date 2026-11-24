@@ -68,6 +68,8 @@ family|hideCreatorName|Hide creator name on pins|creatorName
 family|hidePinAuthor|Hide pin author|pinAuthor
 family|hidePinDescription|Hide pin title and description|pinDescription
 family|showImageSize|Show image size|imageSize
+family|swipeToClosePins|Swipe down to close pins|pullToDismiss
+family|fullSizeProfilePhotos|Full-size profile photos|profilePhotoSheet
 family|hideHighlightRing|Hide blue highlight ring|highlightRing
 family|hideVisualSearchThumbnails|Hide visual search thumbnails|visualSearchThumbnails
 family|foldRelatedPins|Fold related pins|relatedPinsFold
@@ -163,6 +165,7 @@ mutation|downloadToasts|downloadToasts|Lapp/hushpinterest/extension/pinterest/ui
 mutation|blackToasts|blackToasts|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->toast(Landroid/view/View;)V
 mutation|homeTabs|homeTabs|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->homeTabsHeight(Landroid/view/View;II)I
 mutation|searchLanding|searchLanding|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchLanding(Landroid/view/View;)V
+mutation|pullToDismiss,profilePhotoSheet|experimentGroup|Lapp/hushpinterest/extension/pinterest/ui/Experiments;->group(Ljava/lang/String;)Ljava/lang/String;
 mutation|searchSuggestions|searchSuggestions|Lapp/hushpinterest/extension/pinterest/ui/SearchSuggestions;->drop(Ljava/lang/Object;)Z
 mutation|searchKeyboard|searchKeyboard|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchTabPress(Landroid/view/View;Landroid/view/View;)I
 mutation|pinMenuRows|pinMenuRows|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuRows(Landroid/view/View;)V|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuSheet(Landroid/view/View;)V

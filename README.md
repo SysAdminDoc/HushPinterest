@@ -80,7 +80,7 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 50 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 52 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
@@ -98,6 +98,7 @@ There are 50 patches. Where a patch has a switch, its description names the sett
 | `Filter pin menu` | Lets you hide Add to collage, Remix collage, Search image and Promote pin in a pin's menu, each with its own switch. Another switch takes out the rows you pick from a list, including the ones HushPinterest adds. Starts off. Turn them on in HushPinterest settings > Interface. |
 | `Fix push notifications` | Lets the patched app sign up for push notifications. Google's Firebase service only signs Pinterest up when the request names Pinterest's original signature, so this sends that signature's fingerprint and changes nothing else in the request. On by default. Turn it off in HushPinterest settings > Notifications. |
 | `Fold related pins` | Puts an arrow under a pin you open. Related pins stay folded and don't load until you tap it, and tapping again folds them. Your last choice is kept. Hide related pins wins when both are on. Starts off. Turn it on in HushPinterest settings > Interface. |
+| `Full-size profile photos` | Opens someone's profile photo full size when you tap it on their profile, the way Pinterest already does for some accounts. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `GmsCore support` | Lets Google sign-in and push notifications go through microG-RE instead of Google Play services. Pick it only if microG-RE is on your phone. Without microG-RE, Google sign-in and push notifications stop working in the patched app. It brings Spoof signature for Google sign-in along. It isn't selected by default. Works as soon as you patch it in, with no switch. |
 | `Hide AI-labeled pins` | Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. A second switch also takes unlabeled pins whose title or description calls them AI art, or that come from an AI image site. Other AI images still show. Both start off. Turn them on in HushPinterest settings > Feed. |
 | `Hide ads` | Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads. Good for a cleaner feed. On by default. Turn it off in HushPinterest settings > Feed. |
@@ -134,6 +135,7 @@ There are 50 patches. Where a patch has a switch, its description names the sett
 | `Show posted date` | Shows the day a pin was posted under its title when you open it. Pinterest sends that date with every pin but never shows it. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Spoof signature for Google sign-in` | Helps Google sign-in work in the patched app by naming Pinterest's original package and signature. It only helps with microG-RE or the XSpoofSignatures module. Email sign-in doesn't need it. It isn't selected by default. Works as soon as you patch it in, with no switch. |
 | `Strip link tracking` | Removes tracking tags from links you copy or share from Pinterest. The link still goes to the same place. Its Plain pin links switch also turns short pin.it links into the pin's own pinterest.com link, so they don't show who shared them. Strip link tracking is on by default and Plain pin links starts off. Both are in HushPinterest settings > Privacy. |
+| `Swipe down to close pins` | Lets you close a pin you opened by pulling it down, a gesture Pinterest has built but only gives some accounts. Back and the back arrow work as before. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `System share sheet` | Uses Android's own share menu when you share a pin link. Screenshot and download actions work as before. Good if you want your usual share targets. Starts off. Turn it on in HushPinterest settings > Pin actions. |
 
 Every patch but GmsCore support, Spoof signature for Google sign-in and Change package name is in Manager's default selection, and the feature patches need the settings patch. Remove ad tracking permissions has no switch, so its manifest change stays until you patch again without it. The [patch reference](docs/pinterest-14.39.0-patch-reference.md) goes deeper into what each one touches.

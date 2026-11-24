@@ -95,6 +95,7 @@ import app.hushpinterest.extension.pinterest.privacy.PlainPinLinks;
 import app.hushpinterest.extension.pinterest.ui.AmoledBlack;
 import app.hushpinterest.extension.pinterest.ui.CloseupButtons;
 import app.hushpinterest.extension.pinterest.ui.InterfaceControls;
+import app.hushpinterest.extension.pinterest.ui.Experiments;
 import app.hushpinterest.extension.pinterest.ui.PostedDate;
 import app.hushpinterest.extension.pinterest.ui.SearchSuggestions;
 import app.hushpinterest.extension.pinterest.ui.UiHooks;
@@ -602,6 +603,10 @@ public class PausedHooksTest {
         probes.put(Settings.HIDE_PIN_AUTHOR, Collections.singletonList(UiHooksForTests::hidesPinAuthor));
         probes.put(Settings.HIDE_PIN_DESCRIPTION, Collections.singletonList(UiHooksForTests::hidesPinDescription));
         probes.put(Settings.SHOW_IMAGE_SIZE, Collections.singletonList(PausedHooksTest::addsImageSize));
+        probes.put(Settings.SWIPE_TO_CLOSE_PINS, Collections.singletonList(
+                () -> Experiments.group("android_closeup_pull_to_dismiss") != null));
+        probes.put(Settings.FULL_SIZE_PROFILE_PHOTOS, Collections.singletonList(
+                () -> Experiments.group("ce_android_enlarge_other_user_profile_pic") != null));
         probes.put(Settings.HIDE_HIGHLIGHT_RING, Collections.singletonList(UiHooks::hideHighlightRing));
         probes.put(Settings.HIDE_VISUAL_SEARCH_THUMBNAILS, Collections.singletonList(PausedHooksTest::withholdsVisualSearchCrops));
         probes.put(Settings.FOLD_RELATED_PINS, Collections.singletonList(UiHooksForTests::foldSwitchedOn));

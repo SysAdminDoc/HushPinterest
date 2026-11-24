@@ -528,6 +528,8 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_pin_creator": return L10n.t("Hide pin author");
             case "hushpinterest_hide_pin_description": return L10n.t("Hide pin title and description");
             case "hushpinterest_show_image_size": return L10n.t("Show image size");
+            case "hushpinterest_swipe_to_close_pins": return L10n.t("Swipe down to close pins");
+            case "hushpinterest_full_size_profile_photos": return L10n.t("Full-size profile photos");
             case "hushpinterest_hide_highlight_ring": return L10n.t("Hide blue highlight ring");
             case "hushpinterest_hide_visual_search_thumbnails": return L10n.t("Hide visual search thumbnails");
             case "hushpinterest_fold_related_pins": return L10n.t("Fold related pins");
