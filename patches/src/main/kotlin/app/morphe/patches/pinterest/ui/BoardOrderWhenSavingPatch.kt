@@ -6,7 +6,6 @@
  */
 package app.morphe.patches.pinterest.ui
 
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -171,9 +170,9 @@ val boardOrderWhenSavingPatch = bytecodePatch(
         for (at in returns.sortedDescending()) {
             val answer = (getter.instructions()[at] as OneRegisterInstruction).registerA
             val key = getter.freeLocalsAt("$PATCH: the user's board order", at, 1, highest = 255, reads = listOf(answer)).single()
-            // In front of the return, its label staying on it: the control flow label helper would move
-            // that label, the null check's target included, onto the check itself, a loop on no user.
-            reads.addInstructionsWithLabels(at, """
+            // In front of the return, where anything that jumps to it now comes too; the null check
+            // skips to the return itself.
+            reads.addInstructionsAtControlFlowLabel(at, """
                 if-eqz v$answer, :hush_board_order_kept
                 ${profile.sortKeyCall} { v$answer .. v$answer }, ${profile.sortKey}
                 move-result-object v$key
