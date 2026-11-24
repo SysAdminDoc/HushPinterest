@@ -446,12 +446,15 @@ public final class CloseupButtons {
         return PAINTED.containsKey(button);
     }
 
-    /** Pinterest's red, in light or dark mode, and not the gray or black of Saved. */
+    /**
+     * Pinterest's red, #E60023 in light mode and the lighter #F84F4F (saturation 0.68) its buttons
+     * take in dark mode, and not the gray or black of Saved or a pale pink like #FF8F8F.
+     */
     private static boolean red(@Nullable ColorStateList colors) {
         if (colors == null) return false;
         float[] hsv = new float[3];
         Color.colorToHSV(colors.getDefaultColor(), hsv);
-        return (hsv[0] >= 340f || hsv[0] <= 10f) && hsv[1] >= 0.75f && hsv[2] >= 0.6f;
+        return (hsv[0] >= 340f || hsv[0] <= 10f) && hsv[1] >= 0.6f && hsv[2] >= 0.6f;
     }
 
     /** The way Pinterest colors a Gestalt button: the background's tint and its shape's under a ripple. */

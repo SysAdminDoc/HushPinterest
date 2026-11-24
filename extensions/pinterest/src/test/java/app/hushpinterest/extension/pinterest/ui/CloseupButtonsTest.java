@@ -465,6 +465,23 @@ public class CloseupButtonsTest {
         assertEquals("no color picked, nothing to paint", RED, tint(follow));
     }
 
+    /**
+     * #48: in dark mode Pinterest draws Follow and its other red buttons in its lighter red, #F84F4F
+     * (S25, profile Follow), and the switch paints that red too. A pale pink stays as it is.
+     */
+    @Test public void theSwitchPaintsPinterestsDarkModeRedToo() {
+        SaveButtonColorSetting.SAVE_BUTTON_COLOR.save("#3366FF");
+        Settings.SAVE_COLOR_ON_RED_BUTTONS.save(true);
+        Button follow = gestaltButton(View.generateViewId());
+        style(follow, 0xFFF84F4F, WHITE);
+        assertEquals("dark mode's red", 0xFF3366FF, tint(follow));
+
+        Button pink = gestaltButton(View.generateViewId());
+        style(pink, 0xFFFF8F8F, BLACK);
+        assertEquals("a pale pink isn't Pinterest's red", 0xFFFF8F8F, tint(pink));
+        assertEquals(BLACK, pink.getCurrentTextColor());
+    }
+
     @Test public void pausedOtherRedButtonsArePinterestsAgain() {
         Settings.SAVE_COLOR_ON_RED_BUTTONS.save(true);
         SaveButtonColorSetting.SAVE_BUTTON_COLOR.save("#3366FF");
