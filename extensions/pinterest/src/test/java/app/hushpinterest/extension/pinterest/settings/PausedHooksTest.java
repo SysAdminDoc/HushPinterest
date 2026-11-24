@@ -78,6 +78,7 @@ import java.util.function.Function;
 
 import app.hushpinterest.extension.pinterest.actions.BoardDownloads;
 import app.hushpinterest.extension.pinterest.actions.ExternalBrowser;
+import app.hushpinterest.extension.pinterest.actions.PinchZoom;
 import app.hushpinterest.extension.pinterest.actions.LongPressDownloadForTests;
 import app.hushpinterest.extension.pinterest.actions.LongPressDownloadTest;
 import app.hushpinterest.extension.pinterest.actions.PinDownloads;
@@ -636,6 +637,9 @@ public class PausedHooksTest {
             UiHooks.profileBoardSort("custom");
             return !"alphabetical".equals(UiHooks.boardPickerSort("alphabetical"));
         }));
+        probes.put(Settings.NO_PIN_VIDEO_AUTOPLAY, Collections.singletonList(() -> UiHooks.pinVideoWaits() != 0));
+        probes.put(Settings.START_PIN_VIDEOS_MUTED, Collections.singletonList(() -> UiHooks.pinVideoStartsMuted() != 0));
+        probes.put(Settings.PINCH_TO_ZOOM_ONLY, Collections.singletonList(() -> PinchZoom.pinch(null) != 0));
         probes.put(Settings.DISABLE_UPDATE_NAG, Collections.singletonList(UiHooks::disableUpdateNag));
         probes.put(Settings.FIX_PUSH_NOTIFICATIONS, Collections.singletonList(PushNotificationsTest::fixesACertificate));
         return probes;

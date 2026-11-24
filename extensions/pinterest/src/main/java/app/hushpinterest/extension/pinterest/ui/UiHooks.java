@@ -504,6 +504,29 @@ public final class UiHooks {
         return wanted;
     }
 
+    /**
+     * #48, Don't autoplay pin videos. 1 when a video Pinterest has nothing saved for should wait
+     * paused for a tap on play, and when a pin page you leave should keep its video paused for when
+     * you come back. Idea pin pages ask too before they play their page's video. 0 keeps Pinterest's
+     * own start. The answer goes straight into Pinterest's paused flag, so it's only ever 0 or 1.
+     */
+    public static int pinVideoWaits() {
+        if (!enabled(FamilyNames.PIN_VIDEO_PLAYBACK, Settings.NO_PIN_VIDEO_AUTOPLAY)) return 0;
+        HookStatus.counted(FamilyNames.PIN_VIDEO_PLAYBACK, "video waits for play");
+        return 1;
+    }
+
+    /**
+     * #48, Start pin videos muted. 1 when the video of a pin you just opened or swiped to should
+     * start with the sound off. The answer goes straight into Pinterest's sound flag, so it's only
+     * ever 0 or 1. The speaker button still turns the sound on for that video.
+     */
+    public static int pinVideoStartsMuted() {
+        if (!enabled(FamilyNames.PIN_VIDEO_PLAYBACK, Settings.START_PIN_VIDEOS_MUTED)) return 0;
+        HookStatus.counted(FamilyNames.PIN_VIDEO_PLAYBACK, "video started muted");
+        return 1;
+    }
+
     /** True has Pinterest's image model answer its original rendition first, where it has one. */
     public static boolean originalImages() {
         return enabled(FamilyNames.ORIGINAL_IMAGES, Settings.ORIGINAL_IMAGES);

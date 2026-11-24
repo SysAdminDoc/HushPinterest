@@ -180,6 +180,11 @@ public final class SettingsStatus {
     public static boolean boardListHeight() { return false; }
     public static boolean boardOrderWhenSaving() { return false; }
     public static boolean boardPickerSort() { return false; }
+    public static boolean pinVideoPlayback() { return false; }
+    public static boolean pinVideoAutoplay() { return false; }
+    public static boolean pinVideoSound() { return false; }
+    public static boolean pinchToZoomOnly() { return false; }
+    public static boolean pinchZoomViewer() { return false; }
     public static boolean disableUpdateNag() { return false; }
     public static boolean updateNag() { return false; }
     public static boolean fixPushNotifications() { return false; }

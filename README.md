@@ -80,7 +80,7 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 54 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 56 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
@@ -131,6 +131,8 @@ There are 54 patches. Where a patch has a switch, its description names the sett
 | `No screenshot share menu` | Stops Pinterest from popping up sharing suggestions after you take a screenshot. Screenshots still work as usual. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Open links in your browser` | Opens a pin's Visit link and profile websites in your web browser. Pinterest links and sign-in work as before. Good if you prefer your own browser. Starts off. Turn it on in HushPinterest settings > Links. |
 | `Original-quality images` | Loads the original image for each pin and in collages, instead of the large size. Pictures look sharper but use more data. Starts off. Turn it on in HushPinterest settings > Interface. |
+| `Pin video playback` | Lets a video on a pin you open or swipe to wait for you to tap play, and start with the sound off. Two switches, both start off. Turn them on in HushPinterest settings > Interface. |
+| `Pinch to zoom only` | Pinching a pin's picture opens it full screen to zoom and drag, instead of loading pins that look like it. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Quiet email reminders` | Dismisses the optional reminder to confirm your email. Account checks and sign-in still work as usual. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Remove ad tracking permissions` | Removes Google's advertising ID permission and Android's Privacy Sandbox ad services from Pinterest, so it can't use them. Google Play services then answers with zeros. Works as soon as you patch it in, with no switch. |
 | `Show image size` | Shows a picture's width and height under it when you open a pin, beside the posted date when that's on. It reads the largest copy Pinterest sends the app, which can be smaller than the original upload. Videos show nothing. Starts off. Turn it on in HushPinterest settings > Interface. |

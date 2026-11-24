@@ -311,6 +311,15 @@ public class Settings extends BaseSettings {
     /** #48: the Save to sheet lists your boards in your profile's order instead of A to Z. */
     public static final BooleanSetting BOARD_ORDER_WHEN_SAVING =
             new BooleanSetting("hushpinterest_board_order_when_saving", FALSE);
+    /** #48: a pin page's video waits for a tap on play instead of starting on its own. */
+    public static final BooleanSetting NO_PIN_VIDEO_AUTOPLAY =
+            new BooleanSetting("hushpinterest_no_pin_video_autoplay", FALSE);
+    /** #48: a pin page's video starts with the sound off. */
+    public static final BooleanSetting START_PIN_VIDEOS_MUTED =
+            new BooleanSetting("hushpinterest_start_pin_videos_muted", FALSE);
+    /** #48: a pinch on a pin's picture opens it full screen instead of loading pins that look like it. */
+    public static final BooleanSetting PINCH_TO_ZOOM_ONLY =
+            new BooleanSetting("hushpinterest_pinch_to_zoom_only", FALSE);
     public static final BooleanSetting DISABLE_UPDATE_NAG =
             new BooleanSetting("hushpinterest_disable_update_nag", FALSE);
 

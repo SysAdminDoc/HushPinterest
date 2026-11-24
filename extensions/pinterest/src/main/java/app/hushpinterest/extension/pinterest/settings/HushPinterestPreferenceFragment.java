@@ -647,6 +647,14 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Best video quality"),
                     L10n.t("Plays videos at the largest size Pinterest has instead of capping them. Pinterest already does "
                         + "this for some accounts. It uses more data. The change shows on the next video you open."), SettingsIcons.TOOLS);
+            patchToggle(ui, context, build, PatchFamily.PIN_VIDEO_PLAYBACK, Settings.NO_PIN_VIDEO_AUTOPLAY,
+                    L10n.t("Don't autoplay pin videos"),
+                    L10n.t("A video on a pin you open or swipe to waits for you to tap play instead of starting on its own. "
+                        + "A pin you go back to stays paused too. The change shows on the next pin you open."), SettingsIcons.TOOLS);
+            patchToggle(ui, context, build, PatchFamily.PIN_VIDEO_PLAYBACK, Settings.START_PIN_VIDEOS_MUTED,
+                    L10n.t("Start pin videos muted"),
+                    L10n.t("Every pin video you open or swipe to starts with the sound off, even if you turned it on for the "
+                        + "last one. Tap the speaker to hear it. The change shows on the next pin you open."), SettingsIcons.TOOLS);
             patchToggle(ui, context, build, PatchFamily.HIDE_HIGHLIGHT_RING, Settings.HIDE_HIGHLIGHT_RING,
                     L10n.t("Hide blue highlight ring"),
                     L10n.t("Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature."), SettingsIcons.BLOCK);
@@ -654,6 +662,10 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Hide visual search thumbnails"),
                     L10n.t("Keeps a pin's lens button plain, without the little stack of cropped pictures Pinterest "
                         + "puts on it. The change shows on the next pin you open."), SettingsIcons.BLOCK);
+            patchToggle(ui, context, build, PatchFamily.PINCH_TO_ZOOM_ONLY, Settings.PINCH_TO_ZOOM_ONLY,
+                    L10n.t("Pinch to zoom only"),
+                    L10n.t("Pinching a pin's picture opens it full screen, where you can zoom in and drag it around, instead "
+                        + "of loading pins that look like it. The change shows the next time you pinch a pin."), SettingsIcons.TOOLS);
             patchToggle(ui, context, build, PatchFamily.HIDE_RELATED_PINS, Settings.HIDE_RELATED_PINS,
                     L10n.t("Hide related pins"),
                     L10n.t("Leaves the grid of more pins out from under a pin you open, so it doesn't load. "

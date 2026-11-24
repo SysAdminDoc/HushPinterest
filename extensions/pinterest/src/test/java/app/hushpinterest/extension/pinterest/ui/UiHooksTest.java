@@ -95,6 +95,7 @@ public class UiHooksTest {
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
             Settings.SWIPE_TO_CLOSE_PINS, Settings.FULL_SIZE_PROFILE_PHOTOS,
             Settings.BEST_VIDEO_QUALITY, Settings.BOARD_ORDER_WHEN_SAVING,
+            Settings.NO_PIN_VIDEO_AUTOPLAY, Settings.START_PIN_VIDEOS_MUTED,
             Settings.DISABLE_UPDATE_NAG, Settings.HIDE_SHOPPING
     }; }
 
@@ -226,6 +227,28 @@ public class UiHooksTest {
         Settings.BOARD_ORDER_WHEN_SAVING.save(true);
         assertEquals("alphabetical", UiHooks.boardPickerSort("alphabetical"));
         assertNull(UiHooks.boardPickerSort(null));
+    }
+
+    @Test public void pinVideosWaitForPlayOnlyWhileTheirSwitchIsOn() {
+        assertEquals("off by default, Pinterest starts them", 0, UiHooks.pinVideoWaits());
+        Settings.NO_PIN_VIDEO_AUTOPLAY.save(true);
+        assertEquals(1, UiHooks.pinVideoWaits());
+        assertEquals("the sound has its own switch", 0, UiHooks.pinVideoStartsMuted());
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("video waits for play"));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertEquals("paused, Pinterest starts them", 0, UiHooks.pinVideoWaits());
+    }
+
+    @Test public void pinVideosStartMutedOnlyWhileTheirSwitchIsOn() {
+        assertEquals("off by default, Pinterest's own sound", 0, UiHooks.pinVideoStartsMuted());
+        Settings.START_PIN_VIDEOS_MUTED.save(true);
+        assertEquals(1, UiHooks.pinVideoStartsMuted());
+        assertEquals("autoplay has its own switch", 0, UiHooks.pinVideoWaits());
+        String report = String.join("\n", HookStatus.report());
+        assertTrue(report, report.contains("video started muted"));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertEquals("paused, Pinterest's own sound", 0, UiHooks.pinVideoStartsMuted());
     }
 
     @Test public void surveyInvitesAndSponsoredPollsAreSkippedOnlyWhileTheSwitchIsOnAndCounted() {

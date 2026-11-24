@@ -547,6 +547,9 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_suggested_boards": return L10n.t("Hide suggested boards");
             case "hushpinterest_expand_board_list": return L10n.t("Expand board list");
             case "hushpinterest_board_order_when_saving": return L10n.t("Board order when saving");
+            case "hushpinterest_no_pin_video_autoplay": return L10n.t("Don't autoplay pin videos");
+            case "hushpinterest_start_pin_videos_muted": return L10n.t("Start pin videos muted");
+            case "hushpinterest_pinch_to_zoom_only": return L10n.t("Pinch to zoom only");
             case "hushpinterest_disable_update_nag": return L10n.t("Disable update nag");
             case "hushpinterest_fix_push_notifications": return L10n.t("Fix push notifications");
             default: throw new IllegalArgumentException("Unlisted backup switch");

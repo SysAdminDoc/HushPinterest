@@ -84,6 +84,8 @@ family|showPostedDate|Show posted date|postedDate
 family|hideSuggestedBoards|Hide suggested boards|suggestedBoards
 family|expandBoardList|Expand board list|boardListHeight
 family|boardOrderWhenSaving|Board order when saving|boardPickerSort
+family|pinVideoPlayback|Pin video playback|pinVideoAutoplay,pinVideoSound
+family|pinchToZoomOnly|Pinch to zoom only|pinchZoomViewer
 family|disableUpdateNag|Disable update nag|updateNag
 family|fixPushNotifications|Fix push notifications|firebaseCertificate
 
@@ -129,6 +131,9 @@ mutation|blackBoards|blackBoards|Lapp/hushpinterest/extension/pinterest/ui/Amole
 mutation|suggestedBoards|suggestedBoard|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->suggestedBoard(Ljava/util/Collection;Ljava/lang/Object;)V
 mutation|boardListHeight|boardListHeight|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->saveSheetHeight(I)I
 mutation|boardPickerSort|boardOrder|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->boardPickerSort(Ljava/lang/String;)Ljava/lang/String;|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->profileBoardSort(Ljava/lang/String;)V
+mutation|pinVideoAutoplay|pinVideoAutoplay|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->pinVideoWaits()I
+mutation|pinVideoSound|pinVideoSound|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->pinVideoStartsMuted()I
+mutation|pinchZoomViewer|pinchZoom|Lapp/hushpinterest/extension/pinterest/actions/PinchZoom;->pinch(Ljava/lang/Object;)I
 mutation|pinMenuItems|menu|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->pinMenuItem(Landroid/view/View;Ljava/lang/String;)V|overflow_menu_add_to_collage,overflow_menu_remix_collage,contextmenu_visual_search_image,overflow_menu_pin_boost
 mutation|comments|comments|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentsVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentsMeasureSpec(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentsVisible(Z)Z|Lcom/pinterest/activity/pin/view/modules/PinCloseupBaseModule;|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentPreviewsVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->commentPreviewsMeasureSpec(I)I|Lcom/pinterest/activity/pin/view/unifiedcomments/CommentsImagesView;
 mutation|suggestedReplies|views|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->suggestedRepliesVisibility(I)I|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->suggestedRepliesMeasureSpec(I)I|Lcom/pinterest/activity/pin/view/unifiedcomments/CommentsQuickReplies;

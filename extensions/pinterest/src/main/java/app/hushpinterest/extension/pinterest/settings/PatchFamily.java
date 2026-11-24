@@ -130,6 +130,9 @@ public enum PatchFamily {
     HIDE_SUGGESTED_BOARDS(FamilyNames.HIDE_SUGGESTED_BOARDS, "hideSuggestedBoards", null, Settings.HIDE_SUGGESTED_BOARDS),
     EXPAND_BOARD_LIST(FamilyNames.EXPAND_BOARD_LIST, "expandBoardList", null, Settings.EXPAND_BOARD_LIST),
     BOARD_ORDER_WHEN_SAVING(FamilyNames.BOARD_ORDER_WHEN_SAVING, "boardOrderWhenSaving", null, Settings.BOARD_ORDER_WHEN_SAVING),
+    PIN_VIDEO_PLAYBACK(FamilyNames.PIN_VIDEO_PLAYBACK, "pinVideoPlayback", null, Settings.NO_PIN_VIDEO_AUTOPLAY,
+            Settings.START_PIN_VIDEOS_MUTED),
+    PINCH_TO_ZOOM_ONLY(FamilyNames.PINCH_TO_ZOOM_ONLY, "pinchToZoomOnly", null, Settings.PINCH_TO_ZOOM_ONLY),
     DISABLE_UPDATE_NAG(FamilyNames.DISABLE_UPDATE_NAG, "disableUpdateNag", null, Settings.DISABLE_UPDATE_NAG),
     FIX_PUSH_NOTIFICATIONS(FamilyNames.FIX_PUSH_NOTIFICATIONS, "fixPushNotifications", null, Settings.FIX_PUSH_NOTIFICATIONS);
 
@@ -187,7 +190,8 @@ public enum PatchFamily {
             HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
             HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, HIDE_PIN_AUTHOR, HIDE_PIN_DESCRIPTION, SHOW_IMAGE_SIZE, SWIPE_TO_CLOSE_PINS, FULL_SIZE_PROFILE_PHOTOS, BEST_VIDEO_QUALITY, HIDE_HIGHLIGHT_RING, HIDE_VISUAL_SEARCH_THUMBNAILS, FOLD_RELATED_PINS, LET_SCREEN_SLEEP, BOARD_TABS,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
-            HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST, BOARD_ORDER_WHEN_SAVING));
+            HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST, BOARD_ORDER_WHEN_SAVING,
+            PIN_VIDEO_PLAYBACK, PINCH_TO_ZOOM_ONLY));
 
     /** Each independent hook, its owning family and the flag set only after it was inserted. */
     public enum Capability {
@@ -286,6 +290,9 @@ public enum PatchFamily {
         SUGGESTED_BOARDS(HIDE_SUGGESTED_BOARDS, "suggestedBoards", "Hide suggested boards"),
         BOARD_LIST_HEIGHT(EXPAND_BOARD_LIST, "boardListHeight", "Expand board list"),
         BOARD_PICKER_SORT(BOARD_ORDER_WHEN_SAVING, "boardPickerSort", "Board order when saving"),
+        PIN_VIDEO_AUTOPLAY(PIN_VIDEO_PLAYBACK, "pinVideoAutoplay", "Don't autoplay pin videos"),
+        PIN_VIDEO_SOUND(PIN_VIDEO_PLAYBACK, "pinVideoSound", "Start pin videos muted"),
+        PINCH_ZOOM_VIEWER(PINCH_TO_ZOOM_ONLY, "pinchZoomViewer", "Pinch to zoom only"),
         UPDATE_NAG(DISABLE_UPDATE_NAG, "updateNag", "Disable update nag"),
         SIGN_IN_FAILURE(GMS_CORE_SUPPORT, "signInFailure", "Google sign-in failure message"),
         FIREBASE_CERTIFICATE(FIX_PUSH_NOTIFICATIONS, "firebaseCertificate", "Fix push notifications");

@@ -281,6 +281,7 @@ public class DexDiff {
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
             Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1), Map.entry("boardOrder", 2),
+            Map.entry("pinVideoAutoplay", 1), Map.entry("pinVideoSound", 1), Map.entry("pinchZoom", 1),
             Map.entry("blackSheets", 3), Map.entry("blackBoards", 7),
             Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1), Map.entry("offlineBanner", 1), Map.entry("refreshPill", 1),
             Map.entry("downloadToasts", 1),
@@ -7603,6 +7604,350 @@ public class DexDiff {
             capability(c.callee, asked && told);
         }
 
+        static final String ORGANIC_CLOSEUP = "Lcom/pinterest/feature/pin/closeup/presenter/OrganicPinCloseupPresenter;",
+                PROMOTED_CLOSEUP = "Lcom/pinterest/feature/pin/closeup/presenter/PromotedPinCloseupPresenter;",
+                UNBIND_RESET = "onUnbind$lambda$0",
+                VIDEO_MANAGER_EXPERIMENT = "android_global_nav_impression_tracking_modification",
+                PIN_CLOSEUP_SURFACE = "PIN_CLOSEUP",
+                ROUNDED_CORNERS_LAYOUT = "Lcom/pinterest/design/widget/RoundedCornersLayout;",
+                PINCH_CONTEXT = "Lcom/pinterest/feature/search/visual/PinchToZoomTransitionContext;",
+                PINCH_HANDLER = "onHandleTransitionFromPinchToZoom", PINCH_SOURCE = "p2z";
+
+        /** The saved video state getter the organic pin page's unbind reads its pin's state with, right before its one reset. */
+        MethodReference videoStateGetter() {
+            Method unbind = clean.methods.get(ORGANIC_CLOSEUP + "->onUnbind()V");
+            if (unbind == null || unbind.getImplementation() == null) return null;
+            List<Instruction> body = instructions(unbind);
+            MethodReference found = null;
+            int resets = 0;
+            for (int at = 2; at < body.size(); at++) {
+                if (body.get(at).getOpcode() != Opcode.INVOKE_STATIC || !(reference(body.get(at)) instanceof MethodReference reset)
+                        || !reset.getDefiningClass().equals(ORGANIC_CLOSEUP) || !reset.getName().equals(UNBIND_RESET)) continue;
+                resets++;
+                if (body.get(at - 2).getOpcode() == Opcode.INVOKE_STATIC && reference(body.get(at - 2)) instanceof MethodReference got
+                        && descriptor(got).startsWith("(Ljava/lang/String;)") && descriptor(reset).equals("(" + got.getReturnType() + ")Lkotlin/Unit;"))
+                    found = got;
+            }
+            return resets == 1 ? found : null;
+        }
+
+        /** The return of the fresh state [m] builds when the saved one it cast to [state] is null, in one straight run. -1 when there's none. */
+        int freshReturn(Method m, String state) {
+            List<Instruction> body = instructions(m);
+            Layout layout = new Layout(m.getImplementation());
+            int cast = -1, casts = 0;
+            for (int at = 0; at < body.size(); at++)
+                if (body.get(at).getOpcode() == Opcode.CHECK_CAST && reference(body.get(at)) instanceof TypeReference t && t.getType().equals(state)) {
+                    cast = at;
+                    casts++;
+                }
+            if (casts != 1 || cast + 1 >= body.size() || body.get(cast + 1).getOpcode() != Opcode.IF_EQZ
+                    || firstRegister(body.get(cast + 1)) != firstRegister(body.get(cast))) return -1;
+            int start = branchTarget(layout, cast + 1);
+            if (start < 0) return -1;
+            FeatureFlow graph = new FeatureFlow(m);
+            for (int at = start; at < body.size(); at++) {
+                if (at > start && !onlyFrom(graph, at, at - 1)) return -1;
+                if (body.get(at).getOpcode() == Opcode.RETURN_OBJECT) return at;
+                if (body.get(at) instanceof OffsetInstruction || body.get(at).getOpcode() == Opcode.THROW) return -1;
+            }
+            return -1;
+        }
+
+        /**
+         * The index of the play in [m] when [m] is the idea pin page's start of its video: no
+         * parameters, it reads and clears another class's pending flag, seeks the video to a time
+         * and plays it. -1 otherwise.
+         */
+        int ideaPinPlay(Method m) {
+            if (m.getImplementation() == null || !m.getParameterTypes().isEmpty() || !m.getReturnType().equals("V")) return -1;
+            List<Instruction> body = instructions(m);
+            int play = -1, plays = 0;
+            for (int at = 0; at < body.size(); at++)
+                if (body.get(at).getOpcode() == Opcode.INVOKE_INTERFACE && reference(body.get(at)) instanceof MethodReference r
+                        && r.getName().equals("play") && descriptor(r).equals("()V")) {
+                    play = at;
+                    plays++;
+                }
+            if (plays != 1 || play < 1 || play + 1 >= body.size()) return -1;
+            MethodReference played = (MethodReference) reference(body.get(play));
+            if (body.get(play - 1).getOpcode() != Opcode.INVOKE_INTERFACE || !(reference(body.get(play - 1)) instanceof MethodReference seek)
+                    || !seek.getDefiningClass().equals(played.getDefiningClass()) || !descriptor(seek).equals("(JZ)V")
+                    || arguments(body.get(play)).size() != 1 || arguments(body.get(play - 1)).isEmpty()
+                    || !arguments(body.get(play - 1)).get(0).equals(arguments(body.get(play)).get(0))) return -1;
+            Set<String> read = new HashSet<>(), cleared = new HashSet<>();
+            for (int at = 0; at < play; at++) {
+                if (!(reference(body.get(at)) instanceof FieldReference f) || f.getDefiningClass().equals(m.getDefiningClass())) continue;
+                if (body.get(at).getOpcode() == Opcode.IGET_BOOLEAN) read.add(f.toString());
+                if (body.get(at).getOpcode() == Opcode.IPUT_BOOLEAN) cleared.add(f.toString());
+            }
+            read.retainAll(cleared);
+            return read.isEmpty() ? -1 : play;
+        }
+
+        /**
+         * Pin video playback (#48), Don't autoplay pin videos. The saved video state getter asks the
+         * hook right in front of returning the fresh state it builds for a video with nothing saved,
+         * and stores the answer in that state's paused flag. Each pin page's unbind reset stores the
+         * hook's answer in place of its false. The idea pin page's start asks right in front of its
+         * play and skips only the play on yes.
+         */
+        void pinVideoAutoplay(Contract c) {
+            String hook = c.strings.get(0);
+            MethodReference getter = videoStateGetter();
+            if (getter == null) fail("the organic pin page's unbind no longer reads its video's saved state right before its reset");
+            String state = getter == null ? null : getter.getReturnType();
+            boolean ok = getter != null;
+            String paused = null;
+            for (String type : List.of(ORGANIC_CLOSEUP, PROMOTED_CLOSEUP)) {
+                Method reset = state == null ? null : clean.methods.get(type + "->" + UNBIND_RESET + "(" + state + ")Lkotlin/Unit;");
+                if (reset == null || reset.getImplementation() == null) {
+                    if (state != null) fail(type + " has no reset of its video's saved state");
+                    ok = false;
+                    continue;
+                }
+                List<Instruction> before = instructions(reset);
+                int store = -1, stores = 0;
+                for (int at = 0; at < before.size(); at++) if (before.get(at).getOpcode() == Opcode.IPUT_BOOLEAN) { store = at; stores++; }
+                if (stores != 1 || store < 1 || before.get(store - 1).getOpcode() != Opcode.CONST_4
+                        || ((NarrowLiteralInstruction) before.get(store - 1)).getNarrowLiteral() != 0
+                        || firstRegister(before.get(store - 1)) != firstRegister(before.get(store))) {
+                    fail(type + "'s reset no longer stores a false in its video's saved state");
+                    ok = false;
+                    continue;
+                }
+                String flag = String.valueOf(reference(before.get(store)));
+                if (paused == null) paused = flag;
+                else if (!paused.equals(flag)) { fail("the two pin pages reset different flags"); ok = false; }
+                Method m = actual(reset);
+                List<Integer> sites = calls(m, hook, 1);
+                if (m == null || sites.size() != 1) { ok = false; continue; }
+                List<Instruction> body = instructions(m);
+                int at = sites.get(0), register = firstRegister(before.get(store - 1));
+                boolean placed = at == store && at + 2 < body.size() && arguments(body.get(at)).isEmpty()
+                        && body.get(at - 1).getOpcode() == Opcode.CONST_4
+                        && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT && firstRegister(body.get(at + 1)) == register
+                        && body.get(at + 2).getOpcode() == Opcode.IPUT_BOOLEAN && firstRegister(body.get(at + 2)) == register
+                        && String.valueOf(reference(body.get(at + 2))).equals(flag)
+                        && onlyFrom(m, at + 1, at) && onlyFrom(m, at + 2, at + 1);
+                if (placed) remove(m, at, at + 2);
+                else { fail(hook + " doesn't hand its answer to the flag " + m + " clears"); ok = false; }
+            }
+
+            Method stock = getter == null ? null : clean.methods.get(getter.toString());
+            if (getter != null && (stock == null || stock.getImplementation() == null)) { fail("the video state getter " + getter + " isn't in the clean APK"); ok = false; }
+            int fresh = stock == null || stock.getImplementation() == null ? -1 : freshReturn(stock, state);
+            if (stock != null && stock.getImplementation() != null && fresh < 0) {
+                fail("the video state getter's fresh state isn't built and returned in one straight run");
+                ok = false;
+            }
+            Method g = fresh < 0 ? null : actual(stock);
+            List<Integer> asked = calls(g, hook, 1);
+            if (g != null && asked.size() == 1 && paused != null) {
+                List<Instruction> body = instructions(g);
+                int at = asked.get(0), returned = firstRegister(instructions(stock).get(fresh));
+                boolean placed = at == fresh && at + 3 < body.size() && arguments(body.get(at)).isEmpty()
+                        && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT && firstRegister(body.get(at + 1)) != returned
+                        && body.get(at + 2).getOpcode() == Opcode.IPUT_BOOLEAN && firstRegister(body.get(at + 2)) == firstRegister(body.get(at + 1))
+                        && ((TwoRegisterInstruction) body.get(at + 2)).getRegisterB() == returned
+                        && String.valueOf(reference(body.get(at + 2))).equals(paused)
+                        && body.get(at + 3).getOpcode() == Opcode.RETURN_OBJECT && firstRegister(body.get(at + 3)) == returned
+                        && onlyFrom(g, at + 1, at) && onlyFrom(g, at + 2, at + 1) && onlyFrom(g, at + 3, at + 2);
+                if (placed) remove(g, at, at + 3);
+                else { fail(hook + " doesn't set the paused flag of the fresh state " + g + " returns"); ok = false; }
+            } else ok = false;
+
+            List<Method> starts = new ArrayList<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (!ROUNDED_CORNERS_LAYOUT.equals(cd.getSuperclass())) continue;
+                for (Method m : cd.getMethods()) if (ideaPinPlay(m) >= 0) starts.add(m);
+            }
+            Method start = unique(starts, "The idea pin page's start of its video");
+            Method s = actual(start);
+            List<Integer> skipped = calls(s, hook, 1);
+            if (start != null && s != null && skipped.size() == 1) {
+                int play = ideaPinPlay(start);
+                List<Instruction> before = instructions(start), body = instructions(s);
+                Layout layout = new Layout(s.getImplementation());
+                int at = skipped.get(0);
+                boolean placed = at == play && at + 4 < body.size() && arguments(body.get(at)).isEmpty()
+                        && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT
+                        && body.get(at + 2).getOpcode() == Opcode.IF_NEZ && firstRegister(body.get(at + 2)) == firstRegister(body.get(at + 1))
+                        && branchTarget(layout, at + 2) == at + 4
+                        && body.get(at + 3).getOpcode() == before.get(play).getOpcode()
+                        && String.valueOf(reference(body.get(at + 3))).equals(String.valueOf(reference(before.get(play))))
+                        && arguments(body.get(at + 3)).equals(arguments(before.get(play)))
+                        && !arguments(before.get(play)).contains(firstRegister(body.get(at + 1)))
+                        && onlyFrom(s, at + 1, at) && onlyFrom(s, at + 2, at + 1) && onlyFrom(s, at + 3, at + 2);
+                if (placed) remove(s, at, at + 3);
+                else { fail(hook + " doesn't guard only the play in " + s); ok = false; }
+            } else ok = false;
+            capability(c.callee, ok);
+        }
+
+        /** Where a video manager method makes a video the one on screen, read off the clean method. */
+        static final class VideoPick {
+            final int at, closeup, video;
+            final String mute, setter;
+
+            VideoPick(int at, int closeup, int video, String mute, String setter) {
+                this.at = at;
+                this.closeup = closeup;
+                this.video = video;
+                this.mute = mute;
+                this.setter = setter;
+            }
+        }
+
+        /**
+         * The call in [m] that makes a video active, reached only by an if-eqz and an if-nez whose
+         * register is 1 just after the video's surface compared equal to PIN_CLOSEUP. Null when
+         * [m] has no such call, or no single sound flag of [getter]'s class and mute setter.
+         */
+        VideoPick videoPick(Method m, MethodReference getter) {
+            if (getter == null || m.getImplementation() == null || !m.getParameterTypes().isEmpty() || !m.getReturnType().equals("V")) return null;
+            List<Instruction> body = instructions(m);
+            Set<String> players = new TreeSet<>();
+            for (Instruction i : body) if (reference(i) instanceof MethodReference r && r.getName().equals("play") && descriptor(r).equals("()V")) players.add(r.getDefiningClass());
+            if (players.size() != 1) return null;
+            String video = players.iterator().next();
+            FeatureFlow graph = new FeatureFlow(m);
+            int site = -1, sites = 0;
+            for (int at = 1; at < body.size(); at++) {
+                if (body.get(at).getOpcode() != Opcode.INVOKE_VIRTUAL || !(reference(body.get(at)) instanceof MethodReference r)
+                        || !descriptor(r).equals("(" + video + ")V")) continue;
+                List<Integer> from = new ArrayList<>();
+                for (int k = 0; k < graph.normal.size(); k++) if (graph.normal.get(k).contains(at)) from.add(k);
+                if (from.size() != 2 || from.contains(at - 1)) continue;
+                Set<Opcode> tests = new HashSet<>();
+                for (int k : from) tests.add(body.get(k).getOpcode());
+                if (tests.equals(Set.of(Opcode.IF_EQZ, Opcode.IF_NEZ))) { site = at; sites++; }
+            }
+            if (sites != 1 || arguments(body.get(site)).size() != 2) return null;
+            int closeup = -1;
+            for (int k = 0; k < graph.normal.size(); k++)
+                if (graph.normal.get(k).contains(site) && body.get(k).getOpcode() == Opcode.IF_NEZ) closeup = firstRegister(body.get(k));
+            boolean marked = false;
+            for (int k = 2; k < site && !marked; k++)
+                marked = body.get(k - 2).getOpcode() == Opcode.SGET_OBJECT && reference(body.get(k - 2)) instanceof FieldReference f
+                        && f.getName().equals(PIN_CLOSEUP_SURFACE) && body.get(k - 1).getOpcode() == Opcode.IF_NE
+                        && body.get(k).getOpcode() == Opcode.CONST_4 && firstRegister(body.get(k)) == closeup
+                        && ((NarrowLiteralInstruction) body.get(k)).getNarrowLiteral() == 1;
+            if (!marked) return null;
+            Set<String> mutes = new TreeSet<>(), setters = new TreeSet<>();
+            for (int k = 1; k < body.size(); k++)
+                if (body.get(k - 1).getOpcode() == Opcode.SGET_BOOLEAN && body.get(k).getOpcode() == Opcode.INVOKE_STATIC
+                        && reference(body.get(k - 1)) instanceof FieldReference f && reference(body.get(k)) instanceof MethodReference r
+                        && f.getType().equals("Z") && f.getDefiningClass().equals(r.getDefiningClass()) && descriptor(r).equals("()Z")
+                        && f.getDefiningClass().equals(getter.getDefiningClass())) mutes.add(f.toString());
+            for (Instruction i : body)
+                if (reference(i) instanceof MethodReference r && r.getDefiningClass().equals(video) && descriptor(r).equals("(Z)V")) setters.add(r.toString());
+            if (mutes.size() != 1 || setters.size() != 1) return null;
+            return new VideoPick(site, closeup, arguments(body.get(site)).get(1), mutes.iterator().next(), setters.iterator().next());
+        }
+
+        /**
+         * Pin video playback (#48), Start pin videos muted. Right where the video manager makes a
+         * new video active, a pin page's video (the if-eqz on the closeup register) asks the hook,
+         * and on yes the app-wide sound flag takes the answer and the video's mute setter gets it.
+         * Both jumps that let a video through land on that check.
+         */
+        void pinVideoSound(Contract c) {
+            String hook = c.strings.get(0);
+            MethodReference getter = videoStateGetter();
+            List<Method> managers = new ArrayList<>();
+            for (Method m : clean.methods.values())
+                if (!m.getDefiningClass().startsWith(OWN) && clean.texts.getOrDefault(m.toString(), Set.of()).contains(VIDEO_MANAGER_EXPERIMENT)
+                        && videoPick(m, getter) != null) managers.add(m);
+            Method manager = unique(managers, "The video manager's pick of the video on screen");
+            VideoPick pick = manager == null ? null : videoPick(manager, getter);
+            Method m = actual(manager);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (pick != null && m != null && sites.size() == 1) {
+                List<Instruction> before = instructions(manager), body = instructions(m);
+                Layout layout = new Layout(m.getImplementation());
+                int at = pick.at, h = sites.get(0);
+                int answer = h + 1 < body.size() ? firstRegister(body.get(h + 1)) : -1;
+                placed = h == at + 1 && at + 6 < body.size()
+                        && body.get(at).getOpcode() == Opcode.IF_EQZ && firstRegister(body.get(at)) == pick.closeup && branchTarget(layout, at) == at + 6
+                        && arguments(body.get(h)).isEmpty()
+                        && body.get(h + 1).getOpcode() == Opcode.MOVE_RESULT && answer != pick.closeup && answer != pick.video
+                        && body.get(h + 2).getOpcode() == Opcode.IF_EQZ && firstRegister(body.get(h + 2)) == answer && branchTarget(layout, h + 2) == at + 6
+                        && body.get(h + 3).getOpcode() == Opcode.SPUT_BOOLEAN && firstRegister(body.get(h + 3)) == answer
+                        && String.valueOf(reference(body.get(h + 3))).equals(pick.mute)
+                        && String.valueOf(reference(body.get(h + 4))).equals(pick.setter)
+                        && arguments(body.get(h + 4)).equals(List.of(pick.video, answer))
+                        && body.get(at + 6).getOpcode() == before.get(at).getOpcode()
+                        && String.valueOf(reference(body.get(at + 6))).equals(String.valueOf(reference(before.get(at))))
+                        && arguments(body.get(at + 6)).equals(arguments(before.get(at)))
+                        && onlyFrom(m, h, at) && onlyFrom(m, h + 1, h) && onlyFrom(m, h + 2, h + 1) && onlyFrom(m, h + 3, h + 2) && onlyFrom(m, h + 4, h + 3);
+                FeatureFlow stockFlow = new FeatureFlow(manager);
+                for (int k = 0; placed && k < stockFlow.normal.size(); k++) {
+                    if (k == at - 1 || !stockFlow.normal.get(k).contains(at)) continue;
+                    int moved = k < at ? k : k + 6;
+                    placed = body.get(moved) instanceof OffsetInstruction && branchTarget(layout, moved) == at;
+                }
+                if (placed) remove(m, at, at + 6);
+            }
+            if (manager != null && m != null && !placed) fail(hook + " doesn't mute a pin page's video where it becomes active in " + m);
+            capability(c.callee, placed);
+        }
+
+        /**
+         * Pinch to zoom only (#48). The organic pin page's pinch handler starts by reading its
+         * context's source and comparing it with the pinch's, then hands the hook its pin and returns
+         * on yes. Anything but a pinch, and no, go on to Pinterest's own handler.
+         */
+        void pinchZoom(Contract c) {
+            String hook = c.strings.get(0);
+            Method handler = clean.methods.get(ORGANIC_CLOSEUP + "->" + PINCH_HANDLER + "(" + PINCH_CONTEXT + ")V");
+            if (handler == null || handler.getImplementation() == null) {
+                fail("the pin page's pinch handler isn't in the clean APK");
+                capability(c.callee, false);
+                return;
+            }
+            Set<String> sources = new TreeSet<>();
+            for (Instruction i : instructions(handler)) {
+                if (!(reference(i) instanceof FieldReference f) || !f.getDefiningClass().equals(PINCH_CONTEXT)) continue;
+                ClassDef type = clean.classes.get(f.getType());
+                if (type != null) for (Field field : type.getFields())
+                    if (field.getName().equals(PINCH_SOURCE) && field.getType().equals(f.getType()) && AccessFlags.STATIC.isSet(field.getAccessFlags()))
+                        sources.add(f.toString());
+            }
+            if (sources.size() != 1) {
+                fail("the pinch handler reads " + sources.size() + " pinch sources, expected 1");
+                capability(c.callee, false);
+                return;
+            }
+            String source = sources.iterator().next();
+            String sourceType = source.substring(source.lastIndexOf(':') + 1);
+            Method m = actual(handler);
+            List<Instruction> body = m == null ? List.of() : instructions(m);
+            List<Integer> sites = callSites(body, hook);
+            boolean placed = false;
+            int value = body.isEmpty() ? -1 : firstRegister(body.get(0));
+            if (m != null && sites.size() == 1 && sites.get(0) == 6 && body.size() > 10) {
+                Layout layout = new Layout(m.getImplementation());
+                int self = parameter(m, -1), context = parameter(m, 0), pinch = firstRegister(body.get(2));
+                placed = body.get(0).getOpcode() == Opcode.MOVE_OBJECT_FROM16 && ((TwoRegisterInstruction) body.get(0)).getRegisterB() == context
+                        && body.get(1).getOpcode() == Opcode.IGET_OBJECT && firstRegister(body.get(1)) == value
+                        && ((TwoRegisterInstruction) body.get(1)).getRegisterB() == value && String.valueOf(reference(body.get(1))).equals(source)
+                        && body.get(2).getOpcode() == Opcode.SGET_OBJECT && pinch != value
+                        && String.valueOf(reference(body.get(2))).equals(sourceType + "->" + PINCH_SOURCE + ":" + sourceType)
+                        && body.get(3).getOpcode() == Opcode.IF_NE && firstRegister(body.get(3)) == value
+                        && ((TwoRegisterInstruction) body.get(3)).getRegisterB() == pinch && branchTarget(layout, 3) == 10
+                        && body.get(4).getOpcode() == Opcode.MOVE_OBJECT_FROM16 && firstRegister(body.get(4)) == value
+                        && ((TwoRegisterInstruction) body.get(4)).getRegisterB() == self
+                        && body.get(5).getOpcode() == Opcode.IGET_OBJECT && firstRegister(body.get(5)) == value
+                        && ((TwoRegisterInstruction) body.get(5)).getRegisterB() == value
+                        && reference(body.get(5)) instanceof FieldReference pin && pin.getDefiningClass().equals(ORGANIC_CLOSEUP) && pin.getName().equals("pin");
+            }
+            if (m != null && !placed) fail(hook + " isn't handed the pin after a check for a pinch at the start of " + m);
+            guard(m, hook, 0, List.of(value), 6, false, false);
+            capability(c.callee, placed);
+        }
+
         void boardListHeight(Contract c) {
             String hook = c.strings.get(0);
             ClassDef picker = boardPicker();
@@ -9179,6 +9524,9 @@ public class DexDiff {
                     case "suggestedBoard": suggestedBoard(c); break;
                     case "boardListHeight": boardListHeight(c); break;
                     case "boardOrder": boardOrder(c); break;
+                    case "pinVideoAutoplay": pinVideoAutoplay(c); break;
+                    case "pinVideoSound": pinVideoSound(c); break;
+                    case "pinchZoom": pinchZoom(c); break;
                     case "boardMenu": boardMenu(c); break;
                     case "surveyPrompts": surveyPrompts(c); break;
                     case "popupBanners": popupBanners(c); break;

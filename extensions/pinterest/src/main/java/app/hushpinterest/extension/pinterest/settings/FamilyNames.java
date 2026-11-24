@@ -77,6 +77,8 @@ public final class FamilyNames {
     public static final String HIDE_SUGGESTED_BOARDS = "Hide suggested boards";
     public static final String EXPAND_BOARD_LIST = "Expand board list";
     public static final String BOARD_ORDER_WHEN_SAVING = "Board order when saving";
+    public static final String PIN_VIDEO_PLAYBACK = "Pin video playback";
+    public static final String PINCH_TO_ZOOM_ONLY = "Pinch to zoom only";
     public static final String DISABLE_UPDATE_NAG = "Disable update nag";
     public static final String FIX_PUSH_NOTIFICATIONS = "Fix push notifications";
 

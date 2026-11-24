@@ -1341,6 +1341,9 @@ public class SettingsNavigationTest {
         summaryContains(Settings.FULL_SIZE_PROFILE_PHOTOS.key, "profile photo", "full size", "next profile you open");
         summaryContains(Settings.BEST_VIDEO_QUALITY.key, "largest size", "more data", "next video you open");
         summaryContains(Settings.BOARD_ORDER_WHEN_SAVING.key, "Save to sheet", "custom order", "A to Z");
+        summaryContains(Settings.NO_PIN_VIDEO_AUTOPLAY.key, "tap play", "go back to", "next pin you open");
+        summaryContains(Settings.START_PIN_VIDEOS_MUTED.key, "sound off", "speaker", "next pin you open");
+        summaryContains(Settings.PINCH_TO_ZOOM_ONLY.key, "full screen", "look like it", "next time you pinch");
         summaryContains(Settings.HIDE_HIGHLIGHT_RING.key, "thick blue ring", "buttons such as Save");
         summaryContains(Settings.HIDE_VISUAL_SEARCH_THUMBNAILS.key, "lens button", "stack of cropped pictures", "next pin you open");
         summaryContains(Settings.FOLD_RELATED_PINS.key, "arrow under a pin", "don't load until you tap it", "last choice is kept", "Hide related pins wins");

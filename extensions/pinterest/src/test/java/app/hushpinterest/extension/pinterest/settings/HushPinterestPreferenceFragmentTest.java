@@ -140,6 +140,8 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.HIDE_SUGGESTED_BOARDS, "Hide suggested boards");
         ROW_TITLES.put(PatchFamily.EXPAND_BOARD_LIST, "Expand board list");
         ROW_TITLES.put(PatchFamily.BOARD_ORDER_WHEN_SAVING, "Board order when saving");
+        ROW_TITLES.put(PatchFamily.PIN_VIDEO_PLAYBACK, "Don't autoplay pin videos");
+        ROW_TITLES.put(PatchFamily.PINCH_TO_ZOOM_ONLY, "Pinch to zoom only");
         ROW_TITLES.put(PatchFamily.DISABLE_UPDATE_NAG, "Disable update nag");
         ROW_TITLES.put(PatchFamily.FIX_PUSH_NOTIFICATIONS, "Fix push notifications");
     }
