@@ -25,7 +25,8 @@ import app.hushpinterest.extension.pinterest.settings.PatchFamily;
  * holders before anything is drawn. The patch passes the list each holder is built with through
  * {@link #filter}, which drops what Hide ads and Hide AI-labeled pins each say to and hands back the
  * rest in order. A module that stays, such as a row of ideas or a group of products, has the same
- * done to the pins inside it, and goes when none are left ({@link ModuleItems}). With every switch
+ * done to the pins inside it, and goes when none are left ({@link ModuleItems}). A pin of yours, such
+ * as one on your own board, only ever goes for being an ad ({@link YourPins}). With every switch
  * off, or paused, the list goes through untouched.
  *
  * <p>Download board reads what's left, untouched, to keep the pins of a board's own pages. It never
@@ -65,16 +66,29 @@ public final class FeedFilter {
         }
         boolean hideAds = ads, hideAi = ai, hideAiWords = aiWords, hideShopping = shopping, hideVideos = videos,
                 hideSuggestions = suggestions;
-        ModuleItems.Verdict verdict = model -> family(model, hideAds, hideAi, hideAiWords, hideShopping, hideVideos, muted,
-                hideSuggestions);
-        String owner = ads ? FamilyNames.HIDE_ADS : ai || aiWords ? FamilyNames.HIDE_AI_PINS
-                : shopping ? FamilyNames.HIDE_SHOPPING : FamilyNames.FILTER_FEED;
         boolean debug = debugLogging();
-        List<?> shown;
         // What the loop takes out, counted only once the whole list went through: a list that fails
         // partway is shown as it was, so nothing was removed from it. A module pruned before the
-        // failure keeps its own counts, since it did lose those entries.
+        // failure keeps its own counts, since it did lose those entries. Pins of yours left in are
+        // counted here too.
         List<String[]> removed = new ArrayList<>();
+        // A pin you saved keeps its place on your boards and anywhere else it shows (#49). Ads still go.
+        String viewer = YourPins.viewer();
+        ModuleItems.Verdict verdict = model -> {
+            String family = family(model, hideAds, hideAi, hideAiWords, hideShopping, hideVideos, muted, hideSuggestions);
+            if (family == null || FamilyNames.HIDE_ADS.equals(family)) return family;
+            String yours = YourPins.why(model, viewer);
+            if (yours == null) {
+                if (debug) Logger.printDebug(() -> "Took out a pin that " + family + " matched " + YourPins.signals(model, viewer));
+                return family;
+            }
+            removed.add(new String[]{owner(family), "pin of yours left in"});
+            if (debug) Logger.printDebug(() -> "Kept a pin of yours (" + yours + ") that " + family + " matched");
+            return null;
+        };
+        String owner = ads ? FamilyNames.HIDE_ADS : ai || aiWords ? FamilyNames.HIDE_AI_PINS
+                : shopping ? FamilyNames.HIDE_SHOPPING : FamilyNames.FILTER_FEED;
+        List<?> shown;
         try {
             List<Object> kept = null;
             int size = items.size();

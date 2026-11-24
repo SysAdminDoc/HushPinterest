@@ -1089,10 +1089,10 @@ public final class L10nTranslations {
                 "Werbe-Tracking-Berechtigungen entfernen");
         table.put("Remove from history",
                 "Aus Verlauf entfernen");
-        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
-                "Entfernt Pins, die Pinterest als mit KI erstellt oder ver\u00e4ndert kennzeichnet, aus deinem Startfeed, der Suche, \u00e4hnlichen Pins und Pinnw\u00e4nden. KI-Bilder ohne Kennzeichnung werden weiter angezeigt.");
-        table.put("Removes pins that play a video from your home feed, search, related pins and boards. Photos and GIFs stay.",
-                "Entfernt Pins, die ein Video abspielen, aus deinem Startfeed, der Suche, den \u00e4hnlichen Pins und den Pinnw\u00e4nden. Fotos und GIFs bleiben.");
+        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. AI images without the label still show.",
+                "Entfernt Pins, die Pinterest als mit KI erstellt oder ver\u00e4ndert kennzeichnet, aus deinem Startfeed, der Suche, \u00e4hnlichen Pins und den Pinnw\u00e4nden anderer. KI-Bilder ohne Kennzeichnung werden weiter angezeigt.");
+        table.put("Removes pins that play a video from your home feed, search, related pins and other people's boards. Photos and GIFs stay.",
+                "Entfernt Pins, die ein Video abspielen, aus deinem Startfeed, der Suche, den \u00e4hnlichen Pins und den Pinnw\u00e4nden anderer. Fotos und GIFs bleiben.");
         table.put("Removes pins without the label whose title or description calls them AI art, or that come from an AI image site. It goes by their words, so some still show.",
                 "Entfernt Pins ohne Kennzeichnung, deren Titel oder Beschreibung sie als KI-Kunst bezeichnet oder die von einer KI-Bilderseite stammen. Es geht nach ihren Worten, daher werden manche weiter angezeigt.");
         table.put("Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads.",
@@ -2622,10 +2622,10 @@ public final class L10nTranslations {
                 "Quitar permisos de seguimiento publicitario");
         table.put("Remove from history",
                 "Eliminar del historial");
-        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
-                "Quita de tu feed de inicio, la b\u00fasqueda, los pines relacionados y los tableros los pines que Pinterest marca como hechos o modificados con IA. Las im\u00e1genes de IA sin esa marca se siguen viendo.");
-        table.put("Removes pins that play a video from your home feed, search, related pins and boards. Photos and GIFs stay.",
-                "Quita los pines que reproducen un video de tu feed de inicio, la b\u00fasqueda, los pines relacionados y los tableros. Las fotos y los GIF se quedan.");
+        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. AI images without the label still show.",
+                "Quita de tu feed de inicio, la b\u00fasqueda, los pines relacionados y los tableros de otras personas los pines que Pinterest marca como hechos o modificados con IA. Las im\u00e1genes de IA sin esa marca se siguen viendo.");
+        table.put("Removes pins that play a video from your home feed, search, related pins and other people's boards. Photos and GIFs stay.",
+                "Quita los pines que reproducen un video de tu feed de inicio, la b\u00fasqueda, los pines relacionados y los tableros de otras personas. Las fotos y los GIF se quedan.");
         table.put("Removes pins without the label whose title or description calls them AI art, or that come from an AI image site. It goes by their words, so some still show.",
                 "Elimina pines sin la etiqueta cuyo t\u00edtulo o descripci\u00f3n los llama arte con IA, o que vienen de un sitio de im\u00e1genes con IA. Se gu\u00eda por sus palabras, as\u00ed que algunos se siguen mostrando.");
         table.put("Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads.",
@@ -4155,10 +4155,10 @@ public final class L10nTranslations {
                 "Hapus izin pelacakan iklan");
         table.put("Remove from history",
                 "Hapus dari riwayat");
-        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
-                "Menghapus pin yang diberi label Pinterest sebagai buatan atau hasil ubahan AI dari feed beranda, pencarian, pin terkait, dan papan Anda. Gambar AI tanpa label tetap muncul.");
-        table.put("Removes pins that play a video from your home feed, search, related pins and boards. Photos and GIFs stay.",
-                "Menghapus pin yang memutar video dari beranda, pencarian, pin terkait, dan papan Anda. Foto dan GIF tetap ada.");
+        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. AI images without the label still show.",
+                "Menghapus pin yang diberi label Pinterest sebagai buatan atau hasil ubahan AI dari feed beranda, pencarian, pin terkait, dan papan milik orang lain. Gambar AI tanpa label tetap muncul.");
+        table.put("Removes pins that play a video from your home feed, search, related pins and other people's boards. Photos and GIFs stay.",
+                "Menghapus pin yang memutar video dari beranda, pencarian, pin terkait, dan papan milik orang lain. Foto dan GIF tetap ada.");
         table.put("Removes pins without the label whose title or description calls them AI art, or that come from an AI image site. It goes by their words, so some still show.",
                 "Menghapus pin tanpa label yang judul atau deskripsinya menyebutnya seni AI, atau yang berasal dari situs gambar AI. Ini berpatokan pada kata-katanya, jadi sebagian masih muncul.");
         table.put("Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads.",
@@ -5688,10 +5688,10 @@ public final class L10nTranslations {
                 "Remover permiss\u00f5es de rastreamento de an\u00fancios");
         table.put("Remove from history",
                 "Remover do hist\u00f3rico");
-        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
-                "Remove do seu feed inicial, da busca, dos pins relacionados e das pastas os pins que o Pinterest marca como criados ou alterados com IA. Imagens de IA sem essa marca continuam aparecendo.");
-        table.put("Removes pins that play a video from your home feed, search, related pins and boards. Photos and GIFs stay.",
-                "Remove os pins que reproduzem um v\u00eddeo do seu feed inicial, da busca, dos pins relacionados e das pastas. Fotos e GIFs ficam.");
+        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. AI images without the label still show.",
+                "Remove do seu feed inicial, da busca, dos pins relacionados e das pastas de outras pessoas os pins que o Pinterest marca como criados ou alterados com IA. Imagens de IA sem essa marca continuam aparecendo.");
+        table.put("Removes pins that play a video from your home feed, search, related pins and other people's boards. Photos and GIFs stay.",
+                "Remove os pins que reproduzem um v\u00eddeo do seu feed inicial, da busca, dos pins relacionados e das pastas de outras pessoas. Fotos e GIFs ficam.");
         table.put("Removes pins without the label whose title or description calls them AI art, or that come from an AI image site. It goes by their words, so some still show.",
                 "Remove pins sem o selo cujo t\u00edtulo ou descri\u00e7\u00e3o os chama de arte com IA, ou que v\u00eam de um site de imagens de IA. Ele se guia pelas palavras deles, ent\u00e3o alguns ainda aparecem.");
         table.put("Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads.",
@@ -7221,10 +7221,10 @@ public final class L10nTranslations {
                 "Reklam izleme izinlerini kald\u0131r");
         table.put("Remove from history",
                 "Ge\u00e7mi\u015ften kald\u0131r");
-        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.",
-                "Pinterest'in yapay zekayla \u00fcretilmi\u015f veya de\u011fi\u015ftirilmi\u015f olarak etiketledi\u011fi pinleri ana ak\u0131\u015f\u0131ndan, aramadan, ilgili pinlerden ve panolardan kald\u0131r\u0131r. Etiketsiz yapay zeka g\u00f6rselleri g\u00f6r\u00fcnmeye devam eder.");
-        table.put("Removes pins that play a video from your home feed, search, related pins and boards. Photos and GIFs stay.",
-                "Video oynatan pinleri ana ak\u0131\u015f\u0131ndan, aramadan, ilgili pinlerden ve panolardan kald\u0131r\u0131r. Foto\u011fraflar ve GIF'ler kal\u0131r.");
+        table.put("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. AI images without the label still show.",
+                "Pinterest'in yapay zekayla \u00fcretilmi\u015f veya de\u011fi\u015ftirilmi\u015f olarak etiketledi\u011fi pinleri ana ak\u0131\u015f\u0131ndan, aramadan, ilgili pinlerden ve ba\u015fkalar\u0131n\u0131n panolar\u0131ndan kald\u0131r\u0131r. Etiketsiz yapay zeka g\u00f6rselleri g\u00f6r\u00fcnmeye devam eder.");
+        table.put("Removes pins that play a video from your home feed, search, related pins and other people's boards. Photos and GIFs stay.",
+                "Video oynatan pinleri ana ak\u0131\u015f\u0131ndan, aramadan, ilgili pinlerden ve ba\u015fkalar\u0131n\u0131n panolar\u0131ndan kald\u0131r\u0131r. Foto\u011fraflar ve GIF'ler kal\u0131r.");
         table.put("Removes pins without the label whose title or description calls them AI art, or that come from an AI image site. It goes by their words, so some still show.",
                 "Etiketi olmayan ama ba\u015fl\u0131\u011f\u0131 veya a\u00e7\u0131klamas\u0131 kendini yapay zeka sanat\u0131 olarak tan\u0131tan ya da bir yapay zeka g\u00f6rsel sitesinden gelen pinleri kald\u0131r\u0131r. Kelimelerine g\u00f6re karar verir, bu y\u00fczden baz\u0131lar\u0131 yine g\u00f6r\u00fcn\u00fcr.");
         table.put("Removes promoted pins from your home feed, search, related pins and boards, and hides panels that only hold ads.",

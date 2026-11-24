@@ -5,6 +5,7 @@ Every HushPinterest release, newest first.
 ## Unreleased
 
 * The patches now target Pinterest 14.45.0, version code 14458020. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
+* Pins you saved now stay on your own boards. Hide AI-labeled pins, Hide shopping and product pins, Hide video pins, muted words and the other feed filters leave alone any pin you own, saved yourself, or that sits on a board of yours or one you collaborate on, wherever it shows. They still filter other people's boards, and promoted pins still go everywhere. With Debug logging on, the log says which pin of yours stayed and why. (#49)
 * New `Customize board tabs` patch with its switches under Interface, all off to start. On a board tab on Home, `Hide See board on board tabs` and `Hide More ideas for on board tabs` clear the picture at the top so only the board name is left, and `Board name position` moves the name to the top left, top center, middle, bottom center or bottom right. (#42)
 * `Choose board tab covers`, also part of Customize board tabs, stops that picture changing. Turn it on and long-press the picture to keep the one showing, use a pin, pick a photo from your phone or go plain black. Each board remembers its own choice, and Pinterest's choice puts it back. It starts off. (#42)
 * New `Hide download toasts` switch under Interface, part of Hide save toasts. Downloading a pin no longer shows the message that it started or finished. Errors still show, and Android's own download notification stays. It starts off. (#42)

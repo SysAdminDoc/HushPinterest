@@ -152,7 +152,7 @@ AI-labeled pins in lists	pin berlabel AI di daftar
 Android sends pinterest.com and pin.it links to a patched Pinterest only after you select those addresses for it. Selecting them sends their links here. Your other link settings stay as they are.	Android mengirim tautan pinterest.com dan pin.it ke Pinterest yang ditambal hanya setelah Anda memilih alamat itu untuknya. Memilihnya mengarahkan tautannya ke sini. Pengaturan tautan Anda yang lain tidak berubah.
 Feed	Feed
 Hide AI-labeled pins	Sembunyikan pin berlabel AI
-Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. AI images without the label still show.	Menghapus pin yang diberi label Pinterest sebagai buatan atau hasil ubahan AI dari feed beranda, pencarian, pin terkait, dan papan Anda. Gambar AI tanpa label tetap muncul.
+Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. AI images without the label still show.	Menghapus pin yang diberi label Pinterest sebagai buatan atau hasil ubahan AI dari feed beranda, pencarian, pin terkait, dan papan milik orang lain. Gambar AI tanpa label tetap muncul.
 # context: a Feed switch right under Hide AI-labeled pins. It removes pins Pinterest doesn't label as AI when their own title or description says they're AI art, or when they come from a website that only hosts AI images. It has its own switch.
 Hide pins that say they're AI	Sembunyikan pin yang menyebut dirinya AI
 Removes pins without the label whose title or description calls them AI art, or that come from an AI image site. It goes by their words, so some still show.	Menghapus pin tanpa label yang judul atau deskripsinya menyebutnya seni AI, atau yang berasal dari situs gambar AI. Ini berpatokan pada kata-katanya, jadi sebagian masih muncul.
@@ -171,7 +171,7 @@ Hide shopping and product pins	Sembunyikan belanja dan Pin produk
 Hides product pins, shopping stories, featured boards and Shop the look under pins. Visit and Paid link stay.	Menyembunyikan pin produk, cerita belanja, papan unggulan, dan Shop the look di bawah pin. Tautan kunjungan dan label tautan berbayar tetap ada.
 # context: a Feed switch under Hide shopping and product pins, from the Filter feed patch. It removes pins that play a video (video pins and idea pins with video) from the lists Pinterest shows. Photos and animated GIFs stay. The title is also the name of that part of the patch in the build report.
 Hide video pins	Sembunyikan pin video
-Removes pins that play a video from your home feed, search, related pins and boards. Photos and GIFs stay.	Menghapus pin yang memutar video dari beranda, pencarian, pin terkait, dan papan Anda. Foto dan GIF tetap ada.
+Removes pins that play a video from your home feed, search, related pins and other people's boards. Photos and GIFs stay.	Menghapus pin yang memutar video dari beranda, pencarian, pin terkait, dan papan milik orang lain. Foto dan GIF tetap ada.
 Disable analytics	Nonaktifkan analitik
 Stops usage reports and analytics tasks. Restart after turning off or pausing. Google's analytics stays off until you patch again without Disable analytics.	Menghentikan laporan penggunaan dan tugas analitik. Mulai ulang setelah dimatikan atau dijeda. Analitik Google tetap mati sampai Anda menambal ulang tanpa patch Nonaktifkan analitik.
 Firebase and Google Analytics collection is turned off	Pengumpulan data Firebase dan Google Analytics dinonaktifkan

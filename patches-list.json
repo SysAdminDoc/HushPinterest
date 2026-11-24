@@ -399,7 +399,7 @@
     },
     {
       "name": "Filter feed",
-      "description": "Lets you take video pins (photos and GIFs stay) and pins that mention words you mute out of your home feed, search, related pins and boards, pins you've already saved out of your home feed, search and More to explore, and Pinterest's suggestion rows out of your home feed. Starts off. Set it up in HushPinterest settings > Feed.",
+      "description": "Lets you take video pins (photos and GIFs stay) and pins that mention words you mute out of your home feed, search, related pins and other people's boards, pins you've already saved out of your home feed, search and More to explore, and Pinterest's suggestion rows out of your home feed. Starts off. Set it up in HushPinterest settings > Feed.",
       "category": "Feed",
       "use": true,
       "dependencies": [
@@ -581,7 +581,7 @@
     },
     {
       "name": "Hide AI-labeled pins",
-      "description": "Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and boards. A second switch also takes unlabeled pins whose title or description calls them AI art, or that come from an AI image site. Other AI images still show. Both start off. Turn them on in HushPinterest settings > Feed.",
+      "description": "Removes pins that Pinterest labels as made or changed with AI from your home feed, search, related pins and other people's boards. A second switch also takes unlabeled pins whose title or description calls them AI art, or that come from an AI image site. Other AI images still show. Both start off. Turn them on in HushPinterest settings > Feed.",
       "category": "Feed",
       "use": true,
       "dependencies": [

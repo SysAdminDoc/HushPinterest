@@ -286,7 +286,7 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
             if (build.contains(PatchFamily.HIDE_AI_PINS)) {
                 feed.addPreference(mark(toggle(context, Settings.HIDE_AI_PINS, L10n.t("Hide AI-labeled pins"),
                         PatchFamily.HIDE_AI_PINS.coverageSummary(L10n.t("Removes pins that Pinterest labels as made "
-                            + "or changed with AI from your home feed, search, related pins and boards. "
+                            + "or changed with AI from your home feed, search, related pins and other people's boards. "
                             + "AI images without the label still show."))), SettingsIcons.BLOCK));
                 // Its own switch on the same list hook, so a build where that hook didn't go in has no row for it.
                 if (PatchFamily.Capability.FEED_AI_PINS.installed()) {
@@ -303,7 +303,7 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                         + "boards and Shop the look under pins. Visit and Paid link stay."), SettingsIcons.BLOCK);
             patchToggle(feed, context, build, PatchFamily.FILTER_FEED, Settings.HIDE_VIDEO_PINS,
                     L10n.t("Hide video pins"), L10n.t("Removes pins that play a video from your home feed, search, "
-                        + "related pins and boards. Photos and GIFs stay."), SettingsIcons.BLOCK);
+                        + "related pins and other people's boards. Photos and GIFs stay."), SettingsIcons.BLOCK);
             // Its own hooks, on Home's request and pages: no row where they didn't go in.
             if (build.contains(PatchFamily.FILTER_FEED) && PatchFamily.Capability.FEED_SAVED_PINS.installed()) {
                 feed.addPreference(mark(toggle(context, Settings.HIDE_SAVED_PINS, L10n.t("Hide pins you've already saved"),

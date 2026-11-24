@@ -269,7 +269,7 @@ public class HushPinterestPreferenceFragmentTest {
                     String.valueOf(page.findPreference(Settings.HIDE_ADS.key).getSummary()));
             assertEquals("Hide AI-labeled pins", String.valueOf(page.findPreference(Settings.HIDE_AI_PINS.key).getTitle()));
             assertEquals("Removes pins that Pinterest labels as made or changed with AI from your home feed, search, "
-                + "related pins and boards. AI images without the label still show.",
+                + "related pins and other people's boards. AI images without the label still show.",
                     String.valueOf(page.findPreference(Settings.HIDE_AI_PINS.key).getSummary()));
             // Hide ads was always in Manager's default selection and ships on. Hide AI-labeled pins
             // joined it later, so it starts off and a default build shows Pinterest's own feed.
