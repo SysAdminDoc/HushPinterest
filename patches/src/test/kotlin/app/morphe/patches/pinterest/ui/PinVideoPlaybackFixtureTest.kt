@@ -29,20 +29,31 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
-/** #48: the saved video states, the pin pages' reset of them, the idea pin page's own play and the video manager's pick of the video on screen. */
+/** #48: the saved video states, the pin pages' reset of them, the idea pin page's own play and each pin page's start of its sound. */
 @Category(FixtureTests::class)
 class PinVideoPlaybackFixtureTest {
     private val flags = listOf("pinVideoPlayback", "pinVideoAutoplay", "pinVideoSound")
 
-    /** Both pin page presenters, the video manager, every class that plays a video, and the class keeping the saved states. */
+    /**
+     * Both pin page presenters, the regular video pin page, every class that plays a video, the class
+     * keeping the saved states and the sound flag, the idea pin page's sound setter and its callers.
+     */
     private fun read(build: File): List<ClassDef> {
         val found = FixtureDex.classesWhere(build, { true }) { method ->
             method.definingClass == PIN_CLOSEUP_PRESENTER || method.definingClass == PROMOTED_CLOSEUP_PRESENTER ||
-                VIDEO_MANAGER_EXPERIMENT in method.strings() ||
+                method.definingClass == PIN_CLOSEUP_VIDEO_MODULE ||
                 method.calls().any { it.name == "play" && it.parameterTypes.isEmpty() && it.returnType == "V" }
         }
         val states = PatchContexts.of(found).videoStates().getter.definingClass
-        return (found + FixtureDex.classes(build, setOf(states)).values).distinctBy { it.type }
+        val withStates = (found + FixtureDex.classes(build, setOf(states)).values).distinctBy { it.type }
+        val clean = PatchContexts.of(withStates)
+        val flag = clean.soundFlag(clean.videoStates()).second
+        val setters = FixtureDex.classesWhere(build, { true }) { it.setsSound(flag) }
+        val setter = setters.flatMap { it.methods }.single { it.setsSound(flag) }
+        val callers = FixtureDex.classesWhere(build, { true }) { method ->
+            method.calls().any { it.definingClass == setter.definingClass && it.name == setter.name && it.parameterTypes.isEmpty() }
+        }
+        return (withStates + setters + callers).distinctBy { it.type }
     }
 
     private fun mutableOf(context: BytecodePatchContext, method: Method) =
@@ -65,14 +76,14 @@ class PinVideoPlaybackFixtureTest {
     private fun reg(instruction: com.android.tools.smali.dexlib2.iface.instruction.Instruction) = (instruction as OneRegisterInstruction).registerA
 
     @Test
-    fun `each declared APK asks before a fresh video state, a page's reset, an idea pin's play and a pin page video's sound`() {
+    fun `each declared APK asks before a fresh video state, a page's reset, an idea pin's play and each pin page's sound`() {
         for (build in Fixtures.declaredBuilds()) {
             val classes = read(build)
             val clean = PatchContexts.of(classes)
             val states = clean.videoStates()
             val fresh = clean.freshState(states)
             val idea = clean.ideaPinStart()
-            val activation = clean.videoActivation(states)
+            val sound = clean.soundStarts(states)
             val context = PatchContexts.of(ExtensionDex.classes() + classes)
             pinVideoPlaybackPatch.execute(context)
             for (flag in flags) assertEquals("${build.name}: $flag", 1, PinPageKit.flag(context, flag))
@@ -132,45 +143,40 @@ class PinVideoPlaybackFixtureTest {
             assertEquals("${build.name}: the idea pin page is otherwise Pinterest's", PinPageKit.kinds(ideaBefore),
                 PinPageKit.kinds(ideaAfter.take(play) + ideaAfter.drop(play + 3)))
 
-            // The video manager: a pin page's video that just became the one on screen is muted on yes.
-            val pick = activation.at
-            val managerBefore = activation.method.instructions()
-            val managerAfter = PinPageKit.patched(context, activation.method)
-            val manager = mutableOf(context, activation.method).implementation!!.instructions
-            assertEquals(build.name, Opcode.IF_EQZ, managerAfter[pick].opcode)
-            assertEquals("${build.name}: only a pin page's video", activation.closeup, reg(managerAfter[pick]))
-            assertEquals(build.name, pick + 6, (manager[pick] as BuilderOffsetInstruction).target.location.index)
-            assertEquals(build.name, PIN_VIDEO_MUTED_HOOK, PinPageKit.target(managerAfter[pick + 1]))
-            assertEquals(build.name, Opcode.MOVE_RESULT, managerAfter[pick + 2].opcode)
-            val muted = reg(managerAfter[pick + 2])
-            assertTrue("${build.name}: v$muted is free", muted !in listOf(activation.closeup, activation.video) && muted <= 15)
-            assertEquals(build.name, Opcode.IF_EQZ, managerAfter[pick + 3].opcode)
-            assertEquals(build.name, muted, reg(managerAfter[pick + 3]))
-            assertEquals(build.name, pick + 6, (manager[pick + 3] as BuilderOffsetInstruction).target.location.index)
-            assertEquals(build.name, Opcode.SPUT_BOOLEAN, managerAfter[pick + 4].opcode)
-            assertEquals(build.name, muted, reg(managerAfter[pick + 4]))
-            assertEquals(build.name, activation.mute.toString(), PinPageKit.target(managerAfter[pick + 4]))
-            assertEquals(build.name, activation.muteVideo.toString(), PinPageKit.target(managerAfter[pick + 5]))
-            assertEquals("${build.name}: the video and the answer", listOf(activation.video, muted), managerAfter[pick + 5].passed())
-            assertEquals(build.name, PinPageKit.target(managerBefore[pick]), PinPageKit.target(managerAfter[pick + 6]))
-            assertEquals(build.name, managerBefore[pick].passed(), managerAfter[pick + 6].passed())
-            val onto = jumpsOnto(activation.method, pick)
-            assertEquals("${build.name}: the two jumps that let a video through", 2, onto.size)
-            for (from in onto) {
-                assertEquals("${build.name}: a jump from $from runs the hook first", pick, landing(context, activation.method, from, pick, 6))
+            // Each pin page's sound start: on yes the flag it reads next is muted, then Pinterest's own code runs.
+            assertEquals(build.name, PIN_CLOSEUP_VIDEO_MODULE, sound.video.definingClass)
+            assertEquals(build.name, states.getter.definingClass, sound.flag.definingClass)
+            assertTrue("${build.name}: the idea pin presenter calls the sound setter",
+                sound.idea.calls().any { it.name == sound.applier.name && it.definingClass == sound.applier.definingClass })
+            for (page in listOf(sound.video, sound.idea)) {
+                val before = page.instructions()
+                val after = PinPageKit.patched(context, page)
+                val code = mutableOf(context, page).implementation!!.instructions
+                assertEquals(build.name, PIN_VIDEO_MUTED_HOOK, PinPageKit.target(after[0]))
+                assertTrue("${build.name}: the hook takes nothing", after[0].passed().isEmpty())
+                assertEquals(build.name, Opcode.MOVE_RESULT, after[1].opcode)
+                val muted = reg(after[1])
+                assertTrue("${build.name}: v$muted is a local of ${page.name}", muted < page.implementation!!.registerCount - 1 - page.parameterTypes.size)
+                assertEquals(build.name, Opcode.IF_EQZ, after[2].opcode)
+                assertEquals(build.name, muted, reg(after[2]))
+                assertEquals("${build.name}: no goes to Pinterest's first instruction", 4, (code[2] as BuilderOffsetInstruction).target.location.index)
+                assertEquals(build.name, Opcode.SPUT_BOOLEAN, after[3].opcode)
+                assertEquals(build.name, muted, reg(after[3]))
+                assertEquals(build.name, sound.flag.toString(), PinPageKit.target(after[3]))
+                assertEquals("${build.name}: ${page.name} is otherwise Pinterest's", PinPageKit.kinds(before), PinPageKit.kinds(after.drop(4)))
+                assertTrue("${build.name}: nothing jumps into the hook of ${page.name}",
+                    code.filterIsInstance<BuilderOffsetInstruction>().none { it.target.location.index in 1..3 })
             }
-            assertEquals("${build.name}: the video manager is otherwise Pinterest's", PinPageKit.kinds(managerBefore),
-                PinPageKit.kinds(managerAfter.take(pick) + managerAfter.drop(pick + 6)))
         }
     }
 
     @Test
-    fun `a missing stub, pin page, idea pin page, video manager or state getter refuses with Pinterest's code untouched`() {
+    fun `a missing stub, pin page, idea pin page, sound start or state getter refuses with Pinterest's code untouched`() {
         val classes = read(Fixtures.declaredBuilds().last())
         val clean = PatchContexts.of(classes)
         val states = clean.videoStates()
         val idea = clean.ideaPinStart().method.definingClass
-        val manager = clean.videoActivation(states).method.definingClass
+        val sound = clean.soundStarts(states)
         val cases = linkedMapOf(
             "no pinVideoPlayback stub" to (PinPageKit.extensionWithout("pinVideoPlayback") + classes to "pinVideoPlayback"),
             "no pinVideoAutoplay stub" to (PinPageKit.extensionWithout("pinVideoAutoplay") + classes to "pinVideoAutoplay"),
@@ -178,7 +184,9 @@ class PinVideoPlaybackFixtureTest {
             "no ad pin page" to (ExtensionDex.classes() + classes.filter { it.type != PROMOTED_CLOSEUP_PRESENTER } to PROMOTED_CLOSEUP_PRESENTER),
             "no state getter" to (ExtensionDex.classes() + classes.filter { it.type != states.getter.definingClass } to "video state getter"),
             "no idea pin page" to (ExtensionDex.classes() + classes.filter { it.type != idea } to "idea pin page"),
-            "no video manager" to (ExtensionDex.classes() + classes.filter { it.type != manager } to "video manager"),
+            "no video pin page" to (ExtensionDex.classes() + classes.filter { it.type != PIN_CLOSEUP_VIDEO_MODULE } to "regular video pin page"),
+            "no idea pin sound setter" to (ExtensionDex.classes() + classes.filter { it.type != sound.applier.definingClass } to "sound setter"),
+            "no idea pin presenter" to (ExtensionDex.classes() + classes.filter { it.type != sound.idea.definingClass } to "idea pin presenter's start"),
         )
         for ((reason, case) in cases) {
             val (input, message) = case

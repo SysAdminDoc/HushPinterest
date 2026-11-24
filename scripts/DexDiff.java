@@ -7629,8 +7629,8 @@ public class DexDiff {
         static final String ORGANIC_CLOSEUP = "Lcom/pinterest/feature/pin/closeup/presenter/OrganicPinCloseupPresenter;",
                 PROMOTED_CLOSEUP = "Lcom/pinterest/feature/pin/closeup/presenter/PromotedPinCloseupPresenter;",
                 UNBIND_RESET = "onUnbind$lambda$0",
-                VIDEO_MANAGER_EXPERIMENT = "android_global_nav_impression_tracking_modification",
-                PIN_CLOSEUP_SURFACE = "PIN_CLOSEUP",
+                VIDEO_MODULE = "Lcom/pinterest/activity/pin/view/modules/PinCloseupVideoModule;",
+                LOAD_SAVED_MUTE_STATE = "loadSavedMuteState",
                 ROUNDED_CORNERS_LAYOUT = "Lcom/pinterest/design/widget/RoundedCornersLayout;",
                 PINCH_CONTEXT = "Lcom/pinterest/feature/search/visual/PinchToZoomTransitionContext;",
                 PINCH_HANDLER = "onHandleTransitionFromPinchToZoom", PINCH_SOURCE = "p2z";
@@ -7807,112 +7807,71 @@ public class DexDiff {
             capability(c.callee, ok);
         }
 
-        /** Where a video manager method makes a video the one on screen, read off the clean method. */
-        static final class VideoPick {
-            final int at, closeup, video;
-            final String mute, setter;
-
-            VideoPick(int at, int closeup, int video, String mute, String setter) {
-                this.at = at;
-                this.closeup = closeup;
-                this.video = video;
-                this.mute = mute;
-                this.setter = setter;
-            }
-        }
-
-        /**
-         * The call in [m] that makes a video active, reached only by an if-eqz and an if-nez whose
-         * register is 1 just after the video's surface compared equal to PIN_CLOSEUP. Null when
-         * [m] has no such call, or no single sound flag of [getter]'s class and mute setter.
-         */
-        VideoPick videoPick(Method m, MethodReference getter) {
-            if (getter == null || m.getImplementation() == null || !m.getParameterTypes().isEmpty() || !m.getReturnType().equals("V")) return null;
+        /** A method with no parameters that starts by reading [flag] and stores it twice or more: the idea pin page's sound setter. */
+        boolean setsSound(Method m, String flag) {
+            if (m.getImplementation() == null || !m.getParameterTypes().isEmpty() || !m.getReturnType().equals("V")) return false;
             List<Instruction> body = instructions(m);
-            Set<String> players = new TreeSet<>();
-            for (Instruction i : body) if (reference(i) instanceof MethodReference r && r.getName().equals("play") && descriptor(r).equals("()V")) players.add(r.getDefiningClass());
-            if (players.size() != 1) return null;
-            String video = players.iterator().next();
-            FeatureFlow graph = new FeatureFlow(m);
-            int site = -1, sites = 0;
-            for (int at = 1; at < body.size(); at++) {
-                if (body.get(at).getOpcode() != Opcode.INVOKE_VIRTUAL || !(reference(body.get(at)) instanceof MethodReference r)
-                        || !descriptor(r).equals("(" + video + ")V")) continue;
-                List<Integer> from = new ArrayList<>();
-                for (int k = 0; k < graph.normal.size(); k++) if (graph.normal.get(k).contains(at)) from.add(k);
-                if (from.size() != 2 || from.contains(at - 1)) continue;
-                Set<Opcode> tests = new HashSet<>();
-                for (int k : from) tests.add(body.get(k).getOpcode());
-                if (tests.equals(Set.of(Opcode.IF_EQZ, Opcode.IF_NEZ))) { site = at; sites++; }
-            }
-            if (sites != 1 || arguments(body.get(site)).size() != 2) return null;
-            int closeup = -1;
-            for (int k = 0; k < graph.normal.size(); k++)
-                if (graph.normal.get(k).contains(site) && body.get(k).getOpcode() == Opcode.IF_NEZ) closeup = firstRegister(body.get(k));
-            boolean marked = false;
-            for (int k = 2; k < site && !marked; k++)
-                marked = body.get(k - 2).getOpcode() == Opcode.SGET_OBJECT && reference(body.get(k - 2)) instanceof FieldReference f
-                        && f.getName().equals(PIN_CLOSEUP_SURFACE) && body.get(k - 1).getOpcode() == Opcode.IF_NE
-                        && body.get(k).getOpcode() == Opcode.CONST_4 && firstRegister(body.get(k)) == closeup
-                        && ((NarrowLiteralInstruction) body.get(k)).getNarrowLiteral() == 1;
-            if (!marked) return null;
-            Set<String> mutes = new TreeSet<>(), setters = new TreeSet<>();
-            for (int k = 1; k < body.size(); k++)
-                if (body.get(k - 1).getOpcode() == Opcode.SGET_BOOLEAN && body.get(k).getOpcode() == Opcode.INVOKE_STATIC
-                        && reference(body.get(k - 1)) instanceof FieldReference f && reference(body.get(k)) instanceof MethodReference r
-                        && f.getType().equals("Z") && f.getDefiningClass().equals(r.getDefiningClass()) && descriptor(r).equals("()Z")
-                        && f.getDefiningClass().equals(getter.getDefiningClass())) mutes.add(f.toString());
-            for (Instruction i : body)
-                if (reference(i) instanceof MethodReference r && r.getDefiningClass().equals(video) && descriptor(r).equals("(Z)V")) setters.add(r.toString());
-            if (mutes.size() != 1 || setters.size() != 1) return null;
-            return new VideoPick(site, closeup, arguments(body.get(site)).get(1), mutes.iterator().next(), setters.iterator().next());
+            if (body.isEmpty() || body.get(0).getOpcode() != Opcode.SGET_BOOLEAN || !String.valueOf(reference(body.get(0))).equals(flag)) return false;
+            int stores = 0;
+            for (Instruction i : body) if (i.getOpcode() == Opcode.SPUT_BOOLEAN && String.valueOf(reference(i)).equals(flag)) stores++;
+            return stores >= 2;
         }
 
         /**
-         * Pin video playback (#48), Start pin videos muted. Right where the video manager makes a
-         * new video active, a pin page's video (the if-eqz on the closeup register) asks the hook,
-         * and on yes the app-wide sound flag takes the answer and the video's mute setter gets it.
-         * Both jumps that let a video through land on that check.
+         * Pin video playback (#48), Start pin videos muted. Each pin page asks the hook first thing
+         * where it takes its sound from Pinterest's app-wide sound flag, and on yes stores the answer
+         * in the flag: the regular video pin page's loadSavedMuteState, which starts by reading the
+         * flag, and the idea pin presenter's start, the one method with no parameters outside the
+         * idea pin page that calls the page's sound setter. Pinterest's first instruction follows.
          */
         void pinVideoSound(Contract c) {
             String hook = c.strings.get(0);
             MethodReference getter = videoStateGetter();
-            List<Method> managers = new ArrayList<>();
-            for (Method m : clean.methods.values())
-                if (!m.getDefiningClass().startsWith(OWN) && clean.texts.getOrDefault(m.toString(), Set.of()).contains(VIDEO_MANAGER_EXPERIMENT)
-                        && videoPick(m, getter) != null) managers.add(m);
-            Method manager = unique(managers, "The video manager's pick of the video on screen");
-            VideoPick pick = manager == null ? null : videoPick(manager, getter);
-            Method m = actual(manager);
-            List<Integer> sites = calls(m, hook, 1);
-            boolean placed = false;
-            if (pick != null && m != null && sites.size() == 1) {
-                List<Instruction> before = instructions(manager), body = instructions(m);
-                Layout layout = new Layout(m.getImplementation());
-                int at = pick.at, h = sites.get(0);
-                int answer = h + 1 < body.size() ? firstRegister(body.get(h + 1)) : -1;
-                placed = h == at + 1 && at + 6 < body.size()
-                        && body.get(at).getOpcode() == Opcode.IF_EQZ && firstRegister(body.get(at)) == pick.closeup && branchTarget(layout, at) == at + 6
-                        && arguments(body.get(h)).isEmpty()
-                        && body.get(h + 1).getOpcode() == Opcode.MOVE_RESULT && answer != pick.closeup && answer != pick.video
-                        && body.get(h + 2).getOpcode() == Opcode.IF_EQZ && firstRegister(body.get(h + 2)) == answer && branchTarget(layout, h + 2) == at + 6
-                        && body.get(h + 3).getOpcode() == Opcode.SPUT_BOOLEAN && firstRegister(body.get(h + 3)) == answer
-                        && String.valueOf(reference(body.get(h + 3))).equals(pick.mute)
-                        && String.valueOf(reference(body.get(h + 4))).equals(pick.setter)
-                        && arguments(body.get(h + 4)).equals(List.of(pick.video, answer))
-                        && body.get(at + 6).getOpcode() == before.get(at).getOpcode()
-                        && String.valueOf(reference(body.get(at + 6))).equals(String.valueOf(reference(before.get(at))))
-                        && arguments(body.get(at + 6)).equals(arguments(before.get(at)))
-                        && onlyFrom(m, h, at) && onlyFrom(m, h + 1, h) && onlyFrom(m, h + 2, h + 1) && onlyFrom(m, h + 3, h + 2) && onlyFrom(m, h + 4, h + 3);
-                FeatureFlow stockFlow = new FeatureFlow(manager);
-                for (int k = 0; placed && k < stockFlow.normal.size(); k++) {
-                    if (k == at - 1 || !stockFlow.normal.get(k).contains(at)) continue;
-                    int moved = k < at ? k : k + 6;
-                    placed = body.get(moved) instanceof OffsetInstruction && branchTarget(layout, moved) == at;
-                }
-                if (placed) remove(m, at, at + 6);
+            Method video = clean.methods.get(VIDEO_MODULE + "->" + LOAD_SAVED_MUTE_STATE + "()V");
+            List<Instruction> start = video == null || video.getImplementation() == null ? List.of() : instructions(video);
+            String flag = null;
+            if (getter != null && !start.isEmpty() && start.get(0).getOpcode() == Opcode.SGET_BOOLEAN
+                    && reference(start.get(0)) instanceof FieldReference f && f.getType().equals("Z")
+                    && f.getDefiningClass().equals(getter.getDefiningClass())) flag = f.toString();
+            if (flag == null) {
+                fail("the video pin page's " + LOAD_SAVED_MUTE_STATE + " no longer starts by reading Pinterest's sound flag");
+                capability(c.callee, false);
+                return;
             }
-            if (manager != null && m != null && !placed) fail(hook + " doesn't mute a pin page's video where it becomes active in " + m);
+            List<Method> setters = new ArrayList<>();
+            for (Method m : clean.methods.values()) if (!m.getDefiningClass().startsWith(OWN) && setsSound(m, flag)) setters.add(m);
+            Method setter = unique(setters, "The idea pin page's sound setter");
+            List<Method> starts = new ArrayList<>();
+            if (setter != null)
+                for (Method m : clean.methods.values())
+                    if (!m.getDefiningClass().startsWith(OWN) && !m.getDefiningClass().equals(setter.getDefiningClass())
+                            && m.getImplementation() != null && m.getParameterTypes().isEmpty() && m.getReturnType().equals("V")
+                            && !callSites(instructions(m), setter.toString()).isEmpty()) starts.add(m);
+            Method idea = setter == null ? null : unique(starts, "The idea pin presenter's start");
+            boolean placed = setter != null && idea != null;
+            for (Method page : Arrays.asList(video, idea)) {
+                if (page == null) continue;
+                Method m = actual(page);
+                List<Integer> sites = calls(m, hook, 1);
+                boolean here = false;
+                if (m != null && sites.size() == 1) {
+                    List<Instruction> before = instructions(page), body = instructions(m);
+                    Layout layout = new Layout(m.getImplementation());
+                    int answer = body.size() > 1 ? firstRegister(body.get(1)) : -1;
+                    here = sites.get(0) == 0 && body.size() > 4 && arguments(body.get(0)).isEmpty()
+                            && body.get(1).getOpcode() == Opcode.MOVE_RESULT
+                            && body.get(2).getOpcode() == Opcode.IF_EQZ && firstRegister(body.get(2)) == answer && branchTarget(layout, 2) == 4
+                            && body.get(3).getOpcode() == Opcode.SPUT_BOOLEAN && firstRegister(body.get(3)) == answer
+                            && String.valueOf(reference(body.get(3))).equals(flag)
+                            && body.get(4).getOpcode() == before.get(0).getOpcode()
+                            && firstRegister(body.get(4)) == firstRegister(before.get(0))
+                            && String.valueOf(reference(body.get(4))).equals(String.valueOf(reference(before.get(0))))
+                            && onlyFrom(m, 1, 0) && onlyFrom(m, 2, 1) && onlyFrom(m, 3, 2);
+                    if (here) remove(m, 0, 4);
+                }
+                if (m != null && !here) fail(hook + " doesn't set Pinterest's sound flag first thing in " + m);
+                placed &= here;
+            }
             capability(c.callee, placed);
         }
 

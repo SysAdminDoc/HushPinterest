@@ -42,11 +42,11 @@ internal const val PROMOTED_CLOSEUP_PRESENTER = "Lcom/pinterest/feature/pin/clos
 /** The lambda each pin page's unbind runs on its video's saved state, a Kotlin name that stays. */
 internal const val UNBIND_RESET = "onUnbind\$lambda\$0"
 
-/** An experiment the video manager checks in the method that picks the video on screen. Only used to find that method. */
-internal const val VIDEO_MANAGER_EXPERIMENT = "android_global_nav_impression_tracking_modification"
+/** The regular video pin page, a class name that stays. */
+internal const val PIN_CLOSEUP_VIDEO_MODULE = "Lcom/pinterest/activity/pin/view/modules/PinCloseupVideoModule;"
 
-/** The surface a pin page's video reports, an enum constant whose name stays. */
-internal const val PIN_CLOSEUP_SURFACE = "PIN_CLOSEUP"
+/** The regular video pin page's read of Pinterest's sound flag each time it becomes the one on screen, a name that stays. */
+internal const val LOAD_SAVED_MUTE_STATE = "loadSavedMuteState"
 
 /** The base class of the idea pin page view, a name that stays. */
 internal const val ROUNDED_CORNERS_LAYOUT = "Lcom/pinterest/design/widget/RoundedCornersLayout;"
@@ -198,73 +198,60 @@ private fun ideaPinStartIn(method: Method): IdeaPinStart? {
 }
 
 /**
- * Where the video manager makes a video the one on screen: [at] is its call that marks the video
- * active, reached only by the two jumps that let a video through, one of them testing [closeup],
- * the register that says the video sits on a pin page. [video] is that video, [mute] the app-wide
- * sound flag a pin page reads when it builds its player, [muteVideo] the video's own mute setter
- * and [muteCall] the invoke the manager uses for it.
+ * Where each pin page takes its sound from Pinterest's app-wide sound flag [flag], true for muted,
+ * the flag the speaker button sets. [video] is the regular video pin page's read of the flag each
+ * time it becomes the one on screen. [idea] is the idea pin presenter's start each time its page
+ * does, which has [applier] put the flag on the page's videos and its speaker button.
  */
-internal class VideoActivation(
-    val method: Method, val at: Int, val closeup: Int, val video: Int,
-    val mute: FieldReference, val muteVideo: MethodReference, val muteCall: String,
-)
+internal class SoundStarts(val flag: FieldReference, val video: Method, val applier: Method, val idea: Method)
 
 /**
- * 14.45.0: `vb3/u1.u()`. @395 to @401 set v10 to 1 for a video whose surface is [PIN_CLOSEUP_SURFACE],
- * @412 skips a video that's already the active one, @414 and @415 let a new one through to @417,
- * the call that makes it active, and @416 sends everything else away. A pin page's video comes
- * through there once each time you open or swipe to its pin. @421 and @422 read the sound flag.
+ * 14.45.0: `PinCloseupVideoModule.loadSavedMuteState()` starts with `sget-boolean v0, mc3/u.a`, the
+ * flag kept with the saved video states, and hands it to its video's mute setter. `fx1/b1.k2()`
+ * reads the same flag first and stores it back as true or false with the page's videos and speaker
+ * button. `ex1/a0.x4()`, the idea pin presenter's start, is the one method with no parameters in
+ * another class that calls it. The video manager never makes an idea pin's video the active one
+ * (S25, 2026-11-24), so the pages are where the sound starts.
  */
-internal fun BytecodePatchContext.videoActivation(states: VideoStates): VideoActivation =
-    methodsWithString(VIDEO_MANAGER_EXPERIMENT).mapNotNull { activationIn(it, states) }.toList()
-        .one("$PATCH: the video manager's pick of the video on screen")
-
-private fun activationIn(method: Method, states: VideoStates): VideoActivation? {
-    if (method.parameterTypes.isNotEmpty() || method.returnType != "V" || method.implementation == null) return null
-    val body = method.instructions()
-    val video = body.mapNotNull { (it as? ReferenceInstruction)?.reference as? MethodReference }
-        .filter { it.name == "play" && it.parameterTypes.isEmpty() && it.returnType == "V" }.map { it.definingClass }.distinct()
-        .singleOrNull() ?: return null
-    val flow = ControlFlow.of(method)
-    fun into(at: Int) = flow.normal.indices.filter { at in flow.normal[it] }
-    val at = body.indices.filter { k ->
-        val called = (body[k] as? ReferenceInstruction)?.reference as? MethodReference
-        if (body[k].opcode != Opcode.INVOKE_VIRTUAL || called == null || called.parameters() != listOf(video) || called.returnType != "V") {
-            return@filter false
+internal fun BytecodePatchContext.soundStarts(states: VideoStates): SoundStarts {
+    val (video, flag) = soundFlag(states)
+    val appliers = mutableListOf<Method>()
+    classDefForEach { owner -> owner.methods.filterTo(appliers) { it.setsSound(flag) } }
+    val applier = appliers.one("$PATCH: the idea pin page's sound setter")
+    val ideas = mutableListOf<Method>()
+    classDefForEach { owner ->
+        if (owner.type == applier.definingClass) return@classDefForEach
+        owner.methods.filterTo(ideas) { method ->
+            method.parameterTypes.isEmpty() && method.returnType == "V" && method.implementation != null && method.calls().any {
+                it.definingClass == applier.definingClass && it.name == applier.name && it.parameterTypes.isEmpty() && it.returnType == "V"
+            }
         }
-        val from = into(k)
-        from.size == 2 && k - 1 !in from && from.map { body[it].opcode }.toSet() == setOf(Opcode.IF_EQZ, Opcode.IF_NEZ)
-    }.singleOrNull() ?: return null
-    val closeup = (body[into(at).single { body[it].opcode == Opcode.IF_NEZ }] as OneRegisterInstruction).registerA
-    // That register is 1 only right after the video's surface compared equal to the pin page's.
-    val marked = (2 until at).any { k ->
-        val surface = (body[k - 2] as? ReferenceInstruction)?.reference as? FieldReference
-        body[k - 2].opcode == Opcode.SGET_OBJECT && surface?.name == PIN_CLOSEUP_SURFACE && body[k - 1].opcode == Opcode.IF_NE &&
-            body[k].opcode == Opcode.CONST_4 && (body[k] as OneRegisterInstruction).registerA == closeup &&
-            (body[k] as NarrowLiteralInstruction).narrowLiteral == 1
     }
-    if (!marked) return null
-    val shown = body[at].passed().getOrNull(1) ?: return null
-    // The app-wide sound flag, read right before the same class's getter for it. It lives with the saved states.
-    val mute = (1 until body.size).mapNotNull { k ->
-        val flag = (body[k - 1] as? ReferenceInstruction)?.reference as? FieldReference
-        val read = (body[k] as? ReferenceInstruction)?.reference as? MethodReference
-        if (body[k - 1].opcode == Opcode.SGET_BOOLEAN && body[k].opcode == Opcode.INVOKE_STATIC && flag != null && read != null &&
-            flag.type == "Z" && flag.definingClass == read.definingClass && read.parameterTypes.isEmpty() && read.returnType == "Z" &&
-            flag.definingClass == states.getter.definingClass
-        ) flag else null
-    }.distinct().singleOrNull() ?: return null
-    val setters = body.filter { instruction ->
-        val called = (instruction as? ReferenceInstruction)?.reference as? MethodReference
-        called != null && called.definingClass == video && called.parameters() == listOf("Z") && called.returnType == "V"
+    val idea = ideas.one("$PATCH: the idea pin presenter's start")
+    return SoundStarts(flag, video, applier, idea)
+}
+
+/** The regular video pin page's read of Pinterest's sound flag, its first instruction, and the flag it reads. */
+internal fun BytecodePatchContext.soundFlag(states: VideoStates): Pair<Method, FieldReference> {
+    val module = classDefByOrNull(PIN_CLOSEUP_VIDEO_MODULE) ?: throw PatchException("$PATCH: no regular video pin page $PIN_CLOSEUP_VIDEO_MODULE")
+    val video = module.methods.filter {
+        it.name == LOAD_SAVED_MUTE_STATE && it.parameterTypes.isEmpty() && it.returnType == "V" && it.implementation != null
+    }.one("$PATCH: the video pin page's $LOAD_SAVED_MUTE_STATE")
+    val first = video.instructions().firstOrNull()
+    val flag = (first as? ReferenceInstruction)?.reference as? FieldReference
+    if (first?.opcode != Opcode.SGET_BOOLEAN || flag == null || flag.type != "Z" || flag.definingClass != states.getter.definingClass) {
+        throw PatchException("$PATCH: the video pin page's $LOAD_SAVED_MUTE_STATE no longer starts by reading Pinterest's sound flag")
     }
-    val muteVideo = setters.map { (it as ReferenceInstruction).reference as MethodReference }.distinct().singleOrNull() ?: return null
-    val muteCall = when (setters.map { it.opcode }.distinct().singleOrNull()) {
-        Opcode.INVOKE_INTERFACE -> "invoke-interface"
-        Opcode.INVOKE_VIRTUAL -> "invoke-virtual"
-        else -> return null
-    }
-    return VideoActivation(method, at, closeup, shown, mute, muteVideo, muteCall)
+    return video to flag
+}
+
+/** A method with no parameters that starts by reading [flag] and stores it in two places: the idea pin page's sound setter. */
+internal fun Method.setsSound(flag: FieldReference): Boolean {
+    if (parameterTypes.isNotEmpty() || returnType != "V" || implementation == null) return false
+    val body = instructions()
+    fun touches(instruction: com.android.tools.smali.dexlib2.iface.instruction.Instruction, opcode: Opcode) =
+        instruction.opcode == opcode && ((instruction as ReferenceInstruction).reference as FieldReference).toString() == flag.toString()
+    return body.isNotEmpty() && touches(body[0], Opcode.SGET_BOOLEAN) && body.count { touches(it, Opcode.SPUT_BOOLEAN) } >= 2
 }
 
 /**
@@ -273,8 +260,9 @@ private fun activationIn(method: Method, states: VideoStates): VideoActivation? 
  * plays. The extension's answer goes into that fresh state's paused flag, and into the flag each
  * pin page clears when you leave it, so a pin you come back to doesn't start either. Idea pin pages
  * start their page's video themselves, and that one play asks too. Start pin videos muted: each
- * time a pin page's video becomes the one on screen, the app-wide sound flag and the video itself
- * go to muted when the extension says so. Tapping the speaker works as before.
+ * time a pin page becomes the one on screen, regular video pins and idea pins alike, Pinterest's
+ * app-wide sound flag takes the extension's answer right before the page reads it. Tapping the
+ * speaker works as before.
  */
 @Suppress("unused")
 val pinVideoPlaybackPatch = bytecodePatch(
@@ -293,13 +281,12 @@ val pinVideoPlaybackPatch = bytecodePatch(
         val states = videoStates()
         val fresh = freshState(states)
         val idea = ideaPinStart()
-        val activation = videoActivation(states)
+        val sound = soundStarts(states)
         val answer = fresh.method.freeLocalsAt("$PATCH: a fresh video state", fresh.at, 1, reads = listOf(fresh.state)).single()
         val waits = idea.method.freeLocalsAt("$PATCH: the idea pin page's start", idea.play, 1, highest = 255, reads = listOf(idea.video)).single()
-        if (activation.video > 15) throw PatchException("$PATCH: the video on screen is in v${activation.video}, out of reach of its mute setter")
-        if (activation.closeup > 255) throw PatchException("$PATCH: the pin page test is in v${activation.closeup}, out of reach of if-eqz")
-        val muted = activation.method.freeLocalsAt("$PATCH: the video on screen", activation.at, 1,
-            reads = listOf(activation.closeup, activation.video)).single()
+        val pages = listOf(sound.video, sound.idea).map { page ->
+            page to page.freeLocalsAt("$PATCH: a pin page's sound", 0, 1, highest = 255).single()
+        }
 
         // Don't autoplay pin videos: a fresh state waits, a pin page you leave keeps its video waiting,
         // and an idea pin page skips its own play.
@@ -323,16 +310,17 @@ val pinVideoPlaybackPatch = bytecodePatch(
         """, ExternalLabel("hush_video_waits", start.getInstruction(idea.play + 1)))
         enableCapability("pinVideoAutoplay")
 
-        // Start pin videos muted: the hook's answer is 0 or 1, the value Pinterest's sound flag takes.
-        val manager = mutable(activation.method)
-        manager.addInstructionsAtControlFlowLabel(activation.at, """
-            if-eqz v${activation.closeup}, :hush_sound_kept
-            invoke-static {}, $PIN_VIDEO_MUTED_HOOK
-            move-result v$muted
-            if-eqz v$muted, :hush_sound_kept
-            sput-boolean v$muted, ${activation.mute}
-            ${activation.muteCall} {v${activation.video}, v$muted}, ${activation.muteVideo}
-        """, ExternalLabel("hush_sound_kept", manager.getInstruction(activation.at)))
+        // Start pin videos muted: on yes the flag each pin page reads next is muted. The hook's
+        // answer is 0 or 1, the values the flag takes.
+        for ((page, muted) in pages) {
+            val method = mutable(page)
+            method.addInstructionsAtControlFlowLabel(0, """
+                invoke-static {}, $PIN_VIDEO_MUTED_HOOK
+                move-result v$muted
+                if-eqz v$muted, :hush_sound_kept
+                sput-boolean v$muted, ${sound.flag}
+            """, ExternalLabel("hush_sound_kept", method.getInstruction(0)))
+        }
         enableCapability("pinVideoSound")
         enableStatus("pinVideoPlayback")
     }
