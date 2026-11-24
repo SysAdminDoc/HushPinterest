@@ -1287,6 +1287,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.BLACK_SHEETS.key, "In dark mode", "menus and sheets that slide up pure black", "Light mode stays", "next time you open one");
         summaryContains(Settings.BLACK_BOARDS.key, "In dark mode", "floats over a board", "Light mode stays", "next time you open a board or your profile");
         summaryContains(Settings.BLACK_TOASTS.key, "In dark mode", "save or download a pin", "Light mode stays", "next message");
+        summaryContains(Settings.BLACK_BUTTONS.key, "In dark mode", "gray buttons", "keeps their labels", "next time Pinterest draws a button");
         summaryContains(Settings.HIDE_DOWNLOAD_TOASTS.key, "started or finished", "Errors still show", "download notification stays");
         summaryContains(Settings.HIDE_CLOSEUP_BACK.key, "back arrow that floats over a pin", "back gesture or button", "next pin you open");
         summaryContains(Settings.HIDE_CLOSEUP_LENS.key, "visual search button", "Search image in the pin menu still works", "next pin you open");
@@ -1298,6 +1299,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_CLOSEUP_REMIX.key, "Remix button on a pin you open", "next pin you open");
         summaryContains(Settings.HIDE_CLOSEUP_VISIT_SITE.key, "Visit site button under a pin that links to a website", "next pin you open");
         summaryContains(Settings.SMALLER_SAVE_BUTTON.key, "red Save button on a pin you open", "four fifths of its size", "next pin you open");
+        summaryContains(Settings.SAVE_COLOR_ON_RED_BUTTONS.key, "other red buttons", "Follow and Done", "Pick that color first");
         summaryContains(Settings.HIDE_PIN_MENU_COLLAGE.key, "Add to collage and Remix collage", "pin menus you open from now on", "already open won't change");
         summaryContains(Settings.HIDE_PIN_MENU_VISUAL_SEARCH.key, "Search image", "pin menus you open from now on", "already open won't change");
         summaryContains(Settings.HIDE_PIN_MENU_PIN_BOOST.key, "Promote pin", "pin menus you open from now on", "already open won't change");

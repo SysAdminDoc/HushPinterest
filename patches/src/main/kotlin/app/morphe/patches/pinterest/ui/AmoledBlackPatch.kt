@@ -17,6 +17,7 @@ import app.morphe.patches.pinterest.misc.extension.localRegisterCount
 import app.morphe.patches.pinterest.misc.extension.pinterestExtensionPatch
 import app.morphe.patches.pinterest.misc.extension.requireFreeAt
 import app.morphe.patches.pinterest.misc.extension.requireStatusMethod
+import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.patches.pinterest.misc.extension.requireThisIntact
 import app.morphe.patches.pinterest.misc.settings.EXTENSION_ROOT
 import app.morphe.patches.pinterest.misc.settings.settingsPatch
@@ -55,6 +56,7 @@ internal const val PROFILE_FILTERS_HOOK = "$AMOLED_BLACK->profileFilters(Landroi
 internal const val BOARD_HEADER_HOOK = "$AMOLED_BLACK->boardHeader(Landroid/view/View;)V"
 internal const val PIN_DETAILS_HOOK = "$AMOLED_BLACK->pinDetails(Landroid/view/View;)V"
 internal const val TOAST_HOOK = "$AMOLED_BLACK->toast(Landroid/view/View;)V"
+internal const val BLACK_BUTTONS_HOOK = "$AMOLED_BLACK->gestaltButton(Landroid/view/View;)V"
 
 /** The sheet of the drawer a pin's chevron slides up, looked up only where the drawer is built (14.45.0). */
 internal const val PIN_DETAILS_SHEET = "metadata_drawer_bottom_sheet"
@@ -100,7 +102,7 @@ val amoledBlackPatch = bytecodePatch(
     name = PATCH,
     description = "Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED " +
         "screens. The comments sheet, a pin's menu, the Save to sheet that lists your boards, the other menus " +
-        "and sheets, the buttons over boards and profiles, and Pinterest's pop-up messages can go black too, " +
+        "and sheets, the buttons over boards and profiles, Pinterest's pop-up messages and its gray buttons can go black too, " +
         "each with its own switch. " +
         "Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface.",
 ) {
@@ -116,10 +118,11 @@ val amoledBlackPatch = bytecodePatch(
         requireStatusMethod("blackSheets")
         requireStatusMethod("blackBoards")
         requireStatusMethod("blackToasts")
+        requireStatusMethod("blackButtons")
         var sheets = false
         var boards = false
         val surfaces = listOf("bottom bar", "comments screen", "pin menu", "Save to sheet", "sheets", "menus",
-            "pin details", "board tool bar", "profile filters", "board header", "toasts")
+            "pin details", "board tool bar", "profile filters", "board header", "toasts", "button styling")
         handleTargets(PATCH, "surfaces", surfaces) { surface ->
             try {
                 when (surface) {
@@ -156,6 +159,15 @@ val amoledBlackPatch = bytecodePatch(
                     "toasts" -> {
                         paintToasts()
                         enableCapability("blackToasts")
+                    }
+                    "button styling" -> {
+                        // Every GestaltButton right after Pinterest styles it, the spot Hide closeup
+                        // buttons hands the Save button over at. Whichever patch goes in second takes
+                        // the label there, ahead of the other's call, so both run on every path.
+                        val style = styleSite()
+                        mutable(style.method).addInstructionsAtControlFlowLabel(style.index,
+                            "invoke-static/range { v${style.register} .. v${style.register} }, $BLACK_BUTTONS_HOOK")
+                        enableCapability("blackButtons")
                     }
                     "bottom bar" -> {
                         paintBottomBar()

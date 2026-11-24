@@ -71,6 +71,7 @@ class UiFixtureTest {
         // Capabilities past here have no patch of their own at the same index.
         "amoledBlack" to "blackComments", "amoledBlack" to "blackPinMenu", "amoledBlack" to "blackSaveSheet",
         "amoledBlack" to "blackSheets", "amoledBlack" to "blackBoards", "amoledBlack" to "blackToasts",
+        "amoledBlack" to "blackButtons",
         "hideSearchHistory" to "recentSearchRows", "hideSearchHistory" to "recentSearchHeading",
         "hideComments" to "suggestedReplies", "hideComments" to "commentPreviews",
         "hideNavigationButtons" to "homeTabs", "hideSearchHistory" to "searchLanding",
@@ -890,7 +891,8 @@ class UiFixtureTest {
             "unifiedCommentsModulePresenterFactory", "CommentsZone(isVisible=", INBOX_UPDATES_FEED, ONE_BAR_MODULES)
         val required = (SEARCH_HISTORY_VIEWS + TYPEAHEAD_ROW + COMMENT_PREVIEW + COMMENTS_IMAGES + COMMENTS_QUICK_REPLIES + HEADER_BAR + BOTTOM_BAR +
             BLUR_VIEW + PIN_MENU + "Lcom/pinterest/activity/pin/view/modules/PinCloseupVideoModule;" +
-            BOARD_TOOL_BAR + PROFILE_PILL + PROFILE_FILTER_BAR + BOARD_HEADER_IMAGE + TOAST_CONTAINER + TAB_LAYOUT).toSet()
+            BOARD_TOOL_BAR + PROFILE_PILL + PROFILE_FILTER_BAR + BOARD_HEADER_IMAGE + TOAST_CONTAINER + TAB_LAYOUT +
+            GESTALT_BUTTON).toSet()
         val found = mutableMapOf<String, ClassDef>()
         // Every class with a section adder, kept below only when it holds the Updates feed.
         val adders = mutableListOf<ClassDef>()

@@ -500,6 +500,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_black_sheets": return L10n.t("Black menus and sheets");
             case "hushpinterest_black_boards": return L10n.t("Black board and profile buttons");
             case "hushpinterest_black_toasts": return L10n.t("Black toasts");
+            case "hushpinterest_black_buttons": return L10n.t("Black buttons");
             case "hushpinterest_hide_closeup_back": return L10n.t("Hide back arrow on pins");
             case "hushpinterest_hide_closeup_lens": return L10n.t("Hide lens button on pins");
             case "hushpinterest_hide_closeup_search_label": return L10n.t("Hide Search image label on pins");
@@ -510,6 +511,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_hide_closeup_remix": return L10n.t("Hide Remix button on pins");
             case "hushpinterest_hide_closeup_visit_site": return L10n.t("Hide Visit site button on pins");
             case "hushpinterest_smaller_save_button": return L10n.t("Smaller Save button on pins");
+            case "hushpinterest_save_color_on_red_buttons": return L10n.t("Save color on other red buttons");
             case "hushpinterest_hide_pin_menu_collage": return L10n.t("Hide collage menu items");
             case "hushpinterest_hide_pin_menu_visual_search": return L10n.t("Hide Search image menu item");
             case "hushpinterest_hide_pin_menu_pin_boost": return L10n.t("Hide Promote pin menu item");

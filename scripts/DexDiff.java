@@ -285,7 +285,7 @@ public class DexDiff {
             Map.entry("blackSheets", 3), Map.entry("blackBoards", 7),
             Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1), Map.entry("offlineBanner", 1), Map.entry("refreshPill", 1),
             Map.entry("downloadToasts", 1),
-            Map.entry("blackToasts", 1),
+            Map.entry("blackToasts", 1), Map.entry("blackButtons", 1),
             Map.entry("homeTabs", 1),
             Map.entry("searchLanding", 1), Map.entry("searchSuggestions", 1), Map.entry("experimentGroup", 1),
             Map.entry("searchKeyboard", 1),
@@ -6390,15 +6390,31 @@ public class DexDiff {
         static final String GESTALT_BUTTON = "Lcom/pinterest/gestalt/button/view/GestaltButton;",
                 COMPOUND_PADDING = "Landroid/widget/TextView;->setCompoundDrawablePadding(I)V";
 
-        /**
-         * The Save button's size and color. GestaltButton's one instance method taking two of the same
-         * style object and returning nothing calls setCompoundDrawablePadding on its this register
-         * exactly once, with nothing writing that register before it, no backward branch and no try
-         * block. Right after the padding comes the hook with that register, and the instruction that
-         * followed the padding is reached only from the hook, so the branch that skips the padding
-         * lands on the hook too.
-         */
+        /** The hooks that take a GestaltButton right after it pads its icon, one a patch. */
+        static final Set<String> STYLE_HOOKS = Set.of(
+                "Lapp/hushpinterest/extension/pinterest/ui/CloseupButtons;->saveButton(Landroid/view/View;)V",
+                "Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->gestaltButton(Landroid/view/View;)V");
+
+        /** The Save button's size and color, Hide closeup buttons' hook on the button styling. */
         void closeupSaveButton(Contract c) {
+            styleHook(c);
+        }
+
+        /** Black buttons, AMOLED black's hook on the same styling. */
+        void blackButtons(Contract c) {
+            styleHook(c);
+        }
+
+        /**
+         * A hook on every GestaltButton's styling. GestaltButton's one instance method taking two of
+         * the same style object and returning nothing calls setCompoundDrawablePadding on its this
+         * register exactly once, with nothing writing that register before it, no backward branch and
+         * no try block. Right after the padding come the styling hooks with that register, in the
+         * order their patches left them, each reached only from the one before. The instruction that
+         * followed the padding is reached only from the last, so the branch that skips the padding
+         * lands on the first hook and runs them all.
+         */
+        void styleHook(Contract c) {
             String hook = c.strings.get(0);
             ClassDef button = clean.classes.get(GESTALT_BUTTON);
             List<Method> styles = new ArrayList<>();
@@ -6424,10 +6440,16 @@ public class DexDiff {
             boolean placed = false;
             if (style != null && m != null && sites.size() == 1) {
                 List<Instruction> body = instructions(m), was = instructions(style);
-                int at = sites.get(0), self = parameter(style, -1);
-                placed = at == padAt.get(style) + 1 && at + 1 < body.size() && COMPOUND_PADDING.equals(String.valueOf(reference(body.get(at - 1))))
-                        && callRegisters(body.get(at - 1)).get(0) == self && arguments(body.get(at)).equals(List.of(self))
-                        && body.get(at + 1).getOpcode() == was.get(at).getOpcode() && onlyFrom(m, at + 1, at);
+                int at = sites.get(0), self = parameter(style, -1), pad = padAt.get(style);
+                int end = pad + 1;
+                boolean run = true;
+                while (end < body.size() && STYLE_HOOKS.contains(String.valueOf(reference(body.get(end))))) {
+                    run &= arguments(body.get(end)).equals(List.of(self)) && (end == pad + 1 || onlyFrom(m, end, end - 1));
+                    end++;
+                }
+                placed = run && at > pad && at < end && end < body.size() && COMPOUND_PADDING.equals(String.valueOf(reference(body.get(pad))))
+                        && callRegisters(body.get(pad)).get(0) == self
+                        && body.get(end).getOpcode() == was.get(pad + 1).getOpcode() && onlyFrom(m, end, end - 1);
                 if (!placed) fail(hook + " doesn't hand over the button right after " + style + " pads its icon");
                 else remove(m, at, at + 1);
             }
@@ -9512,6 +9534,7 @@ public class DexDiff {
                     case "closeupActionBar": closeupRows(c, false); break;
                     case "closeupVisitSite": closeupRows(c, true); break;
                     case "closeupSaveButton": closeupSaveButton(c); break;
+                    case "blackButtons": blackButtons(c); break;
                     case "postedDate": postedDate(c); break;
                     case "closeupGate": closeupGate(c); break;
                     case "highlightRing": highlightRing(c); break;

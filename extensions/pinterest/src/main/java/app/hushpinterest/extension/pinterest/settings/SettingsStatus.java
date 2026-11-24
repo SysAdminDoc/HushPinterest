@@ -109,6 +109,7 @@ public final class SettingsStatus {
     public static boolean blackSheets() { return false; }
     public static boolean blackBoards() { return false; }
     public static boolean blackToasts() { return false; }
+    public static boolean blackButtons() { return false; }
     public static boolean hideCloseupButtons() { return false; }
     public static boolean closeupButtons() { return false; }
     public static boolean closeupSearchLabel() { return false; }

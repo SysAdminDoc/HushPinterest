@@ -4,6 +4,9 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* New `Save color on other red buttons` switch under Interface, part of Hide closeup buttons. Follow, Done and Pinterest's other red buttons take the color you picked for the Save button. It starts off. (#48)
+* New `Black buttons` switch under Interface, part of AMOLED black. In dark mode, Pinterest's gray buttons, like Message and Edit profile on a profile, turn pure black and keep their labels. It starts off. (#48)
+
 * The patches now target Pinterest 14.45.0, version code 14458020. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
 * Long-pressing the Home button in the bottom bar now opens the HushPinterest settings, the same as long-pressing the Pinterest logo. The other buttons keep what Pinterest does with a long press. (#48)
 * New `Hide the refresh pill` switch under Feed, part of Keep Home feed. After you've been away, Home no longer shows the pill that offers new pins. Pull down on Home when you want them. It starts off. (#48)

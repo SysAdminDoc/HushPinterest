@@ -8,8 +8,10 @@ package app.hushpinterest.extension.pinterest.ui;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.content.Context;
@@ -81,6 +83,7 @@ public class AmoledBlackTest {
         Settings.BLACK_SHEETS.resetToDefault();
         Settings.BLACK_BOARDS.resetToDefault();
         Settings.BLACK_TOASTS.resetToDefault();
+        Settings.BLACK_BUTTONS.resetToDefault();
         HookStatus.clear();
         AmoledBlack.tabRoot = -1;
         AmoledBlack.searchText = -1;
@@ -88,6 +91,18 @@ public class AmoledBlackTest {
         AmoledBlack.gestureStrip = -1;
         AmoledBlack.headerImage = -1;
         AmoledBlack.headerBlur = -1;
+    }
+
+    /** Pinterest's button grays over black go to Black buttons; colors, white and none don't. */
+    @Test public void onlyDarkGraysCountAsButtonGrays() {
+        assertTrue("night secondary gray", AmoledBlack.darkGray(0x4D72727E));
+        assertTrue("an opaque dark gray", AmoledBlack.darkGray(0xFF333333));
+        assertTrue(AmoledBlack.darkGray(SECONDARY));
+        assertFalse("red", AmoledBlack.darkGray(0xFFE60023));
+        assertFalse("a dark red", AmoledBlack.darkGray(0xFF661010));
+        assertFalse("white", AmoledBlack.darkGray(0xFFFFFFFF));
+        assertFalse("light gray", AmoledBlack.darkGray(0xFFE9E9E9));
+        assertFalse("none", AmoledBlack.darkGray(0x00000000));
     }
 
     @Test public void separateTabsTintedGrayTurnBlackAndOffGivesTheTintBack() {

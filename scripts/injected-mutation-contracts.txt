@@ -54,7 +54,7 @@ family|hideAssistant|Hide Assistant|assistantEntries
 family|hideSearchHistory|Hide search history|searchHistory,recentSearchRows,recentSearchHeading,searchLanding,searchSuggestions
 family|hideNavigationButtons|Hide navigation buttons|navigationButtons,homeTabs,searchKeyboard
 family|hideHeaderButtons|Hide header buttons|headerButtons
-family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards,blackToasts
+family|amoledBlack|AMOLED black|blackBottomBar,blackComments,blackPinMenu,blackSaveSheet,blackSheets,blackBoards,blackToasts,blackButtons
 family|hideCloseupButtons|Hide closeup buttons|closeupButtons,closeupSearchLabel,closeupActionBar,closeupRemix,closeupVisitSite,closeupSaveButton
 family|hidePinMenuItems|Filter pin menu|pinMenuItems,pinMenuRows
 family|hideComments|Hide comments|comments,suggestedReplies,commentPreviews
@@ -171,6 +171,7 @@ mutation|feedbackFlyout|feedbackFlyout|Lapp/hushpinterest/extension/pinterest/ui
 mutation|firebaseCertificate|firebaseCertificate|Lapp/hushpinterest/extension/pinterest/notifications/PushNotifications;->certificateHeader(Ljava/net/URLConnection;Ljava/lang/String;)Ljava/lang/String;
 mutation|downloadToasts|downloadToasts|Lapp/hushpinterest/extension/pinterest/ui/UiHooks;->isDownloadToast(Ljava/lang/Object;)Z
 mutation|blackToasts|blackToasts|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->toast(Landroid/view/View;)V
+mutation|blackButtons|blackButtons|Lapp/hushpinterest/extension/pinterest/ui/AmoledBlack;->gestaltButton(Landroid/view/View;)V
 mutation|homeTabs|homeTabs|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->homeTabsHeight(Landroid/view/View;II)I
 mutation|searchLanding|searchLanding|Lapp/hushpinterest/extension/pinterest/ui/InterfaceControls;->searchLanding(Landroid/view/View;)V
 mutation|pullToDismiss,profilePhotoSheet,videoSizeCap|experimentGroup|Lapp/hushpinterest/extension/pinterest/ui/Experiments;->group(Ljava/lang/String;)Ljava/lang/String;

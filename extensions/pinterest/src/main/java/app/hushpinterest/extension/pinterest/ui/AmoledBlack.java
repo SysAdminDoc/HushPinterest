@@ -488,6 +488,50 @@ public final class AmoledBlack {
         Logger.printDebug(() -> "Profile filter " + view.getClass().getSimpleName() + " tinted black");
     }
 
+    /** The lightest a channel of a button gray gets over black for Black buttons to take it. */
+    static final int DARK_GRAY_MOST = 0x80;
+    /** How far apart a button gray's channels may be, so red, blue and the rest keep their look. */
+    static final int GRAY_SPREAD = 0x20;
+
+    /**
+     * Called with every Gestalt button right after Pinterest styles it, at the same spot Hide closeup
+     * buttons hands the Save button over, in whichever order the two patches went in (#48). With
+     * Black buttons on in dark mode, a button Pinterest fills with
+     * one of its dark grays, such as Message, Edit profile and Following on a profile, takes that
+     * gray through the levels curve the way the profile filters do, so its fill turns black and its
+     * label stays. Red, white and see-through buttons keep their look, and so does a button wearing
+     * the Save color. Pinterest puts its colors on only when they change, so off, Pause or light mode
+     * give Pinterest's own tint back on the button's next look.
+     */
+    public static void gestaltButton(View button) {
+        try {
+            if (button == null) return;
+            ColorStateList tint = button.getBackgroundTintList();
+            boolean black = UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BUTTONS) && night(button);
+            if (tint instanceof LeveledTint) {
+                if (!black) CloseupButtons.tint(button, ((LeveledTint) tint).original);
+                return;
+            }
+            if (!black || tint == null || CloseupButtons.painted(button) || !darkGray(tint.getDefaultColor())) return;
+            CloseupButtons.tint(button, new LeveledTint(tint));
+            HookStatus.counted(FamilyNames.AMOLED_BLACK, "button tinted black");
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, "button", failure);
+        }
+    }
+
+    /**
+     * Whether [color] is one of Pinterest's button grays as it shows over black: next to no color
+     * in it, and no lighter than {@link #DARK_GRAY_MOST}. None at all stays out.
+     */
+    static boolean darkGray(int color) {
+        int alpha = Color.alpha(color);
+        if (alpha == 0) return false;
+        int red = Color.red(color) * alpha / 255, green = Color.green(color) * alpha / 255, blue = Color.blue(color) * alpha / 255;
+        int most = Math.max(red, Math.max(green, blue)), least = Math.min(red, Math.min(green, blue));
+        return most <= DARK_GRAY_MOST && most - least <= GRAY_SPREAD;
+    }
+
     /**
      * [color] as it shows over black, each channel stretched so DARKEST_KEPT and below land on
      * black and white stays white, drawn solid. Pinterest's button gray at night is a light gray at

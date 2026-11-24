@@ -539,7 +539,8 @@ public class HushPinterestPreferenceFragmentTest {
                 Settings.HIDE_CLOSEUP_COMMENTS, Settings.HIDE_CLOSEUP_SHARE, Settings.HIDE_CLOSEUP_MORE));
         rowsOf.put(PatchFamily.Capability.CLOSEUP_REMIX, Collections.singletonList(Settings.HIDE_CLOSEUP_REMIX));
         rowsOf.put(PatchFamily.Capability.CLOSEUP_VISIT_SITE, Collections.singletonList(Settings.HIDE_CLOSEUP_VISIT_SITE));
-        rowsOf.put(PatchFamily.Capability.CLOSEUP_SAVE_BUTTON, Collections.singletonList(Settings.SMALLER_SAVE_BUTTON));
+        rowsOf.put(PatchFamily.Capability.CLOSEUP_SAVE_BUTTON, Arrays.asList(Settings.SMALLER_SAVE_BUTTON,
+                Settings.SAVE_COLOR_ON_RED_BUTTONS));
         for (Map.Entry<PatchFamily.Capability, List<BooleanSetting>> missing : rowsOf.entrySet()) {
             Set<PatchFamily.Capability> withoutIt = EnumSet.allOf(PatchFamily.Capability.class);
             withoutIt.remove(missing.getKey());
@@ -578,6 +579,10 @@ public class HushPinterestPreferenceFragmentTest {
             }
             assertEquals(at + 1 + settings.length, indexOfKey(rows, "action_save_button_color"));
             assertEquals("Save button color", String.valueOf(page.findPreference("action_save_button_color").getTitle()));
+            SwitchPreference red = (SwitchPreference) page.findPreference(Settings.SAVE_COLOR_ON_RED_BUTTONS.key);
+            assertEquals("Save color on other red buttons", String.valueOf(red.getTitle()));
+            assertFalse("Save color on other red buttons starts off", red.isChecked());
+            assertEquals(at + 2 + settings.length, indexOfKey(rows, Settings.SAVE_COLOR_ON_RED_BUTTONS.key));
         }
     }
 
@@ -782,6 +787,7 @@ public class HushPinterestPreferenceFragmentTest {
         barOnly.remove(PatchFamily.Capability.BLACK_SHEETS);
         barOnly.remove(PatchFamily.Capability.BLACK_BOARDS);
         barOnly.remove(PatchFamily.Capability.BLACK_TOASTS);
+        barOnly.remove(PatchFamily.Capability.BLACK_BUTTONS);
         PatchFamily.capabilitiesForTests = barOnly;
         try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
             HushPinterestPreferenceFragment page = pageOf(controller);
@@ -791,6 +797,7 @@ public class HushPinterestPreferenceFragmentTest {
             assertNull(page.findPreference(Settings.BLACK_SHEETS.key));
             assertNull(page.findPreference(Settings.BLACK_BOARDS.key));
             assertNull(page.findPreference(Settings.BLACK_TOASTS.key));
+            assertNull(page.findPreference(Settings.BLACK_BUTTONS.key));
             assertNotNull(page.findPreference(Settings.BLACK_BOTTOM_BAR.key));
         }
         PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
@@ -823,6 +830,10 @@ public class HushPinterestPreferenceFragmentTest {
             assertEquals("Black toasts", String.valueOf(toasts.getTitle()));
             assertFalse("Black toasts starts off", toasts.isChecked());
             assertEquals(bar + 6, indexOfKey(rows, Settings.BLACK_TOASTS.key));
+            SwitchPreference buttons = (SwitchPreference) page.findPreference(Settings.BLACK_BUTTONS.key);
+            assertEquals("Black buttons", String.valueOf(buttons.getTitle()));
+            assertFalse("Black buttons starts off", buttons.isChecked());
+            assertEquals(bar + 7, indexOfKey(rows, Settings.BLACK_BUTTONS.key));
         }
     }
 
@@ -868,6 +879,7 @@ public class HushPinterestPreferenceFragmentTest {
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_SHEETS.key));
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_BOARDS.key));
         assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_TOASTS.key));
+        assertEquals(words.get(Settings.BLACK_BOTTOM_BAR.key), words.get(Settings.BLACK_BUTTONS.key));
     }
 
     /** The black surfaces, each with the switch that's its own. */
@@ -880,6 +892,7 @@ public class HushPinterestPreferenceFragmentTest {
         rows.put(PatchFamily.Capability.BLACK_SHEETS, Settings.BLACK_SHEETS);
         rows.put(PatchFamily.Capability.BLACK_BOARDS, Settings.BLACK_BOARDS);
         rows.put(PatchFamily.Capability.BLACK_TOASTS, Settings.BLACK_TOASTS);
+        rows.put(PatchFamily.Capability.BLACK_BUTTONS, Settings.BLACK_BUTTONS);
         return rows;
     }
 

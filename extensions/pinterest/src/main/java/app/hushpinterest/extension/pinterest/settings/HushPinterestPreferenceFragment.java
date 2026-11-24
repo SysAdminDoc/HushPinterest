@@ -568,6 +568,13 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                             + "download a pin, pure black. Light mode stays as it is. The change shows on the next message.")),
                         SettingsIcons.DARK_MODE));
             }
+            if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BLACK_BUTTONS.installed()) {
+                ui.addPreference(mark(toggle(context, Settings.BLACK_BUTTONS, L10n.t("Black buttons"),
+                        L10n.t("In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a "
+                            + "profile, pure black and keeps their labels. Light mode stays as it is. The change shows the "
+                            + "next time Pinterest draws a button.")),
+                        SettingsIcons.DARK_MODE));
+            }
             patchToggle(ui, context, build, PatchFamily.HIDE_CLOSEUP_BUTTONS, Settings.HIDE_CLOSEUP_BACK,
                     L10n.t("Hide back arrow on pins"),
                     L10n.t("Hides the back arrow that floats over a pin you open. Your phone's back gesture or button "
@@ -615,6 +622,11 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                             + "spot at the end of the row. The change shows on the next pin you open.")),
                         SettingsIcons.TOOLS));
                 ui.addPreference(mark(new SaveButtonColorPreference(context), SettingsIcons.DARK_MODE));
+                ui.addPreference(mark(toggle(context, Settings.SAVE_COLOR_ON_RED_BUTTONS, L10n.t("Save color on other red buttons"),
+                        L10n.t("Paints Pinterest's other red buttons, such as Follow and Done, the color you picked for "
+                            + "the Save button. Pick that color first. The change shows the next time Pinterest draws a "
+                            + "button.")),
+                        SettingsIcons.DARK_MODE));
             }
             patchToggle(ui, context, build, PatchFamily.HIDE_CREATOR_NAME, Settings.HIDE_CREATOR_NAME,
                     L10n.t("Hide creator name on pins"),
