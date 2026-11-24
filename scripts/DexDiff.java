@@ -8822,7 +8822,8 @@ public class DexDiff {
          * Every bottom bar tab's long press goes through the settings entry, which opens the screen
          * for the Home tab alone (#48): in each bottom bar method that gives a tab its id
          * (View.setId) and then a two-register setOnLongClickListener, the listener register goes
-         * into the hook and its answer back into that register right in front of the call. A build
+         * into the hook and its answer back into that register right in front of the call, wherever
+         * other features' hooks earlier in the method moved that call. A build
          * whose bar has no such call is left as it was. Found in the clean target, never from the hook.
          */
         void tabLongPress(String hook) {
@@ -8846,7 +8847,9 @@ public class DexDiff {
                 List<Instruction> body = instructions(m);
                 for (int n = 0; n < sites.size(); n++) {
                     int site = sites.get(n), k = at.get(n), listener = ((FiveRegisterInstruction) was.get(site)).getRegisterD();
-                    if (k != site + 2 * n || !arguments(body.get(k)).equals(List.of(listener)) || k + 2 >= body.size()
+                    // Other features' hooks earlier in the same method (the navigation binding after
+                    // setId, for one) move this one down, so the stock call is matched by what it is.
+                    if (k < site + 2 * n || !arguments(body.get(k)).equals(List.of(listener)) || k + 2 >= body.size()
                             || body.get(k + 1).getOpcode() != Opcode.MOVE_RESULT_OBJECT || firstRegister(body.get(k + 1)) != listener
                             || !String.valueOf(reference(body.get(k + 2))).equals(String.valueOf(reference(was.get(site))))
                             || !arguments(body.get(k + 2)).equals(arguments(was.get(site)))
