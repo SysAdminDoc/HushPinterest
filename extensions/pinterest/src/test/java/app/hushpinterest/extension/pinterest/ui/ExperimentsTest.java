@@ -38,6 +38,7 @@ public class ExperimentsTest {
         PauseForTests.resume();
         Settings.SWIPE_TO_CLOSE_PINS.resetToDefault();
         Settings.FULL_SIZE_PROFILE_PHOTOS.resetToDefault();
+        Settings.BEST_VIDEO_QUALITY.resetToDefault();
         HookStatus.clear();
     }
 
@@ -72,6 +73,16 @@ public class ExperimentsTest {
         assertNull(Experiments.group(""));
         assertNull(Experiments.group("android_closeup_pull_to_dismiss_v2"));
         assertNull(Experiments.group("android_video_remove_track_selector_max_video_size"));
+    }
+
+    @Test public void bestVideoQualityAnswersOnlyForTheVideoSizeExperiment() {
+        Settings.BEST_VIDEO_QUALITY.save(true);
+        assertEquals("enabled", Experiments.group("android_video_remove_track_selector_max_video_size"));
+        assertNull(Experiments.group("android_closeup_pull_to_dismiss"));
+        assertNull(Experiments.group("ce_android_enlarge_other_user_profile_pic"));
+        assertTrue(line(FamilyNames.BEST_VIDEO_QUALITY), line(FamilyNames.BEST_VIDEO_QUALITY).contains("experiment answered"));
+        PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+        assertNull("paused, Pinterest's own answer", Experiments.group("android_video_remove_track_selector_max_video_size"));
     }
 
     @Test public void pausedPinterestKeepsEveryAnswer() {

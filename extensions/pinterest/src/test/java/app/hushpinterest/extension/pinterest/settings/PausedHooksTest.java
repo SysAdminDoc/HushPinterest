@@ -607,6 +607,8 @@ public class PausedHooksTest {
                 () -> Experiments.group("android_closeup_pull_to_dismiss") != null));
         probes.put(Settings.FULL_SIZE_PROFILE_PHOTOS, Collections.singletonList(
                 () -> Experiments.group("ce_android_enlarge_other_user_profile_pic") != null));
+        probes.put(Settings.BEST_VIDEO_QUALITY, Collections.singletonList(
+                () -> Experiments.group("android_video_remove_track_selector_max_video_size") != null));
         probes.put(Settings.HIDE_HIGHLIGHT_RING, Collections.singletonList(UiHooks::hideHighlightRing));
         probes.put(Settings.HIDE_VISUAL_SEARCH_THUMBNAILS, Collections.singletonList(PausedHooksTest::withholdsVisualSearchCrops));
         probes.put(Settings.FOLD_RELATED_PINS, Collections.singletonList(UiHooksForTests::foldSwitchedOn));
@@ -630,6 +632,10 @@ public class PausedHooksTest {
             return cells.isEmpty();
         }));
         probes.put(Settings.EXPAND_BOARD_LIST, Collections.singletonList(() -> UiHooks.saveSheetHeight(73) != 73));
+        probes.put(Settings.BOARD_ORDER_WHEN_SAVING, Collections.singletonList(() -> {
+            UiHooks.profileBoardSort("custom");
+            return !"alphabetical".equals(UiHooks.boardPickerSort("alphabetical"));
+        }));
         probes.put(Settings.DISABLE_UPDATE_NAG, Collections.singletonList(UiHooks::disableUpdateNag));
         probes.put(Settings.FIX_PUSH_NOTIFICATIONS, Collections.singletonList(PushNotificationsTest::fixesACertificate));
         return probes;

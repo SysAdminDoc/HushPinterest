@@ -9,6 +9,8 @@ Every HushPinterest release, newest first.
 * New `Hide the refresh pill` switch under Feed, part of Keep Home feed. After you've been away, Home no longer shows the pill that offers new pins. Pull down on Home when you want them. It starts off. (#48)
 * New `Swipe down to close pins` patch with its own switch under Interface. Pull a pin you opened down and it closes. Pinterest built this but only turns it on for some accounts. It starts off. (#48)
 * New `Full-size profile photos` patch with its own switch under Interface. Tap someone's profile photo on their profile and it opens full size. It starts off. (#48)
+* New `Best video quality` patch with its own switch under Interface. Videos play at the largest size Pinterest has instead of the size it caps them at. Pinterest already does this for some accounts. It uses more data and starts off. (#48)
+* New `Board order when saving` patch with its own switch under Interface. The Save to sheet lists your boards in the order your profile shows them instead of A to Z. Set your profile's boards to Custom order and drag them around, and the sheet follows. It starts off. (#48)
 * With `Black bottom bar` on in dark mode, the strip at the very bottom is black from the moment Pinterest opens, instead of gray for a second until the bar shows. (#48)
 * New `Hide suggested searches` switch under Interface, part of Hide search history. On search results, the colored searches under the search bar stop showing and the row closes up behind them. The filter button stays. It starts off. (#48)
 * New `Hide offline banner` switch under Interface, part of Hide pop-up banners. The bar at the top that says you're offline, then back online, stops showing. It starts off and takes effect the next time your connection drops. (#48)

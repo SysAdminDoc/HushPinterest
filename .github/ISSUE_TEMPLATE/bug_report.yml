@@ -70,6 +70,8 @@ body:
       multiple: true
       options:
         - AMOLED black
+        - Best video quality
+        - Board order when saving
         - Change package name
         - Custom save sound
         - Custom splash logo

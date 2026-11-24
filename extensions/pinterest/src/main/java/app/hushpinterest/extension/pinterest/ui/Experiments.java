@@ -23,7 +23,9 @@ public final class Experiments {
     static final String PULL_TO_DISMISS = "android_closeup_pull_to_dismiss";
     /** Tapping someone else's profile photo on their profile opens it full size. */
     static final String PROFILE_PHOTO = "ce_android_enlarge_other_user_profile_pic";
-    /** The group every check of these two experiments looks for. */
+    /** Videos play at the largest size Pinterest has instead of its usual cap. */
+    static final String VIDEO_SIZE = "android_video_remove_track_selector_max_video_size";
+    /** The group every check of these experiments looks for. */
     static final String ENABLED = "enabled";
 
     /**
@@ -37,6 +39,8 @@ public final class Experiments {
                 return answer(FamilyNames.SWIPE_TO_CLOSE_PINS, Settings.SWIPE_TO_CLOSE_PINS);
             case PROFILE_PHOTO:
                 return answer(FamilyNames.FULL_SIZE_PROFILE_PHOTOS, Settings.FULL_SIZE_PROFILE_PHOTOS);
+            case VIDEO_SIZE:
+                return answer(FamilyNames.BEST_VIDEO_QUALITY, Settings.BEST_VIDEO_QUALITY);
             default:
                 return null;
         }

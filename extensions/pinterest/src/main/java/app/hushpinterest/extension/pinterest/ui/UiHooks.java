@@ -21,8 +21,10 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -463,6 +465,43 @@ public final class UiHooks {
         if (!enabled(FamilyNames.EXPAND_BOARD_LIST, Settings.EXPAND_BOARD_LIST) || percent >= FULL_SHEET) return percent;
         HookStatus.counted(FamilyNames.EXPAND_BOARD_LIST, "sheet opened all the way");
         return FULL_SHEET;
+    }
+
+    /** The board order keys Pinterest's API takes, as the profile's sort options name them (14.45.0). */
+    static final List<String> BOARD_SORTS = Arrays.asList("alphabetical", "custom", "last_pinned_to", "newest", "oldest");
+    /** The order a profile shows its boards in until you pick one, Pinterest's most recent first. */
+    static final String DEFAULT_PROFILE_SORT = "last_pinned_to";
+    /** The board order key the signed-in user last came with, "" for none, null before any user was read. */
+    private static volatile String profileSortKey;
+
+    /**
+     * Injected in front of each return of Pinterest's getter for the signed-in user, with the board
+     * order key that user chose on their profile. Only noted here, and only while the switch is on
+     * and nothing's paused; the board picker reads it. Pinterest reads the user often, so a switch
+     * turned on picks the order up on the next read.
+     */
+    public static void profileBoardSort(String key) {
+        if (!enabled(FamilyNames.BOARD_ORDER_WHEN_SAVING, Settings.BOARD_ORDER_WHEN_SAVING)) return;
+        profileSortKey = key == null ? "" : key;
+    }
+
+    static void forgetProfileSort() {
+        profileSortKey = null;
+    }
+
+    /**
+     * The sort the Save to sheet's request for your boards asks for. Pinterest asks for A to Z. While
+     * the switch is on it asks for the order your profile shows them in, its default when you never
+     * picked one; otherwise, paused, or before Pinterest read who you are, Pinterest's own sort.
+     */
+    public static String boardPickerSort(String sort) {
+        if (!enabled(FamilyNames.BOARD_ORDER_WHEN_SAVING, Settings.BOARD_ORDER_WHEN_SAVING)) return sort;
+        String key = profileSortKey;
+        if (key == null) return sort;
+        String wanted = BOARD_SORTS.contains(key) ? key : DEFAULT_PROFILE_SORT;
+        if (wanted.equals(sort)) return sort;
+        HookStatus.counted(FamilyNames.BOARD_ORDER_WHEN_SAVING, "boards listed in the profile's order");
+        return wanted;
     }
 
     /** True has Pinterest's image model answer its original rendition first, where it has one. */

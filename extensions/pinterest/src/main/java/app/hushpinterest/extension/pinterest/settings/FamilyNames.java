@@ -63,6 +63,7 @@ public final class FamilyNames {
     public static final String SHOW_IMAGE_SIZE = "Show image size";
     public static final String SWIPE_TO_CLOSE_PINS = "Swipe down to close pins";
     public static final String FULL_SIZE_PROFILE_PHOTOS = "Full-size profile photos";
+    public static final String BEST_VIDEO_QUALITY = "Best video quality";
     public static final String HIDE_HIGHLIGHT_RING = "Hide blue highlight ring";
     public static final String HIDE_VISUAL_SEARCH_THUMBNAILS = "Hide visual search thumbnails";
     public static final String FOLD_RELATED_PINS = "Fold related pins";
@@ -75,6 +76,7 @@ public final class FamilyNames {
     public static final String SHOW_POSTED_DATE = "Show posted date";
     public static final String HIDE_SUGGESTED_BOARDS = "Hide suggested boards";
     public static final String EXPAND_BOARD_LIST = "Expand board list";
+    public static final String BOARD_ORDER_WHEN_SAVING = "Board order when saving";
     public static final String DISABLE_UPDATE_NAG = "Disable update nag";
     public static final String FIX_PUSH_NOTIFICATIONS = "Fix push notifications";
 

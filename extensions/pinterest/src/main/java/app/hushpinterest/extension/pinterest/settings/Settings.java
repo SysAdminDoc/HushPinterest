@@ -270,6 +270,9 @@ public class Settings extends BaseSettings {
     /** #48: someone else's profile photo opens full size when tapped, kept behind an experiment. */
     public static final BooleanSetting FULL_SIZE_PROFILE_PHOTOS =
             new BooleanSetting("hushpinterest_full_size_profile_photos", FALSE);
+    /** #48: Pinterest's own lift of its cap on a video's size, kept behind an experiment. */
+    public static final BooleanSetting BEST_VIDEO_QUALITY =
+            new BooleanSetting("hushpinterest_best_video_quality", FALSE);
     public static final BooleanSetting HIDE_HIGHLIGHT_RING =
             new BooleanSetting("hushpinterest_hide_highlight_ring", FALSE);
     public static final BooleanSetting HIDE_VISUAL_SEARCH_THUMBNAILS =
@@ -305,6 +308,9 @@ public class Settings extends BaseSettings {
             new BooleanSetting("hushpinterest_hide_suggested_boards", FALSE);
     public static final BooleanSetting EXPAND_BOARD_LIST =
             new BooleanSetting("hushpinterest_expand_board_list", FALSE);
+    /** #48: the Save to sheet lists your boards in your profile's order instead of A to Z. */
+    public static final BooleanSetting BOARD_ORDER_WHEN_SAVING =
+            new BooleanSetting("hushpinterest_board_order_when_saving", FALSE);
     public static final BooleanSetting DISABLE_UPDATE_NAG =
             new BooleanSetting("hushpinterest_disable_update_nag", FALSE);
 

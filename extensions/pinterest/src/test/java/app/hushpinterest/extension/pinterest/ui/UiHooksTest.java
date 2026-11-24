@@ -94,6 +94,7 @@ public class UiHooksTest {
             Settings.HIDE_SURVEY_PROMPTS, Settings.HIDE_POPUP_BANNERS, Settings.HIDE_OFFLINE_BANNER, Settings.HIDE_RELATED_PINS, Settings.HIDE_CREATOR_NAME, Settings.HIDE_HIGHLIGHT_RING, Settings.LET_SCREEN_SLEEP, Settings.HIDE_VISUAL_SEARCH_THUMBNAILS, Settings.CUSTOM_SAVE_SOUND, Settings.HIDE_BOARD_TAB_BUTTON, Settings.HIDE_BOARD_TAB_SUBTITLE, Settings.BOARD_TAB_COVERS, Settings.HIDE_SAVE_TOASTS, Settings.HIDE_DOWNLOAD_TOASTS, Settings.ORIGINAL_IMAGES, Settings.SHOW_POSTED_DATE,
             Settings.HIDE_SUGGESTED_BOARDS, Settings.EXPAND_BOARD_LIST,
             Settings.SWIPE_TO_CLOSE_PINS, Settings.FULL_SIZE_PROFILE_PHOTOS,
+            Settings.BEST_VIDEO_QUALITY, Settings.BOARD_ORDER_WHEN_SAVING,
             Settings.DISABLE_UPDATE_NAG, Settings.HIDE_SHOPPING
     }; }
 
@@ -189,6 +190,42 @@ public class UiHooksTest {
         assertTrue(report, report.contains("sheet opened all the way"));
         PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
         assertEquals("paused, Pinterest's height", 73, UiHooks.saveSheetHeight(73));
+    }
+
+    @Test public void theSaveSheetListsBoardsInTheProfilesOrderOnlyWhileItsSwitchIsOn() {
+        try {
+            UiHooks.profileBoardSort("custom");
+            assertEquals("off by default, Pinterest's A to Z", "alphabetical", UiHooks.boardPickerSort("alphabetical"));
+            Settings.BOARD_ORDER_WHEN_SAVING.save(true);
+            assertEquals("a read while the switch was off isn't noted", "alphabetical", UiHooks.boardPickerSort("alphabetical"));
+            UiHooks.profileBoardSort("custom");
+            assertEquals("custom", UiHooks.boardPickerSort("alphabetical"));
+            String report = String.join("\n", HookStatus.report());
+            assertTrue(report, report.contains("boards listed in the profile's order"));
+            UiHooks.profileBoardSort("newest");
+            assertEquals("the profile's order changed since", "newest", UiHooks.boardPickerSort("alphabetical"));
+            UiHooks.profileBoardSort(null);
+            assertEquals("never picked, the profile's own default", "last_pinned_to", UiHooks.boardPickerSort("alphabetical"));
+            UiHooks.profileBoardSort("a_sort_pinterest_added_later");
+            assertEquals("a key this build doesn't know, the profile's default", "last_pinned_to", UiHooks.boardPickerSort("alphabetical"));
+            UiHooks.profileBoardSort("alphabetical");
+            assertEquals("A to Z on the profile too", "alphabetical", UiHooks.boardPickerSort("alphabetical"));
+            UiHooks.profileBoardSort("custom");
+            PauseForTests.pause(HushPinterestPause.Reason.SWITCH);
+            UiHooks.profileBoardSort("newest");
+            assertEquals("paused, Pinterest's A to Z", "alphabetical", UiHooks.boardPickerSort("alphabetical"));
+            PauseForTests.resume();
+            assertEquals("a read while paused isn't noted", "custom", UiHooks.boardPickerSort("alphabetical"));
+        } finally {
+            UiHooks.forgetProfileSort();
+        }
+    }
+
+    @Test public void beforePinterestReadsWhoYouAreTheSaveSheetKeepsItsOwnSort() {
+        UiHooks.forgetProfileSort();
+        Settings.BOARD_ORDER_WHEN_SAVING.save(true);
+        assertEquals("alphabetical", UiHooks.boardPickerSort("alphabetical"));
+        assertNull(UiHooks.boardPickerSort(null));
     }
 
     @Test public void surveyInvitesAndSponsoredPollsAreSkippedOnlyWhileTheSwitchIsOnAndCounted() {

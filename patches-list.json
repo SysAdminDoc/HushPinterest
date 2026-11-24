@@ -41,6 +41,78 @@
       "options": []
     },
     {
+      "name": "Best video quality",
+      "description": "Plays videos at the largest size Pinterest has instead of capping them, the way Pinterest already does for some accounts. Uses more data. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Board order when saving",
+      "description": "Lists your boards in the Save to sheet in the order your profile shows them, a custom order included, instead of A to Z. Starts off. Turn it on in HushPinterest settings > Interface.",
+      "category": "Pin page",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Change package name",
       "description": "Gives the patched Pinterest its own package name and app name (HushPinterest unless you pick another), so it installs beside the Pinterest you already have instead of over it. It's a separate app with its own sign-in. It isn't selected by default. Works as soon as you patch it in, with no switch.",
       "category": "Settings",

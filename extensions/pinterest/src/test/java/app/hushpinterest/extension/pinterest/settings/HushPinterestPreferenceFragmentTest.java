@@ -126,6 +126,7 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.SHOW_IMAGE_SIZE, "Show image size");
         ROW_TITLES.put(PatchFamily.SWIPE_TO_CLOSE_PINS, "Swipe down to close pins");
         ROW_TITLES.put(PatchFamily.FULL_SIZE_PROFILE_PHOTOS, "Full-size profile photos");
+        ROW_TITLES.put(PatchFamily.BEST_VIDEO_QUALITY, "Best video quality");
         ROW_TITLES.put(PatchFamily.HIDE_HIGHLIGHT_RING, "Hide blue highlight ring");
         ROW_TITLES.put(PatchFamily.HIDE_VISUAL_SEARCH_THUMBNAILS, "Hide visual search thumbnails");
         ROW_TITLES.put(PatchFamily.FOLD_RELATED_PINS, "Fold related pins");
@@ -138,6 +139,7 @@ public class HushPinterestPreferenceFragmentTest {
         ROW_TITLES.put(PatchFamily.SHOW_POSTED_DATE, "Show posted date");
         ROW_TITLES.put(PatchFamily.HIDE_SUGGESTED_BOARDS, "Hide suggested boards");
         ROW_TITLES.put(PatchFamily.EXPAND_BOARD_LIST, "Expand board list");
+        ROW_TITLES.put(PatchFamily.BOARD_ORDER_WHEN_SAVING, "Board order when saving");
         ROW_TITLES.put(PatchFamily.DISABLE_UPDATE_NAG, "Disable update nag");
         ROW_TITLES.put(PatchFamily.FIX_PUSH_NOTIFICATIONS, "Fix push notifications");
     }

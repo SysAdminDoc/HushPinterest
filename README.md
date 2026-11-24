@@ -80,11 +80,13 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 52 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 54 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
 | `AMOLED black` | Paints the bottom bar pure black in dark mode, so it matches Pinterest's black pages on OLED screens. The comments sheet, a pin's menu, the Save to sheet that lists your boards, the other menus and sheets, the buttons over boards and profiles, and Pinterest's pop-up messages can go black too, each with its own switch. Light mode stays as it is. Starts off. Turn them on in HushPinterest settings > Interface. |
+| `Best video quality` | Plays videos at the largest size Pinterest has instead of capping them, the way Pinterest already does for some accounts. Uses more data. Starts off. Turn it on in HushPinterest settings > Interface. |
+| `Board order when saving` | Lists your boards in the Save to sheet in the order your profile shows them, a custom order included, instead of A to Z. Starts off. Turn it on in HushPinterest settings > Interface. |
 | `Change package name` | Gives the patched Pinterest its own package name and app name (HushPinterest unless you pick another), so it installs beside the Pinterest you already have instead of over it. It's a separate app with its own sign-in. It isn't selected by default. Works as soon as you patch it in, with no switch. |
 | `Custom save sound` | Plays a sound file you pick on your phone when you save a pin, in place of Pinterest's chime. Pinterest's other sounds stay. Starts off. Pick the sound with Pick a save sound in HushPinterest settings > Interface, which turns the switch on for you. |
 | `Custom splash logo` | Shows a logo you pick on the screen you see while Pinterest starts, in place of Pinterest's, on Android 13 and newer. Pick the picture in the patch's Logo option when you patch. Leave it empty for HushPinterest's logo. Starts off. Turn it on in HushPinterest settings > Interface. |

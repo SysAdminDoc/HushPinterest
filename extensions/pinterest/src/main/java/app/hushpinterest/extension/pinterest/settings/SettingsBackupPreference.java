@@ -530,6 +530,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_show_image_size": return L10n.t("Show image size");
             case "hushpinterest_swipe_to_close_pins": return L10n.t("Swipe down to close pins");
             case "hushpinterest_full_size_profile_photos": return L10n.t("Full-size profile photos");
+            case "hushpinterest_best_video_quality": return L10n.t("Best video quality");
             case "hushpinterest_hide_highlight_ring": return L10n.t("Hide blue highlight ring");
             case "hushpinterest_hide_visual_search_thumbnails": return L10n.t("Hide visual search thumbnails");
             case "hushpinterest_fold_related_pins": return L10n.t("Fold related pins");
@@ -545,6 +546,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_show_posted_date": return L10n.t("Show posted date");
             case "hushpinterest_hide_suggested_boards": return L10n.t("Hide suggested boards");
             case "hushpinterest_expand_board_list": return L10n.t("Expand board list");
+            case "hushpinterest_board_order_when_saving": return L10n.t("Board order when saving");
             case "hushpinterest_disable_update_nag": return L10n.t("Disable update nag");
             case "hushpinterest_fix_push_notifications": return L10n.t("Fix push notifications");
             default: throw new IllegalArgumentException("Unlisted backup switch");

@@ -280,7 +280,7 @@ public class DexDiff {
             Map.entry("longPress", 4), Map.entry("surveyPrompts", 2), Map.entry("popupBanners", 1), Map.entry("relatedPins", 3), Map.entry("creatorName", 1), Map.entry("saveSound", 1), Map.entry("pinInvites", 2), Map.entry("browserId", 2), Map.entry("signInFailure", 3), Map.entry("saveAndDownload", 3), Map.entry("homePage", 3),
             Map.entry("firebaseCertificate", 1), Map.entry("closeupButtons", 3), Map.entry("closeupSearchLabel", 1),
             Map.entry("closeupRemix", 2), Map.entry("closeupActionBar", 2), Map.entry("closeupVisitSite", 2), Map.entry("closeupSaveButton", 1), Map.entry("postedDate", 1),
-            Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1),
+            Map.entry("saveSheet", 1), Map.entry("suggestedBoard", 1), Map.entry("boardListHeight", 1), Map.entry("boardOrder", 2),
             Map.entry("blackSheets", 3), Map.entry("blackBoards", 7),
             Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1), Map.entry("offlineBanner", 1), Map.entry("refreshPill", 1),
             Map.entry("downloadToasts", 1),
@@ -7482,6 +7482,127 @@ public class DexDiff {
          * starts with the height's state text, asks the hook for its percentage right in front of the
          * getter's only return, and the answer goes back where the percentage was.
          */
+        static final String DEFAULT_BOARD_SORT = "alphabetical", BOARD_PICKER_FIELDS = "BOARD_PICKER_FRAGMENT",
+                BOARD_SORT_UTILS = "BoardSortUtils: myUser is null, Fail to update board sort option",
+                BOARD_SORT_BY_KEY = "getOptionByApiKey";
+
+        /**
+         * The board picker's request for all your boards in [m]: the first call after the picker's
+         * fields are named that takes four strings, its sort (filter, sort, fields, page size) in the
+         * register DEFAULT_BOARD_SORT went into. -1 when [m] has none, like the board section picker,
+         * which sets its sort as a query value.
+         */
+        static int boardRequestCall(Method m) {
+            List<Instruction> body = instructions(m);
+            int fields = -1;
+            for (int at = 0; at < body.size() && fields < 0; at++)
+                if (reference(body.get(at)) instanceof FieldReference f && f.getName().equals(BOARD_PICKER_FIELDS)) fields = at;
+            if (fields < 0) return -1;
+            for (int at = fields; at < body.size(); at++) {
+                Instruction i = body.get(at);
+                if (!i.getOpcode().name().startsWith("INVOKE") || !(reference(i) instanceof MethodReference called)
+                        || !descriptor(called).startsWith("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)")) continue;
+                List<Integer> passed = arguments(i);
+                int sort = passed.size() > (i.getOpcode().name().startsWith("INVOKE_STATIC") ? 1 : 2)
+                        ? passed.get(i.getOpcode().name().startsWith("INVOKE_STATIC") ? 1 : 2) : -1;
+                for (int k = 0; k < at; k++) {
+                    Instruction load = body.get(k);
+                    if (load.getOpcode() == Opcode.CONST_STRING && firstRegister(load) == sort
+                            && reference(load) instanceof StringReference s && s.getString().equals(DEFAULT_BOARD_SORT)) return at;
+                }
+                return -1;
+            }
+            return -1;
+        }
+
+        /**
+         * Board order when saving (#48). The board picker's request for all your boards hands its
+         * sort to the extension right in front of the call and gets the answer back in the same
+         * register. The signed-in user's getter hands the extension the user's board order key in
+         * front of each return, and skips that when there's no user.
+         */
+        void boardOrder(Contract c) {
+            String pickerHook = c.strings.get(0), profileHook = c.strings.get(1);
+            List<Method> requests = new ArrayList<>();
+            for (Method m : clean.methods.values()) {
+                if (m.getDefiningClass().startsWith(OWN) || m.getImplementation() == null) continue;
+                if (clean.texts.getOrDefault(m.toString(), Set.of()).contains(DEFAULT_BOARD_SORT)
+                        && fieldNames(m).contains(BOARD_PICKER_FIELDS) && boardRequestCall(m) >= 0) requests.add(m);
+            }
+            Method request = unique(requests, "Board picker request for your boards");
+            Method m = actual(request);
+            List<Integer> sites = calls(m, pickerHook, 1);
+            boolean asked = false;
+            if (request != null && m != null && sites.size() == 1) {
+                List<Instruction> before = instructions(request), body = instructions(m);
+                Instruction stock = before.get(boardRequestCall(request));
+                int at = sites.get(0);
+                List<Integer> passed = arguments(body.get(at));
+                int sort = passed.size() == 1 ? passed.get(0) : -1;
+                Instruction call = at + 2 < body.size() ? body.get(at + 2) : null;
+                asked = sort >= 0 && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT && firstRegister(body.get(at + 1)) == sort
+                        && call != null && call.getOpcode() == stock.getOpcode()
+                        && String.valueOf(reference(call)).equals(String.valueOf(reference(stock)))
+                        && arguments(call).equals(arguments(stock)) && arguments(stock).contains(sort)
+                        && onlyFrom(m, at + 1, at) && onlyFrom(m, at + 2, at + 1);
+                if (asked) remove(m, at, at + 2);
+                else fail(pickerHook + " doesn't take the board picker's sort right in front of its request in " + m);
+            }
+
+            List<Method> readers = new ArrayList<>();
+            Set<String> owners = new TreeSet<>();
+            for (Method r : clean.methods.values())
+                if (!r.getDefiningClass().startsWith(OWN) && clean.texts.getOrDefault(r.toString(), Set.of()).contains(BOARD_SORT_UTILS))
+                    owners.add(r.getDefiningClass());
+            for (Method r : clean.methods.values()) {
+                if (!owners.contains(r.getDefiningClass()) || r.getImplementation() == null) continue;
+                for (Instruction i : instructions(r))
+                    if (reference(i) instanceof MethodReference called && called.getName().equals(BOARD_SORT_BY_KEY)) { readers.add(r); break; }
+            }
+            Method reader = unique(readers, "Profile board order reader");
+            MethodReference sortKey = null, user = null;
+            if (reader != null) {
+                List<Instruction> body = instructions(reader);
+                int byKey = -1;
+                for (int at = 0; at < body.size() && byKey < 0; at++)
+                    if (reference(body.get(at)) instanceof MethodReference called && called.getName().equals(BOARD_SORT_BY_KEY)) byKey = at;
+                if (byKey >= 2 && reference(body.get(byKey - 2)) instanceof MethodReference key && key.getParameterTypes().isEmpty()
+                        && key.getReturnType().equals("Ljava/lang/String;")) sortKey = key;
+                for (int at = 0; sortKey != null && user == null && at < byKey; at++)
+                    if (reference(body.get(at)) instanceof MethodReference got && got.getParameterTypes().isEmpty()
+                            && got.getReturnType().equals(sortKey.getDefiningClass())) user = got;
+            }
+            Method getter = user == null ? null : clean.methods.get(user.toString());
+            if (reader != null && getter == null) fail("the signed-in user's getter the profile's board order reads isn't in the clean APK");
+            Method g = actual(getter);
+            int returns = 0;
+            if (getter != null) for (Instruction i : instructions(getter)) if (i.getOpcode() == Opcode.RETURN_OBJECT) returns++;
+            List<Integer> tells = calls(g, profileHook, returns);
+            boolean told = g != null && returns > 0 && tells.size() == returns;
+            if (told) {
+                List<Instruction> body = instructions(g);
+                Layout layout = new Layout(g.getImplementation());
+                for (int site : tells) {
+                    int at = site - 3;
+                    boolean placed = at >= 0 && site + 1 < body.size() && body.get(at).getOpcode() == Opcode.IF_EQZ
+                            && body.get(site + 1).getOpcode() == Opcode.RETURN_OBJECT;
+                    if (placed) {
+                        int answer = firstRegister(body.get(site + 1));
+                        placed = firstRegister(body.get(at)) == answer
+                                && layout.addresses.get(at) + ((OffsetInstruction) body.get(at)).getCodeOffset() == layout.addresses.get(site + 1)
+                                && String.valueOf(reference(body.get(at + 1))).equals(String.valueOf(sortKey))
+                                && arguments(body.get(at + 1)).equals(List.of(answer))
+                                && body.get(at + 2).getOpcode() == Opcode.MOVE_RESULT_OBJECT
+                                && arguments(body.get(site)).equals(List.of(firstRegister(body.get(at + 2))))
+                                && firstRegister(body.get(at + 2)) != answer;
+                    }
+                    if (placed) remove(g, at, site + 1);
+                    else { told = false; fail(profileHook + " isn't told the user's board order key in front of a return in " + g); }
+                }
+            }
+            capability(c.callee, asked && told);
+        }
+
         void boardListHeight(Contract c) {
             String hook = c.strings.get(0);
             ClassDef picker = boardPicker();
@@ -9057,6 +9178,7 @@ public class DexDiff {
                     case "blackBoards": blackBoards(c); break;
                     case "suggestedBoard": suggestedBoard(c); break;
                     case "boardListHeight": boardListHeight(c); break;
+                    case "boardOrder": boardOrder(c); break;
                     case "boardMenu": boardMenu(c); break;
                     case "surveyPrompts": surveyPrompts(c); break;
                     case "popupBanners": popupBanners(c); break;

@@ -28,7 +28,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
-/** #48: Pinterest's experiment group lookup, and the two experiments HushPinterest switches answer for. */
+/** Every flag the three experiment patches turn on. */
+private val FLAGS = listOf("swipeToClosePins", "pullToDismiss", "fullSizeProfilePhotos", "profilePhotoSheet", "bestVideoQuality", "videoSizeCap")
+
+/** #48: Pinterest's experiment group lookup, and the experiments HushPinterest switches answer for. */
 @Category(FixtureTests::class)
 class ExperimentsFixtureTest {
     private fun Method.names(text: String) = instructions().any {
@@ -37,7 +40,8 @@ class ExperimentsFixtureTest {
 
     /** The lookup's class and every class that names one of the two experiments. */
     private fun read(build: File): List<ClassDef> = FixtureDex.classesWhere(build, { true }) { method ->
-        method.names(EXPERIMENT_ACTIVATED) || method.names(PULL_TO_DISMISS_EXPERIMENT) || method.names(PROFILE_PHOTO_EXPERIMENT)
+        method.names(EXPERIMENT_ACTIVATED) || method.names(PULL_TO_DISMISS_EXPERIMENT) || method.names(PROFILE_PHOTO_EXPERIMENT) ||
+            method.names(VIDEO_SIZE_EXPERIMENT)
     }
 
     private fun lookupOf(classes: List<ClassDef>) = classes.flatMap { it.methods }.single { it.names(EXPERIMENT_ACTIVATED) }
@@ -54,7 +58,8 @@ class ExperimentsFixtureTest {
             experimentHookPatch.execute(context)
             swipeToClosePinsPatch.execute(context)
             fullSizeProfilePhotosPatch.execute(context)
-            for (flag in listOf("swipeToClosePins", "pullToDismiss", "fullSizeProfilePhotos", "profilePhotoSheet")) {
+            bestVideoQualityPatch.execute(context)
+            for (flag in FLAGS) {
                 assertEquals("${build.name}: $flag", 1, PinPageKit.flag(context, flag))
             }
 
@@ -85,16 +90,19 @@ class ExperimentsFixtureTest {
         val cases = linkedMapOf(
             "no pull-down reader" to Triple(ExtensionDex.classes() + lookupOnly, swipeToClosePinsPatch, PULL_TO_DISMISS_EXPERIMENT),
             "no profile photo reader" to Triple(ExtensionDex.classes() + lookupOnly, fullSizeProfilePhotosPatch, PROFILE_PHOTO_EXPERIMENT),
+            "no video size reader" to Triple(ExtensionDex.classes() + lookupOnly, bestVideoQualityPatch, VIDEO_SIZE_EXPERIMENT),
             "no swipeToClosePins stub" to Triple(PinPageKit.extensionWithout("swipeToClosePins") + classes, swipeToClosePinsPatch, "swipeToClosePins"),
             "no pullToDismiss stub" to Triple(PinPageKit.extensionWithout("pullToDismiss") + classes, swipeToClosePinsPatch, "pullToDismiss"),
             "no fullSizeProfilePhotos stub" to Triple(PinPageKit.extensionWithout("fullSizeProfilePhotos") + classes, fullSizeProfilePhotosPatch, "fullSizeProfilePhotos"),
             "no profilePhotoSheet stub" to Triple(PinPageKit.extensionWithout("profilePhotoSheet") + classes, fullSizeProfilePhotosPatch, "profilePhotoSheet"),
+            "no bestVideoQuality stub" to Triple(PinPageKit.extensionWithout("bestVideoQuality") + classes, bestVideoQualityPatch, "bestVideoQuality"),
+            "no videoSizeCap stub" to Triple(PinPageKit.extensionWithout("videoSizeCap") + classes, bestVideoQualityPatch, "videoSizeCap"),
         )
         for ((reason, case) in cases) {
             val context = PatchContexts.of(case.first)
             val thrown = assertThrows(reason, PatchException::class.java) { case.second.execute(context) }
             assertTrue("$reason: ${thrown.message}", thrown.message.orEmpty().contains(case.third))
-            for (flag in listOf("swipeToClosePins", "pullToDismiss", "fullSizeProfilePhotos", "profilePhotoSheet")) {
+            for (flag in FLAGS) {
                 assertEquals("$reason: $flag", 0, PinPageKit.flagOrZero(context, flag))
             }
         }

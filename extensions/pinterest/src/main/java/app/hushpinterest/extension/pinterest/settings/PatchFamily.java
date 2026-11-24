@@ -114,6 +114,7 @@ public enum PatchFamily {
     SHOW_IMAGE_SIZE(FamilyNames.SHOW_IMAGE_SIZE, "showImageSize", null, Settings.SHOW_IMAGE_SIZE),
     SWIPE_TO_CLOSE_PINS(FamilyNames.SWIPE_TO_CLOSE_PINS, "swipeToClosePins", null, Settings.SWIPE_TO_CLOSE_PINS),
     FULL_SIZE_PROFILE_PHOTOS(FamilyNames.FULL_SIZE_PROFILE_PHOTOS, "fullSizeProfilePhotos", null, Settings.FULL_SIZE_PROFILE_PHOTOS),
+    BEST_VIDEO_QUALITY(FamilyNames.BEST_VIDEO_QUALITY, "bestVideoQuality", null, Settings.BEST_VIDEO_QUALITY),
     HIDE_HIGHLIGHT_RING(FamilyNames.HIDE_HIGHLIGHT_RING, "hideHighlightRing", null, Settings.HIDE_HIGHLIGHT_RING),
     HIDE_VISUAL_SEARCH_THUMBNAILS(FamilyNames.HIDE_VISUAL_SEARCH_THUMBNAILS, "hideVisualSearchThumbnails", null, Settings.HIDE_VISUAL_SEARCH_THUMBNAILS),
     FOLD_RELATED_PINS(FamilyNames.FOLD_RELATED_PINS, "foldRelatedPins", null, Settings.FOLD_RELATED_PINS),
@@ -128,6 +129,7 @@ public enum PatchFamily {
     SHOW_POSTED_DATE(FamilyNames.SHOW_POSTED_DATE, "showPostedDate", null, Settings.SHOW_POSTED_DATE),
     HIDE_SUGGESTED_BOARDS(FamilyNames.HIDE_SUGGESTED_BOARDS, "hideSuggestedBoards", null, Settings.HIDE_SUGGESTED_BOARDS),
     EXPAND_BOARD_LIST(FamilyNames.EXPAND_BOARD_LIST, "expandBoardList", null, Settings.EXPAND_BOARD_LIST),
+    BOARD_ORDER_WHEN_SAVING(FamilyNames.BOARD_ORDER_WHEN_SAVING, "boardOrderWhenSaving", null, Settings.BOARD_ORDER_WHEN_SAVING),
     DISABLE_UPDATE_NAG(FamilyNames.DISABLE_UPDATE_NAG, "disableUpdateNag", null, Settings.DISABLE_UPDATE_NAG),
     FIX_PUSH_NOTIFICATIONS(FamilyNames.FIX_PUSH_NOTIFICATIONS, "fixPushNotifications", null, Settings.FIX_PUSH_NOTIFICATIONS);
 
@@ -183,9 +185,9 @@ public enum PatchFamily {
             LONG_PRESS_DOWNLOAD, SYSTEM_SHARE));
     static final Set<PatchFamily> INTERFACE_PAGE = Collections.unmodifiableSet(EnumSet.of(HIDE_SCREENSHOT_SHARE,
             HIDE_ASSISTANT, HIDE_SEARCH_HISTORY, HIDE_NAVIGATION_BUTTONS, HIDE_HEADER_BUTTONS, AMOLED_BLACK, HIDE_CLOSEUP_BUTTONS,
-            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, HIDE_PIN_AUTHOR, HIDE_PIN_DESCRIPTION, SHOW_IMAGE_SIZE, SWIPE_TO_CLOSE_PINS, FULL_SIZE_PROFILE_PHOTOS, HIDE_HIGHLIGHT_RING, HIDE_VISUAL_SEARCH_THUMBNAILS, FOLD_RELATED_PINS, LET_SCREEN_SLEEP, BOARD_TABS,
+            HIDE_CREATOR_NAME, HIDE_RELATED_PINS, CUSTOM_SAVE_SOUND, CUSTOM_SPLASH_LOGO, HIDE_PIN_AUTHOR, HIDE_PIN_DESCRIPTION, SHOW_IMAGE_SIZE, SWIPE_TO_CLOSE_PINS, FULL_SIZE_PROFILE_PHOTOS, BEST_VIDEO_QUALITY, HIDE_HIGHLIGHT_RING, HIDE_VISUAL_SEARCH_THUMBNAILS, FOLD_RELATED_PINS, LET_SCREEN_SLEEP, BOARD_TABS,
             HIDE_PIN_MENU_ITEMS, HIDE_COMMENTS, HIDE_TOPIC_SUGGESTIONS, QUIET_EMAIL_REMINDER, HIDE_SURVEY_PROMPTS,
-            HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST));
+            HIDE_POPUP_BANNERS, HIDE_SAVE_TOASTS, ORIGINAL_IMAGES, SHOW_POSTED_DATE, HIDE_SUGGESTED_BOARDS, EXPAND_BOARD_LIST, BOARD_ORDER_WHEN_SAVING));
 
     /** Each independent hook, its owning family and the flag set only after it was inserted. */
     public enum Capability {
@@ -266,6 +268,7 @@ public enum PatchFamily {
         IMAGE_SIZE(SHOW_IMAGE_SIZE, "imageSize", "Show image size"),
         PULL_TO_DISMISS(SWIPE_TO_CLOSE_PINS, "pullToDismiss", "Swipe down to close pins"),
         PROFILE_PHOTO_SHEET(FULL_SIZE_PROFILE_PHOTOS, "profilePhotoSheet", "Full-size profile photos"),
+        VIDEO_SIZE_CAP(BEST_VIDEO_QUALITY, "videoSizeCap", "Best video quality"),
         HIGHLIGHT_RING(HIDE_HIGHLIGHT_RING, "highlightRing", "Hide blue highlight ring"),
         VISUAL_SEARCH_THUMBNAILS(HIDE_VISUAL_SEARCH_THUMBNAILS, "visualSearchThumbnails", "Hide visual search thumbnails"),
         RELATED_PINS_FOLD(FOLD_RELATED_PINS, "relatedPinsFold", "Fold related pins"),
@@ -282,6 +285,7 @@ public enum PatchFamily {
         POSTED_DATE(SHOW_POSTED_DATE, "postedDate", "Show posted date"),
         SUGGESTED_BOARDS(HIDE_SUGGESTED_BOARDS, "suggestedBoards", "Hide suggested boards"),
         BOARD_LIST_HEIGHT(EXPAND_BOARD_LIST, "boardListHeight", "Expand board list"),
+        BOARD_PICKER_SORT(BOARD_ORDER_WHEN_SAVING, "boardPickerSort", "Board order when saving"),
         UPDATE_NAG(DISABLE_UPDATE_NAG, "updateNag", "Disable update nag"),
         SIGN_IN_FAILURE(GMS_CORE_SUPPORT, "signInFailure", "Google sign-in failure message"),
         FIREBASE_CERTIFICATE(FIX_PUSH_NOTIFICATIONS, "firebaseCertificate", "Fix push notifications");

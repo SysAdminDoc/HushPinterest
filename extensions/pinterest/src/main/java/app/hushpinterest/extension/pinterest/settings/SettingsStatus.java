@@ -148,6 +148,8 @@ public final class SettingsStatus {
     public static boolean pullToDismiss() { return false; }
     public static boolean fullSizeProfilePhotos() { return false; }
     public static boolean profilePhotoSheet() { return false; }
+    public static boolean bestVideoQuality() { return false; }
+    public static boolean videoSizeCap() { return false; }
     public static boolean hideHighlightRing() { return false; }
     public static boolean highlightRing() { return false; }
     public static boolean hideVisualSearchThumbnails() { return false; }
@@ -176,6 +178,8 @@ public final class SettingsStatus {
     public static boolean suggestedBoards() { return false; }
     public static boolean expandBoardList() { return false; }
     public static boolean boardListHeight() { return false; }
+    public static boolean boardOrderWhenSaving() { return false; }
+    public static boolean boardPickerSort() { return false; }
     public static boolean disableUpdateNag() { return false; }
     public static boolean updateNag() { return false; }
     public static boolean fixPushNotifications() { return false; }

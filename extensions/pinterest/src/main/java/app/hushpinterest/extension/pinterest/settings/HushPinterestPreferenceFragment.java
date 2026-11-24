@@ -643,6 +643,10 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Full-size profile photos"),
                     L10n.t("Tap someone's profile photo on their profile to see it full size. Pinterest already does this "
                         + "for some accounts. The change shows on the next profile you open."), SettingsIcons.TOOLS);
+            patchToggle(ui, context, build, PatchFamily.BEST_VIDEO_QUALITY, Settings.BEST_VIDEO_QUALITY,
+                    L10n.t("Best video quality"),
+                    L10n.t("Plays videos at the largest size Pinterest has instead of capping them. Pinterest already does "
+                        + "this for some accounts. It uses more data. The change shows on the next video you open."), SettingsIcons.TOOLS);
             patchToggle(ui, context, build, PatchFamily.HIDE_HIGHLIGHT_RING, Settings.HIDE_HIGHLIGHT_RING,
                     L10n.t("Hide blue highlight ring"),
                     L10n.t("Stops the thick blue ring Pinterest draws over buttons such as Save to point out a feature."), SettingsIcons.BLOCK);
@@ -773,6 +777,10 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Expand board list"),
                     L10n.t("Opens the sheet that lists your boards all the way up when you save a pin, so more boards "
                         + "show without dragging it. The change shows the next time you save a pin."), SettingsIcons.FEED);
+            patchToggle(ui, context, build, PatchFamily.BOARD_ORDER_WHEN_SAVING, Settings.BOARD_ORDER_WHEN_SAVING,
+                    L10n.t("Board order when saving"),
+                    L10n.t("Lists your boards in the Save to sheet in the order your profile shows them, a custom order "
+                        + "included, instead of A to Z. The change shows the next time you save a pin."), SettingsIcons.FEED);
         }
 
         // In every build: a patched Pinterest isn't verified for its own links, so Android opens them

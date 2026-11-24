@@ -30,6 +30,9 @@ internal const val PULL_TO_DISMISS_EXPERIMENT = "android_closeup_pull_to_dismiss
 /** Tapping someone else's profile photo opens it full size (#48). */
 internal const val PROFILE_PHOTO_EXPERIMENT = "ce_android_enlarge_other_user_profile_pic"
 
+/** Videos play at the largest size Pinterest has instead of its usual cap (#48). */
+internal const val VIDEO_SIZE_EXPERIMENT = "android_video_remove_track_selector_max_video_size"
+
 /**
  * Pinterest's one lookup of an experiment's group, an instance `(String, mode, Z)String` and the
  * only method naming [EXPERIMENT_ACTIVATED]. Every experiment check reaches it with the
