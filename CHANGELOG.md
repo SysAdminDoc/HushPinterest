@@ -2,13 +2,12 @@
 
 Every HushPinterest release, newest first.
 
-## Unreleased
+## 0.0.15 (2026-11-25)
 
 * New `Hide pins you've already seen` switch under Feed, part of Filter feed. Pins you scroll past or open on Home stay out of your home feed after that. `Hide seen pins for` picks how long they stay out: a day, a week, a month, or forever (the newest 50,000 pins). `Hide seen pins in search` does the same for search results, and `Forget pins you've seen` lets them all show again, with a second tap to undo it. Both switches start off. (#52)
 * New `Custom font` patch with its own switch under Interface. Pick a .ttf or .otf file with Font file and Pinterest's text shows in it after a restart. Picking one turns the switch on, and the file is copied into Pinterest, so it keeps working if you move or delete the original. Icons keep their own look. It starts off. (#51)
 * New `Save color on other red buttons` switch under Interface, part of Hide closeup buttons. Follow, Done and Pinterest's other red buttons take the color you picked for the Save button. It starts off. (#48)
 * New `Black buttons` switch under Interface, part of AMOLED black. In dark mode, Pinterest's gray buttons, like Message and Edit profile on a profile, turn pure black and keep their labels. So do the gray chips over search results, like Filter, the rows of the "Refine your search" lists between results, and your account card at the top of Pinterest's own settings. It starts off. (#48)
-
 * The patches now target Pinterest 14.45.0, version code 14458020. APKMirror has it as a plain APK for Android 10 or newer. Older Pinterest versions are refused.
 * Long-pressing the Home button in the bottom bar now opens the HushPinterest settings, the same as long-pressing the Pinterest logo. The other buttons keep what Pinterest does with a long press. (#48)
 * New `Hide the refresh pill` switch under Feed, part of Keep Home feed. After you've been away, Home no longer shows the pill that offers new pins. Pull down on Home when you want them. It starts off. (#48)
