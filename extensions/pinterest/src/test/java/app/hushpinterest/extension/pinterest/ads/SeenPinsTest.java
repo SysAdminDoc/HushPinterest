@@ -39,8 +39,10 @@ import app.hushpinterest.extension.pinterest.settings.PatchFamilyForTests;
 import app.hushpinterest.extension.pinterest.settings.Settings;
 import app.hushpinterest.extension.shared.SettingsContextRule;
 import app.hushpinterest.extension.shared.diagnostics.HookStatus;
+import app.hushpinterest.extension.shared.settings.BaseSettings;
 import app.hushpinterest.extension.shared.settings.HushPinterestPause;
 import app.hushpinterest.extension.shared.settings.PauseForTests;
+import app.hushpinterest.extension.shared.settings.preference.LogBufferManager;
 
 /**
  * Hide pins you've already seen (#52), against stand-ins with a pin's id and grid title. A stand-in
@@ -402,5 +404,45 @@ public class SeenPinsTest {
         assertTrue(SeenPinStore.seenSince(100, Integer.MIN_VALUE));
         SeenPinStore.write();
         assertEquals(4 + SeenPinStore.LINE, file.length());
+    }
+
+    /** A pin with an ad's fields, which the list filter takes out after Home's page hook has run. */
+    static final class AdPin {
+        @Json("id") String id = "400";
+        @Json("grid_title") String gridTitle = "";
+        @Json("is_downstream_promotion") Boolean downstream = true;
+        @Json("campaign_id_reformatted") String campaign = "C400";
+
+        @Override public String toString() {
+            return id;
+        }
+    }
+
+    /**
+     * Home's page hook runs before the list filter, so an ad still on the page here is that filter's to
+     * take out. With Debug logging on, the seen pass says only what it left out: a "Kept" line for an ad
+     * it passed along read on the S22 as an ad that got through, the line #6's reports are read for.
+     */
+    @Test
+    public void debugLoggingNeverCallsWhatTheSeenPassLeftInKept() {
+        Settings.HIDE_SEEN_PINS.save(true);
+        Settings.HIDE_SEEN_PINS_SEARCH.save(true);
+        BaseSettings.DEBUG.save(true);
+        try {
+            LogBufferManager.clearLogBuffer();
+            AdPin ad = new AdPin();
+            List<Object> home = page(ad, first);
+            SeenPins.homePage(home);
+            assertEquals(Arrays.asList(ad, first), home);
+            List<?> results = Arrays.asList(ad, second);
+            assertSame(results, SavedPins.searchPage(results));
+            String export = LogBufferManager.buildExportText();
+            assertTrue(export, export.contains("Seen pins: 0 left out of a Home page, 2 pins on it noted"));
+            assertTrue(export, export.contains("Seen pins: 0 left out of a search page, 2 pins on it noted"));
+            assertFalse(export, export.contains("Kept "));
+        } finally {
+            BaseSettings.DEBUG.resetToDefault();
+            LogBufferManager.clearLogBuffer();
+        }
     }
 }

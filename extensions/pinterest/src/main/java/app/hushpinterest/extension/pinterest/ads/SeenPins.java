@@ -148,7 +148,9 @@ public final class SeenPins {
         try {
             for (Iterator<?> each = items.iterator(); each.hasNext();) {
                 Object item = each.next();
-                if (FeedFilter.judge(item, verdict, FamilyNames.FILTER_FEED, debug, removed) != null) {
+                // Never debug here: judge's "Kept" line names a pin's ad fields, and Home's page hook runs
+                // before the list filter, so an ad this pass leaves in would read as one that got through.
+                if (FeedFilter.judge(item, verdict, FamilyNames.FILTER_FEED, false, removed) != null) {
                     each.remove();
                     out++;
                 } else if (brought(item, from)) {
