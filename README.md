@@ -192,7 +192,7 @@ Each release patches its own build only, so an older Pinterest is refused. SHA-2
 
 On Windows, compare yours with `Get-FileHash -Algorithm SHA256 .\pinterest.apk`. Other Pinterest versions aren't supported.
 
-The next release moves to Pinterest 14.45.0, version code 14458020, and it'll need Morphe Manager 2.6.0 or newer. APKMirror has that one as a plain APK for Android 10 or newer too. Stick with 14.44.0 until the release is out.
+The next release moves to Pinterest 14.45.0, version code 14458020, and it'll need Morphe Manager 2.7.0 or newer. APKMirror has that one as a plain APK for Android 10 or newer too. Stick with 14.44.0 until the release is out.
 
 ## Verify a release download
 
