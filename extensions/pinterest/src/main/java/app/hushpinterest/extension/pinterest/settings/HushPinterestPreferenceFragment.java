@@ -327,6 +327,13 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                             + "and the \"See more like this?\" bubble off pins. The change shows the next time Home loads.")),
                         SettingsIcons.BLOCK));
             }
+            // Read off each page's story types on the list hook, the way Home suggestions are: no row without it.
+            if (build.contains(PatchFamily.FILTER_FEED) && PatchFamily.Capability.FEED_HOME_SUGGESTIONS.installed()) {
+                feed.addPreference(mark(toggle(context, Settings.HIDE_REFINE_SEARCH, L10n.t("Hide Refine your search"),
+                        L10n.t("Takes the \"Refine your search\" lists of suggested searches out of search results, and "
+                            + "the pins close up where they were. The change shows the next time results load.")),
+                        SettingsIcons.BLOCK));
+            }
             // A list rather than a switch, on Filter feed's hook: no row where that capability didn't go in.
             if (build.contains(PatchFamily.FILTER_FEED) && PatchFamily.Capability.FEED_MUTED_WORDS.installed()) {
                 feed.addPreference(mark(new MutedWordsPreference(context), SettingsIcons.BLOCK));
@@ -576,10 +583,15 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                             + "download a pin, pure black. Light mode stays as it is. The change shows on the next message.")),
                         SettingsIcons.DARK_MODE));
             }
-            if (build.contains(PatchFamily.AMOLED_BLACK) && PatchFamily.Capability.BLACK_BUTTONS.installed()) {
+            if (build.contains(PatchFamily.AMOLED_BLACK) && (PatchFamily.Capability.BLACK_BUTTONS.installed()
+                    || PatchFamily.Capability.BLACK_SEARCH_GUIDES.installed()
+                    || PatchFamily.Capability.BLACK_SETTINGS_CARD.installed()
+                    || PatchFamily.Capability.BLACK_SEARCH_BUBBLES.installed())) {
                 ui.addPreference(mark(toggle(context, Settings.BLACK_BUTTONS, L10n.t("Black buttons"),
                         L10n.t("In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a "
-                            + "profile, pure black and keeps their labels. Light mode stays as it is. The change shows the "
+                            + "profile, pure black and keeps their labels. The chips over search results and the Refine your "
+                            + "search rows go black too, and so does your account card in settings. Light mode stays as it "
+                            + "is. The change shows the "
                             + "next time Pinterest draws a button.")),
                         SettingsIcons.DARK_MODE));
             }

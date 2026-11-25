@@ -1319,6 +1319,7 @@ public class SettingsNavigationTest {
         summaryContains(Settings.HIDE_TOPIC_SUGGESTIONS.key, "\"Ideas you might love\" row of topic bubbles under pins", "next time Pinterest shows it", "Comments and related pins stay");
         summaryContains(Settings.HIDE_INBOX_UPDATES.key, "Updates section out of your Inbox", "Pinterest doesn't load it", "Your messages stay");
         summaryContains(Settings.HIDE_HOME_SUGGESTIONS.key, "\"More ideas for your board\"", "\"See more like this?\" bubble off pins", "next time Home loads");
+        summaryContains(Settings.HIDE_REFINE_SEARCH.key, "\"Refine your search\" lists of suggested searches", "pins close up", "next time results load");
         summaryContains(Settings.HIDE_SAVED_PINS.key, "out of your home feed", "Your boards still show them");
         summaryContains(Settings.BACK_LEAVES_HOME.key, "scrolled down Home", "Back leaves Pinterest",
                 "instead of jumping to the top");

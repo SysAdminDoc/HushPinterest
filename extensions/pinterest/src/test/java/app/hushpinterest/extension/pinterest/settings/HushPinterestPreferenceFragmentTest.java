@@ -306,10 +306,14 @@ public class HushPinterestPreferenceFragmentTest {
                 Map<PatchFamily.Capability, BooleanSetting> own = blackSurfaceRows();
                 if (own.containsKey(missing)) {
                     // A surface with a switch to itself promises nothing for the others, so no row
-                    // is rewritten: its own row goes, and each one that's left keeps what it says.
-                    assertNull(missing.label + " kept a switch with no hook behind it", page.findPreference(own.get(missing).key));
+                    // is rewritten: its own row goes unless another hook still backs it, and each
+                    // one that's left keeps what it says.
+                    BooleanSetting setting = own.get(missing);
+                    boolean backed = own.entrySet().stream().anyMatch(other -> other.getKey() != missing && other.getValue() == setting);
+                    if (backed) assertNotNull(missing.label + " took a switch another hook still backs", page.findPreference(setting.key));
+                    else assertNull(missing.label + " kept a switch with no hook behind it", page.findPreference(setting.key));
                     for (Map.Entry<PatchFamily.Capability, BooleanSetting> other : own.entrySet()) {
-                        if (other.getKey() == missing) continue;
+                        if (other.getKey() == missing || other.getValue() == setting) continue;
                         Preference row = page.findPreference(other.getValue().key);
                         assertTrue(other.getKey().label + " was disabled", row.isEnabled());
                         String kept = String.valueOf(row.getSummary());
@@ -789,6 +793,9 @@ public class HushPinterestPreferenceFragmentTest {
         barOnly.remove(PatchFamily.Capability.BLACK_BOARDS);
         barOnly.remove(PatchFamily.Capability.BLACK_TOASTS);
         barOnly.remove(PatchFamily.Capability.BLACK_BUTTONS);
+        barOnly.remove(PatchFamily.Capability.BLACK_SEARCH_GUIDES);
+        barOnly.remove(PatchFamily.Capability.BLACK_SETTINGS_CARD);
+        barOnly.remove(PatchFamily.Capability.BLACK_SEARCH_BUBBLES);
         PatchFamily.capabilitiesForTests = barOnly;
         try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
             HushPinterestPreferenceFragment page = pageOf(controller);
@@ -800,6 +807,18 @@ public class HushPinterestPreferenceFragmentTest {
             assertNull(page.findPreference(Settings.BLACK_TOASTS.key));
             assertNull(page.findPreference(Settings.BLACK_BUTTONS.key));
             assertNotNull(page.findPreference(Settings.BLACK_BOTTOM_BAR.key));
+        }
+        // Black buttons paints the buttons, the chips over search results, the settings account card
+        // and the Refine your search rows, each with its own hook, and any one of them keeps the row.
+        for (PatchFamily.Capability alone : EnumSet.of(PatchFamily.Capability.BLACK_SEARCH_GUIDES,
+                PatchFamily.Capability.BLACK_SETTINGS_CARD, PatchFamily.Capability.BLACK_SEARCH_BUBBLES)) {
+            Set<PatchFamily.Capability> one = EnumSet.copyOf(barOnly);
+            one.add(alone);
+            PatchFamily.capabilitiesForTests = one;
+            try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
+                assertNotNull(alone + "'s hook alone keeps Black buttons",
+                        pageOf(controller).findPreference(Settings.BLACK_BUTTONS.key));
+            }
         }
         PatchFamily.capabilitiesForTests = EnumSet.allOf(PatchFamily.Capability.class);
         try (ActivityController<Activity> controller = Robolectric.buildActivity(Activity.class).setup()) {
@@ -894,6 +913,9 @@ public class HushPinterestPreferenceFragmentTest {
         rows.put(PatchFamily.Capability.BLACK_BOARDS, Settings.BLACK_BOARDS);
         rows.put(PatchFamily.Capability.BLACK_TOASTS, Settings.BLACK_TOASTS);
         rows.put(PatchFamily.Capability.BLACK_BUTTONS, Settings.BLACK_BUTTONS);
+        rows.put(PatchFamily.Capability.BLACK_SEARCH_GUIDES, Settings.BLACK_BUTTONS);
+        rows.put(PatchFamily.Capability.BLACK_SETTINGS_CARD, Settings.BLACK_BUTTONS);
+        rows.put(PatchFamily.Capability.BLACK_SEARCH_BUBBLES, Settings.BLACK_BUTTONS);
         return rows;
     }
 

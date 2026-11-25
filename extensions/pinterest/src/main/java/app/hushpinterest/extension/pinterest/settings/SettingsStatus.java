@@ -113,6 +113,9 @@ public final class SettingsStatus {
     public static boolean blackBoards() { return false; }
     public static boolean blackToasts() { return false; }
     public static boolean blackButtons() { return false; }
+    public static boolean blackSearchGuides() { return false; }
+    public static boolean blackSettingsCard() { return false; }
+    public static boolean blackSearchBubbles() { return false; }
     public static boolean hideCloseupButtons() { return false; }
     public static boolean closeupButtons() { return false; }
     public static boolean closeupSearchLabel() { return false; }

@@ -845,7 +845,7 @@ Every pin video you open or swipe to starts with the sound off, even if you turn
 Pinch to zoom only	Cubit hanya untuk zoom
 Pinching a pin's picture opens it full screen, where you can zoom in and drag it around, instead of loading pins that look like it. The change shows the next time you pinch a pin.	Mencubit gambar pin akan membukanya dalam layar penuh, tempat kamu bisa memperbesar dan menggesernya, bukan memuat pin yang mirip. Perubahannya terlihat saat kamu mencubit pin berikutnya.
 Black buttons	Tombol hitam
-In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. Light mode stays as it is. The change shows the next time Pinterest draws a button.	Dalam mode gelap, mewarnai tombol abu-abu Pinterest, seperti Pesan dan Edit profil di sebuah profil, menjadi hitam pekat dan tetap mempertahankan labelnya. Mode terang tetap seperti biasa. Perubahan terlihat saat Pinterest menggambar tombol berikutnya.
+In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. The chips over search results and the Refine your search rows go black too, and so does your account card in settings. Light mode stays as it is. The change shows the next time Pinterest draws a button.	Dalam mode gelap, mewarnai tombol abu-abu Pinterest, seperti Pesan dan Edit profil di sebuah profil, menjadi hitam pekat dan tetap mempertahankan labelnya. Chip di atas hasil pencarian dan baris "Perbaiki pencarian Anda" juga menjadi hitam, begitu pula kartu akun Anda di pengaturan. Mode terang tetap seperti biasa. Perubahan terlihat saat Pinterest menggambar tombol berikutnya.
 Save color on other red buttons	Warna Simpan di tombol merah lainnya
 Paints Pinterest's other red buttons, such as Follow and Done, the color you picked for the Save button. Pick that color first. The change shows the next time Pinterest draws a button.	Mewarnai tombol merah Pinterest lainnya, seperti Ikuti dan Selesai, dengan warna yang Anda pilih untuk tombol Simpan. Pilih warna itu terlebih dahulu. Perubahan terlihat saat Pinterest menggambar tombol berikutnya.
 Like and comment history	Riwayat suka dan komentar
@@ -869,3 +869,13 @@ Cleared your likes and comments.	Suka dan komentarmu sudah dihapus.
 Couldn't clear the list. Try again.	Tidak dapat menghapus daftar. Coba lagi.
 likes	suka
 comments and replies	komentar dan balasan
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray chips over search results, such as Filter and the suggested searches, black.
+Black search filters	Filter pencarian hitam
+# context: a Feed switch from the Filter feed patch, under Hide Home suggestions. It takes the lists Pinterest puts between search results under its own "Refine your search" heading (rows of suggested searches, each with a picture) out of the results. Use the words Pinterest shows for that heading in this language. The title is also the name of that part of the patch in the build report.
+Hide Refine your search	Sembunyikan "Perbaiki pencarian Anda"
+# context: the summary under Hide Refine your search.
+Takes the "Refine your search" lists of suggested searches out of search results, and the pins close up where they were. The change shows the next time results load.	Menghapus daftar "Perbaiki pencarian Anda" berisi saran pencarian dari hasil pencarian, dan Pin langsung mengisi tempatnya. Perubahan terlihat saat hasil dimuat berikutnya.
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray "Your account" card at the top of Pinterest's own settings (your photo, name, View profile and Share profile) black.
+Black account card in settings	Kartu akun hitam di pengaturan
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray rows of the "Refine your search" lists between search results black. Use the words Pinterest shows for that heading in this language.
+Black Refine your search rows	Baris "Perbaiki pencarian Anda" hitam

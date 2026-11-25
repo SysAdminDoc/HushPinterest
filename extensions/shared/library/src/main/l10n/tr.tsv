@@ -845,7 +845,7 @@ Every pin video you open or swipe to starts with the sound off, even if you turn
 Pinch to zoom only	Sıkıştırınca yalnızca yakınlaştır
 Pinching a pin's picture opens it full screen, where you can zoom in and drag it around, instead of loading pins that look like it. The change shows the next time you pinch a pin.	Bir pinin resmini iki parmakla sıkıştırmak, benzer pinleri yüklemek yerine resmi tam ekranda açar. Orada yakınlaştırıp sürükleyebilirsin. Değişiklik bir pini bir sonraki sıkıştırışında görünür.
 Black buttons	Siyah düğmeler
-In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. Light mode stays as it is. The change shows the next time Pinterest draws a button.	Karanlık modda, Pinterest'in bir profildeki Mesaj ve Profili düzenle gibi gri düğmelerini tamamen siyaha boyar, yazıları yerinde kalır. Aydınlık mod olduğu gibi kalır. Değişiklik Pinterest bir sonraki düğmeyi çizdiğinde görünür.
+In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. The chips over search results and the Refine your search rows go black too, and so does your account card in settings. Light mode stays as it is. The change shows the next time Pinterest draws a button.	Karanlık modda, Pinterest'in bir profildeki Mesaj ve Profili düzenle gibi gri düğmelerini tamamen siyaha boyar, yazıları yerinde kalır. Arama sonuçlarının üstündeki çipler ve "Aramanı daralt" satırları da siyah olur, ayarlardaki hesap kartın da öyle. Aydınlık mod olduğu gibi kalır. Değişiklik Pinterest bir sonraki düğmeyi çizdiğinde görünür.
 Save color on other red buttons	Diğer kırmızı düğmelerde Kaydet rengi
 Paints Pinterest's other red buttons, such as Follow and Done, the color you picked for the Save button. Pick that color first. The change shows the next time Pinterest draws a button.	Pinterest'in Takip et ve Bitti gibi diğer kırmızı düğmelerini, Kaydet düğmesi için seçtiğin renge boyar. Önce o rengi seç. Değişiklik Pinterest bir sonraki düğmeyi çizdiğinde görünür.
 Like and comment history	Beğeni ve yorum geçmişi
@@ -869,3 +869,13 @@ Cleared your likes and comments.	Beğenilerin ve yorumların temizlendi.
 Couldn't clear the list. Try again.	Liste temizlenemedi. Yeniden dene.
 likes	beğeniler
 comments and replies	yorumlar ve yanıtlar
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray chips over search results, such as Filter and the suggested searches, black.
+Black search filters	Siyah arama filtreleri
+# context: a Feed switch from the Filter feed patch, under Hide Home suggestions. It takes the lists Pinterest puts between search results under its own "Refine your search" heading (rows of suggested searches, each with a picture) out of the results. Use the words Pinterest shows for that heading in this language. The title is also the name of that part of the patch in the build report.
+Hide Refine your search	"Aramanı daralt" bölümünü gizle
+# context: the summary under Hide Refine your search.
+Takes the "Refine your search" lists of suggested searches out of search results, and the pins close up where they were. The change shows the next time results load.	Önerilen aramaların bulunduğu "Aramanı daralt" listelerini arama sonuçlarından kaldırır ve Pinler boşluğu kapatır. Değişiklik sonuçlar bir sonraki yüklendiğinde görünür.
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray "Your account" card at the top of Pinterest's own settings (your photo, name, View profile and Share profile) black.
+Black account card in settings	Ayarlarda siyah hesap kartı
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray rows of the "Refine your search" lists between search results black. Use the words Pinterest shows for that heading in this language.
+Black Refine your search rows	Siyah "Aramanı daralt" satırları

@@ -285,7 +285,7 @@ public class DexDiff {
             Map.entry("blackSheets", 3), Map.entry("blackBoards", 7),
             Map.entry("longPressChoices", 1), Map.entry("longPressView", 2), Map.entry("savedElsewhere", 3), Map.entry("homeBack", 1), Map.entry("offlineBanner", 1), Map.entry("refreshPill", 1),
             Map.entry("downloadToasts", 1),
-            Map.entry("blackToasts", 1), Map.entry("blackButtons", 1),
+            Map.entry("blackToasts", 1), Map.entry("blackButtons", 1), Map.entry("blackSearchGuides", 1), Map.entry("blackSettingsCard", 1), Map.entry("blackSearchBubbles", 1),
             Map.entry("homeTabs", 1),
             Map.entry("searchLanding", 1), Map.entry("searchSuggestions", 1), Map.entry("experimentGroup", 1),
             Map.entry("searchKeyboard", 1),
@@ -6405,6 +6405,124 @@ public class DexDiff {
             styleHook(c);
         }
 
+        static final String SEARCH_GUIDE = "Lcom/pinterest/gestalt/searchGuide/GestaltSearchGuide;";
+
+        /**
+         * Black buttons on the chips over search results. The search guide's one instance method
+         * taking two of the same look and returning nothing hands the guide, its this, to the hook
+         * right before each of its returns, and each return is reached only from its hook.
+         */
+        void blackSearchGuides(Contract c) {
+            String hook = c.strings.get(0);
+            ClassDef guide = clean.classes.get(SEARCH_GUIDE);
+            List<Method> looks = new ArrayList<>();
+            if (guide != null) for (Method m : guide.getMethods()) {
+                List<? extends CharSequence> params = m.getParameterTypes();
+                if (!AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getImplementation() != null && m.getReturnType().equals("V")
+                        && params.size() == 2 && params.get(0).toString().equals(params.get(1).toString())
+                        && params.get(0).toString().startsWith("L")) looks.add(m);
+            }
+            Method look = unique(looks, "The search guide's look method");
+            int ends = 0;
+            if (look != null) for (Instruction i : instructions(look)) if (i.getOpcode() == Opcode.RETURN_VOID) ends++;
+            Method m = actual(look);
+            List<Integer> sites = calls(m, hook, ends);
+            boolean placed = false;
+            if (m != null && ends > 0 && sites.size() == ends) {
+                List<Instruction> body = instructions(m);
+                int self = parameter(m, -1);
+                placed = true;
+                for (int at : sites) placed &= at + 1 < body.size() && body.get(at + 1).getOpcode() == Opcode.RETURN_VOID
+                        && arguments(body.get(at)).equals(List.of(self)) && onlyFrom(m, at + 1, at);
+                if (!placed) fail(hook + " doesn't hand the guide over right before each return of " + m);
+                else for (int at : sites) remove(m, at, at + 1);
+            }
+            capability(c.callee, placed);
+        }
+
+        static final String SETTINGS_PROFILE_PREVIEW = "Lcom/pinterest/feature/settings/menu/view/SettingsProfilePreview;",
+                CARD_VIEW = "Landroidx/cardview/widget/CardView;",
+                SEARCH_BUBBLE_FILL = "rounded_rect_medium_radius_opaque_background",
+                SET_BACKGROUND = "Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V";
+
+        /**
+         * Black buttons on the account card at the top of Pinterest's settings. The one store of a
+         * CardView, cast just before, into the settings profile preview's field is followed by the
+         * hook with the stored register, once, reached only from the store, and the instruction after
+         * the hook is reached only from it.
+         */
+        void blackSettingsCard(Contract c) {
+            List<Method> stores = new ArrayList<>();
+            Map<Method, Integer> storeAt = new HashMap<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN)) continue;
+                for (Method m : cd.getMethods()) {
+                    List<Instruction> body = instructions(m);
+                    for (int k = 1; k < body.size(); k++) {
+                        Instruction store = body.get(k), cast = body.get(k - 1);
+                        if (store.getOpcode() != Opcode.IPUT_OBJECT || !(reference(store) instanceof FieldReference field)
+                                || !field.getDefiningClass().equals(SETTINGS_PROFILE_PREVIEW) || !field.getType().equals(CARD_VIEW)) continue;
+                        if (cast.getOpcode() != Opcode.CHECK_CAST || !String.valueOf(reference(cast)).equals(CARD_VIEW)
+                                || ((OneRegisterInstruction) cast).getRegisterA() != ((TwoRegisterInstruction) store).getRegisterA()) continue;
+                        stores.add(m);
+                        storeAt.put(m, k);
+                    }
+                }
+            }
+            Method old = unique(stores, "The account card store");
+            hookAfter(c, old, old == null ? -1 : storeAt.get(old), "store the account card");
+        }
+
+        /**
+         * Black buttons on the rows of a "Refine your search" list. The one method that reads the
+         * rows' rounded shape puts it on the row with setBackground, the first such call after the
+         * read, and right after that call comes the hook with the row, once, reached only from the
+         * call, and the instruction after the hook is reached only from it.
+         */
+        void blackSearchBubbles(Contract c) {
+            List<Method> builders = new ArrayList<>();
+            for (ClassDef cd : clean.classes.values()) {
+                if (cd.getType().startsWith(OWN)) continue;
+                for (Method m : cd.getMethods()) if (instructions(m).stream().anyMatch(i -> reference(i) instanceof FieldReference f
+                        && f.getName().equals(SEARCH_BUBBLE_FILL) && f.getType().equals("I"))) builders.add(m);
+            }
+            Method old = unique(builders, "The Refine your search row builder");
+            int at = -1;
+            if (old != null) {
+                List<Instruction> body = instructions(old);
+                int read = -1;
+                for (int k = 0; k < body.size() && read < 0; k++)
+                    if (reference(body.get(k)) instanceof FieldReference f && f.getName().equals(SEARCH_BUBBLE_FILL)) read = k;
+                for (int k = read; k < body.size() && at < 0; k++)
+                    if (body.get(k).getOpcode() == Opcode.INVOKE_VIRTUAL && SET_BACKGROUND.equals(String.valueOf(reference(body.get(k))))) at = k;
+            }
+            hookAfter(c, old, at, "put the shape on the Refine your search row");
+        }
+
+        /**
+         * The hook right after [old]'s instruction at [index], with the view that instruction stored
+         * or called on: once, reached only from it, the instruction after the hook reached only from
+         * the hook. Fails and leaves the capability off when it isn't so.
+         */
+        void hookAfter(Contract c, Method old, int index, String what) {
+            String hook = c.strings.get(0);
+            Method m = actual(old);
+            List<Integer> sites = calls(m, hook, 1);
+            boolean placed = false;
+            if (m != null && index >= 0 && sites.size() == 1) {
+                List<Instruction> body = instructions(m);
+                Instruction site = instructions(old).get(index);
+                int at = sites.get(0);
+                int view = site.getOpcode() == Opcode.IPUT_OBJECT ? ((TwoRegisterInstruction) site).getRegisterA() : callRegisters(site).get(0);
+                placed = at > 0 && at + 1 < body.size() && body.get(at - 1).getOpcode() == site.getOpcode()
+                        && String.valueOf(reference(body.get(at - 1))).equals(String.valueOf(reference(site)))
+                        && arguments(body.get(at)).equals(List.of(view)) && onlyFrom(m, at, at - 1) && onlyFrom(m, at + 1, at);
+                if (!placed) fail(hook + " doesn't take the view right after the code that " + what + " in " + m);
+                else remove(m, at, at + 1);
+            }
+            capability(c.callee, placed);
+        }
+
         /**
          * A hook on every GestaltButton's styling. GestaltButton's one instance method taking two of
          * the same style object and returning nothing calls setCompoundDrawablePadding on its this
@@ -9708,6 +9826,9 @@ public class DexDiff {
                     case "closeupVisitSite": closeupRows(c, true); break;
                     case "closeupSaveButton": closeupSaveButton(c); break;
                     case "blackButtons": blackButtons(c); break;
+                    case "blackSearchGuides": blackSearchGuides(c); break;
+                    case "blackSettingsCard": blackSettingsCard(c); break;
+                    case "blackSearchBubbles": blackSearchBubbles(c); break;
                     case "postedDate": postedDate(c); break;
                     case "closeupGate": closeupGate(c); break;
                     case "highlightRing": highlightRing(c); break;

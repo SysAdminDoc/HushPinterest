@@ -842,7 +842,7 @@ Every pin video you open or swipe to starts with the sound off, even if you turn
 Pinch to zoom only	Pinça só para zoom
 Pinching a pin's picture opens it full screen, where you can zoom in and drag it around, instead of loading pins that look like it. The change shows the next time you pinch a pin.	Fazer o movimento de pinça na imagem de um pin a abre em tela cheia, onde você pode ampliar e arrastar, em vez de carregar pins parecidos. A mudança aparece na próxima vez que você fizer isso em um pin.
 Black buttons	Botões pretos
-In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. Light mode stays as it is. The change shows the next time Pinterest draws a button.	No modo escuro, pinta de preto puro os botões cinza do Pinterest, como Mensagem e Editar perfil em um perfil, e mantém os textos deles. O modo claro continua como está. A mudança aparece na próxima vez que o Pinterest desenhar um botão.
+In dark mode, paints Pinterest's gray buttons, such as Message and Edit profile on a profile, pure black and keeps their labels. The chips over search results and the Refine your search rows go black too, and so does your account card in settings. Light mode stays as it is. The change shows the next time Pinterest draws a button.	No modo escuro, pinta de preto puro os botões cinza do Pinterest, como Mensagem e Editar perfil em um perfil, e mantém os textos deles. Os chips sobre os resultados de pesquisa e as linhas de "Refine sua pesquisa" também ficam pretos, assim como o cartão da sua conta nas configurações. O modo claro continua como está. A mudança aparece na próxima vez que o Pinterest desenhar um botão.
 Save color on other red buttons	Cor de Salvar em outros botões vermelhos
 Paints Pinterest's other red buttons, such as Follow and Done, the color you picked for the Save button. Pick that color first. The change shows the next time Pinterest draws a button.	Pinta os outros botões vermelhos do Pinterest, como Seguir e Concluído, com a cor que você escolheu para o botão Salvar. Escolha essa cor primeiro. A mudança aparece na próxima vez que o Pinterest desenhar um botão.
 Like and comment history	Histórico de curtidas e comentários
@@ -866,3 +866,13 @@ Cleared your likes and comments.	Suas curtidas e comentários foram apagados.
 Couldn't clear the list. Try again.	Não foi possível limpar a lista. Tente novamente.
 likes	curtidas
 comments and replies	comentários e respostas
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray chips over search results, such as Filter and the suggested searches, black.
+Black search filters	Filtros de pesquisa em preto
+# context: a Feed switch from the Filter feed patch, under Hide Home suggestions. It takes the lists Pinterest puts between search results under its own "Refine your search" heading (rows of suggested searches, each with a picture) out of the results. Use the words Pinterest shows for that heading in this language. The title is also the name of that part of the patch in the build report.
+Hide Refine your search	Ocultar "Refine sua pesquisa"
+# context: the summary under Hide Refine your search.
+Takes the "Refine your search" lists of suggested searches out of search results, and the pins close up where they were. The change shows the next time results load.	Tira dos resultados de pesquisa as listas "Refine sua pesquisa" com pesquisas sugeridas, e os Pins ocupam o lugar delas. A mudança aparece na próxima vez que os resultados carregarem.
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray "Your account" card at the top of Pinterest's own settings (your photo, name, View profile and Share profile) black.
+Black account card in settings	Cartão da conta em preto nas configurações
+# context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray rows of the "Refine your search" lists between search results black. Use the words Pinterest shows for that heading in this language.
+Black Refine your search rows	Linhas de "Refine sua pesquisa" em preto

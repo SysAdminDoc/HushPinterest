@@ -521,6 +521,110 @@ public final class AmoledBlack {
     }
 
     /**
+     * Called with each of Pinterest's search guides, the chips over search results such as Filter
+     * and the rows of suggested searches, right after Pinterest puts its look on (#48). The chip's
+     * fill is a shape of its own in Pinterest's secondary gray, sometimes under an outline in a
+     * layer. With Black buttons on in dark mode, a fill in one of Pinterest's dark grays turns pure
+     * black ({@link BlackFill}) and the chip's text and icons stay. A picked chip's light fill, a
+     * colored one and a gradient keep their look. Pinterest builds a new shape each time the chip
+     * changes, and off, Pause or light mode give the gray back on its next look.
+     */
+    public static void searchGuide(View guide) {
+        try {
+            if (guide == null) return;
+            Drawable background = guide.getBackground();
+            if (background instanceof LayerDrawable && ((LayerDrawable) background).getNumberOfLayers() > 0)
+                background = ((LayerDrawable) background).getDrawable(0);
+            if (!(background instanceof GradientDrawable)) return;
+            GradientDrawable shape = (GradientDrawable) background;
+            ColorStateList fill = shape.getColor();
+            boolean black = UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BUTTONS) && night(guide);
+            if (fill instanceof BlackFill) {
+                if (!black) shape.setColor(((BlackFill) fill).original);
+                return;
+            }
+            if (!black || fill == null || shape.getColors() != null || !darkGray(fill.getDefaultColor())) return;
+            shape.setColor(new BlackFill(fill));
+            HookStatus.counted(FamilyNames.AMOLED_BLACK, "search guide tinted black");
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, "search guide", failure);
+        }
+    }
+
+    /**
+     * Called with the rounded row a suggested search sits on in a "Refine your search" list, its
+     * picture and text inside, right after Pinterest gives the row its background (14.45.0, #48).
+     * The row is a shape in Pinterest's opaque scrim gray (#3A3A36 on a Galaxy S22) loaded from a
+     * resource, which every row shares until one is made its own. With Black buttons on in dark
+     * mode, a fill in one of Pinterest's dark grays turns pure black ({@link BlackFill}) and the
+     * picture and text stay. Pinterest keeps each row and reuses it as the results scroll, so the
+     * row is looked at again on its layout passes, where off, Pause or light mode give the gray back.
+     */
+    public static void searchBubble(View row) {
+        try {
+            if (row == null) return;
+            row.addOnLayoutChangeListener(REPAINT_BUBBLE);
+            paintBubble(row, UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BUTTONS) && night(row));
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, "search bubble", failure);
+        }
+    }
+
+    /** A Refine your search row's next layout pass paints it for the switch as it stands. */
+    private static final View.OnLayoutChangeListener REPAINT_BUBBLE =
+            (row, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                try {
+                    paintBubble(row, Utils.settingsReady() && Settings.BLACK_BUTTONS.get() && night(row));
+                } catch (Throwable failure) {
+                    HookStatus.threw(FamilyNames.AMOLED_BLACK, "search bubble layout", failure);
+                }
+            };
+
+    private static void paintBubble(View row, boolean black) {
+        Drawable background = row.getBackground();
+        if (!(background instanceof GradientDrawable)) return;
+        GradientDrawable shape = (GradientDrawable) background;
+        ColorStateList fill = shape.getColor();
+        if (fill instanceof BlackFill) {
+            if (!black) shape.setColor(((BlackFill) fill).original);
+            return;
+        }
+        if (!black || fill == null || shape.getColors() != null || !darkGray(fill.getDefaultColor())) return;
+        // Shapes loaded from one resource share their fill until one is mutated.
+        shape.mutate();
+        shape.setColor(new BlackFill(fill));
+        HookStatus.counted(FamilyNames.AMOLED_BLACK, "search bubble tinted black");
+    }
+
+    /**
+     * Called with the account card at the top of Pinterest's own settings (Your account: your photo,
+     * name, View profile and Share profile) right after Pinterest builds it (14.45.0, #48). The card
+     * is an androidx CardView in Pinterest's subtle gray (#242421 on a Galaxy S22), drawn by
+     * CardView's own rounded shape, which takes a tint, so with Black buttons on in dark mode a
+     * black tint turns the card black and keeps its corners. Its two buttons are Black buttons' own.
+     * The card is looked at again on its layout passes, where off, Pause or light mode give the gray back.
+     */
+    public static void settingsCard(View card) {
+        try {
+            if (card == null) return;
+            card.addOnLayoutChangeListener(REPAINT_SETTINGS_CARD);
+            paintCard(card, UiHooks.enabled(FamilyNames.AMOLED_BLACK, Settings.BLACK_BUTTONS) && night(card));
+        } catch (Throwable failure) {
+            HookStatus.threw(FamilyNames.AMOLED_BLACK, "settings card", failure);
+        }
+    }
+
+    /** The account card's next layout pass paints it for the switch as it stands. */
+    private static final View.OnLayoutChangeListener REPAINT_SETTINGS_CARD =
+            (card, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                try {
+                    paintCard(card, Utils.settingsReady() && Settings.BLACK_BUTTONS.get() && night(card));
+                } catch (Throwable failure) {
+                    HookStatus.threw(FamilyNames.AMOLED_BLACK, "settings card layout", failure);
+                }
+            };
+
+    /**
      * Whether [color] is one of Pinterest's button grays as it shows over black: next to no color
      * in it, and no lighter than {@link #DARK_GRAY_MOST}. None at all stays out.
      */
@@ -549,23 +653,30 @@ public final class AmoledBlack {
     }
 
     /**
-     * Pinterest's tint with each color through the levels curve, state by state: its dark grays
-     * black, a picked button's white still white. Off, Pause or light mode give back [original].
+     * Pinterest's tint with each color through the levels curve, state by state: a picked button's
+     * white still white. Its gray at rest goes pure black when it's one of the dark button grays,
+     * which the curve alone only darkens when it's opaque (14.45.0's #494943 to #0C0C04), and a
+     * pressed or picked color keeps the curve. Off, Pause or light mode give back [original].
      */
     static final class LeveledTint extends ColorStateList {
         final ColorStateList original;
 
         LeveledTint(ColorStateList original) {
-            super(new int[][] {new int[0]}, new int[] {leveled(original.getDefaultColor())});
+            super(new int[][] {new int[0]}, new int[] {atRest(original.getDefaultColor())});
             this.original = original;
         }
 
+        private static int atRest(int color) {
+            return darkGray(color) ? Color.BLACK : leveled(color);
+        }
+
         @Override public int getColorForState(int[] stateSet, int defaultColor) {
-            return leveled(original.getColorForState(stateSet, defaultColor));
+            int color = original.getColorForState(stateSet, defaultColor);
+            return color == original.getDefaultColor() ? atRest(color) : leveled(color);
         }
 
         @Override public int getDefaultColor() {
-            return leveled(original.getDefaultColor());
+            return atRest(original.getDefaultColor());
         }
 
         @Override public boolean isStateful() {
@@ -582,6 +693,45 @@ public final class AmoledBlack {
 
         @Override public ColorStateList withAlpha(int alpha) {
             return new LeveledTint(original.withAlpha(alpha));
+        }
+    }
+
+    /**
+     * A search guide's fill: Pinterest's gray at rest pure black, the way the cards built from the
+     * same secondary gray go, which the levels curve alone only darkens (#494943 to #0C0C04). Any
+     * other state's color goes through the curve. Off, Pause or light mode give back [original].
+     */
+    static final class BlackFill extends ColorStateList {
+        final ColorStateList original;
+
+        BlackFill(ColorStateList original) {
+            super(new int[][] {new int[0]}, new int[] {Color.BLACK});
+            this.original = original;
+        }
+
+        @Override public int getColorForState(int[] stateSet, int defaultColor) {
+            int color = original.getColorForState(stateSet, defaultColor);
+            return color == original.getDefaultColor() ? Color.BLACK : leveled(color);
+        }
+
+        @Override public int getDefaultColor() {
+            return Color.BLACK;
+        }
+
+        @Override public boolean isStateful() {
+            return original.isStateful();
+        }
+
+        @Override public boolean isOpaque() {
+            return true;
+        }
+
+        @Override public int getChangingConfigurations() {
+            return original.getChangingConfigurations();
+        }
+
+        @Override public ColorStateList withAlpha(int alpha) {
+            return new BlackFill(original.withAlpha(alpha));
         }
     }
 

@@ -86,6 +86,12 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting HIDE_HOME_SUGGESTIONS =
             new BooleanSetting("hushpinterest_hide_home_suggestions", FALSE);
     /**
+     * The "Refine your search" lists of suggested searches leave search results, on Filter feed's
+     * switch, before they're drawn. Off to start.
+     */
+    public static final BooleanSetting HIDE_REFINE_SEARCH =
+            new BooleanSetting("hushpinterest_hide_refine_search", FALSE);
+    /**
      * Filter feed's second capability: pins whose title, grid title or description holds one of
      * these words or phrases leave the same lists. Empty to start, and empty while paused.
      */

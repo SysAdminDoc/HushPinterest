@@ -165,6 +165,11 @@ public class PausedHooksTest {
         @Json("image_dominant_color_rgb") List<String> colors = Collections.singletonList("#aabbcc");
     }
 
+    /** A "Refine your search" list on a results page, known by its story type (14.45.0, #48). */
+    static final class ProbeRefineStory {
+        @Json("story_type") String storyType = "related_searches_organic";
+    }
+
     /** One hook with its switch on: true when it changed what Pinterest would have done. */
     interface Probe {
         boolean changedPinterest();
@@ -448,6 +453,11 @@ public class PausedHooksTest {
             List<Object> page = new ArrayList<>(Arrays.asList(new ProbeBoardIdeas(), new ProbePin()));
             return FeedFilter.filter(page).size() != page.size();
         }, () -> UiHooks.feedbackFlyout(Boolean.TRUE) != Boolean.TRUE));
+        // A results page's "Refine your search" lists leave it.
+        probes.put(Settings.HIDE_REFINE_SEARCH, Arrays.asList(() -> {
+            List<Object> page = new ArrayList<>(Arrays.asList(new ProbeRefineStory(), new ProbePin()));
+            return FeedFilter.filter(page).size() != page.size();
+        }));
         probes.put(Settings.KEEP_HOME_FEED, Arrays.asList(() -> HomeFeed.holdResumeRefresh(10 * 60 * 1000L),
                 () -> HomeFeed.holdHomeRefresh(null, 1)));
         // Back on a scrolled-down Home goes on out instead of jumping to the top.
