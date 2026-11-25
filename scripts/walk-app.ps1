@@ -313,6 +313,31 @@ function Get-WalkResumedActivity {
     $found
 }
 
+function Get-WalkCallProblem {
+    <#
+    .SYNOPSIS
+        Why an input can't go to the device now, or $null when it can. A phone that carries a work
+        line (Aircall on the S25) shows an incoming call's card over Pinterest, and a tap there can
+        answer or reject the call. Telecom's current calls sit between mCalls: and mCallAudioManager:
+        (its history further down names calls too), and the last mAudioModeOwner line holds the
+        audio mode in force (0 is normal). A phone that prints no audio mode isn't read as calm; an
+        emulator that prints none is.
+    #>
+    param([string]$Serial, [string[]]$Telecom, [string[]]$Audio)
+    $telecomText = @($Telecom) -join "`n"
+    if ([string]::IsNullOrWhiteSpace($telecomText)) { return 'dumpsys telecom gave nothing' }
+    $current = ($telecomText -split 'mCalls:', 2)[-1]
+    $current = ($current -split 'mCallAudioManager:', 2)[0]
+    if ($current -match 'TC@') { return 'a call is live' }
+    $modes = @([regex]::Matches((@($Audio) -join "`n"), 'mAudioModeOwner.*?mMode=(\d+)') | ForEach-Object { $_.Groups[1].Value })
+    if ($modes.Count -eq 0) {
+        if ($Serial -like 'emulator-*') { return $null }
+        return 'dumpsys audio named no audio mode'
+    }
+    if ($modes[-1] -ne '0') { return "audio mode $($modes[-1]), a call or ringing" }
+    $null
+}
+
 function Select-WalkGridPin {
     <#
     .SYNOPSIS
@@ -725,6 +750,20 @@ function Invoke-WalkApp {
         $walkAdb = {
             param([string[]]$Arguments)
             Renew-HushDeviceLease $lease
+            # Every tap, swipe and key waits out a live call first (two minutes at most, then the
+            # walk stops), so nothing lands on a call card. A failed dump is read again, never tapped past.
+            if ($Arguments.Count -ge 2 -and $Arguments[0] -eq 'shell' -and $Arguments[1] -eq 'input') {
+                $callProblem = $null
+                for ($try = 0; $try -lt 24; $try++) {
+                    if ($try -gt 0) { Start-Sleep -Seconds 5 }
+                    $telecom = Invoke-HushPinterestAdbCommand -Adb $Adb -Arguments @('-s', $Serial, 'shell', 'dumpsys', 'telecom')
+                    $audio = Invoke-HushPinterestAdbCommand -Adb $Adb -Arguments @('-s', $Serial, 'shell', 'dumpsys', 'audio')
+                    $callProblem = Get-WalkCallProblem -Serial $Serial -Telecom $telecom.Output -Audio $audio.Output
+                    if (-not $callProblem) { break }
+                    if ($try -eq 0) { Write-Host "[walk] holding input: $callProblem" }
+                }
+                if ($callProblem) { throw "The walk stopped before an input, since $callProblem for two minutes." }
+            }
             Invoke-HushPinterestAdbCommand -Adb $Adb -Arguments (@('-s', $Serial) + $Arguments)
         }
         # A screen that's still moving (a playing video pin) can fail a dump, so a failed one is
