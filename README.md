@@ -80,7 +80,7 @@ From a feed, search or board grid, **Download visible pins** in a pin's menu let
 
 ## Patches
 
-There are 58 patches. Where a patch has a switch, its description names the settings page that holds it.
+There are 59 patches. Where a patch has a switch, its description names the settings page that holds it.
 
 | Patch | What it does |
 |---|---|
