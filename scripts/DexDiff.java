@@ -292,7 +292,7 @@ public class DexDiff {
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
             Map.entry("boardTabCovers", 1),
-            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("relatedPinsFold", 3), Map.entry("screenSleep", 3), Map.entry("ownAuthorities", 1),
+            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("relatedPinsFold", 3), Map.entry("screenSleep", 3), Map.entry("ownAuthorities", 1), Map.entry("reportedPackage", 1),
             Map.entry("fontResource", 1));
 
     /**
@@ -8809,6 +8809,75 @@ public class DexDiff {
             }
         }
 
+        static final String RECAPTCHA_SDK = "Lcom/google/android/recaptcha/";
+        static final Set<String> PACKAGE_OWNERS = Set.of("Landroid/content/Context;", "Landroid/content/ContextWrapper;", "Landroid/app/Application;");
+
+        /**
+         * Whether body[at] sends the app's package to reCAPTCHA: getPackageName and its move-result,
+         * with the result reaching, within ten instructions and before a write over it or a jump,
+         * a two-argument put inside the SDK (the token's signals) or a one-String setter of an SDK
+         * class (request fields, the init request's among them; R8 moves those builders anywhere).
+         */
+        static boolean reportsPackage(List<Instruction> body, int at, String owner) {
+            if (at + 2 >= body.size()) return false;
+            Instruction call = body.get(at);
+            if (call.getOpcode() != Opcode.INVOKE_VIRTUAL || !(reference(call) instanceof MethodReference asked)
+                    || !asked.getName().equals("getPackageName") || !asked.getParameterTypes().isEmpty()
+                    || !PACKAGE_OWNERS.contains(asked.getDefiningClass())) return false;
+            Instruction kept = body.get(at + 1);
+            if (kept.getOpcode() != Opcode.MOVE_RESULT_OBJECT) return false;
+            int value = firstRegister(kept);
+            for (int j = at + 2; j < Math.min(body.size(), at + 10); j++) {
+                Instruction next = body.get(j);
+                if (reference(next) instanceof MethodReference to && next instanceof FiveRegisterInstruction) {
+                    List<Integer> args = arguments(next);
+                    boolean put = (next.getOpcode() == Opcode.INVOKE_VIRTUAL || next.getOpcode() == Opcode.INVOKE_INTERFACE)
+                            && to.getName().equals("put") && to.getParameterTypes().size() == 2 && args.size() == 3
+                            && args.get(2) == value && owner.startsWith(RECAPTCHA_SDK);
+                    boolean setter = next.getOpcode() == Opcode.INVOKE_VIRTUAL && to.getDefiningClass().startsWith(RECAPTCHA_SDK)
+                            && args.size() == 2 && args.get(1) == value && to.getParameterTypes().size() == 1
+                            && to.getParameterTypes().get(0).toString().equals("Ljava/lang/String;") && to.getReturnType().equals("V");
+                    if (put || setter) return true;
+                }
+                Opcode op = next.getOpcode();
+                if (!op.canContinue() || next instanceof OffsetInstruction) return false;
+                if (op.setsRegister() && next instanceof OneRegisterInstruction w
+                        && (w.getRegisterA() == value || (op.setsWideRegister() && w.getRegisterA() + 1 == value))) return false;
+            }
+            return false;
+        }
+
+        /**
+         * Change package name's reCAPTCHA report: wherever the SDK sends the app's package (its init
+         * request's field, the token's signals), the hook takes the getPackageName call's place,
+         * static, on the same register, and nothing else in the method moves. The patch refuses a
+         * build with none.
+         */
+        void reportedPackage(Contract c) {
+            String hook = c.strings.get(0);
+            int sites = 0;
+            for (Method original : clean.methods.values()) {
+                if (original.getImplementation() == null) continue;
+                List<Instruction> was = instructions(original);
+                List<Integer> at = new ArrayList<>();
+                for (int k = 0; k < was.size(); k++) if (reportsPackage(was, k, original.getDefiningClass())) at.add(k);
+                if (at.isEmpty()) continue;
+                Method m = actual(original);
+                List<Integer> found = calls(m, hook, at.size());
+                if (m == null || found.size() != at.size()) continue;
+                List<Instruction> body = instructions(m);
+                for (int n = 0; n < at.size(); n++) {
+                    int k = at.get(n);
+                    Instruction old = was.get(k);
+                    boolean shaped = found.get(n) == k && body.size() == was.size() && arguments(body.get(k)).equals(arguments(old));
+                    if (!shaped) fail(hook + " doesn't take the place of reCAPTCHA's getPackageName, on its register, in " + m);
+                    else edits.computeIfAbsent(m.toString(), e -> new FeatureEdits()).replacements.put(k, old);
+                    sites++;
+                }
+            }
+            if (sites == 0) fail("reCAPTCHA reports the app's package nowhere Change package name looks");
+        }
+
         static final String BLOCK_STORE = "Lcom/google/android/gms/auth/blockstore/";
 
         /**
@@ -9890,6 +9959,7 @@ public class DexDiff {
                     case "homePage": homePage(c); break;
                     case "firebaseCertificate": firebaseCertificate(c); break;
                     case "ownAuthorities": ownAuthorities(c); break;
+                    case "reportedPackage": reportedPackage(c); break;
                     case "fontResource": fontResource(c); break;
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;

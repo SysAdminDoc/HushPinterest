@@ -190,6 +190,9 @@ mutation|boardTabCovers|boardTabCovers|Lapp/hushpinterest/extension/pinterest/ui
 # Change package name hands each load of a literal naming one of Pinterest's own providers to the
 # extension, which answers the running copy's authority.
 mutation|changePackageName|ownAuthorities|Lapp/hushpinterest/extension/pinterest/coexist/OwnAuthorities;->name(Ljava/lang/String;)Ljava/lang/String;
+# It also has the reCAPTCHA SDK report the app's package through the extension, which answers
+# Pinterest's in a copy, where the SDK puts it into the signals it sends with a sign-in token.
+mutation|changePackageName|reportedPackage|Lapp/hushpinterest/extension/pinterest/coexist/OwnAuthorities;->reportedPackage(Landroid/content/Context;)Ljava/lang/String;
 # Custom font hands every font ResourcesCompat loads to the extension with its id, and moves every
 # read of Android's default fonts to the extension's stand-ins.
 mutation|customFont|fontResource|Lapp/hushpinterest/extension/pinterest/ui/CustomFont;->resourceFont(Landroid/graphics/Typeface;I)Landroid/graphics/Typeface;
