@@ -879,3 +879,13 @@ Takes the "Refine your search" lists of suggested searches out of search results
 Black account card in settings	Ayarlarda siyah hesap kartı
 # context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray rows of the "Refine your search" lists between search results black. Use the words Pinterest shows for that heading in this language.
 Black Refine your search rows	Siyah "Aramanı daralt" satırları
+Font file	Yazı tipi dosyası
+Copying the font file	Yazı tipi dosyası kopyalanıyor
+No font picked yet. Pick a .ttf or .otf file.	Henüz yazı tipi seçilmedi. Bir .ttf veya .otf dosyası seç.
+A font file is picked. Tap to pick another.	Bir yazı tipi dosyası seçili. Başkasını seçmek için dokun.
+%1$s is picked. Tap to pick another.	%1$s seçili. Başkasını seçmek için dokun.
+Font file saved. Restart Pinterest to see it.	Yazı tipi dosyası kaydedildi. Görmek için Pinterest'i yeniden başlat.
+That file is too large to be a font. Nothing was changed.	Bu dosya bir yazı tipi olamayacak kadar büyük. Hiçbir şey değiştirilmedi.
+That isn't a font file Android can use. Nothing was changed.	Android bu yazı tipi dosyasını kullanamıyor. Hiçbir şey değişmedi.
+Custom font	Özel yazı tipi
+Shows Pinterest's text in the font file you pick below. Icons keep their own font. Restart Pinterest to see the change.	Pinterest'teki yazıları aşağıda seçtiğin yazı tipi dosyasıyla gösterir. Simgeler kendi yazı tiplerini korur. Değişikliği görmek için Pinterest'i yeniden başlat.

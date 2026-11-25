@@ -541,6 +541,7 @@ public class SettingsBackupPreference extends Preference implements ImmediateAct
             case "hushpinterest_let_screen_sleep": return L10n.t("Let the screen sleep");
             case "hushpinterest_custom_save_sound": return L10n.t("Custom save sound");
             case "hushpinterest_custom_splash_logo": return L10n.t("Custom splash logo");
+            case "hushpinterest_custom_font": return L10n.t("Custom font");
             case "hushpinterest_hide_board_tab_button": return L10n.t("Hide See board on board tabs");
             case "hushpinterest_hide_board_tab_subtitle": return L10n.t("Hide More ideas for on board tabs");
             case "hushpinterest_board_tab_covers_on": return L10n.t("Choose board tab covers");

@@ -169,6 +169,42 @@
       ]
     },
     {
+      "name": "Custom font",
+      "description": "Shows Pinterest's text in a font file you pick, a .ttf or .otf. Icons keep their own look. Starts off. Pick the file with Font file in HushPinterest settings > Interface, which turns the switch on for you, then restart Pinterest.",
+      "category": "Theme",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "HushPinterest settings"
+      ],
+      "compatiblePackages": {
+        "com.pinterest": [
+          "14.45.0"
+        ]
+      },
+      "compatibility": [
+        {
+          "name": "Pinterest",
+          "packageName": "com.pinterest",
+          "description": null,
+          "appIconColor": 15073315,
+          "signatures": [
+            "341d6881b1ecf38361fbf8c8fbae0aa516b45375c39ef5e78b161869acc1bcfa"
+          ],
+          "targets": [
+            {
+              "version": "14.45.0",
+              "experimental": false,
+              "versionCodes": {
+                "ARM64_V8A": 14458020
+              }
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Custom save sound",
       "description": "Plays a sound file you pick on your phone when you save a pin, in place of Pinterest's chime. Pinterest's other sounds stay. Starts off. Pick the sound with Pick a save sound in HushPinterest settings > Interface, which turns the switch on for you.",
       "category": "Theme",

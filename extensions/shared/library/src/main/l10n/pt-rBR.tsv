@@ -876,3 +876,13 @@ Takes the "Refine your search" lists of suggested searches out of search results
 Black account card in settings	Cartão da conta em preto nas configurações
 # context: the name of a part of the AMOLED black patch in the build report and patch status, under the Black buttons switch. In dark mode it paints the gray rows of the "Refine your search" lists between search results black. Use the words Pinterest shows for that heading in this language.
 Black Refine your search rows	Linhas de "Refine sua pesquisa" em preto
+Font file	Arquivo de fonte
+Copying the font file	Copiando o arquivo de fonte
+No font picked yet. Pick a .ttf or .otf file.	Nenhuma fonte escolhida ainda. Escolha um arquivo .ttf ou .otf.
+A font file is picked. Tap to pick another.	Há um arquivo de fonte escolhido. Toque para escolher outro.
+%1$s is picked. Tap to pick another.	%1$s está escolhido. Toque para escolher outro.
+Font file saved. Restart Pinterest to see it.	Arquivo de fonte salvo. Reinicie o Pinterest para ver.
+That file is too large to be a font. Nothing was changed.	Esse arquivo é grande demais para ser uma fonte. Nada foi alterado.
+That isn't a font file Android can use. Nothing was changed.	Esse não é um arquivo de fonte que o Android consiga usar. Nada foi alterado.
+Custom font	Fonte personalizada
+Shows Pinterest's text in the font file you pick below. Icons keep their own font. Restart Pinterest to see the change.	Mostra o texto do Pinterest com o arquivo de fonte que você escolher abaixo. Os ícones mantêm a própria fonte. Reinicie o Pinterest para ver a mudança.

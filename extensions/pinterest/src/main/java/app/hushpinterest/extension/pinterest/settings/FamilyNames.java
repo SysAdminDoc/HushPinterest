@@ -71,6 +71,7 @@ public final class FamilyNames {
     public static final String LET_SCREEN_SLEEP = "Let the screen sleep";
     public static final String CUSTOM_SAVE_SOUND = "Custom save sound";
     public static final String CUSTOM_SPLASH_LOGO = "Custom splash logo";
+    public static final String CUSTOM_FONT = "Custom font";
     public static final String BOARD_TABS = "Customize board tabs";
     public static final String HIDE_SAVE_TOASTS = "Hide save toasts";
     public static final String ORIGINAL_IMAGES = "Original-quality images";

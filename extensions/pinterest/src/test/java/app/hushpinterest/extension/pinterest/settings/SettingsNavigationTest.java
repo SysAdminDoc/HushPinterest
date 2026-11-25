@@ -1355,6 +1355,8 @@ public class SettingsNavigationTest {
                 "next pin you open");
         summaryContains(Settings.CUSTOM_SAVE_SOUND.key, "sound you pick below", "when you save a pin",
                 "With no sound picked, Pinterest's plays");
+        summaryContains(Settings.CUSTOM_FONT.key, "font file you pick below", "Icons keep their own font",
+                "Restart Pinterest");
         summaryContains(Settings.CUSTOM_SPLASH_LOGO.key, "logo picked when patching", "Android 13 and newer",
                 "from the next start");
         summaryContains(Settings.HIDE_BOARD_TAB_BUTTON.key, "See board button", "board tab on Home", "next time the tab opens");

@@ -97,6 +97,7 @@ import app.hushpinterest.extension.pinterest.privacy.LinkTracking;
 import app.hushpinterest.extension.pinterest.privacy.PlainPinLinks;
 import app.hushpinterest.extension.pinterest.ui.AmoledBlack;
 import app.hushpinterest.extension.pinterest.ui.CloseupButtons;
+import app.hushpinterest.extension.pinterest.ui.CustomFontForTests;
 import app.hushpinterest.extension.pinterest.ui.InterfaceControls;
 import app.hushpinterest.extension.pinterest.ui.Experiments;
 import app.hushpinterest.extension.pinterest.ui.PostedDate;
@@ -636,6 +637,7 @@ public class PausedHooksTest {
         probes.put(Settings.LET_SCREEN_SLEEP, Collections.singletonList(UiHooksForTests::letsScreenSleep));
         probes.put(Settings.CUSTOM_SAVE_SOUND, Collections.singletonList(UiHooksForTests::playsPickedSaveSound));
         probes.put(Settings.CUSTOM_SPLASH_LOGO, Collections.singletonList(UiHooksForTests::nextStartShowsPickedLogo));
+        probes.put(Settings.CUSTOM_FONT, Collections.singletonList(CustomFontForTests::swaps));
         probes.put(Settings.HIDE_BOARD_TAB_BUTTON, Collections.singletonList(UiHooksForTests::foldsBoardTabButton));
         probes.put(Settings.HIDE_BOARD_TAB_SUBTITLE, Collections.singletonList(UiHooksForTests::foldsBoardTabSubtitle));
         probes.put(Settings.BOARD_TAB_COVERS, Collections.singletonList(UiHooksForTests::coversBoardTab));

@@ -239,7 +239,8 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (!DownloadFolderPreference.onResult(this, requestCode, resultCode, data)
-                && !SaveSoundPreference.onResult(this, requestCode, resultCode, data)) {
+                && !SaveSoundPreference.onResult(this, requestCode, resultCode, data)
+                && !FontFilePreference.onResult(this, requestCode, resultCode, data)) {
             SettingsBackupPreference.onResult(this, requestCode, resultCode, data);
         }
     }
@@ -247,6 +248,12 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
     /** Shows what the switches are saved as, after an import wrote them. */
     void refreshSwitches() {
         updateUIToSettingValues();
+    }
+
+    /** A picked font turned Custom font on: the switch shows it, and the restart row counts it. */
+    void customFontTurnedOn() {
+        refreshSwitches();
+        noteRestartPending(Settings.CUSTOM_FONT, false);
     }
 
     @Override
@@ -724,6 +731,13 @@ public final class HushPinterestPreferenceFragment extends AbstractPreferenceFra
                     L10n.t("Shows the logo picked when patching on the screen you see while Pinterest starts, "
                         + "instead of Pinterest's. Android 13 and newer. It shows from the next start."),
                     SettingsIcons.OPENING);
+            patchToggle(ui, context, build, PatchFamily.CUSTOM_FONT, Settings.CUSTOM_FONT,
+                    L10n.t("Custom font"),
+                    L10n.t("Shows Pinterest's text in the font file you pick below. Icons keep their own font. "
+                        + "Restart Pinterest to see the change."), SettingsIcons.TOOLS);
+            if (build.contains(PatchFamily.CUSTOM_FONT)) {
+                ui.addPreference(mark(new FontFilePreference(this, context), SettingsIcons.TOOLS));
+            }
             patchToggle(ui, context, build, PatchFamily.BOARD_TABS, Settings.HIDE_BOARD_TAB_BUTTON,
                     L10n.t("Hide See board on board tabs"),
                     L10n.t("Takes the See board button off the picture at the top of a board tab on Home. "

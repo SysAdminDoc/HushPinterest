@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import app.hushpinterest.extension.pinterest.actions.DownloadLedger;
 import app.hushpinterest.extension.pinterest.ui.PinterestToasts;
 import app.hushpinterest.extension.pinterest.ui.AmoledBlack;
+import app.hushpinterest.extension.pinterest.ui.CustomFont;
 import app.hushpinterest.extension.pinterest.ui.SplashLogo;
 import app.hushpinterest.extension.shared.L10n;
 import app.hushpinterest.extension.shared.Logger;
@@ -125,6 +126,8 @@ public final class SettingsEntry {
         PinterestToasts.install();
         try {
             if (!Utils.isMainProcess()) return;
+            // Before any screen exists, so every text that never asks for a font draws in the picked one.
+            CustomFont.onPinterestStart(context);
             if (context instanceof Application && !callbacksRegistered) {
                 ((Application) context).registerActivityLifecycleCallbacks(new OpenWhenResumed());
                 callbacksRegistered = true;

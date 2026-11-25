@@ -292,7 +292,8 @@ public class DexDiff {
             Map.entry("pinMenuRows", 2),
             Map.entry("boardTabHeader", 1),
             Map.entry("boardTabCovers", 1),
-            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("relatedPinsFold", 3), Map.entry("screenSleep", 3), Map.entry("ownAuthorities", 1));
+            Map.entry("closeupGate", 1), Map.entry("highlightRing", 1), Map.entry("visualSearchThumbnails", 1), Map.entry("relatedPinsFold", 3), Map.entry("screenSleep", 3), Map.entry("ownAuthorities", 1),
+            Map.entry("fontResource", 1));
 
     /**
      * A start-call, next-call, sole-call or once-call line: its method reference, the next-call's
@@ -8671,6 +8672,85 @@ public class DexDiff {
             capability(c.callee, found);
         }
 
+        static final String TYPEFACE = "Landroid/graphics/Typeface;";
+        static final String CUSTOM_FONT = "Lapp/hushpinterest/extension/pinterest/ui/CustomFont;";
+        /** Android's default fonts and the extension's stand-in each read of one goes to. */
+        static final Map<String, String> TYPEFACE_DEFAULTS = Map.of(
+                TYPEFACE + "->DEFAULT:" + TYPEFACE, CUSTOM_FONT + "->androidDefault:" + TYPEFACE,
+                TYPEFACE + "->SANS_SERIF:" + TYPEFACE, CUSTOM_FONT + "->androidSansSerif:" + TYPEFACE,
+                TYPEFACE + "->DEFAULT_BOLD:" + TYPEFACE, CUSTOM_FONT + "->androidDefaultBold:" + TYPEFACE);
+
+        /** True for ResourcesCompat's static font loader shape: context, id, value, style, a callback and two flags. */
+        static boolean isFontLoader(Method m) {
+            List<String> shape = new ArrayList<>();
+            for (CharSequence p : m.getParameterTypes()) shape.add(p.toString());
+            return AccessFlags.STATIC.isSet(m.getAccessFlags()) && m.getReturnType().equals(TYPEFACE) && shape.size() == 7
+                    && shape.get(0).equals("Landroid/content/Context;") && shape.get(1).equals("I")
+                    && shape.get(2).equals("Landroid/util/TypedValue;") && shape.get(3).equals("I")
+                    && shape.get(4).startsWith("L") && shape.get(5).equals("Z") && shape.get(6).equals("Z");
+        }
+
+        /**
+         * Custom font (#51), a whole family: ResourcesCompat's font loader, found by its message for a
+         * font it can't load and its shape, hands what it returns to the hook with the font's id, back
+         * into the same register, right at its only return. Every read of Android's default fonts in
+         * Pinterest's code reads the extension's stand-in into the same register instead, and the
+         * methods are otherwise untouched.
+         */
+        void fontResource(Contract c) {
+            String hook = c.strings.get(0);
+            List<Method> loaders = new ArrayList<>();
+            for (Method m : clean.holding("Font resource ID #0x")) if (isFontLoader(m)) loaders.add(m);
+            Method loader = unique(loaders, "ResourcesCompat font loader");
+            int exit = -1;
+            if (loader != null) {
+                List<Instruction> was = instructions(loader);
+                List<Integer> returns = new ArrayList<>();
+                for (int at = 0; at < was.size(); at++) if (was.get(at).getOpcode() == Opcode.RETURN_OBJECT) returns.add(at);
+                Method m = actual(loader);
+                List<Integer> sites = calls(m, hook, 1);
+                if (returns.size() != 1) fail("ResourcesCompat font loader returns from " + returns.size() + " places, expected 1");
+                else if (m != null && sites.size() == 1) {
+                    int at = sites.get(0);
+                    exit = returns.get(0);
+                    int result = firstRegister(was.get(exit));
+                    List<Instruction> body = instructions(m);
+                    boolean shaped = at == exit && at + 2 < body.size() && body.size() == was.size() + 2
+                            && arguments(body.get(at)).equals(List.of(result, parameter(m, 1)))
+                            && body.get(at + 1).getOpcode() == Opcode.MOVE_RESULT_OBJECT && firstRegister(body.get(at + 1)) == result
+                            && body.get(at + 2).getOpcode() == Opcode.RETURN_OBJECT && firstRegister(body.get(at + 2)) == result
+                            && onlyFrom(m, at + 1, at) && onlyFrom(m, at + 2, at + 1);
+                    if (!shaped) fail(hook + " doesn't take the font loader's typeface and font id right at its return in " + m);
+                    else remove(m, at, at + 2);
+                }
+            }
+            int reads = 0;
+            for (Method original : clean.methods.values()) {
+                if (original.getDefiningClass().startsWith(OWN) || original.getImplementation() == null) continue;
+                List<Instruction> was = instructions(original);
+                List<Integer> at = new ArrayList<>();
+                for (int k = 0; k < was.size(); k++)
+                    if (was.get(k).getOpcode() == Opcode.SGET_OBJECT && TYPEFACE_DEFAULTS.containsKey(String.valueOf(reference(was.get(k))))) at.add(k);
+                if (at.isEmpty()) continue;
+                Method m = actual(original);
+                if (m == null) continue;
+                List<Instruction> body = instructions(m);
+                // Only the loader gains instructions, the hook's two at its return.
+                int shift = original.equals(loader) ? 2 : 0;
+                for (int k : at) {
+                    Instruction old = was.get(k);
+                    int now = k + (k >= exit && shift > 0 ? shift : 0);
+                    Instruction read = now < body.size() ? body.get(now) : null;
+                    if (read == null || read.getOpcode() != Opcode.SGET_OBJECT || firstRegister(read) != firstRegister(old)
+                            || !TYPEFACE_DEFAULTS.get(String.valueOf(reference(old))).equals(String.valueOf(reference(read))))
+                        fail("Custom font left a read of Android's default font, or moved it, in " + m);
+                    else edits.computeIfAbsent(m.toString(), e -> new FeatureEdits()).replacements.put(now, old);
+                    reads++;
+                }
+            }
+            if (reads == 0) fail("Pinterest's code reads none of Android's default fonts for Custom font to stand in for");
+        }
+
         /** The authority a literal names: a content:// address's host, or the literal itself; null unless it's under Pinterest's package. */
         static String ownAuthority(String literal) {
             String authority = literal;
@@ -9810,6 +9890,7 @@ public class DexDiff {
                     case "homePage": homePage(c); break;
                     case "firebaseCertificate": firebaseCertificate(c); break;
                     case "ownAuthorities": ownAuthorities(c); break;
+                    case "fontResource": fontResource(c); break;
                     case "imageOrder": imageOrder(c); break;
                     case "closeupImage": closeupImage(c); break;
                     case "pageImage": pageImage(c); break;

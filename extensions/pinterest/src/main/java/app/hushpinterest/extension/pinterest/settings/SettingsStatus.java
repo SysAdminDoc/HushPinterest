@@ -168,6 +168,7 @@ public final class SettingsStatus {
     public static boolean customSaveSound() { return false; }
     public static boolean saveSound() { return false; }
     public static boolean customSplashLogo() { return false; }
+    public static boolean customFont() { return false; }
     public static boolean boardTabs() { return false; }
     public static boolean boardTabHeader() { return false; }
     public static boolean boardTabCovers() { return false; }

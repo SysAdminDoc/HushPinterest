@@ -4,6 +4,7 @@ Every HushPinterest release, newest first.
 
 ## Unreleased
 
+* New `Custom font` patch with its own switch under Interface. Pick a .ttf or .otf file with Font file and Pinterest's text shows in it after a restart. Picking one turns the switch on, and the file is copied into Pinterest, so it keeps working if you move or delete the original. Icons keep their own look. It starts off. (#51)
 * New `Save color on other red buttons` switch under Interface, part of Hide closeup buttons. Follow, Done and Pinterest's other red buttons take the color you picked for the Save button. It starts off. (#48)
 * New `Black buttons` switch under Interface, part of AMOLED black. In dark mode, Pinterest's gray buttons, like Message and Edit profile on a profile, turn pure black and keep their labels. So do the gray chips over search results, like Filter, the rows of the "Refine your search" lists between results, and your account card at the top of Pinterest's own settings. It starts off. (#48)
 
