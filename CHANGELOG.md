@@ -75,6 +75,8 @@ Every HushPinterest release, newest first.
 * **Tooling:** A release no longer waits on the source census. The audit still runs whenever you want to see which indexes list HushPinterest, but a stale or flaky answer from one of them can't stop a release anymore.
 * **Tooling:** The tests that only checked the build and release scripts are gone, about 10,000 lines of them. A push that changes a script now takes under a second instead of several minutes. Every test of the patches and the extension still runs.
 * **Tooling:** The GitHub release notes leave out the Tooling bullets now, and their tail can't add a Behind the scenes or Validation section. Tooling bullets are still listed here.
+* **Tooling:** The whole-app walk waits before every tap, swipe or key while the phone has a call going or ringing, and stops if that lasts two minutes. A tap can't land on an incoming call's card anymore, so a phone with a work line can run the walk.
+* **Tooling:** The whole-app walk can open the settings pages again. Since the search box moved onto every page, the walk mistook each page for the settings list, so no page or hook switch could pass. It also turns off Hide back arrow on pins and Hide Notifications button for its run when a phone has them on (both hide what the walk needs), then turns them back on. And it now finds switches at the very end of a long page like Interface.
 
 ## 0.0.14 (2026-11-14)
 

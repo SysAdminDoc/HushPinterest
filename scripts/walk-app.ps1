@@ -76,7 +76,10 @@
     fails the walk, by name, when [HOOK STATUS] shows its hook never ran or lists a target it
     missed or found more than once. Every family the map leaves out, or whose case didn't open, is
     reported as not exercised rather than passed. The receipt's hooks field holds each verdict.
-    The switches the walk turned on are turned back off before it ends, even when it fails.
+    The switches the walk turned on are turned back off before it ends, even when it fails. The
+    walk also turns off, for its run, any switch of Get-WalkRouteSwitches it finds on (the pin's
+    back arrow and the Notifications button take away what it finds or reaches a case by), and
+    turns those back on the same way.
 
     Device safety: the walk takes an exclusive serial lease and releases it when it's done. It
     changes no device setting, only wakes the screen, and stops when the phone is locked rather than
@@ -732,11 +735,12 @@ function Invoke-WalkApp {
     $problems = [Collections.Generic.List[string]]::new()
     $screens = 0
     $dumpPath = '/sdcard/hushpinterest-walk.xml'
-    # The cases that passed, the hook families whose switch is on, and the map entries whose
-    # switch the walk tapped, which it turns back.
+    # The cases that passed, the hook families whose switch is on, the map entries whose switch
+    # the walk tapped on, and the route switches it tapped off, all of which it turns back.
     $opened = [Collections.Generic.List[string]]::new()
     $switchedOn = [Collections.Generic.HashSet[string]]::new()
     $flipped = [Collections.Generic.List[object]]::new()
+    $routeOff = [Collections.Generic.List[object]]::new()
     $hooks = @()
     $restore = $null
     # Each case's result for the receipt, and the main process the walk follows from its launch.
@@ -952,11 +956,14 @@ function Invoke-WalkApp {
         }
         # The settings row whose text is exactly -Row, or the switch titled -Switch, brought in from
         # the screen's edges: on down the list first, then back up it, with a fresh dump after every
-        # swipe. Only the Hush settings are on screen while this runs.
+        # swipe. A swipe that moved nothing is the list's end that way, so each leg goes as far as
+        # the page does, up to -Swipes (twice that back up). Only the Hush settings are on screen
+        # while this runs.
         $seek = {
             param([string]$Row, [string]$Switch, [int]$Swipes = 6)
             foreach ($leg in @(@{ From = 0.75; To = 0.35; Tries = $Swipes }, @{ From = 0.35; To = 0.75; Tries = $Swipes * 2 })) {
                 $low = $null
+                $lastShown = $null
                 for ($try = 0; ; $try++) {
                     $xml = & $readXml
                     $hit = if ($Switch) { Find-WalkSwitch $xml $Switch $Package } else { Find-WalkRow (ConvertFrom-WalkDump $xml) $Row $Package }
@@ -965,6 +972,9 @@ function Invoke-WalkApp {
                     # row of a long page can't come up past the line, and the dump has it on screen.
                     if ($hit -and $low -and $hit.Y -gt $height * 0.85 -and $hit.Y -eq $low.Y) { return $hit }
                     $low = if ($hit -and $hit.Y -gt $height * 0.85) { $hit } else { $null }
+                    $shown = @(ConvertFrom-WalkDump $xml | ForEach-Object { "$($_.Text)@$($_.Y)" }) -join "`n"
+                    if (-not $hit -and $null -ne $lastShown -and $shown -ceq $lastShown) { break }
+                    $lastShown = $shown
                     if ($try -ge $leg.Tries) { break }
                     if ($hit -and $hit.Y -gt $height * 0.85) { & $drag 0.6 0.45 }
                     elseif ($hit) { & $drag 0.45 0.6 }
@@ -1000,7 +1010,8 @@ function Invoke-WalkApp {
         # it, so it gets turned back; Lost, that the page wasn't in front after the tap.
         $setSwitch = {
             param([string]$Page, [string]$Title, [bool]$On)
-            $found = & $seek -Switch $Title -Swipes 8
+            # Interface holds up to 75 rows, past 8 swipes on a tall phone (2026-11-25, S25).
+            $found = & $seek -Switch $Title -Swipes 40
             if (-not $found) { return [pscustomobject]@{ Found = $false; Tapped = $false; Lost = $false; On = $false } }
             if ($found.Checked -eq $On) { return [pscustomobject]@{ Found = $true; Tapped = $false; Lost = $false; On = $found.Checked } }
             [void](& $walkAdb @('shell', 'input', 'tap', [string]$found.X, [string]$found.Y))
@@ -1011,12 +1022,12 @@ function Invoke-WalkApp {
             $after = & $seek -Switch $Title -Swipes 3
             [pscustomobject]@{ Found = $true; Tapped = $true; Lost = $false; On = [bool]$after -and $after.Checked }
         }
-        # Every switch in -Entries set to -On, a page at a time. A switch this taps on joins
-        # $flipped right away, so a stop partway still turns it back; a switch that won't take is
-        # a problem named after its family.
+        # Every switch in -Entries set to -On, a page at a time. A switch this taps joins -Tapped
+        # right away, so a stop partway still turns it back; a switch that won't take is a problem
+        # named after its family. A route switch never counts as a hook family switched on.
         $setSwitches = {
-            param([object[]]$Entries, [bool]$On)
-            $word = if ($On) { 'on' } else { 'back off' }
+            param([object[]]$Entries, [bool]$On, $Tapped)
+            $word = if ($On) { 'on' } else { 'off' }
             foreach ($page in @($Entries | ForEach-Object { $_.Page } | Select-Object -Unique)) {
                 if (-not (& $openPage $page)) {
                     $problems.Add("the settings page $page would not open to turn its switches $word")
@@ -1025,11 +1036,11 @@ function Invoke-WalkApp {
                 $lost = $false
                 foreach ($entry in @($Entries | Where-Object { $_.Page -ceq $page })) {
                     $state = & $setSwitch $page $entry.Switch $On
-                    if ($state.Tapped -and $On) { $flipped.Add($entry) }
+                    if ($state.Tapped -and $null -ne $Tapped) { $Tapped.Add($entry) }
                     if (-not $state.Found) { $problems.Add("$($entry.Family): the switch $($entry.Switch) isn't on the $page page") }
                     elseif ($state.Lost) { $problems.Add("$($entry.Family): after its switch $($entry.Switch) was tapped, the $page page wasn't in front"); $lost = $true; break }
                     elseif ($state.On -ne $On) { $problems.Add("$($entry.Family): the switch $($entry.Switch) on the $page page wouldn't turn $word") }
-                    elseif ($On) { [void]$switchedOn.Add($entry.Family) }
+                    elseif ($On -and -not $entry.Route) { [void]$switchedOn.Add($entry.Family) }
                 }
                 if (-not (& $backToList) -or $lost) {
                     $problems.Add("Back from $page didn't return to the settings list while its switches were turned $word")
@@ -1097,15 +1108,18 @@ function Invoke-WalkApp {
             Write-Host "[walk] saved the diagnostics report to $local and deleted the phone's copy"
             [pscustomobject]@{ Path = $local; Problem = $null }
         }
-        # The switches the walk turned on, turned back off. Runs once, from the walk's end or from
-        # the finally when something stopped it.
+        # The switches the walk turned on, turned back off, and the route switches it turned off,
+        # turned back on. Runs once, from the walk's end or from the finally when something stopped it.
         $restore = {
-            if ($flipped.Count -eq 0) { return }
-            Write-Host "[walk] turning the $($flipped.Count) switches it turned on back off"
+            if ($flipped.Count -eq 0 -and $routeOff.Count -eq 0) { return }
+            Write-Host "[walk] putting back the $($flipped.Count + $routeOff.Count) switches it changed"
             $known = $problems.Count
             try {
-                if (& $openSettings) { [void](& $setSwitches ([object[]]@($flipped)) $false) }
-                else { $problems.Add('the Hush settings would not open to turn the walk''s switches back off') }
+                if (& $openSettings) {
+                    if ($flipped.Count -gt 0) { [void](& $setSwitches ([object[]]@($flipped)) $false $null) }
+                    if ($routeOff.Count -gt 0) { [void](& $setSwitches ([object[]]@($routeOff)) $true $null) }
+                }
+                else { $problems.Add('the Hush settings would not open to put the walk''s switches back') }
                 [void](& $walkAdb @('shell', 'input', 'keyevent', 'KEYCODE_BACK'))
                 Start-Sleep -Seconds 1
             } catch {
@@ -1113,6 +1127,7 @@ function Invoke-WalkApp {
             }
             for ($i = $known; $i -lt $problems.Count; $i++) { Write-Host "[walk] $($problems[$i])" }
             $flipped.Clear()
+            $routeOff.Clear()
         }
 
         if (-not $SkipPatch) {
@@ -1129,9 +1144,15 @@ function Invoke-WalkApp {
         $checkHooks = -not $SkipSettings -and @($HookFamilies).Count -gt 0
         if ($checkHooks) {
             Write-Host "[walk] turning on the switches of $(@($HookFamilies).Count) hook families"
-            if (& $openSettings) { [void](& $setSwitches $HookFamilies $true) }
+            if (& $openSettings) { [void](& $setSwitches $HookFamilies $true $flipped) }
             else { $problems.Add('the Hush settings would not open to turn the hook families'' switches on') }
             Write-Host "[walk] $($switchedOn.Count) switches on, $($flipped.Count) of them turned on by the walk"
+        }
+        if (-not $SkipSettings) {
+            $routes = @(Get-WalkRouteSwitches)
+            if (& $openSettings) { [void](& $setSwitches $routes $false $routeOff) }
+            else { $problems.Add('the Hush settings would not open to turn off the switches that hide the walk''s route') }
+            Write-Host "[walk] $($routeOff.Count) of $($routes.Count) switches hiding the walk's route turned off for the walk"
         }
         # The restart also clears the hook counts, so the report counts only what the cases reach.
         # Every process running just before it, so an exit the stop caused is told from a later
@@ -1397,7 +1418,7 @@ function Invoke-WalkApp {
         Write-Host "[walk] $result on $($identity.Model) ($Serial): $screens screens, $($fatal.Count) crashes, $($problems.Count) problems"
         return $receiptPath
     } finally {
-        if ($restore -and $flipped.Count -gt 0) { & $restore }
+        if ($restore -and ($flipped.Count -gt 0 -or $routeOff.Count -gt 0)) { & $restore }
         if ($lease) { Exit-HushDeviceLease $lease }
     }
 }
